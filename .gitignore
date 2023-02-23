@@ -1,0 +1,14 @@
+*.log
+.DS_Store
+node_modules
+.cache
+dist
+coverage
+
+*.tk*
+*.src
+*.mf
+*.zip
+*.AXW
+
+.history/
