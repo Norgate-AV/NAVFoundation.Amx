@@ -1,5 +1,36 @@
 PROGRAM_NAME='NAVFoundation.HashTableUtils.axi'
 
+/*
+ _   _                       _          ___     __
+| \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /
+|  \| |/ _ \| '__/ _` |/ _` | __/ _ \ / _ \ \ / /
+| |\  | (_) | | | (_| | (_| | ||  __// ___ \ V /
+|_| \_|\___/|_|  \__, |\__,_|\__\___/_/   \_\_/
+                 |___/
+
+MIT License
+
+Copyright (c) 2023 Norgate AV Solutions Ltd
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 #IF_NOT_DEFINED __NAV_FOUNDATION_HASHTABLEUTILS__
 #DEFINE __NAV_FOUNDATION_HASHTABLEUTILS__
 
@@ -149,7 +180,7 @@ define_function integer NAVHashTableAddItem(_NAVHashTable hashTable, char key[],
     #END_IF
 
     NAVHashTableGetItem(hashTable, slot, item)
-    
+
     if (item.Key == "NAV_NULL") {
         if (NAVHashTableGetItemCount(hashTable) >= NAV_MAX_HASH_TABLE_ITEMS) {
             #IF_DEFINED NAV_HASHTABLE_DEBUG
@@ -207,7 +238,7 @@ define_function char[NAV_MAX_BUFFER] NAVHashTableGetItemValue(_NAVHashTable hash
 
     if (item.Key == "NAV_NULL") {
         return ""
-    } 
+    }
 
     if (item.Key != key) {
         return ""
@@ -232,7 +263,7 @@ define_function NAVHashTableItemRemove(_NAVHashTable hashTable, char key[]) {
 
     if (item.Key == "NAV_NULL") {
         return
-    } 
+    }
 
     if (item.Key != key) {
         return
@@ -253,7 +284,7 @@ define_function NAVHashTableDump(_NAVHashTable hashTable) {
         if (item.Key == "NAV_NULL") {
             continue
         }
-        
+
         NAVLog("'Slot: ', format('%04d', x), ' Key: ', item.Key, ' Value: ', item.Value")
     }
 }
