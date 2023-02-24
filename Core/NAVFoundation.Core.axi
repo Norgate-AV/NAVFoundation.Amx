@@ -189,10 +189,35 @@ struct _NAVSocketConnection {
 }
 
 
+////////////////////////////////////////////////////////////
+// Program
+////////////////////////////////////////////////////////////
+struct _NAVProgram {
+    char Name[NAV_MAX_BUFFER]
+    char File[NAV_MAX_BUFFER]
+    char CompileDate[NAV_MAX_CHARS]
+    char CompileTime[NAV_MAX_CHARS]
+}
+
+
+////////////////////////////////////////////////////////////
+// Controller
+////////////////////////////////////////////////////////////
+struct _NAVController {
+    ip_address_struct IP
+    char SerialNumber[NAV_MAX_CHARS]
+    char UniqueId[NAV_MAX_CHARS]
+    char MacAddress[NAV_MAX_CHARS]
+    _NAVProgram Program
+}
+
+
 (***********************************************************)
 (*               VARIABLE DEFINITIONS GO BELOW             *)
 (***********************************************************)
 DEFINE_VARIABLE
+
+volatile _NAVController NAVController
 
 volatile integer NAVBlinker = FALSE
 
@@ -313,6 +338,48 @@ define_function char[NAV_MAX_CHARS] NAVGetMacAddressFromUniqueId(char uniqueId[]
 }
 
 
+define_function char[NAV_MAX_CHARS] NAVGetMacAddress() {
+    return NAVController.MacAddress
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVGetDeviceSerialNumber(dev device) {
+    stack_var char serialNumber[NAV_MAX_CHARS]
+    stack_var slong result
+
+    result = get_serial_number(device, serialNumber)
+
+    if (result < 0) {
+        NAVLog("'Error getting serial number for device: ', NAVDeviceToString(device)")
+        return ""
+    }
+
+    return serialNumber
+}
+
+
+define_function NAVGetDeviceIPAddressInformation(dev device, ip_address_struct ip) {
+    stack_var slong result
+
+    result = get_ip_address(device, ip)
+
+    if (result < 0) {
+        NAVLog("'Error getting IP address information for device: ', NAVDeviceToString(device)")
+    }
+}
+
+
+define_function NAVPrintProgramInformation(_NAVProgram program) {
+    NAVLog("'**********************************************************'")
+    NAVLog("'Program Info'")
+    NAVLog("'**********************************************************'")
+    NAVLog("'Program Name: ', program.Name")
+    NAVLog("'Program File: ', program.File")
+    NAVLog("'Compiled On: ', program.CompileDate, ' at ', program.CompileTime")
+    NAVLog("'**********************************************************'")
+}
+
+
 define_function NAVCommand(dev device, char value[]) {
     send_command device, value
 }
@@ -347,6 +414,26 @@ define_function NAVTimelineStop(long id) {
     }
 
     timeline_kill(id)
+}
+
+
+define_function NAVSetControllerProgramInformation(_NAVProgram program) {
+    program.Name = __NAME__
+    program.File = __FILE__
+    program.CompileDate = __LDATE__
+    program.CompileTime = __TIME__
+}
+
+
+define_function NAVSetControllerInformation(_NAVController controller) {
+    NAVGetDeviceIPAddressInformation(dvNAVMaster, controller.IP)
+
+    controller.SerialNumber = NAVGetDeviceSerialNumber(dvNAVMaster)
+
+    controller.UniqueId = get_unique_id()
+    controller.MacAddress = NAVGetMacAddressFromUniqueId(controller.UniqueId)
+
+    NAVSetControllerProgramInformation(controller.Program)
 }
 
 
@@ -419,6 +506,8 @@ define_function integer NAVZeroBase(integer value) {
 (*                STARTUP CODE GOES BELOW                  *)
 (***********************************************************)
 DEFINE_START {
+    NAVSetControllerInformation(NAVController)
+
     NAVTimelineStart(TL_NAV_BLINKER, NAVBlinkerTLArray, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
     NAVTimelineStart(TL_NAV_FEEDBACK, NAVFeedbackTLArray, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
 
