@@ -252,6 +252,16 @@ define_function NAVLog(char log[]) {
 }
 
 
+define_function NAVCommand(dev device, char value[]) {
+    send_command device, value
+}
+
+
+define_function NAVCommandArray(dev device[], char value[]) {
+    send_command device, value
+}
+
+
 define_function NAVTimelineStart(long id, long times[], long relative, long mode) {
     if (timeline_active(id)) {
         return
