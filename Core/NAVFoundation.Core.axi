@@ -200,6 +200,12 @@ volatile long NAVBlinkerTLArray[]	= { 500 }
 volatile long NAVFeedbackTLArray[]	= { 200 }
 
 
+/////////////////////////////////////////////////////////////
+// Includes
+/////////////////////////////////////////////////////////////
+#include 'NAVFoundation.StringUtils.axi'
+
+
 (***********************************************************)
 (*        SUBROUTINE/FUNCTION DEFINITIONS GO BELOW         *)
 (***********************************************************)
@@ -249,6 +255,27 @@ define_function NAVLog(char log[]) {
 
         send_string dvNAVMaster, "logChunk"
     }
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVGetMacAddressFromUniqueId(char uniqueId[]) {
+    stack_var integer x
+    stack_var char macAddress[6][2]
+    stack_var char result[NAV_MAX_CHARS]
+
+    result = ""
+
+    if (!length_array(uniqueId)) {
+        return result
+    }
+
+    for (x = 1; x <= length_array(uniqueId); x++) {
+        macAddress[x] = format('%02X', uniqueId[x])
+    }
+
+    result = NAVArrayJoinString(macAddress, ':')
+
+    return upper_string(result)
 }
 
 
