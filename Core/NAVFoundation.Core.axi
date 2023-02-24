@@ -206,6 +206,10 @@ volatile long NAVFeedbackTLArray[]	= { 200 }
 #include 'NAVFoundation.SnapiHelpers.axi'
 #include 'NAVFoundation.StringUtils.axi'
 
+#IF_DEFINED USING_RMS
+#include 'NAVFoundation.RmsUtils.axi'
+#END_IF
+
 
 (***********************************************************)
 (*        SUBROUTINE/FUNCTION DEFINITIONS GO BELOW         *)
