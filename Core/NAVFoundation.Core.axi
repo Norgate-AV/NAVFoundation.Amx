@@ -263,6 +263,35 @@ define_function NAVLog(char log[]) {
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVConvertDPSToAscii(dev device) {
+    return NAVStringSurroundWith(NAVDeviceToString(device), '[', ']')
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVDeviceToString(dev device) {
+    return "itoa(device.number), ':', itoa(device.port), ':', itoa(device.system)"
+}
+
+
+define_function NAVStringToDevice(char value[], dev device) {
+    stack_var char valueCopy[NAV_MAX_CHARS]
+
+    device.number = atoi(value)
+    device.port = 1
+    device.system = 0
+
+    if (!NAVContains(value, ':')) {
+        return
+    }
+
+    valueCopy = value
+
+    device.number = atoi(NAVStripRight(remove_string(valueCopy, ':', 1), 1))
+    device.port = atoi(NAVStripRight(remove_string(valueCopy, ':', 1), 1))
+    device.system = atoi(valueCopy)
+}
+
+
 define_function char[NAV_MAX_CHARS] NAVGetMacAddressFromUniqueId(char uniqueId[]) {
     stack_var integer x
     stack_var char macAddress[6][2]
