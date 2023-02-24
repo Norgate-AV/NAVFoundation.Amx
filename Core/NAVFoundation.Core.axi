@@ -317,6 +317,33 @@ define_function NAVStringToDevice(char value[], dev device) {
 }
 
 
+define_function char NAVStringToBoolean(char value[]) {
+    stack_var char valueCopy[NAV_MAX_CHARS]
+
+    valueCopy = lower_string(value)
+
+    if (valueCopy == 'true' || valueCopy == '1' || valueCopy == 'on') {
+        return true
+    }
+
+    return false
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVBooleanToString(char value) {
+    if (value) {
+        return 'true'
+    }
+
+    return 'false'
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVGetUniqueId() {
+    return NAVController.UniqueId
+}
+
+
 define_function char[NAV_MAX_CHARS] NAVGetMacAddressFromUniqueId(char uniqueId[]) {
     stack_var integer x
     stack_var char macAddress[6][2]
