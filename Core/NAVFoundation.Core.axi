@@ -380,6 +380,33 @@ define_function NAVPrintProgramInformation(_NAVProgram program) {
 }
 
 
+define_function NAVFeedback(dev device, integer channels[], integer value) {
+    stack_var integer x
+
+    for(x = 1; x <= length_array(channels); x++) {
+        [device, channels[x]] = (value == x)
+    }
+}
+
+
+define_function NAVFeedbackWithDevArray(dev device[], integer channels[], integer value) {
+    stack_var integer x
+
+    for(x = 1; x <= length_array(channels); x++) {
+        [device, channels[x]] = (value == x)
+    }
+}
+
+
+define_function NAVFeedbackWithValueArray(dev device, integer channels[], integer value[]) {
+    stack_var integer x
+
+    for(x = 1; x <= length_array(channels); x++) {
+        [device, channels[x]] = (value[x])
+    }
+}
+
+
 define_function NAVCommand(dev device, char value[]) {
     send_command device, value
 }
