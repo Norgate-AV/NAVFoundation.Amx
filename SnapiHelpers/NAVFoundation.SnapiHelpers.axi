@@ -119,6 +119,26 @@ struct _NAVSnapiCommand {
 (*        SUBROUTINE/FUNCTION DEFINITIONS GO BELOW         *)
 (***********************************************************)
 
+define_function NAVSwitch(dev device, integer input, integer output, integer level) {
+    if(output > 0) {
+        NAVCommand(device, "'SWITCH-', itoa(input), ',', itoa(output), ',', NAV_SWITCH_LEVELS[level]")
+    }
+    else {
+        NAVCommand(device, "'SWITCH-', itoa(input), ',', NAV_SWITCH_LEVELS[level]")
+    }
+}
+
+
+define_function NAVInput(dev device, char input[]) {
+    NAVCommand(device, "'INPUT-', input")
+}
+
+
+define_function NAVInputArray(dev device[], char input[]) {
+    NAVCommandArray(device, "'INPUT-', input")
+}
+
+
 define_function integer NAVGetPower(dev device) {
     return [device, POWER_FB]
 }
