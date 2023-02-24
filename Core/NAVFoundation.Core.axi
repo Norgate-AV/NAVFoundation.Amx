@@ -180,12 +180,14 @@ struct _NAVRect {
 
 
 ////////////////////////////////////////////////////////////
-// Socket Connection
+// Contact
 ////////////////////////////////////////////////////////////
-struct _NAVSocketConnection {
-    char Address[NAV_MAX_CHARS]
-    integer Port
-    integer IsConnected
+struct _NAVContact {
+    char Name[NAV_MAX_CHARS]
+    char Number[NAV_MAX_CHARS]
+}
+
+
 }
 
 
@@ -230,6 +232,8 @@ volatile long NAVFeedbackTLArray[]	= { 200 }
 /////////////////////////////////////////////////////////////
 #include 'NAVFoundation.SnapiHelpers.axi'
 #include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.SocketUtils.axi'
+
 
 #IF_DEFINED USING_RMS
 #include 'NAVFoundation.RmsUtils.axi'
