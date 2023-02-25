@@ -71,7 +71,7 @@ define_function integer NAVCalculateXOROfBytesChecksum(integer start, char value
 define_function integer NAVCalculateOROfBytesChecksum(integer start, char value[]) {
     stack_var integer x
     stack_var integer sum
-    
+
     for(x = start; x <= length_array(value); x++) {
         sum = sum | value[x]
     }
@@ -198,6 +198,37 @@ define_function long NAVPow(integer value, integer exponent) {
     }
 
     return result
+}
+
+
+define_function integer NAVIsOdd(integer value) {
+    return value % 2 == 1
+}
+
+
+define_function integer NAVIsEven(integer value) {
+    return value % 2 == 0
+}
+
+
+define_function integer NAVIsPrime(integer value) {
+    stack_var integer x
+
+    if (value == 2) {
+        return true
+    }
+
+    if (value < 2 || NAVIsEven(value)) {
+        return true
+    }
+
+    for (x = 3; x <= NAVSquareRoot(value); x = x + 2) {
+        if (value % x == 0) {
+            return false
+        }
+    }
+
+    return true
 }
 
 
