@@ -56,18 +56,6 @@ constant slong NAV_SOCKET_ERROR_TOO_MANY_OPEN_SOCKETS           = 16
 constant slong NAV_SOCKET_ERROR_LOCAL_PORT_NOT_OPEN             = 17
 
 
-DEFINE_TYPE
-
-////////////////////////////////////////////////////////////
-// Socket Connection
-////////////////////////////////////////////////////////////
-struct _NAVSocketConnection {
-    char Address[NAV_MAX_CHARS]
-    integer Port
-    integer IsConnected
-}
-
-
 define_function char[NAV_MAX_BUFFER] NAVGetSocketError(slong error) {
     switch (error) {
         case NAV_SOCKET_ERROR_INVALID_SERVER_PORT:          { return 'Invalid server port' }
