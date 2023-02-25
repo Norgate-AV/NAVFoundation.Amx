@@ -35,6 +35,21 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_BINARYUTILS__
 
 
+define_function long NAVBinaryRotateLeft(long value, long count) {
+    return (((value) << (count)) | ((value) >> (32 - (count))))
+}
+
+
+define_function long NAVBinaryRotateRight(long value, long count) {
+    return (((value) >> (count)) | ((value) << (32 - (count))))
+}
+
+
+define_function long NAVBinaryGetBit(long value, long bit) {
+    return ((value) >> (bit)) & 1
+}
+
+
 define_function char[NAV_MAX_BUFFER] NAVCharToDecimalBinaryString(char value) {
     stack_var integer msb
     stack_var integer lsb
