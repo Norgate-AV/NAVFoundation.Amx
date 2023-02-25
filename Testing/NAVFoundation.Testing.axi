@@ -67,8 +67,8 @@ struct _NAVUnitTestStringResult {
 
 
 struct _NAVUnitTestStringArrayResult {
-    char Expected[][NAV_MAX_BUFFER]
-    char Actual[][NAV_MAX_BUFFER]
+    char Expected[NAV_TEST_MAX_STRING_ARRAY_SIZE][NAV_MAX_BUFFER]
+    char Actual[NAV_TEST_MAX_STRING_ARRAY_SIZE][NAV_MAX_BUFFER]
 }
 
 
@@ -79,8 +79,8 @@ struct _NAVUnitTestIntegerResult {
 
 
 struct _NAVUnitTestIntegerArrayResult {
-    integer Expected[]
-    integer Actual[]
+    integer Expected[NAV_TEST_MAX_INTEGER_ARRAY_SIZE]
+    integer Actual[NAV_TEST_MAX_INTEGER_ARRAY_SIZE]
 }
 
 
