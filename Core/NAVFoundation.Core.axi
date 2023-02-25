@@ -276,11 +276,11 @@ define_function char[NAV_MAX_CHARS] NAVGetTimeStamp() {
 define_function NAVLog(char log[]) {
     stack_var char buffer[NAV_MAX_BUFFER]
 
-    if (!length_array(log)) {
-        return
-    }
-
     buffer = log
+
+    if (!length_array(buffer)) {
+        buffer = "NAV_CR"
+    }
 
     while (length_array(buffer)) {
         stack_var char logChunk[NAV_LOG_CHUNK_SIZE]
