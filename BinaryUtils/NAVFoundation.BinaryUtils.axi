@@ -34,6 +34,8 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_BINARYUTILS__
 #DEFINE __NAV_FOUNDATION_BINARYUTILS__
 
+#include 'NAVFoundation.Core.axi'
+
 
 define_function long NAVBinaryRotateLeft(long value, long count) {
     return (((value) << (count)) | ((value) >> (32 - (count))))
