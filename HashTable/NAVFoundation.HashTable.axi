@@ -1,4 +1,4 @@
-PROGRAM_NAME='NAVFoundation.HashTableUtils.axi'
+PROGRAM_NAME='NAVFoundation.HashTable.axi'
 
 /*
  _   _                       _          ___     __
