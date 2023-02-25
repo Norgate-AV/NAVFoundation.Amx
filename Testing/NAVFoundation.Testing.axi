@@ -39,6 +39,16 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
+constant integer NAV_MAX_TESTS                          = 50
+
+constant integer NAV_TEST_MAX_STRING_ARRAY_SIZE         = 255
+constant integer NAV_TEST_MAX_INTEGER_ARRAY_SIZE        = 255
+
+constant integer NAV_TEST_TYPE_STRING_RESULT            = 1
+constant integer NAV_TEST_TYPE_STRING_ARRAY_RESULT      = 2
+constant integer NAV_TEST_TYPE_INTEGER_RESULT           = 3
+constant integer NAV_TEST_TYPE_INTEGER_ARRAY_RESULT     = 4
+
 
 DEFINE_TYPE
 
