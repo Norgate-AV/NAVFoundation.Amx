@@ -56,6 +56,7 @@ struct _NAVUnitTestProperties {
     char Name[NAV_MAX_CHARS]
     char Description[NAV_MAX_CHARS]
     char Message[NAV_MAX_CHARS]
+    integer Skip
     integer Passed
 }
 
