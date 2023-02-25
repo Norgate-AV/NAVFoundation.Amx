@@ -109,4 +109,23 @@ struct _NAVUnitTestWithIntegerArrayResult  {
 }
 
 
+struct _NAVUnitTestSuite {
+    char Name[NAV_MAX_CHARS]
+    char Description[NAV_MAX_CHARS]
+    char Message[NAV_MAX_CHARS]
+
+    integer Passed
+    integer Total
+    integer PassedCount
+    integer FailedCount
+    integer SkippedCount
+
+    integer Type[NAV_MAX_TESTS]
+    _NAVUnitTestWithStringResult StringResultTest[NAV_MAX_TESTS]
+    _NAVUnitTestWithStringArrayResult StringArrayResultTest[NAV_MAX_TESTS]
+    _NAVUnitTestWithIntegerResult IntegerResultTest[NAV_MAX_TESTS]
+    _NAVUnitTestWithIntegerArrayResult IntegerArrayResultTest[NAV_MAX_TESTS]
+}
+
+
 #END_IF // __NAV_FOUNDATION_TESTING__
