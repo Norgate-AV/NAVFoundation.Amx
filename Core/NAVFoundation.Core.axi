@@ -130,6 +130,18 @@ constant char    NAV_GUID[NAV_MAX_CHARS] = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
 constant char    NAV_GUID_HEX[NAV_MAX_CHARS] = '0123456789abcdef-'
 
 
+/////////////////////////////////////////////////////////////
+// Includes
+/////////////////////////////////////////////////////////////
+#include 'NAVFoundation.SnapiHelpers.axi'
+#include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.SocketUtils.axi'
+
+#IF_DEFINED USING_RMS
+#include 'NAVFoundation.RmsUtils.axi'
+#END_IF
+
+
 (***********************************************************)
 (*              DATA TYPE DEFINITIONS GO BELOW             *)
 (***********************************************************)
