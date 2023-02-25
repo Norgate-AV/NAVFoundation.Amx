@@ -51,6 +51,7 @@ define_function integer NAVFindInArrayINTEGER(integer array[], integer value) {
     return 0
 }
 
+
 define_function integer NAVFindInArraySINTEGER(sinteger array[], sinteger value) {
     stack_var integer x
 
@@ -62,6 +63,7 @@ define_function integer NAVFindInArraySINTEGER(sinteger array[], sinteger value)
 
     return 0
 }
+
 
 define_function integer NAVFindInArrayLONG(long array[], long value) {
     stack_var integer x
