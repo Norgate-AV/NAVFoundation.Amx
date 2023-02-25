@@ -80,19 +80,19 @@ struct _NAVUnitTestWithStringResult  {
 }
 
 
-struct _NAVUnitTestStringArrayResult  {
+struct _NAVUnitTestWithStringArrayResult  {
     _NAVUnitTestProperties Properties
     _NAVUnitTestStringArrayResult Result
 }
 
 
-struct _NAVUnitTestIntegerResult  {
+struct _NAVUnitTestWithIntegerResult  {
     _NAVUnitTestProperties Properties
     _NAVUnitTestIntegerResult Result
 }
 
 
-struct _NAVUnitTestIntegerArrayResult  {
+struct _NAVUnitTestWithIntegerArrayResult  {
     _NAVUnitTestProperties Properties
     _NAVUnitTestIntegerArrayResult Result
 }
