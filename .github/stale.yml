@@ -1,0 +1,17 @@
+daysUntilStale: 60
+
+daysUntilClose: 3600
+
+exemptLabels:
+  - enhancement
+  - pinned
+  - RFC
+  - bug
+  - in progress
+  - 2.0
+
+staleLabel: stale
+
+markComment: false
+
+closeComment: false
