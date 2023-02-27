@@ -38,20 +38,21 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
-constant slong INVALID_FILE_HANDLE            = -1
-constant slong INVALID_FILE_PATH_OR_NAME         = -2
-constant slong INVALID_VALUE_SUPPLIED_FOR_IO_FLAG     = -3
-constant slong INVALID_FILE_PATH            = -4
-constant slong DISK_IO_ERROR                = -5
-constant slong INVALID_PARAMETER            = -6
-constant slong FILE_ALREADY_CLOSED            = -7
-constant slong MINUS_8_UNKNOWN_ERROR            = -8
-constant slong MINUS_9_UNKNOWN_ERROR            = -9
-constant slong BUFFER_TOO_SMALL                = -10
-constant slong MINUS_11_UNKNOWN_ERROR            = -11
-constant slong FILE_PATH_NOT_LOADED            = -12
-constant slong MAXIMUM_NUMBER_OF_FILES_ARE_ALREADY_OPEN = -14
-constant slong INVALID_FILE_FORMAT            = -15
+constant slong NAV_FILE_ERROR_INVALID_FILE_HANDLE                          = -1
+constant slong NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME                    = -2
+constant slong NAV_FILE_ERROR_INVALID_VALUE_SUPPLIED_FOR_IO_FLAG           = -3
+constant slong NAV_FILE_ERROR_INVALID_FILE_PATH                            = -4
+constant slong NAV_FILE_ERROR_DISK_IO_ERROR                                = -5
+constant slong NAV_FILE_ERROR_INVALID_PARAMETER                            = -6
+constant slong NAV_FILE_ERROR_FILE_ALREADY_CLOSED                          = -7
+constant slong NAV_FILE_ERROR_FILE_NAME_EXISTS                             = -8
+constant slong NAV_FILE_ERROR_EOF_END_OF_FILE_REACHED                      = -9
+constant slong NAV_FILE_ERROR_BUFFER_TOO_SMALL                             = -10
+constant slong NAV_FILE_ERROR_DISK_FULL                                    = -11
+constant slong NAV_FILE_ERROR_FILE_PATH_NOT_LOADED                         = -12
+constant slong NAV_FILE_ERROR_DIRECTORY_NAME_EXISTS                        = -13
+constant slong NAV_FILE_ERROR_MAXIMUM_NUMBER_OF_FILES_ARE_ALREADY_OPEN     = -14
+constant slong NAV_FILE_ERROR_INVALID_FILE_FORMAT                          = -15
 
 
 DEFINE_TYPE
@@ -81,22 +82,26 @@ define_function char[NAV_MAX_BUFFER] NAVGetFileError(slong error) {
         return ""
     }
 
-    switch(error) {
-        case INVALID_FILE_HANDLE                : return "'Invalid file handle'"
-        case INVALID_FILE_PATH_OR_NAME            : return "'Invalid file path or name'"
-        case INVALID_VALUE_SUPPLIED_FOR_IO_FLAG        : return "'Invalid value supplied for IOFlag'"
-        case INVALID_FILE_PATH                : return "'Invalid file path'"
-        case DISK_IO_ERROR                    : return "'Disk IO Error'"
-        case INVALID_PARAMETER                : return "'Invalid Parameter'"
-        case FILE_ALREADY_CLOSED                : return "'File already closed'"
-        case MINUS_8_UNKNOWN_ERROR                : return "'-8 = UNKNOWN ERROR'"
-        case MINUS_9_UNKNOWN_ERROR                : return "'-9 = UNKNOWN ERROR'"
-        case BUFFER_TOO_SMALL                : return "'Buffer too small'"
-        case MINUS_11_UNKNOWN_ERROR                : return "'-11 = UNKNOWN ERROR'"
-        case FILE_PATH_NOT_LOADED                : return "'File path not loaded'"
-        case MAXIMUM_NUMBER_OF_FILES_ARE_ALREADY_OPEN    : return "'Maximum number of files are already open'"
-        case INVALID_FILE_FORMAT                : return "'Invalid file format'"
-        default                    : return "'Unknown error'"
+    switch (error) {
+        case NAV_FILE_ERROR_INVALID_FILE_HANDLE:                        { return 'Invalid file handle' }
+        case NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME:                  { return 'Invalid file path or name'"}
+        case NAV_FILE_ERROR_INVALID_VALUE_SUPPLIED_FOR_IO_FLAG:         { return 'Invalid value supplied for IOFlag' }
+        case NAV_FILE_ERROR_INVALID_FILE_PATH:                          { return 'Invalid file path' }
+        case NAV_FILE_ERROR_DISK_IO_ERROR:                              { return 'Disk I/O error' }
+        case NAV_FILE_ERROR_INVALID_PARAMETER:                          { return 'Invalid parameter (buffer length must be greater than zero)' }
+
+        // FILE_SEEK
+        // case NAV_FILE_ERROR_INVALID_PARAMETER:                          { return 'Invalid parameter (pos points beyond the end-of-file (position is set to the end-of-file))' }
+
+        case NAV_FILE_ERROR_FILE_ALREADY_CLOSED:                        { return 'File already closed' }
+        case NAV_FILE_ERROR_FILE_NAME_EXISTS:                           { return 'File name exists' }
+        case NAV_FILE_ERROR_EOF_END_OF_FILE_REACHED:                    { return 'EOF (end-of-file) reached' }
+        case NAV_FILE_ERROR_BUFFER_TOO_SMALL:                           { return 'Buffer too small' }
+        case NAV_FILE_ERROR_DISK_FULL:                                  { return 'Disk full' }
+        case NAV_FILE_ERROR_FILE_PATH_NOT_LOADED:                       { return 'File path not loaded' }
+        case NAV_FILE_ERROR_MAXIMUM_NUMBER_OF_FILES_ARE_ALREADY_OPEN:   { return 'Maximum number of files are already open (max is 10)' }
+        case NAV_FILE_ERROR_INVALID_FILE_FORMAT:                        { return 'Invalid file format' }
+        default:                                                        { return "'Unknown error (', itoa(error), ')'" }
     }
 }
 
