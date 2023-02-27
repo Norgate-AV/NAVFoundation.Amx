@@ -652,4 +652,40 @@ define_function NAVArrayReverseString(char array[][]) {
 }
 
 
+define_function NAVArrayCopyString(char source[][], char destination[][]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(source)
+
+    if (!length) {
+        return
+    }
+
+    set_length_array(destination, length)
+
+    for (x = 1; x <= length; x++) {
+        destination[x] = source[x]
+    }
+}
+
+
+define_function NAVArrayCopyInteger(integer source[], integer destination[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(source)
+
+    if (!length) {
+        return
+    }
+
+    set_length_array(destination, length)
+
+    for (x = 1; x <= length; x++) {
+        destination[x] = source[x]
+    }
+}
+
+
 #END_IF // __NAV_FOUNDATION_ARRAYUTILS__
