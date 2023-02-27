@@ -1,5 +1,3 @@
-PROGRAM_NAME='NAVFoundation.StringUtils'
-
 /*
  _   _                       _          ___     __
 | \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /
@@ -32,15 +30,24 @@ SOFTWARE.
 */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_STRINGUTILS__
-#DEFINE __NAV_FOUNDATION_STRINGUTILS__
+#DEFINE __NAV_FOUNDATION_STRINGUTILS__ 'NAVFoundation.StringUtils'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 DEFINE_CONSTANT
 
 constant integer NAV_CASE_INSENSITIVE =   0
 constant integer NAV_CASE_SENSITIVE =     1
+
+
+define_function NAVStringUtilsErrorLog(integer level, char functionName[], char message[]) {
+    stack_var char log[NAV_MAX_BUFFER]
+
+    log = NAVFormatLibraryFunctionLog(__NAV_FOUNDATION_STRINGUTILS__, functionName, message)
+    NAVErrorLog(level, log)
+}
 
 
 define_function char[NAV_MAX_BUFFER] NAVStripCharsFromRight(char buffer[], integer count) {
@@ -235,12 +242,20 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringBetween(char buffer[], char tok
     result = ""
 
     if(!length_array(buffer)) {
+        NAVStringUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                                'NAVGetStringBetween',
+                                'Invalid argument. The provided argument "buffer" is an empty string')
+
         return result
     }
 
     tokenIndex[1] = NAVIndexOf(buffer, token1, 1)
 
     if (!tokenIndex[1]) {
+        NAVStringUtilsErrorLog(NAV_LOG_LEVEL_WARNING,
+                                'NAVGetStringBetween',
+                                'The provided argument "token1" was not found in the buffer')
+
         return result
     }
 
@@ -248,6 +263,10 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringBetween(char buffer[], char tok
     tokenIndex[2] = NAVIndexOf(buffer, token2, startIndex)
 
     if (!tokenIndex[2]) {
+        NAVStringUtilsErrorLog(NAV_LOG_LEVEL_WARNING,
+                                'NAVGetStringBetween',
+                                'The provided argument "token2" was not found in the buffer')
+
         return result
     }
 
@@ -286,7 +305,19 @@ define_function integer NAVSplitString(char buffer[], char separator[], char res
 
     count = 0
 
+    if (!length_array(buffer)) {
+        NAVStringUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                                'NAVSplitString',
+                                'Invalid argument. The provided argument "buffer" is an empty string')
+
+        return count
+    }
+
     if (!NAVContains(buffer, separator)) {
+        NAVStringUtilsErrorLog(NAV_LOG_LEVEL_WARNING,
+                                'NAVSplitString',
+                                'Buffer does not contain separator')
+
         return count
     }
 
@@ -321,13 +352,23 @@ define_function char[NAV_MAX_BUFFER] NAVArrayJoinString(char array[][], char sep
     stack_var integer length
     stack_var integer x
 
+    result = ""
+
     length = length_array(array)
 
     if (!length) {
+        NAVStringUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                                'NAVArrayJoinString',
+                                'Invalid argument. The provided argument "array" is empty array')
+
         return result
     }
 
     if (!length_array(separator)) {
+        NAVStringUtilsErrorLog(NAV_LOG_LEVEL_WARNING,
+                                'NAVArrayJoinString',
+                                'Separator is an empty string. Using default separator (" ")')
+
         separator = ' '
     }
 
@@ -336,6 +377,10 @@ define_function char[NAV_MAX_BUFFER] NAVArrayJoinString(char array[][], char sep
     for (x = 2; x <= length; x++) {
         result = "result, separator, array[x]"
     }
+
+    NAVStringUtilsErrorLog(NAV_LOG_LEVEL_DEBUG,
+                            'NAVArrayJoinString',
+                            "'Returning result: ', result")
 
     return result
 }
@@ -349,6 +394,10 @@ define_function long NAVStringToLongMilliseconds(char duration[]) {
 
     result = 0
     if (!length_array(duration)) {
+        NAVStringUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                                'NAVStringToLongMilliseconds',
+                                'Invalid argument. The provided argument "duration" is an empty string')
+
         return result
     }
 
@@ -369,7 +418,9 @@ define_function long NAVStringToLongMilliseconds(char duration[]) {
             result = value * 1000
         }
         default: {
-            NAVLog("'An invalid format ("', timeFormat, '") was specified. Valid format is hours (H/h), minutes (M/m), or seconds (S/s)'")
+            NAVStringUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    'NAVStringToLongMilliseconds',
+                                    "'An invalid format (', timeFormat, ') was specified. Valid format is hours (H/h), minutes (M/m), or seconds (S/s)'")
         }
     }
 
