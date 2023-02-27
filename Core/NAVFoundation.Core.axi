@@ -224,7 +224,7 @@ struct _NAVProgram {
 struct _NAVController {
     ip_address_struct IP
     char SerialNumber[NAV_MAX_CHARS]
-    char UniqueId[NAV_MAX_CHARS]
+    char UniqueId[6]
     char MacAddress[NAV_MAX_CHARS]
     _NAVProgram Program
 }
