@@ -1,5 +1,3 @@
-PROGRAM_NAME='NAVFoundation.UIUtils'
-
 /*
  _   _                       _          ___     __
 | \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /
@@ -32,7 +30,7 @@ SOFTWARE.
 */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_UIUTILS__
-#DEFINE __NAV_FOUNDATION_UIUTILS__
+#DEFINE __NAV_FOUNDATION_UIUTILS__ 'NAVFoundation.UIUtils'
 
 #include 'NAVFoundation.Core.axi'
 

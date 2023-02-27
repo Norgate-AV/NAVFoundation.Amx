@@ -1,5 +1,3 @@
-PROGRAM_NAME='NAVFoundation.HashTable.axi'
-
 /*
  _   _                       _          ___     __
 | \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /
@@ -31,8 +29,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#IF_NOT_DEFINED __NAV_FOUNDATION_HASHTABLEUTILS__
-#DEFINE __NAV_FOUNDATION_HASHTABLEUTILS__
+#IF_NOT_DEFINED __NAV_FOUNDATION_HASHTABLE__
+#DEFINE __NAV_FOUNDATION_HASHTABLE__ 'NAVFoundation.HashTable'
 
 #include 'NAVFoundation.Core.axi'
 

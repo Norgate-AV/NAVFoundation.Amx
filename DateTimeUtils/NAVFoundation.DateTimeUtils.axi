@@ -1,5 +1,3 @@
-PROGRAM_NAME='NAVFoundation.DateTimeUtils'
-
 /*
  _   _                       _          ___     __
 | \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /
@@ -32,7 +30,7 @@ SOFTWARE.
 */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_DATETIMEUTILS__
-#DEFINE __NAV_FOUNDATION_DATETIMEUTILS__
+#DEFINE __NAV_FOUNDATION_DATETIMEUTILS__ 'NAVFoundation.DateTimeUtils'
 
 #include 'NAVFoundation.Core.axi'
 

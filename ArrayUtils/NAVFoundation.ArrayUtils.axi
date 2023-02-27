@@ -1,5 +1,3 @@
-PROGRAM_NAME='NAVFoundation.ArrayUtils'
-
 /*
  _   _                       _          ___     __
 | \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /
@@ -32,7 +30,7 @@ SOFTWARE.
 */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_ARRAYUTILS__
-#DEFINE __NAV_FOUNDATION_ARRAYUTILS__
+#DEFINE __NAV_FOUNDATION_ARRAYUTILS__ 'NAVFoundation.ArrayUtils'
 
 #include 'NAVFoundation.Math.axi'
 #include 'NAVFoundation.StringUtils.axi'

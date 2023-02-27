@@ -1,5 +1,3 @@
-PROGRAM_NAME='NAVFoundation.Queue.h.axi'
-
 /*
  _   _                       _          ___     __
 | \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /
@@ -32,7 +30,7 @@ SOFTWARE.
 */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_QUEUE_H__
-#DEFINE __NAV_FOUNDATION_QUEUE_H__
+#DEFINE __NAV_FOUNDATION_QUEUE_H__ 'NAVFoundation.Queue.h'
 
 #include 'NAVFoundation.Core.axi'
 

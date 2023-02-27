@@ -1,5 +1,3 @@
-PROGRAM_NAME='NAVFoundation.FileUtils'
-
 /*
  _   _                       _          ___     __
 | \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /
@@ -32,7 +30,7 @@ SOFTWARE.
 */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_FILEUTILS__
-#DEFINE __NAV_FOUNDATION_FILEUTILS__
+#DEFINE __NAV_FOUNDATION_FILEUTILS__ 'NAVFoundation.FileUtils'
 
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.StringUtils.axi'

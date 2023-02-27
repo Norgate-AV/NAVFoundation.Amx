@@ -1,5 +1,3 @@
-PROGRAM_NAME='NAVFoundation.SnapiHelpers'
-
 /*
  _   _                       _          ___     __
 | \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /
@@ -32,7 +30,7 @@ SOFTWARE.
 */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_SNAPIHELPERS__
-#DEFINE __NAV_FOUNDATION_SNAPIHELPERS__
+#DEFINE __NAV_FOUNDATION_SNAPIHELPERS__ 'NAVFoundation.SnapiHelpers'
 
 #include 'NAVFoundation.Core.axi'
 
