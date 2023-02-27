@@ -249,6 +249,7 @@ volatile long NAVFeedbackTLArray[]	= { 200 }
 #include 'NAVFoundation.SnapiHelpers.axi'
 #include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.SocketUtils.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 #IF_DEFINED USING_RMS
 #include 'NAVFoundation.RmsUtils.axi'
@@ -586,8 +587,7 @@ DEFINE_START {
     NAVTimelineStart(TL_NAV_BLINKER, NAVBlinkerTLArray, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
     NAVTimelineStart(TL_NAV_FEEDBACK, NAVFeedbackTLArray, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
 
-    NAVLog("__NAME__, ' : ', 'Program Started'")
-    amx_log(AMX_INFO, "__NAME__, ' : ', 'Program Started'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "__NAME__, ' : ', 'Program Started'")
 }
 
 
