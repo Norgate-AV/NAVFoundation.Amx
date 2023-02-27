@@ -44,6 +44,10 @@ DEFINE_CONSTANT
 /////////////////////////////////////////////////////////////
 constant integer DUET_MAX_PARAM_LEN     = 1024
 
+#IF_NOT_DEFINED NAV_MAX_SNAPI_MESSAGE_PARAMETERS
+constant integer NAV_MAX_SNAPI_MESSAGE_PARAMETERS    = 20
+#END_IF
+
 
 /////////////////////////////////////////////////////////////
 // Extended SNAPI Channels
@@ -100,9 +104,9 @@ constant char NAV_SWITCH_LEVELS[][NAV_MAX_CHARS]    = { 'VID', 'AUD', 'ALL' }
 
 DEFINE_TYPE
 
-struct _NAVSnapiCommand {
+struct _NAVSnapiMessage {
     char Header[NAV_MAX_BUFFER]
-    char Param[50][NAV_MAX_CHARS]
+    char Parameter[NAV_MAX_SNAPI_MESSAGE_PARAMETERS][255]
 }
 
 
