@@ -33,6 +33,7 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_SNAPIHELPERS__ 'NAVFoundation.SnapiHelpers'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.ErrorLogUtils.axi'
 
 
@@ -157,6 +158,40 @@ define_function integer NAVGetPower(dev device) {
 
 define_function integer NAVGetVolumeMute(dev device) {
     return [device, VOL_MUTE_FB]
+}
+
+
+define_function NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
+    stack_var char dataCopy[NAV_MAX_BUFFER]
+
+    if (!length_array(data)) {
+        NAVSnapiHelpersErrorLog(NAV_LOG_LEVEL_ERROR,
+                                'NAVParseSnapiMessage',
+                                'Invalid argument. The provided argument "data" is an empty string')
+
+        return
+    }
+
+    dataCopy = data
+
+    if (!NAVContains(dataCopy, '-')) {
+        message.Header = dataCopy
+        return
+    }
+
+    message.Header = NAVStripRight(remove_string(dataCopy, '-', 1), 1)
+
+    if (!length_array(dataCopy)) {
+        return
+    }
+
+    if (!NAVContains(dataCopy, ',')) {
+        set_length_array(message.Parameter, 1)
+        message.Parameter[1] = dataCopy
+        return
+    }
+
+    NAVSplitString(dataCopy, ',', message.Parameter)
 }
 
 
