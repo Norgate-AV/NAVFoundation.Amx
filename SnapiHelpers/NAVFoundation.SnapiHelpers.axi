@@ -33,6 +33,7 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_SNAPIHELPERS__ 'NAVFoundation.SnapiHelpers'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 (***********************************************************)
@@ -120,6 +121,14 @@ struct _NAVSnapiMessage {
 (***********************************************************)
 (*        SUBROUTINE/FUNCTION DEFINITIONS GO BELOW         *)
 (***********************************************************)
+
+define_function NAVSnapiHelpersErrorLog(integer level, char functionName[], char message[]) {
+    stack_var char log[NAV_MAX_BUFFER]
+
+    log = NAVFormatLibraryFunctionLog(__NAV_FOUNDATION_SNAPIHELPERS__, functionName, message)
+    NAVErrorLog(level, log)
+}
+
 
 define_function NAVSwitch(dev device, integer input, integer output, integer level) {
     if(output > 0) {
