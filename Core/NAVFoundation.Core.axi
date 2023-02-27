@@ -374,6 +374,8 @@ define_function char[NAV_MAX_CHARS] NAVGetMacAddressFromUniqueId(char uniqueId[]
         return result
     }
 
+    set_length_array(macAddress, max_length_array(macAddress))
+
     for (x = 1; x <= length_array(uniqueId); x++) {
         macAddress[x] = format('%02X', uniqueId[x])
     }
