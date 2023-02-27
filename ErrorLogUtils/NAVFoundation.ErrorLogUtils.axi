@@ -1,5 +1,3 @@
-PROGRAM_NAME='NAVFoundation.ErrorLogUtils'
-
 /*
  _   _                       _          ___     __
 | \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /
@@ -32,59 +30,65 @@ SOFTWARE.
 */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_ERRORLOGUTILS__
-#DEFINE __NAV_FOUNDATION_ERRORLOGUTILS__
+#DEFINE __NAV_FOUNDATION_ERRORLOGUTILS__ 'NAVFoundation.ErrorLogUtils'
 
 #include 'NAVFoundation.Core.axi'
 
 
 DEFINE_CONSTANT
 
-constant long NAV_LOG_TYPE_ERROR     = AMX_ERROR
-constant long NAV_LOG_TYPE_WARNING   = AMX_WARNING
-constant long NAV_LOG_TYPE_INFO      = AMX_INFO
-constant long NAV_LOG_TYPE_DEBUG     = AMX_DEBUG
+constant integer NAV_LOG_LEVEL_ERROR     = AMX_ERROR
+constant integer NAV_LOG_LEVEL_WARNING   = AMX_WARNING
+constant integer NAV_LOG_LEVEL_INFO      = AMX_INFO
+constant integer NAV_LOG_LEVEL_DEBUG     = AMX_DEBUG
 
 
-define_function char[NAV_MAX_CHARS] NAVGetLogType(long type) {
-    switch (type) {
-        case NAV_LOG_TYPE_ERROR: {
+define_function char[NAV_MAX_CHARS] NAVGetLogLevel(integer level) {
+    switch (level) {
+        case NAV_LOG_LEVEL_ERROR: {
             return 'Error'
         }
-        case NAV_LOG_TYPE_WARNING: {
+        case NAV_LOG_LEVEL_WARNING: {
             return 'Warning'
         }
-        case NAV_LOG_TYPE_INFO: {
+        case NAV_LOG_LEVEL_INFO: {
             return 'Info'
         }
-        case NAV_LOG_TYPE_DEBUG: {
+        case NAV_LOG_LEVEL_DEBUG: {
             return 'Debug'
         }
         default: {
-            return NAVGetLogType(NAV_LOG_TYPE_INFO)
+            return NAVGetLogLevel(NAV_LOG_LEVEL_INFO)
         }
     }
 }
 
-define_function char[NAV_MAX_BUFFER] NAVFormatFunction(char libraryName[], char functionName[]) {
+
+define_function char[NAV_MAX_BUFFER] NAVFormatLibraryFunction(char libraryName[], char functionName[]) {
     return "libraryName, '.', functionName, '()'"
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVFormatLog(char moduleName[], char value[]) {
-    return "'Module ', moduleName, ': ', value"
+define_function char[NAV_MAX_BUFFER] NAVFormatLibraryFunctionLog(char libraryName[], char functionName[], char value[]) {
+    return "NAVFormatLibraryFunction(libraryName, functionName), ' => ', value"
 }
 
 
-define_function NAVErrorLog(long type, char moduleName[], char value[]) {    
-    switch (type) {
-        case NAV_LOG_TYPE_ERROR: 
-        case NAV_LOG_TYPE_WARNING:
-        case NAV_LOG_TYPE_INFO:
-        case NAV_LOG_TYPE_DEBUG: {
-            amx_log(type, NAVFormatLog(moduleName, value))
+define_function char[NAV_MAX_BUFFER] NAVFormatLog(integer level, char value[]) {
+    return "NAVGetLogLevel(level), ':: ', NAVFormatHex(value)"
+}
+
+
+define_function NAVErrorLog(integer level, char value[]) {
+    switch (level) {
+        case NAV_LOG_LEVEL_ERROR:
+        case NAV_LOG_LEVEL_WARNING:
+        case NAV_LOG_LEVEL_INFO:
+        case NAV_LOG_LEVEL_DEBUG: {
+            amx_log(level, NAVFormatLog(level, value))
         }
         default: {
-            NAVErrorLog(NAV_LOG_TYPE_ERROR, moduleName, value)
+            NAVErrorLog(NAV_LOG_LEVEL_ERROR, value)
         }
     }
 }
