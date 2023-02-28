@@ -121,6 +121,13 @@ struct _NAVRmsConnectionState {
 }
 
 
+struct _NAVRmsHotlist {
+    char ClientDefaultLocation
+    integer LocationId
+    integer Count
+}
+
+
 struct _NAVRmsClient {
     _NAVRmsServerInformation ServerInformation
     _NAVRmsLocation Location
