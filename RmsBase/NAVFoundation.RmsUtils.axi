@@ -132,6 +132,12 @@ struct _NAVRmsClient {
     _NAVRmsServerInformation ServerInformation
     _NAVRmsLocation Location
     _NAVRmsConnection Connection
+    _NAVRmsConnectionState ConnectionState
+    _NAVKeyValuePair ConfigChange
+    _NAVRmsHotlist Hotlist
+    dev Device
+    char IsOnline
+    char IsRegistered
 }
 
 
