@@ -41,6 +41,7 @@ DEFINE_CONSTANT
 DEFINE_TYPE
 
 struct _NAVRmsConnection {
+    char Name[NAV_MAX_CHARS]
     char Url[NAV_MAX_BUFFER]
     char Password[NAV_MAX_CHARS]
     char Enabled[NAV_MAX_CHARS]
