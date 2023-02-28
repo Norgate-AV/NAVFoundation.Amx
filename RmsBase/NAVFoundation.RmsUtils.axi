@@ -40,11 +40,54 @@ DEFINE_CONSTANT
 
 DEFINE_TYPE
 
+struct _NAVRmsServerInformation {
+    char AppVersion[NAV_MAX_CHARS]
+    char DatabaseVersion[NAV_MAX_CHARS]
+    char TimesyncEnabled
+    char SmtpEnabled
+    integer MinPollTime
+    integer MaxPollTime
+}
+
+
+struct _NAVRmsLocation {
+    char ClientDefaultLocation
+    char Id[NAV_MAX_CHARS]
+    char Name[NAV_MAX_CHARS]
+    char Owner[NAV_MAX_CHARS]
+    char PhoneNumber[NAV_MAX_CHARS]
+    char Occupancy[NAV_MAX_CHARS]
+    char PrestigeName[NAV_MAX_CHARS]
+    char Timezone[NAV_MAX_CHARS]
+    char AssetLicensed
+}
+
+
 struct _NAVRmsConnection {
     char Name[NAV_MAX_CHARS]
     char Url[NAV_MAX_BUFFER]
     char Password[NAV_MAX_CHARS]
     char Enabled[NAV_MAX_CHARS]
 }
+
+
+struct _NAVRmsException {
+    char Message[NAV_MAX_BUFFER]
+    char Header[NAV_MAX_BUFFER]
+}
+
+
+struct _NAVRmsState {
+    char OldState[NAV_MAX_CHARS]
+    char NewState[NAV_MAX_CHARS]
+}
+
+
+struct _NAVRmsClient {
+    _NAVRmsServerInformation ServerInformation
+    _NAVRmsLocation Location
+    _NAVRmsConnection Connection
+}
+
 
 #END_IF // __NAV_FOUNDATION_RMSUTILS__
