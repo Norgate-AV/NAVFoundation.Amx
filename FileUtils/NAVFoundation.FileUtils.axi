@@ -34,6 +34,7 @@ SOFTWARE.
 
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 DEFINE_CONSTANT
@@ -67,6 +68,14 @@ struct _NAVFileEntity {
 }
 
 
+define_function NAVFileUtilsErrorLog(integer level, char functionName[], char message[]) {
+    stack_var char log[NAV_MAX_BUFFER]
+
+    log = NAVFormatLibraryFunctionLog(__NAV_FOUNDATION_FILEUTILS__, functionName, message)
+    NAVErrorLog(level, log)
+}
+
+
 define_function integer NAVIsDirectory(char entity[]) {
     if (NAVStartsWith(entity, '/')) {
         return true
@@ -76,7 +85,6 @@ define_function integer NAVIsDirectory(char entity[]) {
 }
 
 
-
 define_function char[NAV_MAX_BUFFER] NAVGetFileError(slong error) {
     if (error >= 0) {
         return ""
@@ -84,7 +92,7 @@ define_function char[NAV_MAX_BUFFER] NAVGetFileError(slong error) {
 
     switch (error) {
         case NAV_FILE_ERROR_INVALID_FILE_HANDLE:                        { return 'Invalid file handle' }
-        case NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME:                  { return 'Invalid file path or name'"}
+        case NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME:                  { return 'Invalid file path or name' }
         case NAV_FILE_ERROR_INVALID_VALUE_SUPPLIED_FOR_IO_FLAG:         { return 'Invalid value supplied for IOFlag' }
         case NAV_FILE_ERROR_INVALID_FILE_PATH:                          { return 'Invalid file path' }
         case NAV_FILE_ERROR_DISK_IO_ERROR:                              { return 'Disk I/O error' }
@@ -111,7 +119,11 @@ define_function slong NAVFileOpen(char path[], char mode[]) {
     stack_var long flag
 
     if (!length_array(path)) {
-        return INVALID_FILE_PATH_OR_NAME
+        NAVFileUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                            'NAVFileOpen',
+                            "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
 
     switch (lower_string(mode)) {
@@ -119,10 +131,10 @@ define_function slong NAVFileOpen(char path[], char mode[]) {
             flag = FILE_RW_APPEND
         }
         case 'rw': {
-            flag = FILE_RW_NEW 
+            flag = FILE_RW_NEW
         }
-        case 'r': { 
-            flag = FILE_READ_ONLY 
+        case 'r': {
+            flag = FILE_READ_ONLY
         }
         default: {
             flag = FILE_READ_ONLY
@@ -132,10 +144,9 @@ define_function slong NAVFileOpen(char path[], char mode[]) {
     result = file_open(path, flag)
 
     if(result < 0) {
-        #IF_DEFINED NAV_FILEUTILS_DEBUG
-        NAVLog("'Error opening file: "', path, '"'")
-        NAVLog(NAVGetFileError(result))
-        #END_IF
+        NAVFileUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                            'NAVFileOpen',
+                            "'Error opening file "', path, '" : ', NAVGetFileError(result)")
     }
 
     return result
@@ -148,10 +159,9 @@ define_function slong NAVFileClose(long handle) {
     result = file_close(handle)
 
     if(result < 0) {
-        #IF_DEFINED NAV_FILEUTILS_DEBUG
-        NAVLog("'Error closing file: '", handle, '"'")
-        NAVLog(NAVGetFileError(result))
-        #END_IF
+        NAVFileUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                            'NAVFileClose',
+                            "'Error closing file handle "', handle, '" : ', NAVGetFileError(result)")
     }
 
     return result
@@ -163,7 +173,11 @@ define_function slong NAVFileRead(char path[], char data[], integer count) {
     stack_var long handle
 
     if (!length_array(path)) {
-        return INVALID_FILE_PATH_OR_NAME
+        NAVFileUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                            'NAVFileRead',
+                            "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
 
     result = NAVFileOpen(path, 'r')
@@ -177,10 +191,9 @@ define_function slong NAVFileRead(char path[], char data[], integer count) {
     result = file_read(handle, data, count)
 
     if (result < 0) {
-        #IF_DEFINED NAV_FILEUTILS_DEBUG
-        NAVLog("'Error reading file: '", path, '"'")
-        NAVLog(NAVGetFileError(result))
-        #END_IF
+        NAVFileUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                            'NAVFileRead',
+                            "'Error reading file "', path, '" : ', NAVGetFileError(result)")
     }
 
     NAVFileClose(handle)
@@ -193,7 +206,11 @@ define_function slong NAVFileWrite(char path[], char data[]) {
     stack_var long handle
 
     if (!length_array(path)) {
-        return INVALID_FILE_PATH_OR_NAME
+        NAVFileUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                            'NAVFileWrite',
+                            "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
 
     result = NAVFileOpen(path, 'rw')
@@ -207,10 +224,9 @@ define_function slong NAVFileWrite(char path[], char data[]) {
     result = file_write(handle, data, length_array(data))
 
     if (result < 0) {
-        #IF_DEFINED NAV_FILEUTILS_DEBUG
-        NAVLog("'Error writing file: '", path, '"'")
-        NAVLog(NAVGetFileError(result))
-        #END_IF
+        NAVFileUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                            'NAVFileWrite',
+                            "'Error writing file "', path, '" : ', NAVGetFileError(result)")
     }
 
     NAVFileClose(handle)
@@ -223,7 +239,11 @@ define_function slong NAVFileAppend(char path[], char data[]) {
     stack_var long handle
 
     if (!length_array(path)) {
-        return INVALID_FILE_PATH_OR_NAME
+        NAVFileUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                            'NAVFileAppend',
+                            "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
 
     result = NAVFileOpen(path, 'rwa')
@@ -237,10 +257,9 @@ define_function slong NAVFileAppend(char path[], char data[]) {
     result = file_write(handle, data, length_array(data))
 
     if (result < 0) {
-        #IF_DEFINED NAV_FILEUTILS_DEBUG
-        NAVLog("'Error appending file: '", path, '"'")
-        NAVLog(NAVGetFileError(result))
-        #END_IF
+        NAVFileUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                            'NAVFileAppend',
+                            "'Error appending file "', path, '" : ', NAVGetFileError(result)")
     }
 
     NAVFileClose(handle)
@@ -262,16 +281,19 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
     index = 1
 
     if (!length_array(path)) {
+        NAVFileUtilsErrorLog(NAV_LOG_LEVEL_WARNING,
+                            'NAVReadDirectory',
+                            'The path supplied is empty. Using root directory.')
+
         path = '/'
     }
 
     result = file_dir(path, entity, index)
 
     if (result < 0) {
-        #IF_DEFINED NAV_FILEUTILS_DEBUG
-        NAVLog("'Error reading directory: ', path")
-        NAVLog(NAVGetFileError(result))
-        #END_IF
+        NAVFileUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                            'NAVReadDirectory',
+                            "'Error reading directory "', path, '" : ', NAVGetFileError(result)")
 
         return result
     }
@@ -288,10 +310,9 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
         result = file_dir(path, entity, index)
 
         if (result < 0) {
-            #IF_DEFINED NAV_FILEUTILS_DEBUG
-            NAVLog("'Error reading directory: ', path")
-            NAVLog(NAVGetFileError(result))
-            #END_IF
+            NAVFileUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                            'NAVReadDirectory',
+                            "'Error reading directory "', path, '" : ', NAVGetFileError(result)")
 
             continue
         }
@@ -315,9 +336,9 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
         index++
     }
 
-    #IF_DEFINED NAV_FILEUTILS_DEBUG
-    NAVLog("'Number of entities: ', itoa(count)")
-    #END_IF
+    NAVFileUtilsErrorLog(NAV_LOG_LEVEL_DEBUG,
+                            'NAVReadDirectory',
+                            "'Number of entities: ', itoa(count)")
 
     return type_cast(count)
 }
@@ -432,7 +453,7 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
 
         if (entity.IsDirectory) {
             NAVWalkDirectory(entityPath, files)
-        } 
+        }
         else {
             // files[count] = entityPath
             // count++
