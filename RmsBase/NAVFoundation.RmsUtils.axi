@@ -115,7 +115,7 @@ struct _NAVRmsException {
 }
 
 
-struct _NAVRmsState {
+struct _NAVRmsConnectionState {
     char OldState[NAV_MAX_CHARS]
     char NewState[NAV_MAX_CHARS]
 }
