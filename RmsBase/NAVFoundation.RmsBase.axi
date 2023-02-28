@@ -32,9 +32,12 @@ SOFTWARE.
 */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_RMSBASE__
-#DEFINE __NAV_FOUNDATION_RMSBASE__
+#DEFINE __NAV_FOUNDATION_RMSBASE__ 'NAVFoundation.RmsBase'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.RmsUtils.axi'
+#include 'NAVFoundation.ArrayUtils.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 DEFINE_DEVICE
@@ -52,14 +55,21 @@ vdvRMSSourceUsage       = 33000:1:0
 DEFINE_CONSTANT
 
 
-DEFINE_TYPE
-
-
 DEFINE_VARIABLE
+
+volatile _NAVRmsClient rmsClient
 
 
 #include 'RmsApi.axi'
 #include 'RmsSourceUsage.axi'
+
+
+// #DEFINE USING_NAV_RMS_ADAPTER_ONLINE_EVENT_CALLBACK
+// define_function NAVRmsBaseAdapterOnlineEventCallback(tdata data) {}
+
+
+// #DEFINE USING_NAV_RMS_ADAPTER_CONNECTION_INIT_EVENT_CALLBACK
+// define_function NAVRmsBaseAdapterConnectionInitEventCallback(tdata data, _NAVRmsConnection connection) {}
 
 
 DEFINE_START {
@@ -77,190 +87,274 @@ DEFINE_EVENT
 
 data_event[vdvRms] {
     online: {
-        NAVCommand(data.device, "'CONFIG.CLIENT.NAME-', config.RoomName")
-        NAVCommand(data.device, "'CONFIG.SERVER.URL-', config.RmsConnection.Url")
-        NAVCommand(data.device, "'CONFIG.SERVER.PASSWORD-', config.RmsConnection.Password")
-        NAVCommand(data.device, "'CONFIG.CLIENT.ENABLED-', config.RmsConnection.Enabled")
-        NAVCommand(data.device, "'CLIENT.REINIT'")
+        #IF_DEFINED USING_NAV_RMS_ADAPTER_ONLINE_EVENT_CALLBACK
+        NAVRmsBaseAdapterOnlineEventCallback(data)
+        #END_IF
 
-        NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device Online'")
+        #IF_DEFINED USING_NAV_RMS_ADAPTER_CONNECTION_INIT_EVENT_CALLBACK
+        stack_var _NAVRmsConnection connection
+
+        NAVRmsBaseAdapterConnectionInitEventCallback(data, connection)
+        NAVRmsConnectionCopy(connection, rmsClient.Connection)
+
+        NAVCommand(data.device, "'CONFIG.CLIENT.NAME-', rmsClient.Connection.Name")
+        NAVCommand(data.device, "'CONFIG.SERVER.URL-', rmsClient.Connection.Url")
+        NAVCommand(data.device, "'CONFIG.SERVER.PASSWORD-', rmsClient.Connection.Password")
+        NAVCommand(data.device, "'CONFIG.CLIENT.ENABLED-', rmsClient.Connection.Enabled")
+        NAVCommand(data.device, "'CLIENT.REINIT'")
+        #END_IF
+
+        NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                    "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device Online'")
     }
     offline: {
-        NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device Offline'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                    "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device Offline'")
     }
     onerror: {
-        NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device OnError: ', data.text")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                    "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device OnError: ', data.text")
     }
     awake: {
-        NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device Awake'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                    "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device Awake'")
     }
     standby: {
-        NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device Standby'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                    "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device Standby'")
+    }
+    string: {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                    "'String from RMS Adapter ', NAVConvertDPSToAscii(data.device), '-[', data.text, ']'")
     }
     command: {
-        stack_var char header[NAV_MAX_CHARS]
-        stack_var char param[10][NAV_MAX_CHARS]
         stack_var integer x
+        stack_var _NAVSnapiMessage message
 
-        header = DuetParseCmdHeader(data.text)
+        NAVParseSnapiMessage(data.text, message)
 
-        for (x = 1; x <= max_length_array(param); x++) {
-            param[x] = DuetParseCmdParam(data.text)
-        }
-
-        switch (upper_string(header)) {
+        switch (upper_string(message.Header)) {
             // Client Exception Notifications
             case 'EXCEPTION': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Exception: ', param[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_ERROR,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Exception: ', message.Parameter[1]")
 
-                if (length_array(param[2])) {
-                    NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Thrown by Command Header: ', param[2]")
+                if (length_array(message.Parameter[2])) {
+                    NAVErrorLog(NAV_LOG_LEVEL_ERROR,
+                                "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Thrown by Command Header: ', NAVStripRight(message.Parameter[2], 1)")
                 }
             }
 
             // Client Event Notifications
             case 'CLIENT.ONLINE': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Client Online'")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Client Online'")
             }
             case 'CLIENT.REGISTERED': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Client Registered'")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Client Registered'")
             }
             case 'CLIENT.OFFLINE': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Client Offline'")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Client Offline'")
             }
             case 'CLIENT.CONNECTION.STATE.TRANSITION': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Connection State Transition: '")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Old State: ', param[1]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   New State: ', param[2]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Connection State Transition: '")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Old State: ', message.Parameter[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   New State: ', message.Parameter[2]")
             }
             case 'VERSIONS': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Versions'")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Versions'")
             }
             case 'SYSTEM.POWER.ON': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' System Power On'")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' System Power On'")
             }
             case 'SYSTEM.POWER.OFF': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' System Power Off'")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' System Power Off'")
             }
             case 'SERVER.INFO': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Server Info: '")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   App Version: ', param[1]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Database Version: ', param[2]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Timesync Enabled: ', param[3]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Smtp Enabled: ', param[4]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Min Poll Time: ', param[5]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Max Poll Time: ', param[6]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Server Info: '")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   App Version: ', message.Parameter[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Database Version: ', message.Parameter[2]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Timesync Enabled: ', message.Parameter[3]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Smtp Enabled: ', message.Parameter[4]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Min Poll Time: ', message.Parameter[5]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Max Poll Time: ', message.Parameter[6]")
             }
 
             // Client Location Event Notifications
             case 'LOCATION': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Location: '")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Client Default Location: ', param[1]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   ID: ', param[2]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Name: ', param[3]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Owner: ', param[4]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Phone Number: ', param[5]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Occupancy: ', param[6]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Prestige Name: ', param[7]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Timezone: ', param[8]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Licensed: ', param[9]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Location: '")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Client Default Location: ', message.Parameter[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   ID: ', message.Parameter[2]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Name: ', message.Parameter[3]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Owner: ', message.Parameter[4]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Phone Number: ', message.Parameter[5]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Occupancy: ', message.Parameter[6]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Prestige Name: ', message.Parameter[7]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Timezone: ', message.Parameter[8]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Licensed: ', message.Parameter[9]")
             }
 
             // Client Config Change Event Notifications
             case 'CONFIG.CHANGE': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Config Change: '")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Key: ', param[1]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Value: ', param[2]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Config Change: '")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Key: ', message.Parameter[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Value: ', message.Parameter[2]")
             }
 
             // Asset Registration Event Notifications
             case 'ASSET.REGISTER': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Register'")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Register'")
             }
             case 'ASSET.REGISTERED': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Registered: '")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Client Key: ', param[1]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset ID: ', param[2]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   New Registration: ', param[3]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset DPS: ', param[4]") 
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Registered: '")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Client Key: ', message.Parameter[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset ID: ', message.Parameter[2]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   New Registration: ', message.Parameter[3]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset DPS: ', message.Parameter[4]")
             }
             case 'ASSSET.LOCATION.CHANGE': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Location Change: '")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Client Key: ', param[1]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset ID: ', param[2]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   New Location ID: ', param[3]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Location Change: '")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Client Key: ', message.Parameter[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset ID: ', message.Parameter[2]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   New Location ID: ', message.Parameter[3]")
             }
 
             // Asset Parameter Event Notifications
             case 'ASSET.PARAM.UPDATE': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Parameter Update: '")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Client Key: ', param[1]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Key: ', param[2]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Change Operator: ', param[3]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Change Value: ', param[4]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Parameter Update: '")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Client Key: ', message.Parameter[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Key: ', message.Parameter[2]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Change Operator: ', message.Parameter[3]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Change Value: ', message.Parameter[4]")
             }
             case 'ASSET.PARAM.VALUE': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Parameter Value: '")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Client Key: ', param[1]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Key: ', param[2]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Name: ', param[3]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Value: ', param[4]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Parameter Value: '")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Client Key: ', message.Parameter[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Key: ', message.Parameter[2]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Name: ', message.Parameter[3]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Value: ', message.Parameter[4]")
             }
             case 'ASSET.PARAM.RESET': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Parameter Reset: '")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Client Key: ', param[1]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Key: ', param[2]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Name: ', param[3]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Value: ', param[4]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Parameter Reset: '")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Client Key: ', message.Parameter[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Key: ', message.Parameter[2]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Name: ', message.Parameter[3]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Value: ', message.Parameter[4]")
             }
 
             // Asset Control Methods Event Notifications
             case 'ASSET.METHOD.EXECUTE': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Method Execute: '")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Client Key: ', param[1]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Method Key: ', param[2]")
-                
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Method Execute: '")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Client Key: ', message.Parameter[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Method Key: ', message.Parameter[2]")
+
                 // Loop through the parameters
-                for (x = 3; x <= max_length_array(param); x++) {
+                for (x = 3; x <= length_array(message.Parameter); x++) {
                     stack_var integer index
 
-                    if (param[x] == '') {
+                    if (message.Parameter[x] == '') {
                         break
                     }
 
                     index = x - 2
-                    NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Method Argument ', itoa(index), ': ', param[x]")
+                    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                                "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Method Argument ', itoa(index), ': ', message.Parameter[x]")
                 }
             }
 
             // Hotlist Event Notifications
             case 'HOTLIST.COUNT': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Hotlist Count: '")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Client Default Location: ', param[1]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Location ID: ', param[2]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Record Count: ', param[3]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Hotlist Count: '")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Client Default Location: ', message.Parameter[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Location ID: ', message.Parameter[2]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Record Count: ', message.Parameter[3]")
             }
 
             // Messaging Event Notifications
             case 'MESSAGE.DISPLAY': {
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Message Display: '")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Type: ', param[1]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Title: ', param[2]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Body: ', param[3]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Timeout Seconds: ', param[4]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Modal: ', param[5]")
-                NAVLog("'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Response Message: ', param[6]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Message Display: '")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Type: ', message.Parameter[1]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Title: ', message.Parameter[2]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Body: ', message.Parameter[3]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Timeout Seconds: ', message.Parameter[4]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Modal: ', message.Parameter[5]")
+                NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Response Message: ', message.Parameter[6]")
             }
 
             default: {
                 if (length_array(data.text)) {
-                    NAVLog("'Command from RMS Adapter ', NAVConvertDPSToAscii(data.device), '-[', data.text, ']'")
+                    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                                "'Command from RMS Adapter ', NAVConvertDPSToAscii(data.device), '-[', data.text, ']'")
                 }
             }
         }
-    }
-    string: {
-        NAVLog("'String from RMS Adapter ', NAVConvertDPSToAscii(data.device), '-[', data.text, ']'")
     }
 }
 
