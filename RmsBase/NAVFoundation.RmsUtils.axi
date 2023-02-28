@@ -149,4 +149,78 @@ define_function NAVRmsConnectionCopy(_NAVRmsConnection source, _NAVRmsConnection
 }
 
 
+define_function NAVRmsClientServerInformationLog(_NAVRmsServerInformation server, tdata args) {
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), ' Server Info: '")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   App Version: ', server.AppVersion")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Database Version: ', server.DatabaseVersion")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Timesync Enabled: ', NAVBooleanToString(server.TimesyncEnabled)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Smtp Enabled: ', NAVBooleanToString(server.SmtpEnabled)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Min Poll Time: ', itoa(server.MinPollTime)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Max Poll Time: ', itoa(server.MaxPollTime)")
+}
+
+
+define_function NAVRmsClientLocationLog(_NAVRmsLocation location, tdata args) {
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), ' Location: '")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Client Default Location: ', NAVBooleanToString(location.ClientDefaultLocation)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Id: ', location.Id")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Name: ', location.Name")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Owner: ', location.Owner")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Phone Number: ', location.PhoneNumber")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Occupancy: ', location.Occupancy")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Prestige Name: ', location.PrestigeName")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Timezone: ', location.Timezone")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Asset Licensed: ', NAVBooleanToString(location.AssetLicensed)")
+}
+
+
+define_function NAVRmsClientConnectionStateLog(_NAVRmsConnectionState state, tdata args) {
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), ' Connection State Transition: '")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Old State: ', state.OldState")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   New State: ', state.NewState")
+}
+
+
+define_function NAVRmsClientConfigChangeLog(_NAVKeyValuePair config, tdata args) {
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), ' Config Change: '")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Key: ', config.Key")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Value: ', config.Value")
+}
+
+
+define_function NAVRmsHotlistLog(_NAVRmsHotlist hotlist, tdata args) {
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), ' Hotlist: '")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Client Default Location: ', NAVBooleanToString(hotlist.ClientDefaultLocation)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Location ID: ', itoa(hotlist.LocationId)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Count: ', itoa(hotlist.Count)")
+}
+
+
 #END_IF // __NAV_FOUNDATION_RMSUTILS__
