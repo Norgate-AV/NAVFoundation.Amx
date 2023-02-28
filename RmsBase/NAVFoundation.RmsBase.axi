@@ -41,7 +41,9 @@ SOFTWARE.
 
 
 DEFINE_DEVICE
+#IF_NOT_DEFINED dvMaster
 dvMaster                = 0:1:0
+#END_IF
 
 #IF_NOT_DEFINED vdvRMS
 vdvRMS                  = 41001:1:0
