@@ -137,7 +137,7 @@ data_event[vdvRms] {
 
         switch (upper_string(message.Header)) {
             // Client Exception Notifications
-            case 'EXCEPTION': {
+            case NAV_RMS_CLIENT_EVENT_EXCEPTION: {
                 NAVErrorLog(NAV_LOG_LEVEL_ERROR,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Exception: ', message.Parameter[1]")
 
@@ -148,95 +148,76 @@ data_event[vdvRms] {
             }
 
             // Client Event Notifications
-            case 'CLIENT.ONLINE': {
+            case NAV_RMS_CLIENT_EVENT_CLIENT_ONLINE: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Client Online'")
             }
-            case 'CLIENT.REGISTERED': {
+            case NAV_RMS_CLIENT_EVENT_CLIENT_REGISTERED: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Client Registered'")
             }
-            case 'CLIENT.OFFLINE': {
+            case NAV_RMS_CLIENT_EVENT_CLIENT_OFFLINE: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Client Offline'")
             }
-            case 'CLIENT.CONNECTION.STATE.TRANSITION': {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Connection State Transition: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Old State: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   New State: ', message.Parameter[2]")
+            case NAV_RMS_CLIENT_EVENT_CLIENT_CONNECTION_STATE_TRANSITION: {
+                rmsClient.ConnectionState.OldState = message.Parameter[1]
+                rmsClient.ConnectionState.NewState = message.Parameter[2]
+
+                NAVRmsClientConnectionStateLog(rmsClient.ConnectionState, data)
             }
-            case 'VERSIONS': {
+            case NAV_RMS_CLIENT_EVENT_VERSIONS: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Versions'")
             }
-            case 'SYSTEM.POWER.ON': {
+            case NAV_RMS_CLIENT_EVENT_SYSTEM_POWER_ON: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' System Power On'")
             }
-            case 'SYSTEM.POWER.OFF': {
+            case NAV_RMS_CLIENT_EVENT_SYSTEM_POWER_OFF: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' System Power Off'")
             }
-            case 'SERVER.INFO': {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Server Info: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   App Version: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Database Version: ', message.Parameter[2]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Timesync Enabled: ', message.Parameter[3]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Smtp Enabled: ', message.Parameter[4]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Min Poll Time: ', message.Parameter[5]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Max Poll Time: ', message.Parameter[6]")
+            case NAV_RMS_CLIENT_EVENT_SERVER_INFO: {
+                rmsClient.ServerInformation.AppVersion = message.Parameter[1]
+                rmsClient.ServerInformation.DatabaseVersion = message.Parameter[2]
+                rmsClient.ServerInformation.TimesyncEnabled = NAVStringToBoolean(message.Parameter[3])
+                rmsClient.ServerInformation.SmtpEnabled = NAVStringToBoolean(message.Parameter[4])
+                rmsClient.ServerInformation.MinPollTime = atoi(message.Parameter[5])
+                rmsClient.ServerInformation.MaxPollTime = atoi(message.Parameter[6])
+
+                NAVRmsClientServerInformationLog(rmsClient.ServerInformation, data)
             }
 
             // Client Location Event Notifications
-            case 'LOCATION': {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Location: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Client Default Location: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   ID: ', message.Parameter[2]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Name: ', message.Parameter[3]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Owner: ', message.Parameter[4]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Phone Number: ', message.Parameter[5]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Occupancy: ', message.Parameter[6]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Prestige Name: ', message.Parameter[7]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Timezone: ', message.Parameter[8]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset Licensed: ', message.Parameter[9]")
+            case NAV_RMS_CLIENT_EVENT_LOCATION: {
+                rmsClient.Location.ClientDefaultLocation = NAVStringToBoolean(message.Parameter[1])
+                rmsClient.Location.Id = message.Parameter[2]
+                rmsClient.Location.Name = message.Parameter[3]
+                rmsClient.Location.Owner = message.Parameter[4]
+                rmsClient.Location.PhoneNumber = message.Parameter[5]
+                rmsClient.Location.Occupancy = message.Parameter[6]
+                rmsClient.Location.PrestigeName = message.Parameter[7]
+                rmsClient.Location.Timezone = message.Parameter[8]
+                rmsClient.Location.AssetLicensed = NAVStringToBoolean(message.Parameter[9])
+
+                NAVRmsClientLocationLog(rmsClient.Location, data)
             }
 
             // Client Config Change Event Notifications
-            case 'CONFIG.CHANGE': {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Config Change: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Key: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Value: ', message.Parameter[2]")
+            case NAV_RMS_CLIENT_EVENT_CONFIG_CHANGE: {
+                rmsClient.ConfigChange.Key = message.Parameter[1]
+                rmsClient.ConfigChange.Value = message.Parameter[2]
+
+                NAVRmsClientConfigChangeLog(rmsClient.ConfigChange, data)
             }
 
             // Asset Registration Event Notifications
-            case 'ASSET.REGISTER': {
+            case NAV_RMS_CLIENT_EVENT_ASSET_REGISTER: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Register'")
             }
-            case 'ASSET.REGISTERED': {
+            case NAV_RMS_CLIENT_EVENT_ASSET_REGISTERED: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Registered: '")
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
@@ -248,7 +229,7 @@ data_event[vdvRms] {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Asset DPS: ', message.Parameter[4]")
             }
-            case 'ASSSET.LOCATION.CHANGE': {
+            case NAV_RMS_CLIENT_EVENT_ASSET_LOCATION_CHANGE: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Location Change: '")
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
@@ -260,7 +241,7 @@ data_event[vdvRms] {
             }
 
             // Asset Parameter Event Notifications
-            case 'ASSET.PARAM.UPDATE': {
+            case NAV_RMS_CLIENT_EVENT_ASSET_PARAM_UPDATE: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Parameter Update: '")
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
@@ -272,7 +253,7 @@ data_event[vdvRms] {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Change Value: ', message.Parameter[4]")
             }
-            case 'ASSET.PARAM.VALUE': {
+            case NAV_RMS_CLIENT_EVENT_ASSET_PARAM_VALUE: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Parameter Value: '")
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
@@ -284,7 +265,7 @@ data_event[vdvRms] {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Parameter Value: ', message.Parameter[4]")
             }
-            case 'ASSET.PARAM.RESET': {
+            case NAV_RMS_CLIENT_EVENT_ASSET_PARAM_RESET: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Parameter Reset: '")
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
@@ -298,7 +279,7 @@ data_event[vdvRms] {
             }
 
             // Asset Control Methods Event Notifications
-            case 'ASSET.METHOD.EXECUTE': {
+            case NAV_RMS_CLIENT_EVENT_ASSET_CONTROL_METHOD_EXECUTE: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Asset Method Execute: '")
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
@@ -321,19 +302,16 @@ data_event[vdvRms] {
             }
 
             // Hotlist Event Notifications
-            case 'HOTLIST.COUNT': {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Hotlist Count: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Client Default Location: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Location ID: ', message.Parameter[2]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Record Count: ', message.Parameter[3]")
+            case NAV_RMS_CLIENT_EVENT_HOTLIST_COUNT: {
+                rmsClient.Hotlist.ClientDefaultLocation = NAVStringToBoolean(message.Parameter[1])
+                rmsClient.Hotlist.LocationId = atoi(message.Parameter[2])
+                rmsClient.Hotlist.Count = atoi(message.Parameter[3])
+
+                NAVRmsHotlistLog(rmsClient.Hotlist, data)
             }
 
             // Messaging Event Notifications
-            case 'MESSAGE.DISPLAY': {
+            case NAV_RMS_CLIENT_EVENT_MESSAGE_DISPLAY: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Message Display: '")
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
