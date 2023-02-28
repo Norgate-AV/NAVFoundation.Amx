@@ -90,4 +90,12 @@ struct _NAVRmsClient {
 }
 
 
+define_function NAVRmsConnectionCopy(_NAVRmsConnection source, _NAVRmsConnection destination) {
+    destination.Name = source.Name
+    destination.Url = source.Url
+    destination.Password = source.Password
+    destination.Enabled = source.Enabled
+}
+
+
 #END_IF // __NAV_FOUNDATION_RMSUTILS__
