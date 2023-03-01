@@ -230,6 +230,16 @@ struct _NAVController {
 }
 
 
+/////////////////////////////////////////////////////////////
+// Console
+/////////////////////////////////////////////////////////////
+struct _NAVConsole {
+    dev Socket
+    _NAVSocketConnection SocketConnection
+    char RxBuffer[NAV_MAX_BUFFER]
+}
+
+
 (***********************************************************)
 (*               VARIABLE DEFINITIONS GO BELOW             *)
 (***********************************************************)
@@ -246,10 +256,11 @@ volatile long NAVFeedbackTLArray[]	= { 200 }
 /////////////////////////////////////////////////////////////
 // Includes
 /////////////////////////////////////////////////////////////
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.SnapiHelpers.axi'
 #include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.SocketUtils.axi'
-#include 'NAVFoundation.ErrorLogUtils.axi'
+#include 'NAVFoundation.DebugConsole.axi'
 
 #IF_DEFINED USING_RMS
 #include 'NAVFoundation.RmsUtils.axi'
@@ -304,6 +315,7 @@ define_function NAVLog(char log[]) {
         logChunk = get_buffer_string(buffer, NAV_LOG_CHUNK_SIZE)
 
         send_string dvNAVMaster, "logChunk"
+        NAVDebugConsoleLog(logChunk)
     }
 }
 
