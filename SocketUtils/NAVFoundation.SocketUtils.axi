@@ -33,6 +33,7 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_SOCKETUTILS__ 'NAVFoundation.SocketUtils'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 DEFINE_CONSTANT
@@ -52,6 +53,14 @@ constant slong NAV_SOCKET_ERROR_LOCAL_PORT_ALREADY_USED         = 14
 constant slong NAV_SOCKET_ERROR_UDP_SOCKET_ALREADY_LISTENING    = 15
 constant slong NAV_SOCKET_ERROR_TOO_MANY_OPEN_SOCKETS           = 16
 constant slong NAV_SOCKET_ERROR_LOCAL_PORT_NOT_OPEN             = 17
+
+
+define_function NAVSocketUtilsErrorLog(integer level, char functionName[], char message[]) {
+    stack_var char log[NAV_MAX_BUFFER]
+
+    log = NAVFormatLibraryFunctionLog(__NAV_FOUNDATION_SOCKETUTILS__, functionName, message)
+    NAVErrorLog(level, log)
+}
 
 
 define_function char[NAV_MAX_BUFFER] NAVGetSocketError(slong error) {
@@ -82,8 +91,9 @@ define_function slong NAVServerSocketOpen(integer socket, integer port, integer 
     result = ip_server_open(socket, port, protocol)
 
     if (result < 0) {
-        NAVLog("'NAVServerSocketOpen(): Error => ', NAVGetSocketError(result)")
-        amx_log(AMX_ERROR, "'NAVServerSocketOpen(): Error => ', NAVGetSocketError(result)")
+        NAVSocketUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                                'NAVServerSocketOpen',
+                                "'Failed to open socket. ', NAVGetSocketError(result)")
     }
 
     return result
