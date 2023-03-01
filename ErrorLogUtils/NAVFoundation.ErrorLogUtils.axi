@@ -46,16 +46,16 @@ constant integer NAV_LOG_LEVEL_DEBUG     = AMX_DEBUG
 define_function char[NAV_MAX_CHARS] NAVGetLogLevel(integer level) {
     switch (level) {
         case NAV_LOG_LEVEL_ERROR: {
-            return 'Error'
+            return 'ERROR'
         }
         case NAV_LOG_LEVEL_WARNING: {
-            return 'Warning'
+            return 'WARNING'
         }
         case NAV_LOG_LEVEL_INFO: {
-            return 'Info'
+            return 'INFO'
         }
         case NAV_LOG_LEVEL_DEBUG: {
-            return 'Debug'
+            return 'DEBUG'
         }
         default: {
             return NAVGetLogLevel(NAV_LOG_LEVEL_INFO)
