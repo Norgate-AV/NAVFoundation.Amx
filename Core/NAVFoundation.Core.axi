@@ -596,6 +596,31 @@ DEFINE_START {
 (***********************************************************)
 DEFINE_EVENT
 
+data_event[dvNAVMaster] {
+    online: {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Device ', NAVConvertDPSToAscii(data.device), ' Online'")
+    }
+    offline: {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Device ', NAVConvertDPSToAscii(data.device), ' Offline'")
+    }
+    awake: {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Device ', NAVConvertDPSToAscii(data.device), ' Awake'")
+    }
+    standby: {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Device ', NAVConvertDPSToAscii(data.device), ' Standby'")
+    }
+    string: {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'String from Master Device ', NAVConvertDPSToAscii(data.device), '-[', data.text, ']'")
+    }
+    command: {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Command from Master Device ', NAVConvertDPSToAscii(data.device), '-[', data.text, ']'")
+    }
+    onerror: {
+        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Master Device ', NAVConvertDPSToAscii(data.device), ' OnError: ', data.text")
+    }
+}
+
+
 timeline_event[TL_NAV_BLINKER] {
     NAVBlinker = !NAVBlinker
 }
