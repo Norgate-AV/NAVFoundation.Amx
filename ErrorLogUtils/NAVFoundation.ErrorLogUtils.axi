@@ -86,6 +86,7 @@ define_function NAVErrorLog(integer level, char value[]) {
         case NAV_LOG_LEVEL_INFO:
         case NAV_LOG_LEVEL_DEBUG: {
             amx_log(level, NAVFormatLog(level, value))
+            NAVDebugConsoleLog(NAVFormatLog(level, value))
         }
         default: {
             NAVErrorLog(NAV_LOG_LEVEL_ERROR, value)
