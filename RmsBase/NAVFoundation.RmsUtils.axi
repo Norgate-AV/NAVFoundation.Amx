@@ -111,7 +111,7 @@ struct _NAVRmsConnection {
 
 struct _NAVRmsException {
     char Message[NAV_MAX_BUFFER]
-    char Header[NAV_MAX_BUFFER]
+    char ThrownByCommandHeader[NAV_MAX_BUFFER]
 }
 
 
@@ -128,6 +128,16 @@ struct _NAVRmsHotlist {
 }
 
 
+struct _NAVRmsMessage {
+    char Type[NAV_MAX_CHARS]
+    char Title[NAV_MAX_BUFFER]
+    char Body[NAV_MAX_BUFFER]
+    integer TimeOutSeconds
+    char Modal
+    char ResponseMessage[NAV_MAX_BUFFER]
+}
+
+
 struct _NAVRmsClient {
     _NAVRmsServerInformation ServerInformation
     _NAVRmsLocation Location
@@ -135,6 +145,8 @@ struct _NAVRmsClient {
     _NAVRmsConnectionState ConnectionState
     _NAVKeyValuePair ConfigChange
     _NAVRmsHotlist Hotlist
+    _NAVRmsMessage Message
+    _NAVRmsException Exception
     dev Device
     char IsOnline
     char IsRegistered
@@ -146,6 +158,58 @@ define_function NAVRmsConnectionCopy(_NAVRmsConnection source, _NAVRmsConnection
     destination.Url = source.Url
     destination.Password = source.Password
     destination.Enabled = source.Enabled
+}
+
+
+define_function NAVRmsServerInformationCopy(_NAVRmsServerInformation source, _NAVRmsServerInformation destination) {
+    destination.AppVersion = source.AppVersion
+    destination.DatabaseVersion = source.DatabaseVersion
+    destination.TimesyncEnabled = source.TimesyncEnabled
+    destination.SmtpEnabled = source.SmtpEnabled
+    destination.MinPollTime = source.MinPollTime
+    destination.MaxPollTime = source.MaxPollTime
+}
+
+
+define_function NAVRmsLocationCopy(_NAVRmsLocation source, _NAVRmsLocation destination) {
+    destination.ClientDefaultLocation = source.ClientDefaultLocation
+    destination.Id = source.Id
+    destination.Name = source.Name
+    destination.Owner = source.Owner
+    destination.PhoneNumber = source.PhoneNumber
+    destination.Occupancy = source.Occupancy
+    destination.PrestigeName = source.PrestigeName
+    destination.Timezone = source.Timezone
+    destination.AssetLicensed = source.AssetLicensed
+}
+
+
+define_function NAVRmsMessageCopy(_NAVRmsMessage source, _NAVRmsMessage destination) {
+    destination.Type = source.Type
+    destination.Title = source.Title
+    destination.Body = source.Body
+    destination.TimeOutSeconds = source.TimeOutSeconds
+    destination.Modal = source.Modal
+    destination.ResponseMessage = source.ResponseMessage
+}
+
+
+define_function NAVRmsExceptionCopy(_NAVRmsException source, _NAVRmsException destination) {
+    destination.Message = source.Message
+    destination.ThrownByCommandHeader = source.ThrownByCommandHeader
+}
+
+
+define_function NAVRmsExceptionLog(_NAVRmsException exception, tdata args) {
+    NAVErrorLog(NAV_LOG_LEVEL_ERROR,
+                "'RMS Client ', NAVDeviceToString(args.device), ' Exception: ', exception.Message")
+
+    if (!length_array(exception.ThrownByCommandHeader)) {
+        return
+    }
+
+    NAVErrorLog(NAV_LOG_LEVEL_ERROR,
+                "'RMS Client ', NAVDeviceToString(args.device), ' Thrown By Command Header: ', exception.ThrownByCommandHeader")
 }
 
 
@@ -220,6 +284,24 @@ define_function NAVRmsHotlistLog(_NAVRmsHotlist hotlist, tdata args) {
                 "'RMS Client ', NAVDeviceToString(args.device), '   Location ID: ', itoa(hotlist.LocationId)")
     NAVErrorLog(NAV_LOG_LEVEL_INFO,
                 "'RMS Client ', NAVDeviceToString(args.device), '   Count: ', itoa(hotlist.Count)")
+}
+
+
+define_function NAVRmsMessageDisplayLog(_NAVRmsMessage message, tdata args) {
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), ' Message Display: '")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Type: ', message.Type")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Title: ', message.Title")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Body: ', message.Body")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Timeout seconds: ', itoa(message.TimeOutSeconds)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Modal: ', NAVBooleanToString(message.Modal)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVDeviceToString(args.device), '   Response Message: ', message.ResponseMessage")
 }
 
 

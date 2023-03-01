@@ -66,12 +66,59 @@ volatile _NAVRmsClient rmsClient
 #include 'RmsSourceUsage.axi'
 
 
-// #DEFINE USING_NAV_RMS_ADAPTER_ONLINE_EVENT_CALLBACK
-// define_function NAVRmsBaseAdapterOnlineEventCallback(tdata data) {}
-
+// #DEFINE USING_NAV_RMS_ADAPTER_ONLINE_EVENT_PRE_CONNECTION_INIT_CALLBACK
+// define_function NAVRmsAdapterOnlineEventPreConnectionInitCallback(_NAVRmsClient client, tdata args) {}
 
 // #DEFINE USING_NAV_RMS_ADAPTER_CONNECTION_INIT_EVENT_CALLBACK
-// define_function NAVRmsBaseAdapterConnectionInitEventCallback(tdata data, _NAVRmsConnection connection) {}
+// define_function NAVRmsAdapterConnectionInitEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_ADAPTER_ONLINE_EVENT_POST_CONNECTION_INIT_CALLBACK
+// define_function NAVRmsAdapterOnlineEventPostConnectionInitCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_ADAPTER_OFFLINE_EVENT_CALLBACK
+// define_function NAVRmsAdapterOfflineEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_ADAPTER_ONERROR_EVENT_CALLBACK
+// define_function NAVRmsAdapterOnErrorEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_EXCEPTION_EVENT_CALLBACK
+// define_function NAVRmsClientExceptionEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_ONLINE_EVENT_CALLBACK
+// define_function NAVRmsClientOnlineEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_OFFLINE_EVENT_CALLBACK
+// define_function NAVRmsClientOfflineEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_REGISTERED_EVENT_CALLBACK
+// define_function NAVRmsClientRegisteredEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_CONNECTION_STATE_TRANSITION_EVENT_CALLBACK
+// define_function NAVRmsClientConnectionStateTransitionEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_VERSIONS_EVENT_CALLBACK
+// define_function NAVRmsClientVersionsEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_SYSTEM_POWER_ON_EVENT_CALLBACK
+// define_function NAVRmsClientSystemPowerOnEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_SYSTEM_POWER_OFF_EVENT_CALLBACK
+// define_function NAVRmsClientSystemPowerOffEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_SERVER_INFO_EVENT_CALLBACK
+// define_function NAVRmsClientServerInfoEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_LOCATION_EVENT_CALLBACK
+// define_function NAVRmsClientLocationEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_CONFIG_CHANGE_EVENT_CALLBACK
+// define_function NAVRmsClientConfigChangeEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_HOTLIST_COUNT_EVENT_CALLBACK
+// define_function NAVRmsClientHotlistCountEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_MESSAGE_DISPLAY_EVENT_CALLBACK
+// define_function NAVRmsClientMessageDisplayEventCallback(_NAVRmsClient client, tdata args) {}
 
 
 DEFINE_START {
@@ -89,31 +136,45 @@ DEFINE_EVENT
 
 data_event[vdvRms] {
     online: {
-        #IF_DEFINED USING_NAV_RMS_ADAPTER_ONLINE_EVENT_CALLBACK
-        NAVRmsBaseAdapterOnlineEventCallback(data)
+        rmsClient.Device = data.device
+
+        #IF_DEFINED USING_NAV_RMS_ADAPTER_ONLINE_EVENT_PRE_CONNECTION_INIT_CALLBACK
+        NAVRmsAdapterOnlineEventPreConnectionInitCallback(rmsClient, data)
         #END_IF
 
         #IF_DEFINED USING_NAV_RMS_ADAPTER_CONNECTION_INIT_EVENT_CALLBACK
-        stack_var _NAVRmsConnection connection
-
-        NAVRmsBaseAdapterConnectionInitEventCallback(data, connection)
-        NAVRmsConnectionCopy(connection, rmsClient.Connection)
+        NAVRmsAdapterConnectionInitEventCallback(rmsClient, data)
 
         NAVCommand(data.device, "'CONFIG.CLIENT.NAME-', rmsClient.Connection.Name")
         NAVCommand(data.device, "'CONFIG.SERVER.URL-', rmsClient.Connection.Url")
         NAVCommand(data.device, "'CONFIG.SERVER.PASSWORD-', rmsClient.Connection.Password")
         NAVCommand(data.device, "'CONFIG.CLIENT.ENABLED-', rmsClient.Connection.Enabled")
         NAVCommand(data.device, "'CLIENT.REINIT'")
+        #ELSE
+        #warn 'USING_NAV_RMS_ADAPTER_CONNECTION_INIT_EVENT_CALLBACK not defined'
+        #warn 'RMS Adapter will not be configured and will not connect to the RMS Server!!!'
+        #END_IF
+
+        #IF_DEFINED USING_NAV_RMS_ADAPTER_ONLINE_EVENT_POST_CONNECTION_INIT_CALLBACK
+        NAVRmsAdapterOnlineEventPostConnectionInitCallback(rmsClient, data)
         #END_IF
 
         NAVErrorLog(NAV_LOG_LEVEL_INFO,
                     "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device Online'")
     }
     offline: {
+        #IF_DEFINED USING_NAV_RMS_ADAPTER_OFFLINE_EVENT_CALLBACK
+        NAVRmsAdapterOfflineEventCallback(rmsClient, data)
+        #END_IF
+
         NAVErrorLog(NAV_LOG_LEVEL_INFO,
                     "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device Offline'")
     }
     onerror: {
+        #IF_DEFINED USING_NAV_RMS_ADAPTER_ONERROR_EVENT_CALLBACK
+        NAVRmsAdapterOnErrorEventCallback(rmsClient, data)
+        #END_IF
+
         NAVErrorLog(NAV_LOG_LEVEL_INFO,
                     "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Adapter Device OnError: ', data.text")
     }
@@ -138,25 +199,47 @@ data_event[vdvRms] {
         switch (upper_string(message.Header)) {
             // Client Exception Notifications
             case NAV_RMS_CLIENT_EVENT_EXCEPTION: {
-                NAVErrorLog(NAV_LOG_LEVEL_ERROR,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Exception: ', message.Parameter[1]")
+                rmsClient.Exception.Message = message.Parameter[1]
 
                 if (length_array(message.Parameter[2])) {
-                    NAVErrorLog(NAV_LOG_LEVEL_ERROR,
-                                "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Thrown by Command Header: ', NAVStripRight(message.Parameter[2], 1)")
+                    rmsClient.Exception.ThrownByCommandHeader = NAVStripRight(message.Parameter[2], 1)
                 }
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_EXCEPTION_EVENT_CALLBACK
+                NAVRmsClientExceptionEventCallback(rmsClient, data)
+                #END_IF
+
+                NAVRmsExceptionLog(rmsClient.Exception, data)
             }
 
             // Client Event Notifications
             case NAV_RMS_CLIENT_EVENT_CLIENT_ONLINE: {
+                rmsClient.IsOnline = true
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ONLINE_EVENT_CALLBACK
+                NAVRmsClientOnlineEventCallback(rmsClient, data)
+                #END_IF
+
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Client Online'")
             }
             case NAV_RMS_CLIENT_EVENT_CLIENT_REGISTERED: {
+                rmsClient.IsRegistered = true
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_REGISTERED_EVENT_CALLBACK
+                NAVRmsClientRegisteredEventCallback(rmsClient, data)
+                #END_IF
+
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Client Registered'")
             }
             case NAV_RMS_CLIENT_EVENT_CLIENT_OFFLINE: {
+                rmsClient.IsOnline = false
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_OFFLINE_EVENT_CALLBACK
+                NAVRmsClientOfflineEventCallback(rmsClient, data)
+                #END_IF
+
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Client Offline'")
             }
@@ -164,17 +247,33 @@ data_event[vdvRms] {
                 rmsClient.ConnectionState.OldState = message.Parameter[1]
                 rmsClient.ConnectionState.NewState = message.Parameter[2]
 
+                #IF_DEFINED USING_NAV_RMS_CLIENT_CONNECTION_STATE_TRANSITION_EVENT_CALLBACK
+                NAVRmsClientConnectionStateTransitionEventCallback(rmsClient, data)
+                #END_IF
+
                 NAVRmsClientConnectionStateLog(rmsClient.ConnectionState, data)
             }
             case NAV_RMS_CLIENT_EVENT_VERSIONS: {
+                #IF_DEFINED USING_NAV_RMS_CLIENT_VERSIONS_EVENT_CALLBACK
+                NAVRmsClientVersionsEventCallback(rmsClient, data)
+                #END_IF
+
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Versions'")
             }
             case NAV_RMS_CLIENT_EVENT_SYSTEM_POWER_ON: {
+                #IF_DEFINED USING_NAV_RMS_CLIENT_SYSTEM_POWER_ON_EVENT_CALLBACK
+                NAVRmsClientSystemPowerOnEventCallback(rmsClient, data)
+                #END_IF
+
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' System Power On'")
             }
             case NAV_RMS_CLIENT_EVENT_SYSTEM_POWER_OFF: {
+                #IF_DEFINED USING_NAV_RMS_CLIENT_SYSTEM_POWER_OFF_EVENT_CALLBACK
+                NAVRmsClientSystemPowerOffEventCallback(rmsClient, data)
+                #END_IF
+
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' System Power Off'")
             }
@@ -185,6 +284,10 @@ data_event[vdvRms] {
                 rmsClient.ServerInformation.SmtpEnabled = NAVStringToBoolean(message.Parameter[4])
                 rmsClient.ServerInformation.MinPollTime = atoi(message.Parameter[5])
                 rmsClient.ServerInformation.MaxPollTime = atoi(message.Parameter[6])
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_SERVER_INFO_EVENT_CALLBACK
+                NAVRmsClientServerInfoEventCallback(rmsClient, data)
+                #END_IF
 
                 NAVRmsClientServerInformationLog(rmsClient.ServerInformation, data)
             }
@@ -201,6 +304,10 @@ data_event[vdvRms] {
                 rmsClient.Location.Timezone = message.Parameter[8]
                 rmsClient.Location.AssetLicensed = NAVStringToBoolean(message.Parameter[9])
 
+                #IF_DEFINED USING_NAV_RMS_CLIENT_LOCATION_EVENT_CALLBACK
+                NAVRmsClientLocationEventCallback(rmsClient, data)
+                #END_IF
+
                 NAVRmsClientLocationLog(rmsClient.Location, data)
             }
 
@@ -208,6 +315,10 @@ data_event[vdvRms] {
             case NAV_RMS_CLIENT_EVENT_CONFIG_CHANGE: {
                 rmsClient.ConfigChange.Key = message.Parameter[1]
                 rmsClient.ConfigChange.Value = message.Parameter[2]
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_CONFIG_CHANGE_EVENT_CALLBACK
+                NAVRmsClientConfigChangeEventCallback(rmsClient, data)
+                #END_IF
 
                 NAVRmsClientConfigChangeLog(rmsClient.ConfigChange, data)
             }
@@ -307,25 +418,27 @@ data_event[vdvRms] {
                 rmsClient.Hotlist.LocationId = atoi(message.Parameter[2])
                 rmsClient.Hotlist.Count = atoi(message.Parameter[3])
 
+                #IF_DEFINED USING_NAV_RMS_CLIENT_HOTLIST_COUNT_EVENT_CALLBACK
+                NAVRmsClientHotlistCountEventCallback(rmsClient, data)
+                #END_IF
+
                 NAVRmsHotlistLog(rmsClient.Hotlist, data)
             }
 
             // Messaging Event Notifications
             case NAV_RMS_CLIENT_EVENT_MESSAGE_DISPLAY: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), ' Message Display: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Type: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Title: ', message.Parameter[2]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Body: ', message.Parameter[3]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Timeout Seconds: ', message.Parameter[4]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Modal: ', message.Parameter[5]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Adapter ', NAVConvertDPSToAscii(data.device), '   Response Message: ', message.Parameter[6]")
+                rmsClient.Message.Type = message.Parameter[1]
+                rmsClient.Message.Title = message.Parameter[2]
+                rmsClient.Message.Body = message.Parameter[3]
+                rmsClient.Message.TimeOutSeconds = atoi(message.Parameter[4])
+                rmsClient.Message.Modal = NAVStringToBoolean(message.Parameter[5])
+                rmsClient.Message.ResponseMessage = message.Parameter[6]
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_MESSAGE_DISPLAY_EVENT_CALLBACK
+                NAVRmsClientMessageDisplayEventCallback(rmsClient, data)
+                #END_IF
+
+                NAVRmsMessageDisplayLog(rmsClient.Message, data)
             }
 
             default: {
