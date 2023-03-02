@@ -37,43 +37,7 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
-// Client Exception Notifications
-constant char NAV_RMS_CLIENT_EVENT_EXCEPTION[NAV_MAX_CHARS]                             = 'EXCEPTION'
-
-// Client Event Notifications
-constant char NAV_RMS_CLIENT_EVENT_CLIENT_ONLINE[NAV_MAX_CHARS]                         = 'CLIENT.ONLINE'
-constant char NAV_RMS_CLIENT_EVENT_CLIENT_REGISTERED[NAV_MAX_CHARS]                     = 'CLIENT.REGISTERED'
-constant char NAV_RMS_CLIENT_EVENT_CLIENT_OFFLINE[NAV_MAX_CHARS]                        = 'CLIENT.OFFLINE'
-constant char NAV_RMS_CLIENT_EVENT_CLIENT_CONNECTION_STATE_TRANSITION[NAV_MAX_CHARS]    = 'CLIENT.CONNECTION.STATE.TRANSITION'
-constant char NAV_RMS_CLIENT_EVENT_VERSIONS[NAV_MAX_CHARS]                              = 'VERSIONS'
-constant char NAV_RMS_CLIENT_EVENT_SYSTEM_POWER_ON[NAV_MAX_CHARS]                       = 'SYSTEM.POWER.ON'
-constant char NAV_RMS_CLIENT_EVENT_SYSTEM_POWER_OFF[NAV_MAX_CHARS]                      = 'SYSTEM.POWER.OFF'
-constant char NAV_RMS_CLIENT_EVENT_SERVER_INFO[NAV_MAX_CHARS]                           = 'SERVER.INFO'
-
-// Client Location Event Notifications
-constant char NAV_RMS_CLIENT_EVENT_LOCATION[NAV_MAX_CHARS]                              = 'LOCATION'
-
-// Client Config Change Event Notifications
-constant char NAV_RMS_CLIENT_EVENT_CONFIG_CHANGE[NAV_MAX_CHARS]                         = 'CONFIG.CHANGE'
-
-// Asset Registration Event Notifications
-constant char NAV_RMS_CLIENT_EVENT_ASSET_REGISTER[NAV_MAX_CHARS]                        = 'ASSET.REGISTER'
-constant char NAV_RMS_CLIENT_EVENT_ASSET_REGISTERED[NAV_MAX_CHARS]                      = 'ASSET.REGISTERED'
-constant char NAV_RMS_CLIENT_EVENT_ASSET_LOCATION_CHANGE[NAV_MAX_CHARS]                 = 'ASSSET.LOCATION.CHANGE'
-
-// Asset Parameter Event Notifications
-constant char NAV_RMS_CLIENT_EVENT_ASSET_PARAM_UPDATE[NAV_MAX_CHARS]                    = 'ASSET.PARAM.UPDATE'
-constant char NAV_RMS_CLIENT_EVENT_ASSET_PARAM_VALUE[NAV_MAX_CHARS]                     = 'ASSET.PARAM.VALUE'
-constant char NAV_RMS_CLIENT_EVENT_ASSET_PARAM_RESET[NAV_MAX_CHARS]                     = 'ASSET.PARAM.RESET'
-
-// Asset Control Methods Event Notifications
-constant char NAV_RMS_CLIENT_EVENT_ASSET_CONTROL_METHOD_EXECUTE[NAV_MAX_CHARS]          = 'ASSET.METHOD.EXECUTE'
-
-// Hotlist Event Notifications
-constant char NAV_RMS_CLIENT_EVENT_HOTLIST_COUNT[NAV_MAX_CHARS]                         = 'HOTLIST.COUNT'
-
-// Messaging Event Notifications
-constant char NAV_RMS_CLIENT_EVENT_MESSAGE_DISPLAY[NAV_MAX_CHARS]                       = 'MESSAGE.DISPLAY'
+constant char NAV_RMS_CLIENT_EVENT_SERVER_INFO[]                           = 'SERVER.INFO'
 
 
 DEFINE_TYPE
