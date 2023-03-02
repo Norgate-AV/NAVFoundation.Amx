@@ -120,6 +120,21 @@ volatile _NAVRmsClient rmsClient
 // #DEFINE USING_NAV_RMS_CLIENT_MESSAGE_DISPLAY_EVENT_CALLBACK
 // define_function NAVRmsClientMessageDisplayEventCallback(_NAVRmsClient client, tdata args) {}
 
+// #DEFINE_USING_NAV_RMS_ADAPTER_BUTTON_PUSH_EVENT_CALLBACK
+// define_function NAVRmsAdapterButtonPushEventCallback(_NAVRmsClient client, tbutton args) {}
+
+// #DEFINE_USING_NAV_RMS_ADAPTER_BUTTON_RELEASE_EVENT_CALLBACK
+// define_function NAVRmsAdapterButtonReleaseEventCallback(_NAVRmsClient client, tbutton args) {}
+
+// #DEFINE_USING_NAV_RMS_ADAPTER_CHANNEL_ON_EVENT_CALLBACK
+// define_function NAVRmsAdapterChannelOnEventCallback(_NAVRmsClient client, tchannel args) {}
+
+// #DEFINE_USING_NAV_RMS_ADAPTER_CHANNEL_OFF_EVENT_CALLBACK
+// define_function NAVRmsAdapterChannelOffEventCallback(_NAVRmsClient client, tchannel args) {}
+
+// #DEFINE_USING_NAV_RMS_ADAPTER_LEVEL_EVENT_CALLBACK
+// define_function NAVRmsAdapterLevelEventCallback(_NAVRmsClient client, tlevel args) {}
+
 
 DEFINE_START {
     RmsSourceUsageReset()
@@ -450,5 +465,41 @@ data_event[vdvRms] {
         }
     }
 }
+
+
+button_event[vdvRMS, 0] {
+    push: {
+        #IF_DEFINED USING_NAV_RMS_ADAPTER_BUTTON_PUSH_EVENT_CALLBACK
+        NAVRmsAdapterButtonPushEventCallback(rmsClient, button)
+        #END_IF
+    }
+    release: {
+        #IF_DEFINED USING_NAV_RMS_ADAPTER_BUTTON_RELEASE_EVENT_CALLBACK
+        NAVRmsAdapterButtonReleaseEventCallback(rmsClient, button)
+        #END_IF
+    }
+}
+
+
+channel_event[vdvRMS, 0] {
+    on: {
+        #IF_DEFINED USING_NAV_RMS_ADAPTER_CHANNEL_ON_EVENT_CALLBACK
+        NAVRmsAdapterChannelOnEventCallback(rmsClient, channel)
+        #END_IF
+    }
+    off: {
+        #IF_DEFINED USING_NAV_RMS_ADAPTER_CHANNEL_OFF_EVENT_CALLBACK
+        NAVRmsAdapterChannelOffEventCallback(rmsClient, channel)
+        #END_IF
+    }
+}
+
+
+level_event[vdvRMS, 0] {
+    #IF_DEFINED USING_NAV_RMS_ADAPTER_LEVEL_EVENT_CALLBACK
+    NAVRmsAdapterLevelEventCallback(rmsClient, level)
+    #END_IF
+}
+
 
 #END_IF // __NAV_FOUNDATION_RMSBASE__
