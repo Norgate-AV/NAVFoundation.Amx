@@ -222,7 +222,7 @@ data_event[vdvRms] {
                 rmsClient.Exception.Message = message.Parameter[1]
 
                 if (length_array(message.Parameter[2])) {
-                    rmsClient.Exception.ThrownByCommandHeader = NAVStripRight(message.Parameter[2], 1)
+                    rmsClient.Exception.ThrownByCommand = message.Parameter[2]
                 }
 
                 #IF_DEFINED USING_NAV_RMS_CLIENT_EXCEPTION_EVENT_CALLBACK

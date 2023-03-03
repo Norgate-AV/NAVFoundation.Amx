@@ -75,7 +75,7 @@ struct _NAVRmsConnection {
 
 struct _NAVRmsException {
     char Message[NAV_MAX_BUFFER]
-    char ThrownByCommandHeader[NAV_MAX_BUFFER]
+    char ThrownByCommand[NAV_MAX_BUFFER]
 }
 
 
@@ -168,12 +168,12 @@ define_function NAVRmsExceptionLog(_NAVRmsException exception, tdata args) {
     NAVErrorLog(NAV_LOG_LEVEL_ERROR,
                 "'RMS Client ', NAVDeviceToString(args.device), ' Exception: ', exception.Message")
 
-    if (!length_array(exception.ThrownByCommandHeader)) {
+    if (!length_array(exception.ThrownByCommand)) {
         return
     }
 
     NAVErrorLog(NAV_LOG_LEVEL_ERROR,
-                "'RMS Client ', NAVDeviceToString(args.device), ' Thrown By Command Header: ', exception.ThrownByCommandHeader")
+                "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), ' Thrown By Command: ', exception.ThrownByCommand")
 }
 
 
