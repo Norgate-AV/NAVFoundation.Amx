@@ -313,6 +313,14 @@ define_function integer NAVSplitString(char buffer[], char separator[], char res
         return count
     }
 
+    if (!length_array(separator)) {
+        NAVStringUtilsErrorLog(NAV_LOG_LEVEL_WARNING,
+                                'NAVSplitString',
+                                'Separator is an empty string. Using default separator (" ")')
+
+        separator = ' '
+    }
+
     if (!NAVContains(buffer, separator)) {
         NAVStringUtilsErrorLog(NAV_LOG_LEVEL_WARNING,
                                 'NAVSplitString',
