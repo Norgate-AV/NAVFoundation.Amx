@@ -199,22 +199,14 @@ define_function NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
 
         switch (byte) {
             case '"': {
-                parameter = NAVStripRight(remove_string(dataCopy, '"', 1), 1)
-
-                if (NAVStartsWith(dataCopy, ',')) {
-                    remove_string(dataCopy, ',', 1)
-                }
+                parameter = NAVParseEscapedSnapiMessageParameter(dataCopy)
             }
             case ',': {
                 parameter = ''
             }
             default: {
-                if (NAVContains(dataCopy, ',')) {
-                    parameter = "byte, NAVStripRight(remove_string(dataCopy, ',', 1), 1)"
-                }
-                else {
-                    parameter = "byte, get_buffer_string(dataCopy, length_array(dataCopy))"
-                }
+                dataCopy = "byte, dataCopy"
+                parameter = NAVParseSnapiMessageParamter(dataCopy)
             }
         }
 
@@ -222,6 +214,40 @@ define_function NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
         set_length_array(message.Parameter, count)
         message.Parameter[count] = parameter
     }
+}
+
+
+define_function char[255] NAVParseSnapiMessageParamter(char data[]) {
+    if (NAVContains(data, ',')) {
+        return NAVStripRight(remove_string(data, ',', 1), 1)
+    }
+
+    return get_buffer_string(data, length_array(data))
+}
+
+
+define_function char[255] NAVParseEscapedSnapiMessageParameter(char data[]) {
+    stack_var integer x
+    stack_var char endings[2][3]
+
+    endings[1] = '"",'
+    endings[2] = '",'
+
+    for (x = 1; x <= max_length_array(endings); x++) {
+        stack_var integer index
+
+        index = NAVIndexOf(data, endings[x], 1)
+
+        if (index) {
+            stack_var integer end
+
+            end = index + length_array(endings[x])
+
+            return NAVStripRight(get_buffer_string(data, end), 2)
+        }
+    }
+
+    return NAVStripRight(get_buffer_string(data, length_array(data)), 1)
 }
 
 
