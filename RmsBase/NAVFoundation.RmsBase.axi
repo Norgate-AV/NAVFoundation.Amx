@@ -66,14 +66,14 @@ volatile _NAVRmsClient rmsClient
 #include 'RmsSourceUsage.axi'
 
 
-// #DEFINE USING_NAV_RMS_ADAPTER_ONLINE_EVENT_PRE_CONNECTION_INIT_CALLBACK
-// define_function NAVRmsAdapterOnlineEventPreConnectionInitCallback(_NAVRmsClient client, tdata args) {}
+// #DEFINE USING_NAV_RMS_ADAPTER_ONLINE_EVENT_PRE_CLIENT_CONNECTION_INIT_CALLBACK
+// define_function NAVRmsAdapterOnlineEventPreClientConnectionInitCallback(_NAVRmsClient client, tdata args) {}
 
-// #DEFINE USING_NAV_RMS_ADAPTER_CONNECTION_INIT_EVENT_CALLBACK
-// define_function NAVRmsAdapterConnectionInitEventCallback(_NAVRmsClient client, tdata args) {}
+// #DEFINE USING_NAV_RMS_CLIENT_CONNECTION_INIT_EVENT_CALLBACK
+// define_function NAVRmsClientConnectionInitEventCallback(_NAVRmsClient client, tdata args) {}
 
-// #DEFINE USING_NAV_RMS_ADAPTER_ONLINE_EVENT_POST_CONNECTION_INIT_CALLBACK
-// define_function NAVRmsAdapterOnlineEventPostConnectionInitCallback(_NAVRmsClient client, tdata args) {}
+// #DEFINE USING_NAV_RMS_ADAPTER_ONLINE_EVENT_POST_CLIENT_CONNECTION_INIT_CALLBACK
+// define_function NAVRmsAdapterOnlineEventPostClientConnectionInitCallback(_NAVRmsClient client, tdata args) {}
 
 // #DEFINE USING_NAV_RMS_ADAPTER_OFFLINE_EVENT_CALLBACK
 // define_function NAVRmsAdapterOfflineEventCallback(_NAVRmsClient client, tdata args) {}
@@ -153,12 +153,12 @@ data_event[vdvRms] {
     online: {
         rmsClient.Device = data.device
 
-        #IF_DEFINED USING_NAV_RMS_ADAPTER_ONLINE_EVENT_PRE_CONNECTION_INIT_CALLBACK
-        NAVRmsAdapterOnlineEventPreConnectionInitCallback(rmsClient, data)
+        #IF_DEFINED USING_NAV_RMS_ADAPTER_ONLINE_EVENT_PRE_CLIENT_CONNECTION_INIT_CALLBACK
+        NAVRmsAdapterOnlineEventPreClientConnectionInitCallback(rmsClient, data)
         #END_IF
 
-        #IF_DEFINED USING_NAV_RMS_ADAPTER_CONNECTION_INIT_EVENT_CALLBACK
-        NAVRmsAdapterConnectionInitEventCallback(rmsClient, data)
+        #IF_DEFINED USING_NAV_RMS_CLIENT_CONNECTION_INIT_EVENT_CALLBACK
+        NAVRmsClientConnectionInitEventCallback(rmsClient, data)
 
         NAVCommand(data.device, "'CONFIG.CLIENT.NAME-', rmsClient.Connection.Name")
         NAVCommand(data.device, "'CONFIG.SERVER.URL-', rmsClient.Connection.Url")
@@ -166,12 +166,12 @@ data_event[vdvRms] {
         NAVCommand(data.device, "'CONFIG.CLIENT.ENABLED-', rmsClient.Connection.Enabled")
         NAVCommand(data.device, "'CLIENT.REINIT'")
         #ELSE
-        #warn 'USING_NAV_RMS_ADAPTER_CONNECTION_INIT_EVENT_CALLBACK not defined'
-        #warn 'RMS Adapter will not be configured and will not connect to the RMS Server!!!'
+        #warn 'USING_NAV_RMS_CLIENT_CONNECTION_INIT_EVENT_CALLBACK not defined'
+        #warn 'RMS Client will not be configured and will not connect to the RMS Server!!!'
         #END_IF
 
-        #IF_DEFINED USING_NAV_RMS_ADAPTER_ONLINE_EVENT_POST_CONNECTION_INIT_CALLBACK
-        NAVRmsAdapterOnlineEventPostConnectionInitCallback(rmsClient, data)
+        #IF_DEFINED USING_NAV_RMS_ADAPTER_ONLINE_EVENT_POST_CLIENT_CONNECTION_INIT_CALLBACK
+        NAVRmsAdapterOnlineEventPostClientConnectionInitCallback(rmsClient, data)
         #END_IF
 
         NAVErrorLog(NAV_LOG_LEVEL_INFO,
