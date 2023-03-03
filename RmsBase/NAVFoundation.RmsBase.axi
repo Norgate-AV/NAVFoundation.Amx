@@ -142,9 +142,7 @@ DEFINE_START {
 
 
 define_module 'RmsNetLinxAdapter_dr4_0_0' RmsNetLinxAdapterComm(vdvRMS)
-
 define_module 'RmsControlSystemMonitor' RmsControlSystemMonitorComm(vdvRMS, dvMaster)
-define_module 'RmsSystemPowerMonitor' RmsSystemPowerMonitorComm(vdvRMS, dvMaster)
 
 
 DEFINE_EVENT
