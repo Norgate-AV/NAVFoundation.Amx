@@ -214,6 +214,7 @@ data_event[vdvRms] {
                     "'Command from RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
 
         NAVParseSnapiMessage(data.text, message)
+        NAVSnapiMessageLog(message)
 
         switch (upper_string(message.Header)) {
             // Client Exception Notifications
