@@ -164,7 +164,8 @@ data_event[vdvRms] {
         NAVCommand(data.device, "'CONFIG.SERVER.URL-', rmsClient.Connection.Url")
         NAVCommand(data.device, "'CONFIG.SERVER.PASSWORD-', rmsClient.Connection.Password")
         NAVCommand(data.device, "'CONFIG.CLIENT.ENABLED-', rmsClient.Connection.Enabled")
-        NAVCommand(data.device, "'CLIENT.REINIT'")
+
+        NAVCommand(data.device, RMS_COMMAND_REINITIALIZE)
         #ELSE
         #warn 'USING_NAV_RMS_CLIENT_CONNECTION_INIT_EVENT_CALLBACK not defined'
         #warn 'RMS Client will not be configured and will not connect to the RMS Server!!!'
