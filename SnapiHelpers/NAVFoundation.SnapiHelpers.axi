@@ -167,6 +167,7 @@ define_function integer NAVGetVolumeMute(dev device) {
 
 define_function NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
     stack_var char dataCopy[NAV_MAX_BUFFER]
+    stack_var integer count
 
     if (!length_array(data)) {
         NAVSnapiHelpersErrorLog(NAV_LOG_LEVEL_ERROR,
@@ -189,13 +190,38 @@ define_function NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
         return
     }
 
-    if (!NAVContains(dataCopy, ',')) {
-        set_length_array(message.Parameter, 1)
-        message.Parameter[1] = dataCopy
-        return
-    }
+    count = 0
+    while (length_array(dataCopy)) {
+        stack_var char byte
+        stack_var char parameter[255]
 
-    NAVSplitString(dataCopy, ',', message.Parameter)
+        byte = get_buffer_char(dataCopy)
+
+        switch (byte) {
+            case '"': {
+                parameter = NAVStripRight(remove_string(dataCopy, '"', 1), 1)
+
+                if (NAVStartsWith(dataCopy, ',')) {
+                    remove_string(dataCopy, ',', 1)
+                }
+            }
+            case ',': {
+                parameter = ''
+            }
+            default: {
+                if (NAVContains(dataCopy, ',')) {
+                    parameter = "byte, NAVStripRight(remove_string(dataCopy, ',', 1), 1)"
+                }
+                else {
+                    parameter = "byte, get_buffer_string(dataCopy, length_array(dataCopy))"
+                }
+            }
+        }
+
+        count++
+        set_length_array(message.Parameter, count)
+        message.Parameter[count] = parameter
+    }
 }
 
 
