@@ -199,4 +199,31 @@ define_function NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
 }
 
 
+define_function NAVSnapiMessageLog(_NAVSnapiMessage message) {
+    stack_var integer count
+
+    NAVSnapiHelpersErrorLog(NAV_LOG_LEVEL_DEBUG,
+                            'NAVSnapiMessageLog',
+                            "'Parsed SNAPI Message:'")
+
+    NAVSnapiHelpersErrorLog(NAV_LOG_LEVEL_DEBUG,
+                            'NAVSnapiMessageLog',
+                            "'  Header: ', message.Header")
+
+    count = length_array(message.Parameter)
+    NAVSnapiHelpersErrorLog(NAV_LOG_LEVEL_DEBUG,
+                            'NAVSnapiMessageLog',
+                            "'  Parameter Count: ', itoa(count)")
+    if (count) {
+        stack_var integer x
+
+        for (x = 1; x <= count; x++) {
+            NAVSnapiHelpersErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                    'NAVSnapiMessageLog',
+                                    "'    Parameter ', itoa(x), ': ', message.Parameter[x]")
+        }
+    }
+}
+
+
 #END_IF // __NAV_FOUNDATION_SNAPIHELPERS__
