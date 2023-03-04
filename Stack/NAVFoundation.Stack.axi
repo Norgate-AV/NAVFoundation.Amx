@@ -33,6 +33,7 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_STACK__ 'NAVFoundation.Stack'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 DEFINE_CONSTANT
@@ -61,6 +62,14 @@ struct _NAVStackString {
 struct _NAVStackInteger {
     _NAVStackProperties Properties
     integer Items[NAV_MAX_STACK_SIZE]
+}
+
+
+define_function NAVStackErrorLog(integer level, char functionName[], char message[]) {
+    stack_var char log[NAV_MAX_BUFFER]
+
+    log = NAVFormatLibraryFunctionLog(__NAV_FOUNDATION_STACK__, functionName, message)
+    NAVErrorLog(level, log)
 }
 
 
@@ -133,6 +142,75 @@ define_function char[NAV_MAX_BUFFER] NAVStackPeekString(_NAVStackString stack) {
 }
 
 
+define_function NAVStackInitInteger(_NAVStackInteger stack, integer capacity) {
+    stack_var integer x
+
+    if (capacity <= 0 || capacity > NAV_MAX_STACK_SIZE) {
+        capacity = NAV_MAX_STACK_SIZE
+    }
+
+    stack.Properties.Top = NAV_STACK_EMPTY
+    stack.Properties.Capacity = capacity
+}
+
+
+define_function integer NAVStackPushInteger(_NAVStackInteger stack, integer item) {
+    stack_var integer x
+
+    if (NAVStackIsFull(stack.Properties)) {
+        NAVStackErrorLog(NAV_LOG_LEVEL_ERROR,
+                        'NAVStackPushInteger',
+                        'Stack is full')
+
+        return false
+    }
+
+    stack.Properties.Top++
+    set_length_array(stack.Items, stack.Properties.Top)
+    stack.Items[stack.Properties.Top] = item
+
+    return true
+}
+
+
+define_function integer NAVStackPopInteger(_NAVStackInteger stack) {
+    stack_var integer x
+    stack_var integer item
+
+    if (NAVStackIsEmpty(stack.Properties)) {
+        NAVStackErrorLog(NAV_LOG_LEVEL_ERROR,
+                        'NAVStackPopInteger',
+                        'Stack is empty')
+
+        return 0
+    }
+
+    item = stack.Items[stack.Properties.Top]
+    stack.Properties.Top--
+    set_length_array(stack.Items, stack.Properties.Top)
+
+    return item
+}
+
+
+define_function integer NAVStackPeekInteger(_NAVStackInteger stack) {
+    stack_var integer x
+    stack_var integer item
+
+    if (NAVStackIsEmpty(stack.Properties)) {
+        NAVStackErrorLog(NAV_LOG_LEVEL_ERROR,
+                        'NAVStackPeekInteger',
+                        'Stack is empty')
+
+        return 0
+    }
+
+    item = stack.Items[stack.Properties.Top]
+
+    return item
+}
+
+
 define_function integer NAVStackGetCount(_NAVStackProperties stack) {
     return stack.Top
 }
@@ -169,6 +247,26 @@ define_function integer NAVStackStringGetCapacity(_NAVStackString stack) {
 
 
 define_function integer NAVStackStringIsEmpty(_NAVStackString stack) {
+    return NAVStackIsEmpty(stack.Properties)
+}
+
+
+define_function integer NAVStackIntegerGetCount(_NAVStackInteger stack) {
+    return NAVStackGetCount(stack.Properties)
+}
+
+
+define_function integer NAVStackIntegerIsFull(_NAVStackInteger stack) {
+    return NAVStackIsFull(stack.Properties)
+}
+
+
+define_function integer NAVStackIntegerGetCapacity(_NAVStackInteger stack) {
+    return NAVStackGetCapacity(stack.Properties)
+}
+
+
+define_function integer NAVStackIntegerIsEmpty(_NAVStackInteger stack) {
     return NAVStackIsEmpty(stack.Properties)
 }
 
