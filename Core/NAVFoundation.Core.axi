@@ -227,6 +227,7 @@ struct _NAVController {
     char UniqueId[6]
     char MacAddress[NAV_MAX_CHARS]
     _NAVProgram Program
+    dev_info_struct Information
 }
 
 
@@ -514,6 +515,7 @@ define_function NAVSetControllerProgramInformation(_NAVProgram program) {
 
 
 define_function NAVSetControllerInformation(_NAVController controller) {
+    device_info(dvNAVMaster, controller.Information)
     NAVGetDeviceIPAddressInformation(dvNAVMaster, controller.IP)
 
     controller.SerialNumber = NAVGetDeviceSerialNumber(dvNAVMaster)
