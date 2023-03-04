@@ -100,4 +100,13 @@ define_function slong NAVServerSocketOpen(integer socket, integer port, integer 
 }
 
 
+define_function slong NAVServerSocketClose(integer socket) {
+    NAVSocketUtilsErrorLog(NAV_LOG_LEVEL_INFO,
+                            'NAVServerSocketClose',
+                            'Closing server socket...')
+
+    return ip_server_close(socket)
+}
+
+
 #END_IF // __NAV_FOUNDATION_SOCKETUTILS__
