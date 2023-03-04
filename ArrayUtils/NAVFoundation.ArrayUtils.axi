@@ -670,6 +670,25 @@ define_function NAVArrayCopyString(char source[][], char destination[][]) {
 }
 
 
+define_function NAVArrayReverseInteger(integer array[]) {
+    stack_var _NAVStackInteger stack
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    NAVStackInitInteger(stack, length)
+
+    for (x = 1; x <= length; x++) {
+        NAVStackPushInteger(stack, array[x])
+    }
+
+    for (x = 1; x <= length; x++) {
+        array[x] = NAVStackPopInteger(stack)
+    }
+}
+
+
 define_function NAVArrayCopyInteger(integer source[], integer destination[]) {
     stack_var integer x
     stack_var integer length
@@ -759,6 +778,30 @@ define_function char NAVArrayIsSortedDescendingInteger(integer array[]) {
     }
 
     return true
+}
+
+
+define_function NAVArrayToLowerString(char array[][]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        array[x] = lower_string(array[x])
+    }
+}
+
+
+define_function NAVArrayToUpperString(char array[][]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        array[x] = upper_string(array[x])
+    }
 }
 
 
