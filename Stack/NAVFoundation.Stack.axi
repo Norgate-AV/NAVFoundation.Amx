@@ -82,12 +82,6 @@ define_function NAVStackInitString(_NAVStackString stack, integer capacity) {
 
     stack.Properties.Top = NAV_STACK_EMPTY
     stack.Properties.Capacity = capacity
-
-    set_length_array(stack.Items, capacity)
-
-    for (x = 1; x <= length_array(stack.Items); x++) {
-        stack.Items[x] = ""
-    }
 }
 
 
@@ -109,6 +103,7 @@ define_function integer NAVStackPushString(_NAVStackString stack, char item[]) {
     }
 
     stack.Properties.Top++
+    set_length_array(stack.Items, stack.Properties.Top)
     stack.Items[stack.Properties.Top] = item
 
     return true
@@ -128,8 +123,8 @@ define_function char[NAV_MAX_BUFFER] NAVStackPopString(_NAVStackString stack) {
     }
 
     item = stack.Items[stack.Properties.Top]
-    stack.Items[stack.Properties.Top] = ""
     stack.Properties.Top--
+    set_length_array(stack.Items, stack.Properties.Top)
 
     return item
 }
