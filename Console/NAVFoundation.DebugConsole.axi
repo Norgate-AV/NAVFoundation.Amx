@@ -38,6 +38,7 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.SocketUtils.axi'
+#include 'NAVFoundation.ConsoleUtils.axi'
 
 
 (***********************************************************)
@@ -74,24 +75,6 @@ volatile _NAVConsole NAVDebugConsole[MAX_NAV_DEBUG_CONSOLE_CONNECTIONS]
 (***********************************************************)
 (*        SUBROUTINE/FUNCTION DEFINITIONS GO BELOW         *)
 (***********************************************************)
-
-define_function integer NAVGetDebugConsoleConnectionCount() {
-    stack_var integer x
-    stack_var integer count
-
-    count = 0
-
-    for (x = 1; x <= MAX_NAV_DEBUG_CONSOLE_CONNECTIONS; x++) {
-        if (!NAVDebugConsole[x].SocketConnection.IsConnected) {
-            continue
-        }
-
-        count++
-    }
-
-    return count
-}
-
 
 define_function char[NAV_MAX_BUFFER] NAVFormatDebugConsoleLog(char log[]) {
     return "NAVGetTimeStamp(), ':: ', log, NAV_CR, NAV_LF"
