@@ -590,6 +590,27 @@ define_function integer NAVZeroBase(integer value) {
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVGetNAVBanner() {
+    return "
+        NAV_CR, NAV_LF,
+        ' _   _                       _          ___     __', NAV_CR, NAV_LF,
+        '| \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /', NAV_CR, NAV_LF,
+        '|  \| |/ _ \| ''__/ _` |/ _` | __/ _ \ / _ \ \ / /', NAV_CR, NAV_LF,
+        '| |\  | (_) | | | (_| | (_| | ||  __// ___ \ V /', NAV_CR, NAV_LF,
+        '|_| \_|\___/|_|  \__, |\__,_|\__\___/_/   \_\_/', NAV_CR, NAV_LF,
+        '                 |___/', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF,
+        'MIT License', NAV_CR, NAV_LF,
+        'Copyright (c) 2010-2023, Norgate AV Solutions Ltd.', NAV_CR, NAV_LF,
+        'https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF,
+        '=============================================================', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF
+    "
+}
+
+
 (***********************************************************)
 (*                STARTUP CODE GOES BELOW                  *)
 (***********************************************************)
