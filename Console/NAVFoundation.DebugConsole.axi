@@ -53,8 +53,6 @@ dvNAVDebugConsole       =       0:250:0
 (***********************************************************)
 DEFINE_CONSTANT
 
-constant long TL_NAV_DEBUG_CONSOLE_PING         = 301
-
 #IF_NOT_DEFINED NAV_DEBUG_CONSOLE_PORT
 constant integer NAV_DEBUG_CONSOLE_PORT	                = 5000
 #END_IF
@@ -68,8 +66,6 @@ constant integer MAX_NAV_DEBUG_CONSOLE_CONNECTIONS      = 5
 (*               VARIABLE DEFINITIONS GO BELOW             *)
 (***********************************************************)
 DEFINE_VARIABLE
-
-volatile long NAVDebugConsolePing[]     = { 20000 }
 
 volatile dev dvaNAVDebugConsole[MAX_NAV_DEBUG_CONSOLE_CONNECTIONS]
 volatile _NAVConsole NAVDebugConsole[MAX_NAV_DEBUG_CONSOLE_CONNECTIONS]
@@ -150,8 +146,6 @@ define_function NAVDebugConsoleHandleDataEvent(char event[], tdata args) {
 
             NAVErrorLog(NAV_LOG_LEVEL_INFO,
                         "'NAVDebugConsole: Server', format('%02d', serverIndex), ': Client Connected: ', args.sourceip, ':', args.sourceport")
-
-            NAVTimelineStart(TL_NAV_DEBUG_CONSOLE_PING, NAVDebugConsolePing, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
         }
         case NAV_EVENT_OFFLINE: {
             NAVDebugConsole[serverIndex].SocketConnection.IsConnected = false
@@ -160,12 +154,6 @@ define_function NAVDebugConsoleHandleDataEvent(char event[], tdata args) {
                         "'NAVDebugConsole: Server', format('%02d', serverIndex), ': Client Disconnected'")
 
             NAVDebugConsoleServerOpen(NAVZeroBase(serverIndex), NAV_DEBUG_CONSOLE_PORT)
-
-            if (NAVGetDebugConsoleConnectionCount() > 0) {
-                return
-            }
-
-            NAVTimelineStop(TL_NAV_DEBUG_CONSOLE_PING)
         }
         case NAV_EVENT_ONERROR: {
             NAVDebugConsole[serverIndex].SocketConnection.IsConnected = false
@@ -225,11 +213,6 @@ data_event[dvaNAVDebugConsole] {
     string: {
         NAVDebugConsoleHandleDataEvent(NAV_EVENT_STRING, data)
     }
-}
-
-
-timeline_event[TL_NAV_DEBUG_CONSOLE_PING] {
-    NAVDebugConsoleLog('Ping')
 }
 
 
