@@ -326,6 +326,9 @@ define_function integer NAVSplitString(char buffer[], char separator[], char res
                                 'NAVSplitString',
                                 'Buffer does not contain separator')
 
+        count++
+        set_length_array(result, count)
+        result[count] = buffer
         return count
     }
 
