@@ -95,12 +95,17 @@ define_function integer NAVStackPushString(_NAVStackString stack, char item[]) {
     stack_var integer x
 
     if (NAVStackIsFull(stack.Properties)) {
-        NAVLog("'NAVStackPush(): Error: Stack is full'")
+        NAVStackErrorLog(NAV_LOG_LEVEL_ERROR,
+                        'NAVStackPushString',
+                        'Stack is full')
+
         return false
     }
 
     if (!length_array(item)) {
-        NAVLog("'NAVStackPush(): Warning: Item is an empty string'")
+        NAVStackErrorLog(NAV_LOG_LEVEL_WARNING,
+                        'NAVStackPushString',
+                        'Item is an empty string')
     }
 
     stack.Properties.Top++
@@ -115,7 +120,10 @@ define_function char[NAV_MAX_BUFFER] NAVStackPopString(_NAVStackString stack) {
     stack_var char item[NAV_MAX_BUFFER]
 
     if (NAVStackIsEmpty(stack.Properties)) {
-        NAVLog("'NAVStackPop(): Error: Stack is empty'")
+        NAVStackErrorLog(NAV_LOG_LEVEL_ERROR,
+                        'NAVStackPopString',
+                        'Stack is empty')
+
         return ""
     }
 
@@ -132,7 +140,10 @@ define_function char[NAV_MAX_BUFFER] NAVStackPeekString(_NAVStackString stack) {
     stack_var char item[NAV_MAX_BUFFER]
 
     if (NAVStackIsEmpty(stack.Properties)) {
-        NAVLog("'NAVStackPeek(): Error: Stack is empty'")
+        NAVStackErrorLog(NAV_LOG_LEVEL_ERROR,
+                        'NAVStackPeekString',
+                        'Stack is empty')
+
         return ""
     }
 
