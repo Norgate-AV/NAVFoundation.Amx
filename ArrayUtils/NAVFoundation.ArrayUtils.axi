@@ -688,4 +688,78 @@ define_function NAVArrayCopyInteger(integer source[], integer destination[]) {
 }
 
 
+define_function char NAVArrayIsSortedString(char array[][]) {
+    return NAVArrayIsSortedAscendingString(array)
+}
+
+
+define_function char NAVArrayIsSortedInteger(integer array[]) {
+    return NAVArrayIsSortedAscendingInteger(array)
+}
+
+
+define_function char NAVArrayIsSortedAscendingString(char array[][]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x < length; x++) {
+        if (NAVStringCompare(array[x], array[x + 1]) > 0) {
+            return false
+        }
+    }
+
+    return true
+}
+
+
+define_function char NAVArrayIsSortedAscendingInteger(integer array[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x < length; x++) {
+        if (array[x] > array[x + 1]) {
+            return false
+        }
+    }
+
+    return true
+}
+
+
+define_function char NAVArrayIsSortedDescendingString(char array[][]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x < length; x++) {
+        if (NAVStringCompare(array[x], array[x + 1]) < 0) {
+            return false
+        }
+    }
+
+    return true
+}
+
+
+define_function char NAVArrayIsSortedDescendingInteger(integer array[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x < length; x++) {
+        if (array[x] < array[x + 1]) {
+            return false
+        }
+    }
+
+    return true
+}
+
+
 #END_IF // __NAV_FOUNDATION_ARRAYUTILS__
