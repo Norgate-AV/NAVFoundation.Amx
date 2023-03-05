@@ -126,8 +126,7 @@ struct _NAVCommandConsole {
 (***********************************************************)
 DEFINE_VARIABLE
 
-volatile dev dvaNAVCommandConsole[MAX_NAV_COMMAND_CONSOLE_CONNECTIONS]
-volatile _NAVConsole NAVCommandConsole[MAX_NAV_COMMAND_CONSOLE_CONNECTIONS]
+volatile _NAVCommandConsole navCommandConsole
 
 (***********************************************************)
 (*        SUBROUTINE/FUNCTION DEFINITIONS GO BELOW         *)
@@ -162,25 +161,25 @@ define_function NAVCommandConsoleSendPrompt(_NAVConsole console, slong error) {
 }
 
 
-define_function slong NAVCommandConsoleServerOpen(dev device, integer server, integer port) {
+define_function slong NAVCommandConsoleServerOpen(_NAVConsole console, integer server) {
     stack_var integer socket
-    stack_var integer serverIndex
+    stack_var integer port
     stack_var slong result
 
-    socket = device.port + server
-    serverIndex = server + 1
+    socket = console.Socket.Port
+    port = console.SocketConnection.Port
 
     result = NAVServerSocketOpen(socket, port, IP_TCP)
 
     if (result < 0) {
         NAVErrorLog(NAV_LOG_LEVEL_ERROR,
-                    "'NAVCommandConsole: Server', format('%02d', serverIndex), ': Failed to start server'")
+                    "'NAVCommandConsole: Server', format('%02d', server), ': Failed to start server'")
 
         return result
     }
 
     NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                "'NAVCommandConsole: Server', format('%02d', serverIndex), ': Listening on port ', itoa(port)")
+                "'NAVCommandConsole: Server', format('%02d', server), ': Listening on port ', itoa(port)")
 
     return result
 }
@@ -368,29 +367,29 @@ define_function NAVCommandConsoleProcessCommand(_NAVConsole console) {
 define_function NAVCommandConsoleHandleDataEvent(char event[], tdata args) {
     stack_var integer serverIndex
 
-    serverIndex = get_last(dvaNAVCommandConsole)
+    serverIndex = get_last(navCommandConsole.Socket)
 
     switch (lower_string(event)) {
         case NAV_EVENT_ONLINE: {
-            NAVCommandConsole[serverIndex].SocketConnection.IsConnected = true
+            navCommandConsole.Console[serverIndex].SocketConnection.IsConnected = true
 
             NAVErrorLog(NAV_LOG_LEVEL_INFO,
                         "'NAVCommandConsole: Server', format('%02d', serverIndex), ': Client Connected: ', args.sourceip, ':', args.sourceport")
 
-            NAVCommandConsoleSendResponse(NAVCommandConsole[serverIndex], NAVCommandConsoleGetBanner())
-            NAVCommandConsoleSendPrompt(NAVCommandConsole[serverIndex], 0)
+            NAVCommandConsoleSendResponse(navCommandConsole.Console[serverIndex], NAVCommandConsoleGetBanner())
+            NAVCommandConsoleSendPrompt(navCommandConsole.Console[serverIndex], 0)
         }
         case NAV_EVENT_OFFLINE: {
-            NAVCommandConsole[serverIndex].SocketConnection.IsConnected = false
+            navCommandConsole.Console[serverIndex].SocketConnection.IsConnected = false
 
             NAVErrorLog(NAV_LOG_LEVEL_INFO,
                         "'NAVCommandConsole: Server', format('%02d', serverIndex), ': Client Disconnected'")
 
-            NAVCommandConsoleServerOpen(NAVCommandConsole[serverIndex].Socket, NAVZeroBase(serverIndex), NAV_COMMAND_CONSOLE_PORT)
-            NAVCommandConsole[serverIndex].RxBuffer  = ""
+            NAVCommandConsoleServerOpen(navCommandConsole.Console[serverIndex], serverIndex)
+            navCommandConsole.Console[serverIndex].RxBuffer  = ""
         }
         case NAV_EVENT_ONERROR: {
-            NAVCommandConsole[serverIndex].SocketConnection.IsConnected = false
+            navCommandConsole.Console[serverIndex].SocketConnection.IsConnected = false
 
             NAVErrorLog(NAV_LOG_LEVEL_ERROR,
                         "'NAVCommandConsole: Server', format('%02d', serverIndex), ': Socket OnError'")
@@ -400,13 +399,13 @@ define_function NAVCommandConsoleHandleDataEvent(char event[], tdata args) {
                         "'NAVCommandConsole: Server', format('%02d', serverIndex), ': Data Received: ', args.text")
 
             select {
-                active (NAVCommandConsole[serverIndex].RxBuffer[1] == "$0C"): {
-                    NAVCommandConsoleSendResponse(NAVCommandConsole[serverIndex], "$1B, '[2J', $1B, '[H'")
-                    NAVCommandConsoleSendPrompt(NAVCommandConsole[serverIndex], 0)
-                    NAVCommandConsole[serverIndex].RxBuffer = ""
+                active (navCommandConsole.Console[serverIndex].RxBuffer == "NAV_FF"): {
+                    NAVCommandConsoleSendResponse(navCommandConsole.Console[serverIndex], "NAV_ESC, '[2J', NAV_ESC, '[H'")
+                    NAVCommandConsoleSendPrompt(navCommandConsole.Console[serverIndex], 0)
+                    navCommandConsole.Console[serverIndex].RxBuffer = ""
                 }
                 active (1): {
-                    NAVCommandConsoleProcessCommand(NAVCommandConsole[serverIndex])
+                    NAVCommandConsoleProcessCommand(navCommandConsole.Console[serverIndex])
                 }
             }
         }
@@ -417,23 +416,24 @@ define_function NAVCommandConsoleHandleDataEvent(char event[], tdata args) {
 DEFINE_START {
     stack_var integer x
 
+    set_length_array(navCommandConsole.Socket, MAX_NAV_COMMAND_CONSOLE_CONNECTIONS)
+    set_length_array(navCommandConsole.Console.Socket, MAX_NAV_COMMAND_CONSOLE_CONNECTIONS)
+
     for(x = 0; x < MAX_NAV_COMMAND_CONSOLE_CONNECTIONS; x++) {
         stack_var integer socket
-        stack_var integer serverIndex
+        stack_var integer server
 
         socket = dvNAVCommandConsole.PORT + x
-        serverIndex = x + 1
+        server = x + 1
 
-        set_length_array(NAVCommandConsole, MAX_NAV_COMMAND_CONSOLE_CONNECTIONS)
-        set_length_array(dvaNAVCommandConsole, MAX_NAV_COMMAND_CONSOLE_CONNECTIONS)
-
-        NAVCommandConsole[serverIndex].Socket = 0:socket:0
-        dvaNAVCommandConsole[serverIndex] = NAVCommandConsole[serverIndex].Socket
+        navCommandConsole.Socket[server] = 0:socket:0
+        navCommandConsole.Console[server].Socket = navCommandConsole.Socket[server]
         rebuild_event()
 
-        create_buffer NAVCommandConsole[serverIndex].Socket, NAVCommandConsole[serverIndex].RxBuffer
+        create_buffer navCommandConsole.Console[server].Socket, navCommandConsole.Console[server].RxBuffer
 
-        NAVCommandConsoleServerOpen(NAVCommandConsole[serverIndex].Socket, x, NAV_COMMAND_CONSOLE_PORT)
+        navCommandConsole.Console[server].SocketConnection.Port = NAV_COMMAND_CONSOLE_PORT
+        NAVCommandConsoleServerOpen(navCommandConsole.Console[server], server)
     }
 }
 
@@ -443,7 +443,7 @@ DEFINE_START {
 (***********************************************************)
 DEFINE_EVENT
 
-data_event[dvaNAVCommandConsole] {
+data_event[navCommandConsole.Socket] {
     online: {
         NAVCommandConsoleHandleDataEvent(NAV_EVENT_ONLINE, data)
     }
