@@ -88,6 +88,39 @@ constant char NAV_COMMAND_CONSOLE_COMMAND_OPTION_TYPE[][NAV_MAX_CHARS]  =   {
                                                                             }
 
 
+DEFINE_TYPE
+
+struct _NAVCommandConsoleCommandOptionFlag {
+    char ShortValue[5]
+    char LongValue[NAV_MAX_CHARS]
+}
+
+
+struct _NAVCommandConsoleCommandOption {
+    char Name[NAV_MAX_CHARS]
+    char Description[NAV_MAX_BUFFER]
+    char Type[NAV_MAX_CHARS]
+    _NAVCommandConsoleCommandOptionFlag Flag
+    char DefaultValue[NAV_MAX_CHARS]
+}
+
+
+struct _NAVCommandConsoleCommand {
+    char Name[NAV_MAX_CHARS]
+    char Alias[MAX_NAV_COMMAND_CONSOLE_COMMAND_ALIASES][NAV_MAX_CHARS]
+    char Description[NAV_MAX_BUFFER]
+    _NAVCommandConsoleCommandOption Options[MAX_NAV_COMMAND_CONSOLE_COMMAND_OPTIONS]
+}
+
+
+struct _NAVCommandConsole {
+    dev Socket[MAX_NAV_COMMAND_CONSOLE_CONNECTIONS]
+    _NAVConsole Console[MAX_NAV_COMMAND_CONSOLE_CONNECTIONS]
+    _NAVConsoleCommand Commands[MAX_NAV_COMMAND_CONSOLE_COMMANDS]
+    char History[MAX_NAV_COMMAND_CONSOLE_COMMAND_HISTORY][NAV_MAX_BUFFER]
+}
+
+
 (***********************************************************)
 (*               VARIABLE DEFINITIONS GO BELOW             *)
 (***********************************************************)
