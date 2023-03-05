@@ -237,6 +237,8 @@ struct _NAVController {
 struct _NAVConsole {
     dev Socket
     _NAVSocketConnection SocketConnection
+    slong ErrorCode
+    char Semaphore
     char RxBuffer[NAV_MAX_BUFFER]
 }
 
@@ -262,6 +264,7 @@ volatile long NAVFeedbackTLArray[]	= { 200 }
 #include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.SocketUtils.axi'
 #include 'NAVFoundation.DebugConsole.axi'
+#include 'NAVFoundation.CommandConsole.axi'
 
 #IF_DEFINED USING_RMS
 #include 'NAVFoundation.RmsUtils.axi'
