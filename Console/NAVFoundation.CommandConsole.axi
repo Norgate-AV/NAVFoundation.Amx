@@ -55,20 +55,37 @@ dvNAVCommandConsole     =       0:260:0
 DEFINE_CONSTANT
 
 #IF_NOT_DEFINED NAV_COMMAND_CONSOLE_PORT
-constant integer NAV_COMMAND_CONSOLE_PORT	        = 6000
+constant integer NAV_COMMAND_CONSOLE_PORT	                            = 6000
 #END_IF
 
 #IF_NOT_DEFINED MAX_NAV_COMMAND_CONSOLE_CONNECTIONS
-constant integer MAX_NAV_COMMAND_CONSOLE_CONNECTIONS    = 5
+constant integer MAX_NAV_COMMAND_CONSOLE_CONNECTIONS                    = 5
 #END_IF
 
-#IF_NOT_DEFINED MAX_NAV_COMMAND_CONSOLE_COMMAND_ARGUMENTS
-constant integer MAX_NAV_COMMAND_CONSOLE_COMMAND_ARGUMENTS    = 5
+#IF_NOT_DEFINED MAX_NAV_COMMAND_CONSOLE_COMMANDS
+constant integer MAX_NAV_COMMAND_CONSOLE_COMMANDS                       = 30
 #END_IF
 
 #IF_NOT_DEFINED MAX_NAV_COMMAND_CONSOLE_COMMAND_OPTIONS
-constant integer MAX_NAV_COMMAND_CONSOLE_COMMAND_OPTIONS    = 5
+constant integer MAX_NAV_COMMAND_CONSOLE_COMMAND_OPTIONS                = 5
 #END_IF
+
+#IF_NOT_DEFINED MAX_NAV_COMMAND_CONSOLE_COMMAND_ALIASES
+constant integer MAX_NAV_COMMAND_CONSOLE_COMMAND_ALIASES                = 3
+#END_IF
+
+#IF_NOT_DEFINED MAX_NAV_COMMAND_CONSOLE_COMMAND_HISTORY
+constant integer MAX_NAV_COMMAND_CONSOLE_COMMAND_HISTORY                = 100
+#END_IF
+
+constant integer NAV_COMMAND_CONSOLE_COMMAND_OPTION_TYPE_STRING         = 1
+constant integer NAV_COMMAND_CONSOLE_COMMAND_OPTION_TYPE_NUMBER         = 2
+constant integer NAV_COMMAND_CONSOLE_COMMAND_OPTION_TYPE_BOOLEAN        = 3
+constant char NAV_COMMAND_CONSOLE_COMMAND_OPTION_TYPE[][NAV_MAX_CHARS]  =   {
+                                                                                'string',
+                                                                                'number',
+                                                                                'boolean'
+                                                                            }
 
 
 (***********************************************************)
