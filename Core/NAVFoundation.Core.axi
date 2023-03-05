@@ -634,25 +634,25 @@ DEFINE_EVENT
 
 data_event[dvNAVMaster] {
     online: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Device ', NAVConvertDPSToAscii(data.device), ' Online'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Online'")
     }
     offline: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Device ', NAVConvertDPSToAscii(data.device), ' Offline'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Offline'")
     }
     awake: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Device ', NAVConvertDPSToAscii(data.device), ' Awake'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Awake'")
     }
     standby: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Device ', NAVConvertDPSToAscii(data.device), ' Standby'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Standby'")
     }
     string: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'String from Master Device ', NAVConvertDPSToAscii(data.device), '-[', data.text, ']'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'String from Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
     }
     command: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Command from Master Device ', NAVConvertDPSToAscii(data.device), '-[', data.text, ']'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Command from Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
     }
     onerror: {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Master Device ', NAVConvertDPSToAscii(data.device), ' OnError: ', data.text")
+        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' OnError: ', data.text")
     }
 }
 

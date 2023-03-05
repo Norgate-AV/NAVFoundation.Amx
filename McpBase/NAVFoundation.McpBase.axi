@@ -74,39 +74,39 @@ DEFINE_EVENT
 
 data_event[5001:28:0] {
     online: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVConvertDPSToAscii(data.device), ' Online'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Online'")
     }
     offline: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVConvertDPSToAscii(data.device), ' Offline'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Offline'")
     }
     awake: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVConvertDPSToAscii(data.device), ' Awake'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Awake'")
     }
     standby: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVConvertDPSToAscii(data.device), ' Standby'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Standby'")
     }
     string: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'String from MCP Keypad Device ', NAVConvertDPSToAscii(data.device), '-[', data.text, ']'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'String from MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
     }
     command: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Command from MCP Keypad Device ', NAVConvertDPSToAscii(data.device), '-[', data.text, ']'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Command from MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
     }
     onerror: {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'MCP Keypad Device ', NAVConvertDPSToAscii(data.device), ' OnError: ', data.text")
+        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' OnError: ', data.text")
     }
 }
 
 
 button_event[5001:28:0, 0] {
     push: {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'MCP Keypad Device ', NAVConvertDPSToAscii(button.input.device), ' Button ', itoa(button.input.channel), ': Push'")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(button.input.device), '[', ']'), ' Button ', itoa(button.input.channel), ': Push'")
 
         #IF_DEFINED USING_NAV_MCP_KEYPAD_BUTTON_PUSH_EVENT_CALLBACK
         NAVMcpKeypadButtonPushEventCallback(button)
         #END_IF
     }
     release: {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'MCP Keypad Device ', NAVConvertDPSToAscii(button.input.device), ' Button ', itoa(button.input.channel), ': Release'")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(button.input.device), '[', ']'), ' Button ', itoa(button.input.channel), ': Release'")
 
         #IF_DEFINED USING_NAV_MCP_KEYPAD_BUTTON_RELEASE_EVENT_CALLBACK
         NAVMcpKeypadButtonReleaseEventCallback(button)
@@ -116,7 +116,7 @@ button_event[5001:28:0, 0] {
 
 
 level_event[5001:28:0, 0] {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'MCP Keypad Device ', NAVConvertDPSToAscii(level.input.device), ' Level ', itoa(level.input.level), ': ', itoa(level.value)")
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(level.input.device), '[', ']'), ' Level ', itoa(level.input.level), ': ', itoa(level.value)")
 
     #IF_DEFINED USING_NAV_MCP_KEYPAD_LEVEL_EVENT_CALLBACK
     NAVMcpKeypadLevelEventCallback(level)
