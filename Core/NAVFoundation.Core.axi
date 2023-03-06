@@ -141,6 +141,65 @@ constant integer NAV_HTTPS_PORT         = 443
 constant integer NAV_ICSP_PORT          = 1319
 constant integer NAV_ICSPS_PORT         = 1320
 
+constant char NAV_TELNET_COMMAND_SE     = $F0
+constant char NAV_TELNET_COMMAND_NOP    = $F1
+constant char NAV_TELNET_COMMAND_DM     = $F2
+constant char NAV_TELNET_COMMAND_BRK    = $F3
+constant char NAV_TELNET_COMMAND_IP     = $F4
+constant char NAV_TELNET_COMMAND_AO     = $F5
+constant char NAV_TELNET_COMMAND_AYT    = $F6
+constant char NAV_TELNET_COMMAND_EC     = $F7
+constant char NAV_TELNET_COMMAND_EL     = $F8
+constant char NAV_TELNET_COMMAND_GA     = $F9
+constant char NAV_TELNET_COMMAND_SB     = $FA
+constant char NAV_TELNET_COMMAND_WILL   = $FB
+constant char NAV_TELNET_COMMAND_WONT   = $FC
+constant char NAV_TELNET_COMMAND_DO     = $FD
+constant char NAV_TELNET_COMMAND_DONT   = $FE
+constant char NAV_TELNET_COMMAND_IAC    = $FF
+
+constant char NAV_TELNET_OPTION_BINARY_TRANSMISSION = $00
+constant char NAV_TELNET_OPTION_ECHO                = $01
+constant char NAV_TELNET_OPTION_RECONNECTION        = $02
+constant char NAV_TELNET_OPTION_SGA                 = $03
+constant char NAV_TELNET_OPTION_AMSN                = $04
+constant char NAV_TELNET_OPTION_STATUS              = $05
+constant char NAV_TELNET_OPTION_TIMING_MARK         = $06
+constant char NAV_TELNET_OPTION_RCTE                = $07
+constant char NAV_TELNET_OPTION_OLW                 = $08
+constant char NAV_TELNET_OPTION_OPS                 = $09
+constant char NAV_TELNET_OPTION_OCRD                = $0A
+constant char NAV_TELNET_OPTION_OHTS                = $0B
+constant char NAV_TELNET_OPTION_OHTD                = $0C
+constant char NAV_TELNET_OPTION_OFFD                = $0D
+constant char NAV_TELNET_OPTION_OVTS                = $0E
+constant char NAV_TELNET_OPTION_OVTD                = $0F
+constant char NAV_TELNET_OPTION_OVTR                = $10
+constant char NAV_TELNET_OPTION_EXTENDED_ASCII      = $11
+constant char NAV_TELNET_OPTION_LOGOUT              = $12
+constant char NAV_TELNET_OPTION_BYTE_MACRO          = $13
+constant char NAV_TELNET_OPTION_DATA_ENTRY_TERMINAL = $14
+constant char NAV_TELNET_OPTION_SUPDUP              = $15
+constant char NAV_TELNET_OPTION_SUPDUP_OUTPUT       = $16
+constant char NAV_TELNET_OPTION_SEND_LOCATION       = $17
+constant char NAV_TELNET_OPTION_TERMINAL_TYPE       = $18
+constant char NAV_TELNET_OPTION_END_OF_RECORD       = $19
+constant char NAV_TELNET_OPTION_TACACS_USER_ID      = $1A
+constant char NAV_TELNET_OPTION_OUTPUT_MARKING      = $1B
+constant char NAV_TELNET_OPTION_TERMINAL_LOCATION   = $1C
+constant char NAV_TELNET_OPTION_3270_REGIME         = $1D
+constant char NAV_TELNET_OPTION_X3_PAD              = $1E
+constant char NAV_TELNET_OPTION_NAWS                = $1F
+constant char NAV_TELNET_OPTION_TSPEED              = $20
+constant char NAV_TELNET_OPTION_RFLOW               = $21
+constant char NAV_TELNET_OPTION_LINEMODE            = $22
+constant char NAV_TELNET_OPTION_XDISPLOC            = $23
+constant char NAV_TELNET_OPTION_ENVIRON             = $24
+constant char NAV_TELNET_OPTION_AUTH                = $25
+constant char NAV_TELNET_OPTION_ENCRYPT             = $26
+constant char NAV_TELNET_OPTION_NEWENV              = $27
+constant char NAV_TELNET_OPTION_EXOPL               = $FF
+
 
 /////////////////////////////////////////////////////////////
 // Logging
