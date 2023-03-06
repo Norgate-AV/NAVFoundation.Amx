@@ -291,6 +291,51 @@ struct _NAVContact {
 }
 
 
+////////////////////////////////////////////////////////////
+// State Tracking
+////////////////////////////////////////////////////////////
+struct _NAVStateInteger {
+    integer Required
+    integer Actual
+}
+
+
+struct _NAVStateSignedInteger {
+    sinteger Required
+    sinteger Actual
+}
+
+
+struct _NAVStateLong {
+    long Required
+    long Actual
+}
+
+
+struct _NAVStateSignedLong {
+    slong Required
+    slong Actual
+}
+
+
+struct _NAVStateDouble {
+    double Required
+    double Actual
+}
+
+
+struct _NAVStateFloat {
+    float Required
+    float Actual
+}
+
+
+struct _NAVStateString {
+    char Required[NAV_MAX_BUFFER]
+    char Actual[NAV_MAX_BUFFER]
+}
+
+
 /////////////////////////////////////////////////////////////
 // Credential
 /////////////////////////////////////////////////////////////
