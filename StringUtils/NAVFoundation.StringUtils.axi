@@ -439,19 +439,25 @@ define_function long NAVStringToLongMilliseconds(char duration[]) {
 }
 
 
-define_function char[NAV_MAX_CHARS] NAVGetTimeSpan(long value) {
+define_function char[NAV_MAX_BUFFER] NAVGetTimeSpan(double value) {
     stack_var long milliseconds
     stack_var long seconds
     stack_var long minutes
     stack_var long hours
-    stack_var char result[NAV_MAX_CHARS]
+    stack_var long years
+    stack_var long months
+    stack_var long days
+    stack_var char result[NAV_MAX_BUFFER]
 
-    milliseconds = value % 1000
-    seconds = value / 1000
-    minutes = seconds / 60 % 60
-    hours = minutes / 60 % 60
+    milliseconds = type_cast(value % 1000)
+    seconds = type_cast(value / 1000 % 60)
+    minutes = type_cast(value / 60000 % 60)
+    hours = type_cast(value / 3600000 % 24)
+    days = type_cast(value / 86400000 % 30)
+    months = type_cast(value / 2629746000 % 12)
+    years = type_cast(value / 31556952000)
 
-    result = "itoa(seconds), 's ', itoa(milliseconds % 1000), 'ms'"
+    result = "itoa(seconds), 's ', itoa(milliseconds), 'ms'"
 
     if (minutes > 0) {
         result = "itoa(minutes), 'm ', result"
@@ -459,6 +465,18 @@ define_function char[NAV_MAX_CHARS] NAVGetTimeSpan(long value) {
 
     if (hours > 0) {
         result = "itoa(hours), 'h ', result"
+    }
+
+    if (days > 0) {
+        result = "itoa(days), 'd ', result"
+    }
+
+    if (months > 0) {
+        result = "itoa(months), 'mo ', result"
+    }
+
+    if (years > 0) {
+        result = "itoa(years), 'y ', result"
     }
 
     return result
