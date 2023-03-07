@@ -20,9 +20,32 @@ It's feature rich and written in pure NetLinx.
 
 ## Contents :book:
 
+-   [Libraries :books:](#libraries-books)
 -   [Team :soccer:](#team-soccer)
 -   [Contributing :sparkles:](#contributing-sparkles)
 -   [LICENSE :balance_scale:](#license-balance_scale)
+
+## Libraries :books:
+
+-   [Core](./Core/README.md)
+-   [ArrayUtils](./ArrayUtils/README.md)
+-   [BinaryUtils](./BinaryUtils/README.md)
+-   [DateTimeUtils](./DateTimeUtils/README.md)
+-   [ErrorLogUtils](./ErrorLogUtils/README.md)
+-   [FileUtils](./FileUtils/README.md)
+-   [HashTable](./HashTable/README.md)
+-   [Jsmn](./Jsmn/README.md)
+-   [LogicEngine](./LogicEngine/README.md)
+-   [Math](./Math/README.md)
+-   [McpBase](./McpBase/README.md)
+-   [Queue](./Queue/README.md)
+-   [RmsBase](./RmsBase/README.md)
+-   [SnapiHelpers](./SnapiHelpers/README.md)
+-   [SocketUtils](./SocketUtils/README.md)
+-   [Stack](./Stack/README.md)
+-   [StringUtils](./StringUtils/README.md)
+-   [TimelineUtils](./TimelineUtils/README.md)
+-   [UIUtils](./UIUtils/README.md)
 
 ## Team :soccer:
 
