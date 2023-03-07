@@ -150,4 +150,65 @@ define_function integer NAVTimelineStop(long id) {
 }
 
 
+define_function integer NAVTimelinePause(long id) {
+    stack_var integer result
+
+    if (!timeline_active(id)) {
+        return
+    }
+
+    result = timeline_pause(id)
+
+    if (result != 0) {
+        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                                'NAVTimelinePause',
+                                "'Failed to pause Timeline with ID ', itoa(id), ' : ', NAVGetTimelineRunError(result)")
+
+        return result
+    }
+
+    NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_DEBUG,
+                            'NAVTimelinePause',
+                            "'Paused Timeline with ID ', itoa(id)")
+
+    return result
+}
+
+
+define_function integer NAVTimelineSetValue(long id, long value) {
+    stack_var integer result
+
+    if (!timeline_active(id)) {
+        return
+    }
+
+    result = timeline_set(id, value)
+
+    if (result != 0) {
+        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
+                                'NAVTimelineSetValue',
+                                "'Failed to set Timeline with ID ', itoa(id), ' to value ', itoa(value),' : ', NAVGetTimelineRunError(result)")
+
+        return result
+    }
+
+    NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_DEBUG,
+                            'NAVTimelineSetValue',
+                            "'Set Timeline with ID ', itoa(id), ' to value ', itoa(value)")
+
+    return result
+}
+
+
+define_function long NAVTimelineGetValue(long id) {
+    stack_var integer result
+
+    if (!timeline_active(id)) {
+        return
+    }
+
+    return timeline_get(id)
+}
+
+
 #END_IF // __NAV_FOUNDATION_TIMELINEUTILS__
