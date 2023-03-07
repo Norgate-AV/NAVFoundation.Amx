@@ -411,6 +411,7 @@ volatile long NAVFeedbackTLArray[]	= { 200 }
 #include 'NAVFoundation.SnapiHelpers.axi'
 #include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.SocketUtils.axi'
+#include 'NAVFoundation.TimelineUtils.axi'
 #include 'NAVFoundation.DebugConsole.axi'
 #include 'NAVFoundation.CommandConsole.axi'
 
@@ -627,33 +628,6 @@ define_function NAVCommand(dev device, char value[]) {
 
 define_function NAVCommandArray(dev device[], char value[]) {
     send_command device, value
-}
-
-
-define_function NAVTimelineStart(long id, long times[], long relative, long mode) {
-    if (timeline_active(id)) {
-        return
-    }
-
-    timeline_create(id, times, length_array(times), relative, mode)
-}
-
-
-define_function NAVTimelineReload(long id, long times[]) {
-    if (!timeline_active(id)) {
-        return
-    }
-
-    timeline_reload(id, times, length_array(times))
-}
-
-
-define_function NAVTimelineStop(long id) {
-    if (!timeline_active(id)) {
-        return
-    }
-
-    timeline_kill(id)
 }
 
 
