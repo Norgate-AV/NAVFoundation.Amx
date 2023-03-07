@@ -75,7 +75,7 @@ define_function char[NAV_MAX_BUFFER] NAVGetTimelineRunError(integer error) {
 }
 
 
-define_function NAVTimelineStart(long id, long times[], long relative, long mode) {
+define_function integer NAVTimelineStart(long id, long times[], long relative, long mode) {
     stack_var integer result
 
     if (timeline_active(id)) {
@@ -89,16 +89,18 @@ define_function NAVTimelineStart(long id, long times[], long relative, long mode
                                 'NAVTimelineStart',
                                 "'Failed to create Timeline with ID ', itoa(id), ' : ', NAVGetTimelineInitError(result)")
 
-        return
+        return result
     }
 
     NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_DEBUG,
                             'NAVTimelineStart',
                             "'Created Timeline with ID ', itoa(id)")
+
+    return result
 }
 
 
-define_function NAVTimelineReload(long id, long times[]) {
+define_function integer NAVTimelineReload(long id, long times[]) {
     stack_var integer result
 
     if (!timeline_active(id)) {
@@ -112,16 +114,18 @@ define_function NAVTimelineReload(long id, long times[]) {
                                 'NAVTimelineReload',
                                 "'Failed to reload Timeline with ID ', itoa(id), ' : ', NAVGetTimelineInitError(result)")
 
-        return
+        return result
     }
 
     NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_DEBUG,
                             'NAVTimelineReload',
                             "'Reloaded Timeline with ID ', itoa(id)")
+
+    return result
 }
 
 
-define_function NAVTimelineStop(long id) {
+define_function integer NAVTimelineStop(long id) {
     stack_var integer result
 
     if (!timeline_active(id)) {
@@ -135,12 +139,14 @@ define_function NAVTimelineStop(long id) {
                                 'NAVTimelineStop',
                                 "'Failed to kill Timeline with ID ', itoa(id), ' : ', NAVGetTimelineRunError(result)")
 
-        return
+        return result
     }
 
     NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_DEBUG,
                             'NAVTimelineStop',
                             "'Killed Timeline with ID ', itoa(id)")
+
+    return result
 }
 
 
