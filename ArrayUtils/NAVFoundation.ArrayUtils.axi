@@ -805,4 +805,196 @@ define_function NAVArrayToUpperString(char array[][]) {
 }
 
 
+define_function NAVArrayTrimString(char array[][]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        array[x] = NAVTrimString(array[x])
+    }
+}
+
+
+define_function double NAVArraySumInteger(integer array[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var double sum
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        sum = sum + array[x]
+    }
+
+    return sum
+}
+
+
+define_function double NAVArraySumSignedInteger(sinteger array[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var double sum
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        sum = sum + array[x]
+    }
+
+    return sum
+}
+
+
+define_function double NAVArraySumLong(long array[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var double sum
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        sum = sum + array[x]
+    }
+
+    return sum
+}
+
+
+define_function double NAVArraySumSignedLong(slong array[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var double sum
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        sum = sum + array[x]
+    }
+
+    return sum
+}
+
+
+define_function double NAVArraySumFloat(float array[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var double sum
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        sum = sum + array[x]
+    }
+
+    return sum
+}
+
+
+define_function double NAVArraySumDouble(double array[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var double sum
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        sum = sum + array[x]
+    }
+
+    return sum
+}
+
+
+define_function double NAVArrayAverageInteger(integer array[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var double sum
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        sum = sum + array[x]
+    }
+
+    return sum / length
+}
+
+
+define_function double NAVArrayAverageSignedInteger(sinteger array[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var double sum
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        sum = sum + array[x]
+    }
+
+    return sum / length
+}
+
+
+define_function double NAVArrayAverageLong(long array[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var double sum
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        sum = sum + array[x]
+    }
+
+    return sum / length
+}
+
+
+define_function double NAVArrayAverageSignedLong(slong array[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var double sum
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        sum = sum + array[x]
+    }
+
+    return sum / length
+}
+
+
+define_function double NAVArrayAverageFloat(float array[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var double sum
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        sum = sum + array[x]
+    }
+
+    return sum / length
+}
+
+
+define_function double NAVArrayAverageDouble(double array[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var double sum
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        sum = sum + array[x]
+    }
+
+    return sum / length
+}
+
+
 #END_IF // __NAV_FOUNDATION_ARRAYUTILS__
