@@ -473,7 +473,10 @@ define_function NAVLog(char log[]) {
         logChunk = get_buffer_string(buffer, NAV_LOG_CHUNK_SIZE)
 
         send_string dvNAVMaster, "logChunk"
+
+        #IF_DEFINED __NAV_FOUNDATION_DEBUGCONSOLE__
         NAVDebugConsoleLog(logChunk)
+        #END_IF
     }
 }
 
