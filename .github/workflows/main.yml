@@ -38,6 +38,15 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+      
+      - name: Check PS Version
+        run: $PSVersionTable
+      
+      - name: Check User
+        run: whoami
+        
+      - name: Check Working Directory
+        run: $pwd
 
       - name: Check Genlinx
         run: |
