@@ -1,3 +1,5 @@
+PROGRAM_NAME='NAVFoundation.RmsUtils'
+
 /*
  _   _                       _          ___     __
 | \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /
