@@ -37,14 +37,6 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 
 
-define_function NAVStackErrorLog(integer level, char functionName[], char message[]) {
-    stack_var char log[NAV_MAX_BUFFER]
-
-    log = NAVFormatLibraryFunctionLog(__NAV_FOUNDATION_STACK__, functionName, message)
-    NAVErrorLog(level, log)
-}
-
-
 define_function NAVStackInitString(_NAVStackString stack, integer capacity) {
     stack_var integer x
 
@@ -61,17 +53,19 @@ define_function integer NAVStackPushString(_NAVStackString stack, char item[]) {
     stack_var integer x
 
     if (NAVStackIsFull(stack.Properties)) {
-        NAVStackErrorLog(NAV_LOG_LEVEL_ERROR,
-                        'NAVStackPushString',
-                        'Stack is full')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STACK__,
+                                    'NAVStackPushString',
+                                    'Stack is full')
 
         return false
     }
 
     if (!length_array(item)) {
-        NAVStackErrorLog(NAV_LOG_LEVEL_WARNING,
-                        'NAVStackPushString',
-                        'Item is an empty string')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_STACK__,
+                                    'NAVStackPushString',
+                                    'Item is an empty string')
     }
 
     stack.Properties.Top++
@@ -87,9 +81,10 @@ define_function char[NAV_MAX_BUFFER] NAVStackPopString(_NAVStackString stack) {
     stack_var char item[NAV_MAX_BUFFER]
 
     if (NAVStackIsEmpty(stack.Properties)) {
-        NAVStackErrorLog(NAV_LOG_LEVEL_ERROR,
-                        'NAVStackPopString',
-                        'Stack is empty')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STACK__,
+                                    'NAVStackPopString',
+                                    'Stack is empty')
 
         return ""
     }
@@ -107,9 +102,10 @@ define_function char[NAV_MAX_BUFFER] NAVStackPeekString(_NAVStackString stack) {
     stack_var char item[NAV_MAX_BUFFER]
 
     if (NAVStackIsEmpty(stack.Properties)) {
-        NAVStackErrorLog(NAV_LOG_LEVEL_ERROR,
-                        'NAVStackPeekString',
-                        'Stack is empty')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STACK__,
+                                    'NAVStackPeekString',
+                                    'Stack is empty')
 
         return ""
     }
@@ -136,9 +132,10 @@ define_function integer NAVStackPushInteger(_NAVStackInteger stack, integer item
     stack_var integer x
 
     if (NAVStackIsFull(stack.Properties)) {
-        NAVStackErrorLog(NAV_LOG_LEVEL_ERROR,
-                        'NAVStackPushInteger',
-                        'Stack is full')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STACK__,
+                                    'NAVStackPushInteger',
+                                    'Stack is full')
 
         return false
     }
@@ -156,9 +153,10 @@ define_function integer NAVStackPopInteger(_NAVStackInteger stack) {
     stack_var integer item
 
     if (NAVStackIsEmpty(stack.Properties)) {
-        NAVStackErrorLog(NAV_LOG_LEVEL_ERROR,
-                        'NAVStackPopInteger',
-                        'Stack is empty')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STACK__,
+                                    'NAVStackPopInteger',
+                                    'Stack is empty')
 
         return 0
     }
@@ -176,9 +174,10 @@ define_function integer NAVStackPeekInteger(_NAVStackInteger stack) {
     stack_var integer item
 
     if (NAVStackIsEmpty(stack.Properties)) {
-        NAVStackErrorLog(NAV_LOG_LEVEL_ERROR,
-                        'NAVStackPeekInteger',
-                        'Stack is empty')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STACK__,
+                                    'NAVStackPeekInteger',
+                                    'Stack is empty')
 
         return 0
     }

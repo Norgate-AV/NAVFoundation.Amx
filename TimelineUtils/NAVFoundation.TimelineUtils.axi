@@ -48,14 +48,6 @@ constant integer NAV_TIMELINE_RUN_ERROR_INVALID_ID                      = 1
 constant integer NAV_TIMELINE_RUN_ERROR_TIMER_VALUE_OUT_OF_RANGE        = 2
 
 
-define_function NAVTimelineUtilsErrorLog(integer level, char functionName[], char message[]) {
-    stack_var char log[NAV_MAX_BUFFER]
-
-    log = NAVFormatLibraryFunctionLog(__NAV_FOUNDATION_TIMELINEUTILS__, functionName, message)
-    NAVErrorLog(level, log)
-}
-
-
 define_function char[NAV_MAX_BUFFER] NAVGetTimelineInitError(integer error) {
     switch (error) {
         case NAV_TIMELINE_INIT_ERROR_ID_ALREADY_IN_USE:         { return 'Timeline ID already in use' }
@@ -82,9 +74,10 @@ define_function integer NAVTimelineStart(long id, long times[], long relative, l
     result = timeline_active(id)
 
     if (result > 0) {
-        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_WARNING,
-                                'NAVTimelineStart',
-                                "'Timeline with ID ', itoa(id), ' has already be created'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_TIMELINEUTILS__,
+                                    'NAVTimelineStart',
+                                    "'Timeline with ID ', itoa(id), ' has already be created'")
 
         return result
     }
@@ -92,16 +85,18 @@ define_function integer NAVTimelineStart(long id, long times[], long relative, l
     result = timeline_create(id, times, length_array(times), relative, mode)
 
     if (result != 0) {
-        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
-                                'NAVTimelineStart',
-                                "'Failed to create Timeline with ID ', itoa(id), ' : ', NAVGetTimelineInitError(result)")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_TIMELINEUTILS__,
+                                    'NAVTimelineStart',
+                                    "'Failed to create Timeline with ID ', itoa(id), ' : ', NAVGetTimelineInitError(result)")
 
         return result
     }
 
-    NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_DEBUG,
-                            'NAVTimelineStart',
-                            "'Created Timeline with ID ', itoa(id)")
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_TIMELINEUTILS__,
+                                'NAVTimelineStart',
+                                "'Created Timeline with ID ', itoa(id)")
 
     return result
 }
@@ -113,9 +108,10 @@ define_function integer NAVTimelineReload(long id, long times[]) {
     result = timeline_active(id)
 
     if (result == 0) {
-        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
-                                'NAVTimelineRoload',
-                                "'Timeline with ID ', itoa(id), ' has not been created'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_TIMELINEUTILS__,
+                                    'NAVTimelineRoload',
+                                    "'Timeline with ID ', itoa(id), ' has not been created'")
 
         return result
     }
@@ -123,16 +119,18 @@ define_function integer NAVTimelineReload(long id, long times[]) {
     result = timeline_reload(id, times, length_array(times))
 
     if (result != 0) {
-        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
-                                'NAVTimelineReload',
-                                "'Failed to reload Timeline with ID ', itoa(id), ' : ', NAVGetTimelineInitError(result)")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_TIMELINEUTILS__,
+                                    'NAVTimelineReload',
+                                    "'Failed to reload Timeline with ID ', itoa(id), ' : ', NAVGetTimelineInitError(result)")
 
         return result
     }
 
-    NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_DEBUG,
-                            'NAVTimelineReload',
-                            "'Reloaded Timeline with ID ', itoa(id)")
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_TIMELINEUTILS__,
+                                'NAVTimelineReload',
+                                "'Reloaded Timeline with ID ', itoa(id)")
 
     return result
 }
@@ -144,9 +142,10 @@ define_function integer NAVTimelineStop(long id) {
     result = timeline_active(id)
 
     if (result == 0) {
-        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
-                                'NAVTimelineStop',
-                                "'Timeline with ID ', itoa(id), ' has not been created'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_TIMELINEUTILS__,
+                                    'NAVTimelineStop',
+                                    "'Timeline with ID ', itoa(id), ' has not been created'")
 
         return result
     }
@@ -154,16 +153,18 @@ define_function integer NAVTimelineStop(long id) {
     result = timeline_kill(id)
 
     if (result != 0) {
-        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
-                                'NAVTimelineStop',
-                                "'Failed to kill Timeline with ID ', itoa(id), ' : ', NAVGetTimelineRunError(result)")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_TIMELINEUTILS__,
+                                    'NAVTimelineStop',
+                                    "'Failed to kill Timeline with ID ', itoa(id), ' : ', NAVGetTimelineRunError(result)")
 
         return result
     }
 
-    NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_DEBUG,
-                            'NAVTimelineStop',
-                            "'Killed Timeline with ID ', itoa(id)")
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_TIMELINEUTILS__,
+                                'NAVTimelineStop',
+                                "'Killed Timeline with ID ', itoa(id)")
 
     return result
 }
@@ -175,9 +176,10 @@ define_function integer NAVTimelinePause(long id) {
     result = timeline_active(id)
 
     if (result == 0) {
-        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
-                                'NAVTimelinePause',
-                                "'Timeline with ID ', itoa(id), ' has not been created'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_TIMELINEUTILS__,
+                                    'NAVTimelinePause',
+                                    "'Timeline with ID ', itoa(id), ' has not been created'")
 
         return result
     }
@@ -185,16 +187,18 @@ define_function integer NAVTimelinePause(long id) {
     result = timeline_pause(id)
 
     if (result != 0) {
-        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
-                                'NAVTimelinePause',
-                                "'Failed to pause Timeline with ID ', itoa(id), ' : ', NAVGetTimelineRunError(result)")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_TIMELINEUTILS__,
+                                    'NAVTimelinePause',
+                                    "'Failed to pause Timeline with ID ', itoa(id), ' : ', NAVGetTimelineRunError(result)")
 
         return result
     }
 
-    NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_DEBUG,
-                            'NAVTimelinePause',
-                            "'Paused Timeline with ID ', itoa(id)")
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_TIMELINEUTILS__,
+                                'NAVTimelinePause',
+                                "'Paused Timeline with ID ', itoa(id)")
 
     return result
 }
@@ -206,9 +210,10 @@ define_function integer NAVTimelineSetValue(long id, long value) {
     result = timeline_active(id)
 
     if (result == 0) {
-        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
-                                'NAVTimelineSetValue',
-                                "'Timeline with ID ', itoa(id), ' has not been created'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_TIMELINEUTILS__,
+                                    'NAVTimelineSetValue',
+                                    "'Timeline with ID ', itoa(id), ' has not been created'")
 
         return result
     }
@@ -216,16 +221,18 @@ define_function integer NAVTimelineSetValue(long id, long value) {
     result = timeline_set(id, value)
 
     if (result != 0) {
-        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
-                                'NAVTimelineSetValue',
-                                "'Failed to set Timeline with ID ', itoa(id), ' to value ', itoa(value),' : ', NAVGetTimelineRunError(result)")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_TIMELINEUTILS__,
+                                    'NAVTimelineSetValue',
+                                    "'Failed to set Timeline with ID ', itoa(id), ' to value ', itoa(value),' : ', NAVGetTimelineRunError(result)")
 
         return result
     }
 
-    NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_DEBUG,
-                            'NAVTimelineSetValue',
-                            "'Set Timeline with ID ', itoa(id), ' to value ', itoa(value)")
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_TIMELINEUTILS__,
+                                'NAVTimelineSetValue',
+                                "'Set Timeline with ID ', itoa(id), ' to value ', itoa(value)")
 
     return result
 }
@@ -237,9 +244,10 @@ define_function long NAVTimelineGetValue(long id) {
     result = timeline_active(id)
 
     if (result == 0) {
-        NAVTimelineUtilsErrorLog(NAV_LOG_LEVEL_ERROR,
-                                'NAVTimelineGetValue',
-                                "'Timeline with ID ', itoa(id), ' has not been created'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_TIMELINEUTILS__,
+                                    'NAVTimelineGetValue',
+                                    "'Timeline with ID ', itoa(id), ' has not been created'")
 
         return result
     }

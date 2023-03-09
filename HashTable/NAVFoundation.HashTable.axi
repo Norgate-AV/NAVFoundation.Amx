@@ -37,14 +37,6 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 
 
-define_function NAVHashTableErrorLog(integer level, char functionName[], char message[]) {
-    stack_var char log[NAV_MAX_BUFFER]
-
-    log = NAVFormatLibraryFunctionLog(__NAV_FOUNDATION_HASHTABLE__, functionName, message)
-    NAVErrorLog(level, log)
-}
-
-
 define_function integer NAVHashTableGetKeyHash(char key[]) {
     stack_var integer length
     stack_var long value
@@ -54,16 +46,18 @@ define_function integer NAVHashTableGetKeyHash(char key[]) {
     length = length_array(key)
 
     if (length <= 0) {
-        NAVHashTableErrorLog(NAV_LOG_LEVEL_ERROR,
-                            'NAVHashTableGetKeyHash',
-                            'The argument "key" is an empty string')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableGetKeyHash',
+                                    'The argument "key" is an empty string')
 
         return type_cast(value)
     }
 
-    NAVHashTableErrorLog(NAV_LOG_LEVEL_DEBUG,
-                        'NAVHashTableGetKeyHash',
-                        "'Getting hash for key: ', key")
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_HASHTABLE__,
+                                'NAVHashTableGetKeyHash',
+                                "'Getting hash for key: ', key")
 
     for (x = 1; x <= length; x++) {
         value = value * 37 + key[x]
@@ -71,9 +65,10 @@ define_function integer NAVHashTableGetKeyHash(char key[]) {
 
     value = value % NAV_HASH_TABLE_SIZE
 
-    NAVHashTableErrorLog(NAV_LOG_LEVEL_DEBUG,
-                        'NAVHashTableGetKeyHash',
-                        "'Hash value for key "', key,'": ', format('%04d', type_cast(value))")
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_HASHTABLE__,
+                                'NAVHashTableGetKeyHash',
+                                "'Hash value for key "', key,'": ', format('%04d', type_cast(value))")
 
     return type_cast(value)
 }
@@ -130,9 +125,10 @@ define_function integer NAVHashTableAddItem(_NAVHashTable hashTable, char key[],
     stack_var _NAVKeyValuePair item
 
     if (!length_array(key)) {
-        NAVHashTableErrorLog(NAV_LOG_LEVEL_ERROR,
-                            'NAVHashTableAddItem',
-                            'The argument "key" is an empty string')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableAddItem',
+                                    'The argument "key" is an empty string')
 
         return 0
     }
@@ -140,31 +136,35 @@ define_function integer NAVHashTableAddItem(_NAVHashTable hashTable, char key[],
     slot = NAVHashTableGetKeyHash(key)
 
     if (slot <= 0) {
-        NAVHashTableErrorLog(NAV_LOG_LEVEL_ERROR,
-                            'NAVHashTableAddItem',
-                            "'Hash value for key "', key, '" is invalid'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableAddItem',
+                                    "'Hash value for key "', key, '" is invalid'")
 
         return 0
     }
 
-    NAVHashTableErrorLog(NAV_LOG_LEVEL_DEBUG,
-                        'NAVHashTableAddItem',
-                        "'Using slot: ', format('%04d', slot)")
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_HASHTABLE__,
+                                'NAVHashTableAddItem',
+                                "'Using slot: ', format('%04d', slot)")
 
     NAVHashTableGetItem(hashTable, slot, item)
 
     if (item.Key == "NAV_NULL") {
         if (NAVHashTableGetItemCount(hashTable) >= NAV_MAX_HASH_TABLE_ITEMS) {
-            NAVHashTableErrorLog(NAV_LOG_LEVEL_ERROR,
-                            'NAVHashTableAddItem',
-                            'The hashtable is full')
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_HASHTABLE__,
+                                        'NAVHashTableAddItem',
+                                        'The hashtable is full')
 
             return 0
         }
 
-        NAVHashTableErrorLog(NAV_LOG_LEVEL_DEBUG,
-                            'NAVHashTableAddItem',
-                            "'Slot ', format('%04d', slot), ' is empty, adding item "', value, '"'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableAddItem',
+                                    "'Slot ', format('%04d', slot), ' is empty, adding item "', value, '"'")
 
         NAVHashTableItemInit(item, key, value)
         NAVHashTableItemNew(hashTable, slot, item)
@@ -172,15 +172,18 @@ define_function integer NAVHashTableAddItem(_NAVHashTable hashTable, char key[],
         return slot
     }
 
-    NAVHashTableErrorLog(NAV_LOG_LEVEL_DEBUG,
-                        'NAVHashTableAddItem',
-                        "'Slot ', format('%04d', slot), ' is in use'")
-    NAVHashTableErrorLog(NAV_LOG_LEVEL_DEBUG,
-                        'NAVHashTableAddItem',
-                        "'Current item in slot: ', format('%04d', slot)")
-    NAVHashTableErrorLog(NAV_LOG_LEVEL_DEBUG,
-                        'NAVHashTableAddItem',
-                        "'Item Key: ', item.Key, ' Item Value: ', item.Value")
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_HASHTABLE__,
+                                'NAVHashTableAddItem',
+                                "'Slot ', format('%04d', slot), ' is in use'")
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_HASHTABLE__,
+                                'NAVHashTableAddItem',
+                                "'Current item in slot: ', format('%04d', slot)")
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_HASHTABLE__,
+                                'NAVHashTableAddItem',
+                                "'Item Key: ', item.Key, ' Item Value: ', item.Value")
 
     if (item.Key == key) {
         NAVHashTableItemUpdate(hashTable.Items[slot], value)
@@ -188,9 +191,10 @@ define_function integer NAVHashTableAddItem(_NAVHashTable hashTable, char key[],
         return slot
     }
 
-    NAVHashTableErrorLog(NAV_LOG_LEVEL_ERROR,
-                        'NAVHashTableAddItem',
-                        'Hashtable collision detected')
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_HASHTABLE__,
+                                'NAVHashTableAddItem',
+                                'Hashtable collision detected')
 
     return 0
 }
@@ -201,9 +205,10 @@ define_function char[NAV_MAX_BUFFER] NAVHashTableGetItemValue(_NAVHashTable hash
     stack_var _NAVKeyValuePair item
 
     if (!length_array(key)) {
-        NAVHashTableErrorLog(NAV_LOG_LEVEL_ERROR,
-                            'NAVHashTableGetItemValue',
-                            'The argument "key" is an empty string')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableGetItemValue',
+                                    'The argument "key" is an empty string')
 
         return ""
     }
@@ -211,9 +216,10 @@ define_function char[NAV_MAX_BUFFER] NAVHashTableGetItemValue(_NAVHashTable hash
     slot = NAVHashTableGetKeyHash(key)
 
     if (slot <= 0) {
-        NAVHashTableErrorLog(NAV_LOG_LEVEL_ERROR,
-                            'NAVHashTableGetItemValue',
-                            "'Hash value for key "', key, '" is invalid'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableGetItemValue',
+                                    "'Hash value for key "', key, '" is invalid'")
 
         return ""
     }
@@ -242,9 +248,10 @@ define_function NAVHashTableItemRemove(_NAVHashTable hashTable, char key[]) {
     stack_var _NAVKeyValuePair item
 
     if (!length_array(key)) {
-        NAVHashTableErrorLog(NAV_LOG_LEVEL_ERROR,
-                            'NAVHashTableItemRemove',
-                            'The argument "key" is an empty string')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableItemRemove',
+                                    'The argument "key" is an empty string')
 
         return
     }
@@ -252,9 +259,10 @@ define_function NAVHashTableItemRemove(_NAVHashTable hashTable, char key[]) {
     slot = NAVHashTableGetKeyHash(key)
 
     if (slot <= 0) {
-        NAVHashTableErrorLog(NAV_LOG_LEVEL_ERROR,
-                            'NAVHashTableItemRemove',
-                            "'Hash value for key "', key, '" is invalid'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableItemRemove',
+                                    "'Hash value for key "', key, '" is invalid'")
 
         return
     }
@@ -285,9 +293,10 @@ define_function NAVHashTableDump(_NAVHashTable hashTable) {
             continue
         }
 
-        NAVHashTableErrorLog(NAV_LOG_LEVEL_INFO,
-                            'NAVHashTableDump',
-                            "'Slot: ', format('%04d', x), ' Key: ', item.Key, ' Value: ', item.Value")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableDump',
+                                    "'Slot: ', format('%04d', x), ' Key: ', item.Key, ' Value: ', item.Value")
     }
 }
 

@@ -216,12 +216,18 @@ define_function char[NAV_MAX_BUFFER] NAVFormatArrayInteger(integer array[]) {
 
 
 define_function NAVPrintArrayInteger(integer array[]) {
-    NAVLog(NAVFormatArrayInteger(array))
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_ARRAYUTILS__,
+                                'NAVPrintArrayInteger',
+                                NAVFormatArrayInteger(array))
 }
 
 
 define_function NAVPrintArrayString(char array[][]) {
-    NAVLog(NAVFormatArrayString(array))
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_ARRAYUTILS__,
+                                'NAVPrintArrayString',
+                                NAVFormatArrayString(array))
 }
 
 

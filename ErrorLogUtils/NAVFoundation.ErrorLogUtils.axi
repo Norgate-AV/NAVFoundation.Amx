@@ -58,6 +58,14 @@ define_function char[NAV_MAX_CHARS] NAVGetLogLevel(integer level) {
 }
 
 
+define_function NAVLibraryFunctionErrorLog(integer level, char libraryName[], char functionName[], char message[]) {
+    stack_var char log[NAV_MAX_BUFFER]
+
+    log = NAVFormatLibraryFunctionLog(libraryName, functionName, message)
+    NAVErrorLog(level, log)
+}
+
+
 define_function char[NAV_MAX_BUFFER] NAVFormatLibraryFunction(char libraryName[], char functionName[]) {
     return "libraryName, '.', functionName, '()'"
 }

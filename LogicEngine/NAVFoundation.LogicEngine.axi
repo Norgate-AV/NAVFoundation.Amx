@@ -104,23 +104,16 @@ DEFINE_VARIABLE
 volatile _NAVLogicEngine navLogicEngine
 
 
-define_function NAVLogicEngineErrorLog(integer level, char functionName[], char message[]) {
-    stack_var char log[NAV_MAX_BUFFER]
-
-    log = NAVFormatLibraryFunctionLog(__NAV_FOUNDATION_LOGICENGINE__, functionName, message)
-    NAVErrorLog(level, log)
-}
-
-
 define_function NAVLogicEngineStart() {
     if (navLogicEngine.IsRunning) {
         return
     }
 
     if (NAVTimelineStart(TL_NAV_LOGIC_ENGINE, navLogicEngine.Timer.Ticks, TIMELINE_RELATIVE, TIMELINE_REPEAT) != 0) {
-        NAVLogicEngineErrorLog(NAV_LOG_LEVEL_ERROR,
-                                'NAVLogicEngineStart',
-                                'Failed to start LogicEngine')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_LOGICENGINE__,
+                                    'NAVLogicEngineStart',
+                                    'Failed to start LogicEngine')
 
         return
     }
@@ -135,9 +128,10 @@ define_function NAVLogicEngineStop() {
     }
 
     if (NAVTimelineStop(TL_NAV_LOGIC_ENGINE) != 0) {
-        NAVLogicEngineErrorLog(NAV_LOG_LEVEL_ERROR,
-                                'NAVLogicEngineStop',
-                                'Failed to stop LogicEngine')
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_LOGICENGINE__,
+                                    'NAVLogicEngineStop',
+                                    'Failed to stop LogicEngine')
 
         return
     }
