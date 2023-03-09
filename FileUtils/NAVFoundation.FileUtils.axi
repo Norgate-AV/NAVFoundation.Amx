@@ -35,8 +35,6 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_FILEUTILS__ 'NAVFoundation.FileUtils'
 
 #include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.StringUtils.axi'
-#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 DEFINE_CONSTANT

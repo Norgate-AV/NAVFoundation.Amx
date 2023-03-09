@@ -1,4 +1,4 @@
-PROGRAM_NAME='NAVFoundation.RmsBase'
+PROGRAM_NAME='NAVFoundation.HashTable.h'
 
 /*
  _   _                       _          ___     __
@@ -17,7 +17,7 @@ of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+furnished to do so, subject to the following conditions
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
@@ -31,51 +31,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#IF_NOT_DEFINED __NAV_FOUNDATION_RMSBASE__
-#DEFINE __NAV_FOUNDATION_RMSBASE__ 'NAVFoundation.RmsBase'
-
-#include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.RmsUtils.axi'
-#include 'NAVFoundation.ArrayUtils.axi'
-
-
-DEFINE_DEVICE
-#IF_NOT_DEFINED dvMaster
-dvMaster                = 0:1:0
-#END_IF
-
-#IF_NOT_DEFINED vdvRMS
-vdvRMS                  = 41001:1:0
-#END_IF
-
-#IF_NOT_DEFINED vdvRmsSourceUsage
-vdvRMSSourceUsage       = 33000:1:0
-#END_IF
+#IF_NOT_DEFINED __NAV_FOUNDATION_HASHTABLE_H__
+#DEFINE __NAV_FOUNDATION_HASHTABLE_H__ 'NAVFoundation.HashTable.h'
 
 
 DEFINE_CONSTANT
 
+#IF_NOT_DEFINED NAV_HASH_TABLE_SIZE
+constant integer NAV_HASH_TABLE_SIZE = 1000
+#END_IF
 
-DEFINE_VARIABLE
-
-volatile _NAVRmsClient rmsClient
-
-
-#include 'RmsApi.axi'
-#include 'RmsSourceUsage.axi'
-#include 'NAVFoundation.RmsEvents.axi'
+#IF_NOT_DEFINED NAV_MAX_HASH_TABLE_ITEMS
+constant long NAV_MAX_HASH_TABLE_ITEMS = NAV_HASH_TABLE_SIZE / 2
+#END_IF
 
 
-DEFINE_START {
-    RmsSourceUsageReset()
+DEFINE_TYPE
+
+struct _NAVHashTable {
+    _NAVKeyValuePair Items[NAV_HASH_TABLE_SIZE];
+    integer ItemCount;
 }
 
 
-define_module 'RmsNetLinxAdapter_dr4_0_0' RmsNetLinxAdapterComm(vdvRMS)
-define_module 'RmsControlSystemMonitor' RmsControlSystemMonitorComm(vdvRMS, dvMaster)
-
-
-DEFINE_EVENT
-
-
-#END_IF // __NAV_FOUNDATION_RMSBASE__
+#END_IF // __NAV_FOUNDATION_HASHTABLE_H__

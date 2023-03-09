@@ -35,36 +35,6 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_STACK__ 'NAVFoundation.Stack'
 
 #include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.ErrorLogUtils.axi'
-
-
-DEFINE_CONSTANT
-
-#IF_NOT_DEFINED NAV_MAX_STACK_SIZE
-constant integer NAV_MAX_STACK_SIZE = 500
-#END_IF
-
-constant integer NAV_STACK_EMPTY = 0
-
-
-DEFINE_TYPE
-
-struct _NAVStackProperties {
-    integer Top
-    integer Capacity
-}
-
-
-struct _NAVStackString {
-    _NAVStackProperties Properties
-    char Items[NAV_MAX_STACK_SIZE][NAV_MAX_BUFFER]
-}
-
-
-struct _NAVStackInteger {
-    _NAVStackProperties Properties
-    integer Items[NAV_MAX_STACK_SIZE]
-}
 
 
 define_function NAVStackErrorLog(integer level, char functionName[], char message[]) {

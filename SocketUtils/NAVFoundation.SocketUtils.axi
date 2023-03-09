@@ -35,7 +35,6 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_SOCKETUTILS__ 'NAVFoundation.SocketUtils'
 
 #include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 DEFINE_CONSTANT

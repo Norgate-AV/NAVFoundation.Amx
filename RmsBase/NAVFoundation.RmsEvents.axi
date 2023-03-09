@@ -37,7 +37,6 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.RmsUtils.axi'
 #include 'NAVFoundation.ArrayUtils.axi'
-#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 // #DEFINE USING_NAV_RMS_ADAPTER_ONLINE_EVENT_PRE_CLIENT_CONNECTION_INIT_CALLBACK

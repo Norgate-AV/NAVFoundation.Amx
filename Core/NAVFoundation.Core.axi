@@ -407,10 +407,15 @@ volatile long NAVFeedbackTLArray[]	= { 200 }
 /////////////////////////////////////////////////////////////
 // Includes
 /////////////////////////////////////////////////////////////
+#include 'NAVFoundation.ErrorLogUtils.h.axi'
+#include 'NAVFoundation.HashTable.h.axi'
+#include 'NAVFoundation.Queue.h.axi'
+#include 'NAVFoundation.SnapiHelpers.h.axi'
+#include 'NAVFoundation.Stack.h.axi'
+
 #include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.SnapiHelpers.axi'
 #include 'NAVFoundation.StringUtils.axi'
-#include 'NAVFoundation.SocketUtils.axi'
 #include 'NAVFoundation.TimelineUtils.axi'
 #include 'NAVFoundation.DebugConsole.axi'
 #include 'NAVFoundation.CommandConsole.axi'

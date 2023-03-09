@@ -35,7 +35,6 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_TIMELINEUTILS__ 'NAVFoundation.TimelineUtils'
 
 #include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 DEFINE_CONSTANT

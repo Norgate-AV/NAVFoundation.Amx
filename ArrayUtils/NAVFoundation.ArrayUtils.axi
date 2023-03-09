@@ -34,9 +34,9 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_ARRAYUTILS__
 #DEFINE __NAV_FOUNDATION_ARRAYUTILS__ 'NAVFoundation.ArrayUtils'
 
-#include 'NAVFoundation.Math.axi'
-#include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.Stack.axi'
+#include 'NAVFoundation.Math.axi'
 
 
 define_function integer NAVFindInArrayINTEGER(integer array[], integer value) {

@@ -36,7 +36,6 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_DEBUGCONSOLE__ 'NAVFoundation.DebugConsole'
 
 #include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.SocketUtils.axi'
 #include 'NAVFoundation.ConsoleUtils.axi'
 

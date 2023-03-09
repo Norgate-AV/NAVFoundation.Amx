@@ -37,14 +37,6 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 
 
-DEFINE_CONSTANT
-
-constant integer NAV_LOG_LEVEL_ERROR     = AMX_ERROR
-constant integer NAV_LOG_LEVEL_WARNING   = AMX_WARNING
-constant integer NAV_LOG_LEVEL_INFO      = AMX_INFO
-constant integer NAV_LOG_LEVEL_DEBUG     = AMX_DEBUG
-
-
 define_function char[NAV_MAX_CHARS] NAVGetLogLevel(integer level) {
     switch (level) {
         case NAV_LOG_LEVEL_ERROR: {

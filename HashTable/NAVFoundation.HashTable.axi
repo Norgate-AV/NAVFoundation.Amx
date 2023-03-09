@@ -35,26 +35,6 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_HASHTABLE__ 'NAVFoundation.HashTable'
 
 #include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.ErrorLogUtils.axi'
-
-
-DEFINE_CONSTANT
-
-#IF_NOT_DEFINED NAV_HASH_TABLE_SIZE
-constant integer NAV_HASH_TABLE_SIZE = 1000
-#END_IF
-
-#IF_NOT_DEFINED NAV_MAX_HASH_TABLE_ITEMS
-constant long NAV_MAX_HASH_TABLE_ITEMS = NAV_HASH_TABLE_SIZE / 2
-#END_IF
-
-
-DEFINE_TYPE
-
-struct _NAVHashTable {
-    _NAVKeyValuePair Items[NAV_HASH_TABLE_SIZE];
-    integer ItemCount;
-}
 
 
 define_function NAVHashTableErrorLog(integer level, char functionName[], char message[]) {

@@ -36,7 +36,7 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_COMMANDCONSOLE__ 'NAVFoundation.CommandConsole'
 
 #include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.ErrorLogUtils.axi'
+#include 'NAVFoundation.ArrayUtils.axi'
 #include 'NAVFoundation.SocketUtils.axi'
 #include 'NAVFoundation.ConsoleUtils.axi'
 
