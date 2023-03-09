@@ -341,7 +341,7 @@ define_function NAVCommandConsoleProcessCommand(_NAVConsole console) {
             }
             case 'exit':
             case 'quit': {
-                ip_server_close(console.Socket.Port)
+                NAVServerSocketClose(console.Socket.Port)
             }
             case 'clear':
             case 'cls': {
