@@ -188,7 +188,7 @@ define_function char[NAV_MAX_BUFFER] NAVFormatArrayString(char array[][]) {
         }
     }
 
-    return NAVFormatHex("'[ ', result, ' ]'")
+    return NAVFormatHex("'[ ''', result, ''' ]'")
 }
 
 
