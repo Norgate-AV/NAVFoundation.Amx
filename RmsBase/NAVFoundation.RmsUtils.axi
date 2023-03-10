@@ -162,7 +162,7 @@ define_function NAVRmsMessageCopy(_NAVRmsMessage source, _NAVRmsMessage destinat
 
 define_function NAVRmsExceptionCopy(_NAVRmsException source, _NAVRmsException destination) {
     destination.Message = source.Message
-    destination.ThrownByCommandHeader = source.ThrownByCommandHeader
+    destination.ThrownByCommand = source.ThrownByCommand
 }
 
 
