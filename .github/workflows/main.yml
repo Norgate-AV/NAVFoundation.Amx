@@ -2,9 +2,8 @@ name: CI
 
 on:
   push:
-    # branches: ["master"]
+
   pull_request:
-    # branches: ["master"]
 
   workflow_dispatch:
 
@@ -29,4 +28,20 @@ jobs:
         run: which genlinx
 
       - name: Run genlinx
-        run: genlinx build
+        run: genlinx build -c NAVFoundation.build.ci.cfg
+
+      - name: Upload build log only if failure
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: build-log
+          path: ./*.build.log
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            ./**/*.tkn
+            ./**/*.tko
+            ./*.build.log
