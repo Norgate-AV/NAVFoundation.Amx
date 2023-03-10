@@ -111,6 +111,7 @@ SOFTWARE.
 
 DEFINE_EVENT
 
+#IF_DEFINED vdvRms
 data_event[vdvRms] {
     online: {
         rmsClient.Device = data.device
@@ -468,6 +469,7 @@ level_event[vdvRMS, 0] {
     NAVRmsAdapterLevelEventCallback(rmsClient, level)
     #END_IF
 }
+#END_IF
 
 
 #END_IF // __NAV_FOUNDATION_RMSEVENTS__
