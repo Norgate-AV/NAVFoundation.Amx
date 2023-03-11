@@ -1,25 +1,14 @@
 {
-    "files": [
-        "ArrayUtils/NAVFoundation.ArrayUtils.axi",
-        "BinaryUtils/NAVFoundation.BinaryUtils.axi",
-        "Console/NAVFoundation.DebugConsole.axi",
-        "Core/NAVFoundation.Core.axi",
-        "DateTimeUtils/NAVFoundation.DateTimeUtils.axi",
-        "ErrorLogUtils/NAVFoundation.ErrorLogUtils.axi",
-        "FileUtils/NAVFoundation.FileUtils.axi",
-        "HashTable/NAVFoundation.HashTable.axi",
-        "Jsmn/NAVFoundation.Jsmn.axi",
-        "Math/NAVfoundation.Math.axi",
-        "McpBase/NAVFoundation.McpBase.axi",
-        "Queue/NAVFoundation.Queue.h.axi",
-        "Queue/NAVFoundation.Queue.axi",
-        "RmsBase/NAVFoundation.RmsBase.axi",
-        "RmsBase/NAVFoundation.RmsUtils.axi",
-        "SnapiHelpers/NAVFoundation.SnapiHelpers.axi",
-        "SocketUtils/NAVFoundation.SocketUtils.axi",
-        "Stack/NAVFoundation.Stack.axi",
-        "StringUtils/NAVFoundation.StringUtils.axi",
-        "Testing/NAVFoundation.Testing.axi",
-        "UIUtils/NAVFoundation.UIUtils.axi"
-    ]
+    "name": "NAVFoundation.Amx",
+    "description": "A collection of libraries for NetLinx software development",
+    "version": "0.0.0",
+    "license": "MIT",
+    "files": ["**/*.axi"],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx/issues"
+    }
 }
