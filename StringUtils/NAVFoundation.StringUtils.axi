@@ -37,6 +37,10 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 
 
+// #DEFINE USING_NAV_STRING_GATHER_CALLBACK
+// define_function NAVStringGatherCallback(_NAVStringGatherResult args) {}
+
+
 define_function char[NAV_MAX_BUFFER] NAVStripCharsFromRight(char buffer[], integer count) {
     return left_string(buffer, length_array(buffer) - count)
 }
@@ -499,6 +503,38 @@ define_function sinteger NAVStringCompare(char string1[], char string2[]) {
 
 define_function char[NAV_MAX_BUFFER] NAVStringSurroundWith(char buffer[], char left[], char right[]) {
     return "left, buffer, right"
+}
+
+
+define_function NAVStringGather(_NAVRxBuffer buffer, char delimiter[]) {
+    stack_var char data[NAV_MAX_BUFFER]
+
+    if (buffer.Semaphore) {
+        return
+    }
+
+    buffer.Semaphore = true
+
+    while (length_array(buffer.Data) && NAVContains(buffer.Data, delimiter)) {
+        data = remove_string(buffer.Data, delimiter, 1)
+
+        if (!length_array(data)) {
+            continue
+        }
+
+        #IF_DEFINED USING_NAV_STRING_GATHER_CALLBACK
+        if (true) {
+            stack_var _NAVStringGatherResult result
+
+            result.Data = data
+            result.Delimiter = delimiter
+
+            NAVStringGatherCallback(result)
+        }
+        #END_IF
+    }
+
+    buffer.Semaphore = false
 }
 
 
