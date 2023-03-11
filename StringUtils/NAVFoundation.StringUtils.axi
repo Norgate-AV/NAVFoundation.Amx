@@ -103,7 +103,7 @@ define_function integer NAVStringCount(char buffer[], char value[], integer case
     tempBuffer = buffer
     tempValue = value
 
-    if (caseSensitivity = NAV_CASE_INSENSITIVE) {
+    if (caseSensitivity == NAV_CASE_INSENSITIVE) {
         tempBuffer = lower_string(tempBuffer)
         tempValue = lower_string(tempValue)
     }
