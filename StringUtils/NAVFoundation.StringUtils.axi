@@ -37,12 +37,6 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 
 
-DEFINE_CONSTANT
-
-constant integer NAV_CASE_INSENSITIVE =   0
-constant integer NAV_CASE_SENSITIVE =     1
-
-
 define_function char[NAV_MAX_BUFFER] NAVStripCharsFromRight(char buffer[], integer count) {
     return left_string(buffer, length_array(buffer) - count)
 }
