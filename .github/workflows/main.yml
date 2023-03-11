@@ -91,9 +91,9 @@ jobs:
           echo "UncommittedChanges: ${{ steps.gitversion.outputs.uncommittedChanges }}"
           echo "CommitDate: ${{ steps.gitversion.outputs.commitDate }}"
 
-      - name: Update manifest
-        run: |
-          $manifest = Get-Content -Path .\manifest.json -Raw | ConvertFrom-Json
-          $manifest.version = ${{ steps.gitversion.outputs.semVer }}
-          $manifest | Out-File -FilePath .\manifest.json
-          $manifest
+      - name: Create Tag
+        uses: tvdias/github-tagger@v0.0.1
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          tag: "${{ steps.gitversion.outputs.semVer }}"
+          commit-sha: "${{ steps.gitversion.outputs.sha }}"
