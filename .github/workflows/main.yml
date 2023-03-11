@@ -46,13 +46,12 @@ jobs:
         uses: gittools/actions/gitversion/setup@v0
         with:
           versionSpec: "5.x"
-      
+
       - name: Show GitVersion config
-        id: gitversion
         uses: gittools/actions/gitversion/execute@v0
         with:
           additionalArguments: /showConfig
-      
+
       - name: Determine Version
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0
