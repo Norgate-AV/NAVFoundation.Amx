@@ -294,6 +294,12 @@ struct _NAVContact {
 ////////////////////////////////////////////////////////////
 // State Tracking
 ////////////////////////////////////////////////////////////
+struct _NAVStateBoolean {
+    char Required
+    char Actual
+}
+
+
 struct _NAVStateInteger {
     integer Required
     integer Actual
