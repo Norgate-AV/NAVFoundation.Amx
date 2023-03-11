@@ -119,6 +119,11 @@ struct _NAVRmsClient {
 }
 
 
+define_function NAVRmsClientInit(_NAVRmsClient client, tdata args) {
+    client.Device = args.device
+}
+
+
 define_function NAVRmsConnectionCopy(_NAVRmsConnection source, _NAVRmsConnection destination) {
     destination.Name = source.Name
     destination.Url = source.Url

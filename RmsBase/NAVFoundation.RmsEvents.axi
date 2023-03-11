@@ -114,7 +114,7 @@ DEFINE_EVENT
 #IF_DEFINED vdvRms
 data_event[vdvRms] {
     online: {
-        rmsClient.Device = data.device
+        NAVRmsClientInit(rmsClient, data)
 
         #IF_DEFINED USING_NAV_RMS_ADAPTER_ONLINE_EVENT_PRE_CLIENT_CONNECTION_INIT_CALLBACK
         NAVRmsAdapterOnlineEventPreClientConnectionInitCallback(rmsClient, data)
