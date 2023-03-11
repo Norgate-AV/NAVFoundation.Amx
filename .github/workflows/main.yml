@@ -30,13 +30,6 @@ jobs:
       - name: Run genlinx
         run: genlinx build -c NAVFoundation.ci.build.cfg
 
-      - name: Upload build log only if failure
-        uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: build-log
-          path: ./*.build.log
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
