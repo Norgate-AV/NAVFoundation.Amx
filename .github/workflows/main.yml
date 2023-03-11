@@ -88,6 +88,8 @@ jobs:
           echo "UncommittedChanges: ${{ steps.gitversion.outputs.uncommittedChanges }}"
           echo "CommitDate: ${{ steps.gitversion.outputs.commitDate }}"
 
-      - name: Display SemVer
+      - name: Update manifest
         run: |
-          echo "SemVer: $GITVERSION_SEMVER"
+          $manifest = Get-Content -Path .\manifest.json -Raw | ConvertFrom-Json
+          $manifest.version = ${{ steps.gitversion.outputs.semVer }}
+          $manifest.version | Out-File -FilePath .\manifest.json
