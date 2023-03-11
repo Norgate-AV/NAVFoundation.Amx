@@ -67,6 +67,11 @@ struct _NAVRmsLocation {
 }
 
 
+struct _NAVRmsAdapter {
+    char IsOnline
+}
+
+
 struct _NAVRmsConnection {
     char Name[NAV_MAX_CHARS]
     char Url[NAV_MAX_BUFFER]
