@@ -92,4 +92,4 @@ jobs:
         run: |
           $manifest = Get-Content -Path .\manifest.json -Raw | ConvertFrom-Json
           $manifest.version = ${{ steps.gitversion.outputs.semVer }}
-          $manifest.version | Out-File -FilePath .\manifest.json
+          $manifest | Out-File -FilePath .\manifest.json
