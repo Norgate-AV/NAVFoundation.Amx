@@ -3,7 +3,7 @@
     "description": "A collection of libraries for NetLinx software development",
     "version": "0.0.0",
     "license": "MIT",
-    "files": ["**/*.axi", "LICENSE"],
+    "files": ["**/*.axi", "./SymLink.ps1", "LICENSE"],
     "repository": {
         "type": "git",
         "url": "https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx.git"
