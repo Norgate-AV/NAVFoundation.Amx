@@ -333,6 +333,9 @@ define_function NAVCommandConsoleProcessCommand(_NAVConsole console) {
                         NAVCommandConsoleSendResponse(console, "NAV_CR, NAV_LF, 'Log level is ', NAVGetLogLevel(get_log_level())")
                         NAVCommandConsoleSendPrompt(console, 0)
                     }
+                    case 'info': {
+                        NAVCommandConsoleSendPrompt(console, 0)
+                    }
                     default: {
                         NAVCommandConsoleSendResponse(console, "NAV_CR, NAV_LF, 'Invalid get argument: ', args[2]")
                         NAVCommandConsoleSendPrompt(console, 1)
