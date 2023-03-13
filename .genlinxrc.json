@@ -1,0 +1,29 @@
+{
+    "build": {
+        "nlrc": {
+            "includePath": [
+                ".\\ArrayUtils",
+                ".\\BinaryUtils",
+                ".\\Console",
+                ".\\Core",
+                ".\\DateTimeUtils",
+                ".\\ErrorLogUtils",
+                ".\\FileUtils",
+                ".\\HashTable",
+                ".\\Jsmn",
+                ".\\LogicEngine",
+                ".\\Math",
+                ".\\McpBase",
+                ".\\Queue",
+                ".\\RmsBase",
+                ".\\SnapiHelpers",
+                ".\\SocketUtils",
+                ".\\Stack",
+                ".\\StringUtils",
+                ".\\Testing",
+                ".\\TimelineUtils",
+                ".\\UIUtils"
+            ]
+        }
+    }
+}
