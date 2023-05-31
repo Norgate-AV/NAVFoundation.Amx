@@ -56,6 +56,15 @@ struct _NAVUIButton {
 }
 
 
+////////////////////////////////////////////////////////////
+// UI State
+////////////////////////////////////////////////////////////
+struct _NAVUIState {
+    integer CurrentPage
+    integer CurrentPopupPage
+}
+
+
 define_function NAVShowButtonArray(dev device[], integer address, integer state) {
     NAVCommandArray(device, "'^SHO-', itoa(address), ',', itoa(state)")
 }
