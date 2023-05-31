@@ -646,7 +646,11 @@ define_function char[NAV_MAX_CHARS] NAVBooleanToString(char value) {
 }
 
 
+// Deprecated
 define_function char[NAV_MAX_CHARS] NAVSITOA(sinteger value) {
+    #warn 'Use of deprecated function NAVSITOA'
+    #warn 'Use NAVSignedIntegerToAscii instead'
+
     return "itoa(value)"
 }
 
@@ -656,7 +660,11 @@ define_function char[NAV_MAX_CHARS] NAVSignedIntegerToAscii(sinteger value) {
 }
 
 
+// Deprecated
 define_function char[NAV_MAX_CHARS] NAVLTOA(long value) {
+    #warn 'Use of deprecated function NAVLTOA'
+    #warn 'Use NAVLongToAscii instead'
+
     return "itoa(value)"
 }
 
@@ -666,7 +674,11 @@ define_function char[NAV_MAX_CHARS] NAVLongToAscii(long value) {
 }
 
 
+// Deprecated
 define_function char[NAV_MAX_CHARS] NAVDTOA(double value) {
+    #warn 'Use of deprecated function NAVDTOA'
+    #warn 'Use NAVDoubleToAscii instead'
+
     return "itoa(value)"
 }
 
