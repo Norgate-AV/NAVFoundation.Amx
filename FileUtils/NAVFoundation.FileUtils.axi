@@ -519,4 +519,70 @@ define_function char[NAV_MAX_BUFFER] NAVJoinPath(char parent[], char child[]) {
 }
 
 
+// define_function NAVReadCsvFile(char path[], char lines[][]) {
+//     stack_var char file[NAV_MAX_BUFFER]
+//     stack_var integer index
+//     stack_var integer lineIndex
+
+//     if (!length_array(path)) {
+//         return
+//     }
+
+//     file = NAVFileRead(path)
+//     if (!length_array(file)) {
+//         return
+//     }
+
+//     index = 0
+//     lineIndex = 0
+
+//     while (index < length_array(file)) {
+//         stack_var char line[NAV_MAX_BUFFER]
+//         stack_var integer lineLength
+
+//         line = NAVStringSubstring(file, index, index + 1)
+//         lineLength = length_array(line)
+
+//         if (lineLength == 0) {
+//             break
+//         }
+
+//     }
+// }
+
+
+// define_function slong NAVSplitPath(char path[], char elements[][]) {
+//     stack_var char element[NAV_MAX_BUFFER]
+//     stack_var long index
+//     stack_var long count
+
+//     if (!length_array(path)) {
+//         return 0
+//     }
+
+//     count = 0
+//     index = 0
+
+//     while (index < length_array(path)) {
+//         element = NAVSubstring(path, index, index + 1)
+
+//         if (element == '/') {
+//             if (length_array(elements[count])) {
+//                 count++
+//             }
+//         } else {
+//             elements[count] = "elements[count], element"
+//         }
+
+//         index++
+//     }
+
+//     if (length_array(elements[count])) {
+//         count++
+//     }
+
+//     return count
+// }
+
+
 #END_IF // __NAV_FOUNDATION_FILEUTILS__
