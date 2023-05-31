@@ -128,4 +128,91 @@ struct _NAVUnitTestSuite {
 }
 
 
+define_function NAVUnitTestSuiteInit(_NAVUnitTestSuite suite, char name[], char description[]) {
+    suite.Name = name
+    suite.Description = description
+    suite.Message = ""
+    suite.Passed = 0
+    suite.Total = 0
+    suite.PassedCount = 0
+    suite.FailedCount = 0
+    suite.SkippedCount = 0
+}
+
+
+define_function NAVUnitTestSuiteAddTestWithStringResult(_NAVUnitTestSuite suite, _NAVUnitTestWithStringResult test) {
+    if (suite.Total >= NAV_MAX_TESTS) {
+        NAVLog("'NAVUnitTestSuiteAddTestWithStringResult(): Maximum number of tests reached'")
+        return
+    }
+
+    suite.Total++
+    suite.Type[suite.Total] = NAV_TEST_TYPE_STRING_RESULT
+
+    // set_length_array(suite.StringResultTest[suite.Total], suite.Total)
+
+    // suite.StringResultTest[suite.Total].Properties.Name = name
+    // suite.StringResultTest[suite.Total].Properties.Description = description
+    // suite.StringResultTest[suite.Total].Properties.Message = ""
+    // suite.StringResultTest[suite.Total].Properties.Skip = skip
+    // suite.StringResultTest[suite.Total].Properties.Passed = 0
+    // suite.StringResultTest[suite.Total].Result.Expected = expected
+    // suite.StringResultTest[suite.Total].Result.Actual = actual
+
+    suite.StringResultTest[suite.Total] = test
+}
+
+
+define_function NAVUnitTestWithStringResultInit(_NAVUnitTestWithStringResult test, char name[], char description[]) {
+    test.Properties.Name = name
+    test.Properties.Description = description
+    test.Properties.Message = ""
+    test.Properties.Skip = false
+    test.Properties.Passed = false
+}
+
+
+// define_function NAVUnitTestSuiteRun(_NAVUnitTestSuite suite) {
+//     stack_var integer x
+
+//     for (x = 1; x <= suite.Total; x++) {
+//         switch (suite.Type[x]) {
+//             case NAV_TEST_TYPE_STRING_RESULT: {
+//                 stack_var _NAVUnitTestWithStringResult test
+
+//                 test = suite.StringResultTest[x]
+
+//                 NAVUnitTestRunWithStringResult(suite, test)
+//             }
+//         }
+//     }
+// }
+
+
+// define_function NAVUnitTestRunWithStringResult(_NAVUnitTestSuite suite, _NAVUnitTestWithStringResult test) {
+//     if (test.Properties.Skip) {
+//         test.Properties.Message = "Test skipped"
+//         test.Properties.Passed = false
+//         suite.SkippedCount++
+//         return
+//     }
+
+//     // Invoke a callback function to run the test
+//     #IF_DEFINED NAV_TEST_CALLBACK
+//     NAV_TEST_CALLBACK(test)
+//     #END_IF
+
+//     if (test.Result.Actual != test.Result.Expected) {
+//         test.Properties.Message = "Test failed"
+//         test.Properties.Passed = false
+//         suite.FailedCount++
+//         return
+//     }
+
+//     test.Properties.Message = "Test passed"
+//     test.Properties.Passed = true
+//     suite.PassedCount++
+// }
+
+
 #END_IF // __NAV_FOUNDATION_TESTING__
