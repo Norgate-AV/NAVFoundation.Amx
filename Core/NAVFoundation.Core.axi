@@ -646,6 +646,36 @@ define_function char[NAV_MAX_CHARS] NAVBooleanToString(char value) {
 }
 
 
+define_function char[NAV_MAX_CHARS] NAVSITOA(sinteger value) {
+    return "itoa(value)"
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVSignedIntegerToAscii(sinteger value) {
+    return "itoa(value)"
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVLTOA(long value) {
+    return "itoa(value)"
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVLongToAscii(long value) {
+    return "itoa(value)"
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVDTOA(double value) {
+    return "itoa(value)"
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVDoubleToAscii(double value) {
+    return "itoa(value)"
+}
+
+
 define_function char[NAV_MAX_CHARS] NAVGetUniqueId() {
     return NAVController.UniqueId
 }
