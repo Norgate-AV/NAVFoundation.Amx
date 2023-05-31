@@ -343,11 +343,94 @@ struct _NAVStateString {
 
 
 ////////////////////////////////////////////////////////////
+// Volume
+////////////////////////////////////////////////////////////
+struct _NAVVolume {
+    _NAVStateSignedInteger Level
+    _NAVStateInteger Mute
+}
+
+
+////////////////////////////////////////////////////////////
+// Device
+////////////////////////////////////////////////////////////
+struct _NAVDevice {
+    integer IsOnline
+    integer IsCommunicating
+    integer IsInitialized
+    _NAVSocketConnection SocketConnection
+}
+
+
+////////////////////////////////////////////////////////////
+// Display
+////////////////////////////////////////////////////////////
+struct _NAVDisplay {
+    _NAVDevice Device
+    _NAVStateInteger Power
+    _NAVStateInteger Input
+    _NAVStateInteger VideoMute
+    _NAVVolume Volume
+    char AutoAdjustRequired
+}
+
+
+////////////////////////////////////////////////////////////
+// Projector
+////////////////////////////////////////////////////////////
+struct _NAVProjector {
+    _NAVDisplay Display
+    _NAVStateInteger LampHours[2]
+    _NAVStateInteger LampStatus[2]
+    _NAVStateInteger FilterHours[2]
+    _NAVStateInteger FilterStatus[2]
+    _NAVStateFloat Temperature
+}
+
+
+////////////////////////////////////////////////////////////
+// Switcher
+////////////////////////////////////////////////////////////
+struct _NAVSwitcher {
+    _NAVDevice Device
+    _NAVVolume Volume
+    // integer OutputRequired[3][128]
+    // integer OutputActual[3][128]
+    _NAVStateInteger Output[3][128]
+    integer PendingRequired[3][128]
+    integer NumberOfInputs
+    char InputHasSignal[128]
+    char Pending
+}
+
+
+////////////////////////////////////////////////////////////
 // RxBuffer
 ////////////////////////////////////////////////////////////
 struct _NAVRxBuffer {
     char Data[NAV_MAX_BUFFER]
     char Semaphore
+}
+
+
+////////////////////////////////////////////////////////////
+// Module
+////////////////////////////////////////////////////////////
+struct _NAVModule {
+    _NAVRxBuffer RxBuffer
+    integer Enabled
+    integer CommandBusy
+}
+
+
+/////////////////////////////////////////////////////////////
+// Disc Device
+/////////////////////////////////////////////////////////////
+struct NAVDiscDevice {
+    _NAVDevice Device
+    _NAVStateInteger PowerState
+    _NAVStateInteger TransportState
+    _NAVStateInteger DiscType
 }
 
 
@@ -403,6 +486,21 @@ struct _NAVConsole {
     slong ErrorCode
     char Semaphore
     char RxBuffer[NAV_MAX_BUFFER]
+}
+
+
+/////////////////////////////////////////////////////////////
+// System
+/////////////////////////////////////////////////////////////
+struct _NAVSystem {
+    long Feedback[1]
+    long Blinker[1]
+    _NAVController Controller
+}
+
+
+struct _NAVDataEventArgs {
+    tdata Data
 }
 
 
