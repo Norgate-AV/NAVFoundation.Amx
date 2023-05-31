@@ -367,7 +367,7 @@ struct _NAVDevice {
 ////////////////////////////////////////////////////////////
 struct _NAVDisplay {
     _NAVDevice Device
-    _NAVStateInteger Power
+    _NAVStateInteger PowerState
     _NAVStateInteger Input
     _NAVStateInteger VideoMute
     _NAVVolume Volume
