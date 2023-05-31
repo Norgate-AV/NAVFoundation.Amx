@@ -201,4 +201,9 @@ define_function NAVBeep(dev device) {
 }
 
 
+define_function NAVPanelUpdate(dev device) {
+    NAVCommand(device, "'@UPD'")
+}
+
+
 #END_IF /* __NAV_FOUNDATION_UIUTILS__ */
