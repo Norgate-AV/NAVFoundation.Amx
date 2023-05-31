@@ -124,6 +124,18 @@ struct _NAVRmsClient {
 }
 
 
+struct _NAVRmsMonitorAssetProperties {
+    char MonitorAssetName[NAV_MAX_CHARS]
+    char MonitorAssetDescription[NAV_MAX_BUFFER]
+    char MonitorAssetManufacturerName[NAV_MAX_CHARS]
+    char MonitorAssetModelName[NAV_MAX_CHARS]
+    char MonitorAssetManufacturerURL[NAV_MAX_BUFFER]
+    char MonitorAssetModelURL[NAV_MAX_BUFFER]
+    char MonitorAssetSerialNumber[NAV_MAX_CHARS]
+    char MonitorAssetFirmwareVersion[NAV_MAX_CHARS]
+}
+
+
 define_function NAVRmsClientInit(_NAVRmsClient client, tdata args) {
     client.Device = args.device
 }
