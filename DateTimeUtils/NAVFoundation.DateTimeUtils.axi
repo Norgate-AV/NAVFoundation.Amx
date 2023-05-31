@@ -90,5 +90,82 @@ define_function char[NAV_MAX_BUFFER] NAVGetNextDate() {
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVDateTimeGetCurrentTodDate() {
+    stack_var char result[NAV_MAX_CHARS]
+
+    // makestring(result, "%04u%02u%02u", getyearnum(), getmonthnum(), getdatenum())
+
+    return result
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVDateTimeGetCurrentTodTime() {
+    stack_var char result[NAV_MAX_CHARS]
+
+    // makestring(result, "%02u%02u%02u", gethournum(), getminutesnum(), getsecondsnum())
+
+    return result
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVDateTimeGetCurrentTod() {
+    stack_var char result[NAV_MAX_CHARS]
+
+    // makestring(result, "%s%s", NAVDateTimeGetCurrentTodDate(), NAVDateTimeGetCurrentTodTime())
+
+    return result
+}
+
+
+define_function integer NAVDateTimePast(char date[], char time[]) {
+    // stack_var char dateElements[3][4]
+    // stack_var char timeElements[3][2]
+
+    // stack_var char todDate[NAV_MAX_CHARS]
+    // stack_var long todDate
+    // stack_var char todTime[NAV_MAX_CHARS]
+    // stack_var long todTime
+
+    // stack_var char currentTodDate[NAV_MAX_CHARS]
+    // stack_var long currentTodDate
+    // stack_var char currentTodTime[NAV_MAX_CHARS]
+    // stack_var long currentTodTime
+
+    // stack_var integer day
+    // stack_var integer month
+    // stack_var integer year
+
+    // stack_var integer hour
+    // stack_var integer minutes
+    // stack_var integer seconds
+
+    // stack_var integer datePast
+    // stack_var integer timePast
+
+    // NAVSplitString(date, '/', dateElements)
+    // NAVSplitString(time, ':', timeElements)
+
+    // day = atoi(dateElements[1])
+    // month = atoi(dateElements[2])
+    // year = atoi(dateElements[3])
+
+    // hour = atoi(timeElements[1])
+    // minutes = atoi(timeElements[2])
+    // seconds = atoi(timeElements[3])
+
+    // makestring(todDate, "%04u%02u%02u", year, month, day)
+    // makestring(todTime, "%02u%02u%02u", hour, minutes, seconds)
+
+    // todDate = atoi(todDate)
+    // todTime = atoi(todTime)
+
+    // currentTodDate = atoi(NAVDateTimeGetCurrentTodDate())
+    // currentTodTime = atoi(NAVDateTimeGetCurrentTodTime())
+
+    // datePast = (currentTodDate > todDate)
+    // timePast = (currentTodTime > todTime)
+
+    // return (datePast || timePast)
+}
 
 #END_IF // __NAV_FOUNDATION_DATETIMEUTILS__
