@@ -648,8 +648,15 @@ define_function char[NAV_MAX_CHARS] NAVBooleanToString(char value) {
 
 // Deprecated
 define_function char[NAV_MAX_CHARS] NAVSITOA(sinteger value) {
-    #warn 'Use of deprecated function NAVSITOA'
-    #warn 'Use NAVSignedIntegerToAscii instead'
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_CORE__,
+                                'NAVSITOA()',
+                                'Use of deprecated function NAVSITOA')
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_CORE__,
+                                'NAVSITOA()',
+                                'Use NAVSignedIntegerToAscii instead')
 
     return "itoa(value)"
 }
@@ -662,8 +669,15 @@ define_function char[NAV_MAX_CHARS] NAVSignedIntegerToAscii(sinteger value) {
 
 // Deprecated
 define_function char[NAV_MAX_CHARS] NAVLTOA(long value) {
-    #warn 'Use of deprecated function NAVLTOA'
-    #warn 'Use NAVLongToAscii instead'
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_CORE__,
+                                'NAVLTOA()',
+                                'Use of deprecated function NAVLTOA')
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_CORE__,
+                                'NAVLTOA()',
+                                'Use NAVLongToAscii instead')
 
     return "itoa(value)"
 }
@@ -676,8 +690,15 @@ define_function char[NAV_MAX_CHARS] NAVLongToAscii(long value) {
 
 // Deprecated
 define_function char[NAV_MAX_CHARS] NAVDTOA(double value) {
-    #warn 'Use of deprecated function NAVDTOA'
-    #warn 'Use NAVDoubleToAscii instead'
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_CORE__,
+                                'NAVDTOA()',
+                                'Use of deprecated function NAVDTOA')
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_CORE__,
+                                'NAVDTOA()',
+                                'Use NAVDoubleToAscii instead')
 
     return "itoa(value)"
 }
