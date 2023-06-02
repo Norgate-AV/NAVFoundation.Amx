@@ -37,7 +37,7 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 
 
-define_function char[NAV_MAX_CHARS] NAVGetLogLevel(integer level) {
+define_function char[NAV_MAX_CHARS] NAVGetLogLevel(long level) {
     switch (level) {
         case NAV_LOG_LEVEL_ERROR: {
             return 'ERROR'
@@ -58,7 +58,7 @@ define_function char[NAV_MAX_CHARS] NAVGetLogLevel(integer level) {
 }
 
 
-define_function NAVLibraryFunctionErrorLog(integer level, char libraryName[], char functionName[], char message[]) {
+define_function NAVLibraryFunctionErrorLog(long level, char libraryName[], char functionName[], char message[]) {
     stack_var char log[NAV_MAX_BUFFER]
 
     log = NAVFormatLibraryFunctionLog(libraryName, functionName, message)
@@ -76,12 +76,12 @@ define_function char[NAV_MAX_BUFFER] NAVFormatLibraryFunctionLog(char libraryNam
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVFormatLog(integer level, char value[]) {
+define_function char[NAV_MAX_BUFFER] NAVFormatLog(long level, char value[]) {
     return "NAVGetLogLevel(level), ':: ', NAVFormatHex(value)"
 }
 
 
-define_function NAVErrorLog(integer level, char value[]) {
+define_function NAVErrorLog(long level, char value[]) {
     switch (level) {
         case NAV_LOG_LEVEL_ERROR:
         case NAV_LOG_LEVEL_WARNING:

@@ -37,10 +37,10 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
-constant integer NAV_LOG_LEVEL_ERROR     = AMX_ERROR
-constant integer NAV_LOG_LEVEL_WARNING   = AMX_WARNING
-constant integer NAV_LOG_LEVEL_INFO      = AMX_INFO
-constant integer NAV_LOG_LEVEL_DEBUG     = AMX_DEBUG
+constant long NAV_LOG_LEVEL_ERROR     = AMX_ERROR
+constant long NAV_LOG_LEVEL_WARNING   = AMX_WARNING
+constant long NAV_LOG_LEVEL_INFO      = AMX_INFO
+constant long NAV_LOG_LEVEL_DEBUG     = AMX_DEBUG
 
 
 #END_IF // __NAV_FOUNDATION_ERRORLOGUTILS_H__
