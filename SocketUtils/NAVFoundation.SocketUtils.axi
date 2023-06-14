@@ -82,6 +82,16 @@ define_function char[NAV_MAX_BUFFER] NAVGetSocketError(slong error) {
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVGetSocketProtocol(integer protocol) {
+    switch (protocol) {
+        case IP_TCP:        { return 'TCP' }
+        case IP_UDP:        { return 'UDP' }
+        case IP_UDP_2WAY:   { return 'UDP 2-Way' }
+        default:            { return "'Unknown protocol (', itoa(protocol), ')'" }
+    }
+}
+
+
 define_function slong NAVServerSocketOpen(integer socket, integer port, integer protocol) {
     stack_var slong result
 
