@@ -129,6 +129,19 @@ define_function slong NAVClientSocketOpen(integer socket, char address[], intege
         return NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS
     }
 
+    if (port <= 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientSocketOpen',
+                                    "'Failed to open socket. ', NAVGetSocketError(NAV_SOCKET_ERROR_INVALID_PORT)")
+        return NAV_SOCKET_ERROR_INVALID_PORT
+    }
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+                                __NAV_FOUNDATION_SOCKETUTILS__,
+                                'NAVClientSocketOpen',
+                                "'Attemping to open socket to ', address, ':', itoa(port), ' (', NAVGetSocketProtocol(protocol), ')'")
+
     result = ip_client_open(socket, address, port, protocol)
 
     if (result < 0) {
