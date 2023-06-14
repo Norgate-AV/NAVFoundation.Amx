@@ -43,6 +43,7 @@ constant slong NAV_SOCKET_ERROR_INVALID_SERVER_PORT             = -1
 constant slong NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE          = -2
 constant slong NAV_SOCKET_ERROR_UNABLE_TO_OPEN_PORT             = -3
 constant slong NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS            = -10
+constant slong NAV_SOCKET_ERROR_INVALID_PORT                    = -11
 constant slong NAV_SOCKET_ERROR_GENERAL_FAILURE                 = 2
 constant slong NAV_SOCKET_ERROR_UNKNOWN_HOST                    = 4
 constant slong NAV_SOCKET_ERROR_CONNECTION_REFUSED              = 6
@@ -63,6 +64,7 @@ define_function char[NAV_MAX_BUFFER] NAVGetSocketError(slong error) {
         case NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE:       { return 'Invalid value for protocol' }
         case NAV_SOCKET_ERROR_UNABLE_TO_OPEN_PORT:          { return 'Unable to open communication port' }
         case NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS:         { return 'Invalid host address' }
+        case NAV_SOCKET_ERROR_INVALID_PORT:                 { return 'Invalid port' }
         case NAV_SOCKET_ERROR_GENERAL_FAILURE:              { return 'General failure (out of memory)' }
         case NAV_SOCKET_ERROR_UNKNOWN_HOST:                 { return 'Unknown host' }
         case NAV_SOCKET_ERROR_CONNECTION_REFUSED:           { return 'Connection refused' }
