@@ -42,6 +42,7 @@ DEFINE_CONSTANT
 constant slong NAV_SOCKET_ERROR_INVALID_SERVER_PORT             = -1
 constant slong NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE          = -2
 constant slong NAV_SOCKET_ERROR_UNABLE_TO_OPEN_PORT             = -3
+constant slong NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS            = -10
 constant slong NAV_SOCKET_ERROR_GENERAL_FAILURE                 = 2
 constant slong NAV_SOCKET_ERROR_UNKNOWN_HOST                    = 4
 constant slong NAV_SOCKET_ERROR_CONNECTION_REFUSED              = 6
@@ -61,6 +62,7 @@ define_function char[NAV_MAX_BUFFER] NAVGetSocketError(slong error) {
         case NAV_SOCKET_ERROR_INVALID_SERVER_PORT:          { return 'Invalid server port' }
         case NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE:       { return 'Invalid value for protocol' }
         case NAV_SOCKET_ERROR_UNABLE_TO_OPEN_PORT:          { return 'Unable to open communication port' }
+        case NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS:         { return 'Invalid host address' }
         case NAV_SOCKET_ERROR_GENERAL_FAILURE:              { return 'General failure (out of memory)' }
         case NAV_SOCKET_ERROR_UNKNOWN_HOST:                 { return 'Unknown host' }
         case NAV_SOCKET_ERROR_CONNECTION_REFUSED:           { return 'Connection refused' }
@@ -101,6 +103,51 @@ define_function slong NAVServerSocketClose(integer socket) {
                                 'Closing server socket...')
 
     return ip_server_close(socket)
+}
+
+
+define_function slong NAVClientSocketOpen(integer socket, char address[], integer port, integer protocol) {
+    stack_var slong result
+
+    if (!length_array(address)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientSocketOpen',
+                                    "'Failed to open socket. ', NAVGetSocketError(NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS)")
+        return NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS
+    }
+
+    result = ip_client_open(socket, address, port, protocol)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientSocketOpen',
+                                    "'Failed to open socket. ', NAVGetSocketError(result)")
+    }
+
+    return result
+}
+
+
+define_function slong NAVClientSocketClose(integer socket) {
+    stack_var slong result
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+                                __NAV_FOUNDATION_SOCKETUTILS__,
+                                'NAVClientSocketClose',
+                                'Closing client socket...')
+
+    result = ip_client_close(socket)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientSocketOpen',
+                                    "'Failed to close socket. ', NAVGetSocketError(result)")
+    }
+
+    return result
 }
 
 
