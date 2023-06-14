@@ -265,7 +265,7 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringBetween(char buffer[], char tok
     }
 
     if (tokenIndex[1] < tokenIndex[2]) {
-        result = mid_string(buffer, startIndex, tokenIndex[2] - tokenIndex[1])
+        result = NAVStringSubstring(buffer, startIndex, tokenIndex[2] - startIndex)
     }
 
     return result
