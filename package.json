@@ -1,0 +1,52 @@
+{
+    "name": "NAVFoundation.Amx",
+    "description": "A collection of libraries for NetLinx software development",
+    "version": "0.80.2",
+    "private": true,
+    "keywords": [
+        "amx",
+        "netlinx",
+        "harman"
+    ],
+    "files": [
+        "**/*.axi",
+        "./SymLink.ps1",
+        "LICENSE"
+    ],
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx/issues"
+    },
+    "engines": {
+        "node": ">=14"
+    },
+    "scripts": {
+        "lint": "echo \"Linting not setup for this project\"",
+        "lint:fix": "echo \"Linting not setup for this project\"",
+        "commit": "git-cz",
+        "prepare": "husky install",
+        "pretty:fix": "prettier --write .",
+        "doctoc": "doctoc README.md",
+        "contrib:add": "all-contributors add",
+        "contrib:generate": "all-contributors generate",
+        "contrib:check": "all-contributors check",
+        "size": "size-limit",
+        "analyze": "size-limit --why"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^17.4.4",
+        "@commitlint/config-conventional": "^17.4.4",
+        "all-contributors-cli": "^6.24.0",
+        "cz-conventional-changelog": "3.3.0",
+        "doctoc": "^2.2.1",
+        "husky": "^8.0.3",
+        "lint-staged": "^13.1.2",
+        "prettier": "^2.8.4",
+        "size-limit": "^8.2.4"
+    },
+    "dependencies": {}
+}
