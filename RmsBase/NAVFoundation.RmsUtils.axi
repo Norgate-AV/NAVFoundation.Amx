@@ -136,6 +136,12 @@ struct _NAVRmsMonitorAssetProperties {
 }
 
 
+struct _NAVRmsSource {
+    char Name[NAV_MAX_CHARS]
+    char Description[NAV_MAX_BUFFER]
+}
+
+
 define_function NAVRmsClientInit(_NAVRmsClient client, tdata args) {
     client.Device = args.device
 }
