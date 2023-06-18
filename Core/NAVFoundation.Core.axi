@@ -233,6 +233,33 @@ constant char    NAV_GUID[NAV_MAX_CHARS] = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
 constant char    NAV_GUID_HEX[NAV_MAX_CHARS] = '0123456789abcdef-'
 
 
+/////////////////////////////////////////////////////////////
+// Variable to Xml Errors
+/////////////////////////////////////////////////////////////
+constant sinteger NAV_VAR_TO_XML_ERROR_XML_DECODE_DATA_TYPE_MISMATCH        = 3
+constant sinteger NAV_VAR_TO_XML_ERROR_XML_DECODE_DATA_TOO_SMALL            = 2
+constant sinteger NAV_VAR_TO_XML_ERROR_STRUCTURE_TOO_SMALL                  = 1
+constant sinteger NAV_VAR_TO_XML_ERROR_DECODE_VARIABLE_TYPE_MISMATCH        = -1
+constant sinteger NAV_VAR_TO_XML_ERROR_DECODE_DATA_TOO_SMALL                = -2
+constant sinteger NAV_VAR_TO_XML_ERROR_OUTPUT_CHARACTER_BUFFER_TOO_SMALL    = -3
+
+
+/////////////////////////////////////////////////////////////
+// Variable to String Errors
+/////////////////////////////////////////////////////////////
+constant sinteger NAV_VAR_TO_STRING_UNRECOGNIZED_TYPE   = -1
+constant sinteger NAV_VAR_TO_STRING_BUFFER_TOO_SMALL    = -2
+
+
+/////////////////////////////////////////////////////////////
+// String to Variable Errors
+/////////////////////////////////////////////////////////////
+constant sinteger NAV_STRING_TO_VAR_ERROR_DECODE_DATA_TOO_SMALL_1           = 2
+constant sinteger NAV_STRING_TO_VAR_ERROR_STRUCTURE_TOO_SMALL               = 1
+constant sinteger NAV_STRING_TO_VAR_ERROR_DECODE_VARIABLE_TYPE_MISMATCH     = -1
+constant sinteger NAV_STRING_TO_VAR_ERROR_DECODE_DATA_TOO_SMALL_2           = -2
+
+
 (***********************************************************)
 (*              DATA TYPE DEFINITIONS GO BELOW             *)
 (***********************************************************)
@@ -918,6 +945,69 @@ define_function char[NAV_MAX_BUFFER] NAVGetNAVBanner() {
         '=============================================================',
         NAV_CR, NAV_LF
     "
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVGetVariableToXmlError(sinteger error) {
+    switch (error) {
+        case NAV_VAR_TO_XML_ERROR_XML_DECODE_DATA_TYPE_MISMATCH: {
+            return "'XML decode data type mismatch'"
+        }
+        case NAV_VAR_TO_XML_ERROR_XML_DECODE_DATA_TOO_SMALL: {
+            return "'XML decode data too small, more members in structure'"
+        }
+        case NAV_VAR_TO_XML_ERROR_STRUCTURE_TOO_SMALL: {
+            return "'Structure too small, more members in XML decode string'"
+        }
+        case NAV_VAR_TO_XML_ERROR_DECODE_VARIABLE_TYPE_MISMATCH: {
+            return "'Decode variable type mismatch'"
+        }
+        case NAV_VAR_TO_XML_ERROR_DECODE_DATA_TOO_SMALL: {
+            return "'Decode data too small, decoder ran out of data. Most likely poorly formed XML'"
+        }
+        case NAV_VAR_TO_XML_ERROR_OUTPUT_CHARACTER_BUFFER_TOO_SMALL: {
+            return "'Output character buffer was too small'"
+        }
+        default: {
+            return "'Unknown error: ', itoa(error)"
+        }
+    }
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVGetVariableToStringError(sinteger error) {
+    switch (error) {
+        case NAV_VAR_TO_STRING_UNRECOGNIZED_TYPE: {
+            return "'Encoded variable unrecognized type'"
+        }
+        case NAV_VAR_TO_STRING_BUFFER_TOO_SMALL: {
+            return "'Encoded data would not fit into buffer, buffer too small'"
+        }
+        default: {
+            return "'Unknown error: ', itoa(error)"
+        }
+    }
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVGetStringToVariableError(sinteger error) {
+    switch (error) {
+        case NAV_STRING_TO_VAR_ERROR_DECODE_DATA_TOO_SMALL_1: {
+            return "'Decode data too small, more members in structure'"
+        }
+        case NAV_STRING_TO_VAR_ERROR_STRUCTURE_TOO_SMALL: {
+            return "'Structure too small, more members in decode string'"
+        }
+        case NAV_STRING_TO_VAR_ERROR_DECODE_VARIABLE_TYPE_MISMATCH: {
+            return "'Decode variable type mismatch'"
+        }
+        case NAV_STRING_TO_VAR_ERROR_DECODE_DATA_TOO_SMALL_2: {
+            return "'Decode data too small, decoder ran out of data'"
+        }
+        default: {
+            return "'Unknown error: ', itoa(error)"
+        }
+    }
 }
 
 
