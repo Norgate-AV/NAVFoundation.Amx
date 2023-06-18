@@ -579,8 +579,11 @@ volatile long NAVFeedbackTLArray[]	= { 200 }
 #include 'NAVFoundation.SnapiHelpers.axi'
 #include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.TimelineUtils.axi'
+
+#IF_DEFINED USING_CONSOLE
 #include 'NAVFoundation.DebugConsole.axi'
 #include 'NAVFoundation.CommandConsole.axi'
+#END_IF
 
 #IF_DEFINED USING_RMS
 #include 'NAVFoundation.RmsUtils.axi'
