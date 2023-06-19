@@ -109,12 +109,31 @@ define_function char[NAV_MAX_BUFFER] NAVGetFileError(slong error) {
 define_function slong NAVFileOpen(char path[], char mode[]) {
     stack_var slong result
     stack_var long flag
+    stack_var char filePath[NAV_MAX_BUFFER]
+    stack_var char fileName[NAV_MAX_BUFFER]
 
     if (!length_array(path)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
                                 'NAVFileOpen',
                                 "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    filePath = NAVGetFileEntityParent(path)
+    fileName = NAVGetFileEntityName(path)
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_FILEUTILS__,
+                                'NAVFileOpen',
+                                "'Opening file ', fileName, ' in path ', filePath")
+
+    if (!NAVFileExists(filePath, fileName)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                'NAVFileOpen',
+                                "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The file does not exist.'")
 
         return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
