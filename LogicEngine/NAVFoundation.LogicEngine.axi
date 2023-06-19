@@ -35,6 +35,7 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_LOGICENGINE__ 'NAVFoundation.LogicEngine'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ArrayUtils.axi'
 
 
 DEFINE_CONSTANT
