@@ -198,6 +198,29 @@ define_function slong NAVFileRead(char path[], char data[]) {
 }
 
 
+define_function slong NAVFileReadLine(long handle, char data[]) {
+    stack_var slong result
+
+    if (!handle) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileReadLine',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : The handle provided is null.'")
+    }
+
+    result = file_read_line(handle, data, max_length_array(data))
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileReadLine',
+                                    "'Error reading line in file : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
 define_function slong NAVFileWrite(char path[], char data[]) {
     stack_var slong result
     stack_var long handle
