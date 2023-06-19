@@ -163,7 +163,7 @@ define_function slong NAVFileClose(long handle) {
 }
 
 
-define_function slong NAVFileRead(char path[], char data[], integer count) {
+define_function slong NAVFileRead(char path[], char data[]) {
     stack_var slong result
     stack_var long handle
 
@@ -184,7 +184,7 @@ define_function slong NAVFileRead(char path[], char data[], integer count) {
 
     handle = type_cast(result)
 
-    result = file_read(handle, data, count)
+    result = file_read(handle, data, max_length_array(data))
 
     if (result < 0) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
