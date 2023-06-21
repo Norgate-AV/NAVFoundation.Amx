@@ -1005,4 +1005,58 @@ define_function double NAVArrayAverageDouble(double array[]) {
 }
 
 
+define_function integer NAVArraySliceString(char array[][], integer start, integer end, char slice[][]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var integer sliceLength
+
+    length = length_array(array)
+    sliceLength = end - start + 1
+
+    if (sliceLength < 1) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_ARRAYUTILS__,
+                                    'NAVArraySliceString',
+                                    "'Slice length must be greater than 0'")
+        return sliceLength
+    }
+
+    set_length_array(slice, sliceLength)
+
+    for (x = 1; x <= sliceLength; x++) {
+        slice[x] = array[start]
+        start++
+    }
+
+    return sliceLength
+}
+
+
+define_function integer NAVArraySliceInteger(integer array[], integer start, integer end, integer slice[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var integer sliceLength
+
+    length = length_array(array)
+    sliceLength = end - start + 1
+
+    if (sliceLength < 1) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_ARRAYUTILS__,
+                                    'NAVArraySliceInteger',
+                                    "'Slice length must be greater than 0'")
+        return sliceLength
+    }
+
+    set_length_array(slice, sliceLength)
+
+    for (x = 1; x <= sliceLength; x++) {
+        slice[x] = array[start]
+        start++
+    }
+
+    return sliceLength
+}
+
+
 #END_IF // __NAV_FOUNDATION_ARRAYUTILS__
