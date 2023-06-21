@@ -77,7 +77,7 @@ define_function integer NAVTimelineStart(long id, long times[], long relative, l
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
                                     __NAV_FOUNDATION_TIMELINEUTILS__,
                                     'NAVTimelineStart',
-                                    "'Timeline with ID ', itoa(id), ' has already be created'")
+                                    "'Timeline with ID ', itoa(id), ' has already been created'")
 
         return result
     }
