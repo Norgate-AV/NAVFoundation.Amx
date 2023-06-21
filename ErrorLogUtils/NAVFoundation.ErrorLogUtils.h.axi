@@ -42,5 +42,21 @@ constant long NAV_LOG_LEVEL_WARNING   = AMX_WARNING
 constant long NAV_LOG_LEVEL_INFO      = AMX_INFO
 constant long NAV_LOG_LEVEL_DEBUG     = AMX_DEBUG
 
+constant integer NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_TO           = 1
+constant integer NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM         = 2
+constant integer NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_TO            = 3
+constant integer NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_FROM          = 4
+constant integer NAV_STANDARD_LOG_MESSAGE_TYPE_PARSING_COMMAND_FROM = 5
+constant integer NAV_STANDARD_LOG_MESSAGE_TYPE_PARSING_STRING_FROM  = 6
+
+constant char NAV_STANDARD_LOG_MESSAGE_TYPE[][NAV_MAX_CHARS]    =   {
+                                                                        'Command To',
+                                                                        'Command From',
+                                                                        'String To',
+                                                                        'String From',
+                                                                        'Parsing Command From',
+                                                                        'Parsing String From'
+                                                                    }
+
 
 #END_IF // __NAV_FOUNDATION_ERRORLOGUTILS_H__

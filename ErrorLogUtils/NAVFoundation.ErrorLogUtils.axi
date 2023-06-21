@@ -100,4 +100,14 @@ define_function NAVErrorLog(long level, char value[]) {
 }
 
 
+define_function char[NAV_MAX_CHARS] NAVGetStandardLogMessageType(integer type) {
+    return NAV_STANDARD_LOG_MESSAGE_TYPE[type]
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVFormatStandardLogMessage(integer type, dev device, char message[]) {
+    return "NAVGetStandardLogMessageType(type), ' ', NAVStringSurroundWith(NAVDeviceToString(device), '[', ']'), '-', NAVStringSurroundWith(message, '[', ']')"
+}
+
+
 #END_IF // __NAV_FOUNDATION_ERRORLOGUTILS__
