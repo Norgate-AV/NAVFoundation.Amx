@@ -36,13 +36,6 @@ SOFTWARE.
 
 #include 'NAVFoundation.ModuleBase.h.axi'
 
-DEFINE_DEVICE
-
-#IF_NOT_DEFINED vdvObject
-vdvObject = 33201:1:0
-#END_IF
-
-
 DEFINE_CONSTANT
 
 
@@ -72,6 +65,7 @@ DEFINE_START {
 
 DEFINE_EVENT
 
+#IF_DEFINED USING_NAV_MODULE_BASE_PROPERTY_EVENT_CALLBACK
 data_event[vdvObject] {
     command: {
         stack_var _NAVSnapiMessage message
@@ -93,6 +87,7 @@ data_event[vdvObject] {
         }
     }
 }
+#END_IF // USING_NAV_MODULE_BASE_PROPERTY_EVENT_CALLBACK
 
 
 #END_IF // __NAV_FOUNDATION_MODULEBASE__
