@@ -93,6 +93,7 @@ define_function NAVDebugConsoleLog(char log[]) {
 }
 
 
+#IF_NOT_DEFINED NAV_MODULE
 define_function slong NAVDebugConsoleServerOpen(integer server, integer port) {
     stack_var integer socket
     stack_var integer serverIndex
@@ -115,6 +116,7 @@ define_function slong NAVDebugConsoleServerOpen(integer server, integer port) {
 
     return result
 }
+#END_IF
 
 
 define_function NAVDebugConsoleHandleDataEvent(char event[], tdata args) {
@@ -126,26 +128,34 @@ define_function NAVDebugConsoleHandleDataEvent(char event[], tdata args) {
         case NAV_EVENT_ONLINE: {
             NAVDebugConsole[serverIndex].SocketConnection.IsConnected = true
 
+            #IF_NOT_DEFINED NAV_MODULE
             NAVErrorLog(NAV_LOG_LEVEL_INFO,
                         "'NAVDebugConsole: Server', format('%02d', serverIndex), ': Client Connected: ', args.sourceip, ':', args.sourceport")
+            #END_IF
         }
         case NAV_EVENT_OFFLINE: {
             NAVDebugConsole[serverIndex].SocketConnection.IsConnected = false
 
+            #IF_NOT_DEFINED NAV_MODULE
             NAVErrorLog(NAV_LOG_LEVEL_INFO,
                         "'NAVDebugConsole: Server', format('%02d', serverIndex), ': Client Disconnected'")
 
             NAVDebugConsoleServerOpen(NAVZeroBase(serverIndex), NAV_DEBUG_CONSOLE_PORT)
+            #END_IF
         }
         case NAV_EVENT_ONERROR: {
             NAVDebugConsole[serverIndex].SocketConnection.IsConnected = false
 
+            #IF_NOT_DEFINED NAV_MODULE
             NAVErrorLog(NAV_LOG_LEVEL_ERROR,
                         "'NAVDebugConsole: Server', format('%02d', serverIndex), ': Socket OnError'")
+            #END_IF
         }
         case NAV_EVENT_STRING: {
+            #IF_NOT_DEFINED NAV_MODULE
             NAVErrorLog(NAV_LOG_LEVEL_INFO,
                         "'NAVDebugConsole: Server', format('%02d', serverIndex), ': Data Received: ', args.text")
+            #END_IF
 
             NAVDebugConsole[serverIndex].RxBuffer = ""
         }
@@ -172,7 +182,9 @@ DEFINE_START {
 
         create_buffer NAVDebugConsole[serverIndex].Socket, NAVDebugConsole[serverIndex].RxBuffer
 
+        #IF_NOT_DEFINED NAV_MODULE
         NAVDebugConsoleServerOpen(x, NAV_DEBUG_CONSOLE_PORT)
+        #END_IF
     }
 }
 

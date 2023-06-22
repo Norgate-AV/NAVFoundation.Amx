@@ -580,8 +580,9 @@ volatile long NAVFeedbackTLArray[]	= { 200 }
 #include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.TimelineUtils.axi'
 
-#IF_DEFINED USING_CONSOLE
 #include 'NAVFoundation.DebugConsole.axi'
+
+#IF_NOT_DEFINED NAV_MODULE
 #include 'NAVFoundation.CommandConsole.axi'
 #END_IF
 
