@@ -40,7 +40,7 @@ SOFTWARE.
 
 DEFINE_VARIABLE
 
-volatile _NAVDevicePriorityQueue queue
+volatile _NAVDevicePriorityQueue priorityQueue
 
 
 (***********************************************************)
@@ -177,7 +177,7 @@ DEFINE_START {
 DEFINE_EVENT
 
 timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE] {
-    NAVDevicePriorityQueueFailedResponse(queue)
+    NAVDevicePriorityQueueFailedResponse(priorityQueue)
 }
 
 
