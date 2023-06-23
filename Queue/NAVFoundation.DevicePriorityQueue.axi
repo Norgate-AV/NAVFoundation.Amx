@@ -177,7 +177,7 @@ define_function NAVDevicePriorityQueueInit(_NAVDevicePriorityQueue queue) {
 
 
 DEFINE_START {
-
+    NAVDevicePriorityQueueInit(priorityQueue)
 }
 
 
