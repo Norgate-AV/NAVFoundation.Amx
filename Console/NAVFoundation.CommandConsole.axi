@@ -419,8 +419,8 @@ define_function NAVCommandConsoleHandleDataEvent(char event[], tdata args) {
 DEFINE_START {
     stack_var integer x
 
-    set_length_array(navCommandConsole.Socket, MAX_NAV_COMMAND_CONSOLE_CONNECTIONS)
-    set_length_array(navCommandConsole.Console.Socket, MAX_NAV_COMMAND_CONSOLE_CONNECTIONS)
+    // set_length_array(navCommandConsole.Socket, MAX_NAV_COMMAND_CONSOLE_CONNECTIONS)
+    // set_length_array(navCommandConsole.Console.Socket, MAX_NAV_COMMAND_CONSOLE_CONNECTIONS)
 
     for(x = 0; x < MAX_NAV_COMMAND_CONSOLE_CONNECTIONS; x++) {
         stack_var integer socket
