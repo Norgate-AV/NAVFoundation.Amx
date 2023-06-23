@@ -38,6 +38,13 @@ SOFTWARE.
 #include 'NAVFoundation.Queue.axi'
 
 
+// #DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK
+// define_function NAVDevicePriorityQueueSendNextItemEventCallback(char item[]) {}
+
+// #DEFINE USING NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE_EVENT_CALLBACK
+// define_function NAVDevicePriorityQueueFailedResponseEventCallback(_NAVDevicePriorityQueue queue) {}
+
+
 DEFINE_VARIABLE
 
 volatile _NAVDevicePriorityQueue priorityQueue
@@ -127,7 +134,7 @@ define_function NAVDevicePriorityQueueSendNextItem(_NAVDevicePriorityQueue queue
         return
     }
 
-    #IF_DEFINED USING_NAV_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK
+    #IF_DEFINED USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK
     NAVDevicePriorityQueueSendNextItemEventCallback(item)
     NAVTimelineStart(queue.FailedResponseTimeline.Id, queue.FailedResponseTimeline.Time, TIMELINE_ABSOLUTE, TIMELINE_ONCE)
     #END_IF
@@ -148,7 +155,7 @@ define_function NAVDevicePriorityQueueFailedResponse(_NAVDevicePriorityQueue que
         return
     }
 
-    #IF_DEFINED USING NAV_PRIORITY_QUEUE_FAILED_RESPONSE_EVENT_CALLBACK
+    #IF_DEFINED USING NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE_EVENT_CALLBACK
     NAVDevicePriorityQueueFailedResponseEventCallback(queue)
     #END_IF
 
