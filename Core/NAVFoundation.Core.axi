@@ -498,6 +498,7 @@ struct _NAVSocketConnection {
     char Address[NAV_MAX_CHARS]
     integer Port
     integer IsConnected
+    integer IsAuthenticated
 }
 
 
