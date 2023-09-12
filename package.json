@@ -38,15 +38,15 @@
         "analyze": "size-limit --why"
     },
     "devDependencies": {
-        "@commitlint/cli": "^17.4.4",
-        "@commitlint/config-conventional": "^17.4.4",
-        "all-contributors-cli": "^6.24.0",
+        "@commitlint/cli": "^17.7.1",
+        "@commitlint/config-conventional": "^17.7.0",
+        "all-contributors-cli": "^6.26.1",
         "cz-conventional-changelog": "3.3.0",
         "doctoc": "^2.2.1",
         "husky": "^8.0.3",
-        "lint-staged": "^13.1.2",
-        "prettier": "^2.8.4",
-        "size-limit": "^8.2.4"
+        "lint-staged": "^14.0.1",
+        "prettier": "^3.0.3",
+        "size-limit": "^9.0.0"
     },
     "dependencies": {}
 }
