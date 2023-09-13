@@ -42,6 +42,9 @@ DEFINE_CONSTANT
 // #DEFINE USING_NAV_MODULE_BASE_PROPERTY_EVENT_CALLBACK
 // define_function NAVModulePropertyEventCallback(_NAVModulePropertyEvent event) {}
 
+// #DEFINE USING_NAV_MODULE_BASE_PASSTHRU_EVENT_CALLBACK
+// define_function NAVModulePassthruEventCallback(char data[]) {}
+
 
 DEFINE_TYPE
 
@@ -58,8 +61,23 @@ define_function NAVModulePropertyEventInit(_NAVSnapiMessage message, _NAVModuleP
 }
 
 
-DEFINE_START {
+define_function NAVModuleInit(_NAVModule module) {
+    module.RxBuffer.Semaphore = false
 
+    module.Device.IsOnline = false
+    module.Device.IsCommunicating = false
+    module.Device.IsInitialized = false
+
+    module.Device.SocketConnection.IsConnected = false
+    module.Device.SocketConnection.IsAuthenticated = false
+
+    module.Enabled = true
+    module.CommandBusy = false
+}
+
+
+DEFINE_START {
+    NAVModuleInit(module)
 }
 
 
@@ -70,18 +88,23 @@ data_event[vdvObject] {
     command: {
         stack_var _NAVSnapiMessage message
 
-        NAVLog("'Command From ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-[', data.text, ']'")
+        NAVLog(NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM, data.device, data.text))
 
         NAVParseSnapiMessage(data.text, message)
 
         switch (message.Header) {
-            case 'PROPERTY': {
+            case NAV_MODULE_PROPERTY_EVENT: {
                 #IF_DEFINED USING_NAV_MODULE_BASE_PROPERTY_EVENT_CALLBACK
                 stack_var _NAVModulePropertyEvent event
 
                 NAVModulePropertyEventInit(message, event)
 
                 NAVModulePropertyEventCallback(event)
+                #END_IF
+            }
+            case NAV_MODULE_PASSTHRU_EVENT: {
+                #IF_DEFINED USING_NAV_MODULE_BASE_PASSTHRU_EVENT_CALLBACK
+                NAVModulePassthruEventCallback(message.Parameter[1])
                 #END_IF
             }
         }

@@ -41,6 +41,18 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
+constant char NAV_MODULE_PROPERTY_EVENT[]         = 'PROPERTY'
+constant char NAV_MODULE_PASSTHRU_EVENT[]         = 'PASSTHRU'
+constant char NAV_MODULE_EVENT_SWITCH[]           = 'SWITCH'
+constant char NAV_MODULE_EVENT_VOLUME[]           = 'VOLUME'
+constant char NAV_MODULE_EVENT_MUTE[]             = 'MUTE'
+constant char NAV_MODULE_EVENT_POWER[]            = 'POWER'
+constant char NAV_MODULE_EVENT_INPUT[]            = 'INPUT'
+
+constant char NAV_MODULE_PROPERTY_EVENT_IP_ADDRESS[]    = 'IP_ADDRESS'
+constant char NAV_MODULE_PROPERTY_EVENT_PORT[]          = 'PORT'
+constant char NAV_MODULE_PROPERTY_EVENT_USERNAME[]      = 'USERNAME'
+constant char NAV_MODULE_PROPERTY_EVENT_PASSWORD[]      = 'PASSWORD'
 
 
 DEFINE_TYPE
