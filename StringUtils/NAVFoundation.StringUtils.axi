@@ -538,4 +538,172 @@ define_function NAVStringGather(_NAVRxBuffer buffer, char delimiter[]) {
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVStringCapitalize(char buffer[]) {
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer length
+    stack_var integer x
+    stack_var char byte
+
+    result = buffer
+    length = length_array(result)
+
+    if (!length) {
+        return result
+    }
+
+    result[1] = result[1] - 32
+
+    for (x = 2; x <= length; x++) {
+        byte = result[x]
+
+        if (byte != $20) {
+            continue
+        }
+
+        result[x + 1] = result[x + 1] - 32
+    }
+
+    return result
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVStringPascalCase(char buffer[]) {
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer length
+    stack_var integer x
+    stack_var integer byte
+
+    result = buffer
+    length = length_array(result)
+
+    if (!length) {
+        return result
+    }
+
+    result[1] = result[1] - 32
+
+    for (x = 2; x <= length; x++) {
+        byte = result[x]
+
+        if (byte != $20 && byte != $2D && byte != $5F) {
+            continue
+        }
+
+        result[x + 1] = result[x + 1] - 32
+    }
+
+    return result
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVStringCamelCase(char buffer[]) {
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer length
+    stack_var integer x
+    stack_var integer byte
+
+    result = buffer
+    length = length_array(result)
+
+    if (!length) {
+        return result
+    }
+
+    result[1] = result[1] + 32
+
+    for (x = 2; x <= length; x++) {
+        byte = result[x]
+
+        if (byte != $20 && byte != $2D && byte != $5F) {
+            continue
+        }
+
+        result[x + 1] = result[x + 1] - 32
+    }
+
+    return result
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVStringSnakeCase(char buffer[]) {
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer length
+    stack_var integer x
+    stack_var integer byte
+
+    result = lower_string(buffer)
+    length = length_array(result)
+
+    if (!length) {
+        return result
+    }
+
+    for (x = 1; x <= length; x++) {
+        byte = result[x]
+
+        if (byte != $20 && byte != $2D) {
+            continue
+        }
+
+        result[x] = $5F
+    }
+
+    return result
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVStringKebabCase(char buffer[]) {
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer length
+    stack_var integer x
+    stack_var integer byte
+
+    result = lower_string(buffer)
+    length = length_array(result)
+
+    if (!length) {
+        return result
+    }
+
+    for (x = 1; x <= length; x++) {
+        byte = result[x]
+
+        if (byte != $20 && byte != $5F) {
+            continue
+        }
+
+        result[x] = $2D
+    }
+
+    return result
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVStringScreamKebabCase(char buffer[]) {
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer length
+    stack_var integer x
+    stack_var integer byte
+
+    result = upper_string(buffer)
+    length = length_array(result)
+
+    if (!length) {
+        return result
+    }
+
+    for (x = 1; x <= length; x++) {
+        byte = result[x]
+
+        if (byte != $20 && byte != $5F) {
+            continue
+        }
+
+        result[x] = $2D
+    }
+
+    return result
+}
+
+
 #END_IF // __NAV_FOUNDATION_STRINGUTILS__
