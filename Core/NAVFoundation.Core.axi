@@ -266,12 +266,49 @@ constant sinteger NAV_STRING_TO_VAR_ERROR_DECODE_DATA_TOO_SMALL_2           = -2
 DEFINE_TYPE
 
 ////////////////////////////////////////////////////////////
-// Key Value Pair
+// Key Value Pairs
 ////////////////////////////////////////////////////////////
 struct _NAVKeyValuePair {
     char Key[NAV_MAX_CHARS];
     char Value[NAV_MAX_BUFFER];
 }
+
+
+struct _NAVKeyStringValuePair {
+    char Key[256];
+    char Value[256];
+}
+
+
+struct _NAVKeyIntegerValuePair {
+    char Key[256];
+    integer Value;
+}
+
+
+struct _NAVKeyLongValuePair {
+    char Key[256];
+    long Value;
+}
+
+
+struct _NAVKeyDoubleValuePair {
+    char Key[256];
+    double Value;
+}
+
+
+struct _NAVKeyFloatValuePair {
+    char Key[256];
+    float Value;
+}
+
+
+struct _NAVKeyBooleanValuePair {
+    char Key[256];
+    char Value;
+}
+
 
 ////////////////////////////////////////////////////////////
 // Range
