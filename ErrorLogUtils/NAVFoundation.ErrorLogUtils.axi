@@ -105,8 +105,8 @@ define_function char[NAV_MAX_CHARS] NAVGetStandardLogMessageType(integer type) {
 }
 
 
-define_function char[NAV_MAX_CHARS] NAVFormatStandardLogMessage(integer type, dev device, char message[]) {
-    return "NAVGetStandardLogMessageType(type), ' ', NAVStringSurroundWith(NAVDeviceToString(device), '[', ']'), '-', NAVStringSurroundWith(message, '[', ']')"
+define_function char[NAV_MAX_BUFFER] NAVFormatStandardLogMessage(integer type, dev device, char message[]) {
+    return "NAVGetStandardLogMessageType(type), ' ', NAVStringSurroundWith(NAVDeviceToString(device), '[', ']'), '-', NAVStringSurroundWith(NAVFormatHex(message), '[', ']')"
 }
 
 
