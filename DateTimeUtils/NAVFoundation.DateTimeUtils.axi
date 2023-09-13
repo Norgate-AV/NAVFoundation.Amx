@@ -34,13 +34,25 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_DATETIMEUTILS__
 #DEFINE __NAV_FOUNDATION_DATETIMEUTILS__ 'NAVFoundation.DateTimeUtils'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.DateTime.h.axi'
 
 
 DEFINE_CONSTANT
 
 constant integer NAV_DAYS_IN_MONTH[12] = {
     31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+}
+
+
+define_function NAVTimespecInit(_NAVTimespec timespec) {
+    timespec.Seconds = time_to_second(time)
+    timespec.Minutes = time_to_minute(time)
+    timespec.Hours = time_to_hour(time)
+    timespec.Day = date_to_day(date)
+    timespec.Month = date_to_month(date)
+    timespec.Year = date_to_year(date)
+    timespec.DayOfWeek = day_of_week(time)
+    timespec.Zone = clkmgr_get_timezone()
 }
 
 
