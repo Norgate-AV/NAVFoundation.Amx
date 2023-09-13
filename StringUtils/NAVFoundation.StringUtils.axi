@@ -706,4 +706,25 @@ define_function char[NAV_MAX_BUFFER] NAVStringScreamKebabCase(char buffer[]) {
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVStringReverse(char buffer[]) {
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer length
+    stack_var integer x
+    stack_var integer y
+
+    result = buffer
+    length = length_array(result)
+
+    if (!length) {
+        return result
+    }
+
+    for (x = 1, y = length; x <= length; x++, y--) {
+        result[x] = buffer[y]
+    }
+
+    return result
+}
+
+
 #END_IF // __NAV_FOUNDATION_STRINGUTILS__
