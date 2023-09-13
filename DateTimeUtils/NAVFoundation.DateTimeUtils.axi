@@ -34,13 +34,97 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_DATETIMEUTILS__
 #DEFINE __NAV_FOUNDATION_DATETIMEUTILS__ 'NAVFoundation.DateTimeUtils'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.DateTimeUtils.h.axi'
 
 
-DEFINE_CONSTANT
+define_function char NAVTimeSpecInit(_NAVTimeSpec timespec, char date[], char time[]) {
+    stack_var sinteger seconds
+    stack_var sinteger minutes
+    stack_var sinteger hours
 
-constant integer NAV_DAYS_IN_MONTH[12] = {
-    31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    stack_var sinteger day
+    stack_var sinteger month
+    stack_var sinteger year
+    stack_var sinteger dayOfWeek
+
+    seconds = time_to_second(time)
+    if (seconds < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_DATETIMEUTILS__,
+                                    'NAVTimeSpecInit',
+                                    'Failed to get seconds from time')
+
+        return false
+    }
+
+    minutes = time_to_minute(time)
+    if (minutes < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_DATETIMEUTILS__,
+                                    'NAVTimeSpecInit',
+                                    'Failed to get minutes from time')
+
+        return false
+    }
+
+    hours = time_to_hour(time)
+    if (hours < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_DATETIMEUTILS__,
+                                    'NAVTimeSpecInit',
+                                    'Failed to get hours from time')
+
+        return false
+    }
+
+    day = date_to_day(date)
+    if (day < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_DATETIMEUTILS__,
+                                    'NAVTimeSpecInit',
+                                    'Failed to get day from date')
+
+        return false
+    }
+
+    month = date_to_month(date)
+    if (month < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_DATETIMEUTILS__,
+                                    'NAVTimeSpecInit',
+                                    'Failed to get month from date')
+
+        return false
+    }
+
+    year = date_to_year(date)
+    if (year < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_DATETIMEUTILS__,
+                                    'NAVTimeSpecInit',
+                                    'Failed to get year from date')
+
+        return false
+    }
+
+    dayOfWeek = day_of_week(date)
+    if (dayOfWeek < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_DATETIMEUTILS__,
+                                    'NAVTimeSpecInit',
+                                    'Failed to get day of week from date')
+
+        return false
+    }
+
+    timespec.Seconds = type_cast(seconds)
+    timespec.Minutes = type_cast(minutes)
+    timespec.Hours = type_cast(hours)
+    timespec.Day = type_cast(day)
+    timespec.Month = type_cast(month)
+    timespec.Year = type_cast(year)
+    timespec.DayOfWeek = type_cast(dayOfWeek)
+    timespec.TimeZone = clkmgr_get_timezone()
 }
 
 
