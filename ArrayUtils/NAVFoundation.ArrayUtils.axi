@@ -39,6 +39,30 @@ SOFTWARE.
 #include 'NAVFoundation.Math.axi'
 
 
+define_function NAVSetArrayInteger(integer array[], integer value) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        array[x] = value
+    }
+}
+
+
+define_function NAVSetArraySignedInteger(sinteger array[], sinteger value) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        array[x] = value
+    }
+}
+
+
 define_function integer NAVFindInArrayINTEGER(integer array[], integer value) {
     stack_var integer x
 
