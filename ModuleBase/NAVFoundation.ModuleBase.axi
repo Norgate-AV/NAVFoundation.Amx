@@ -43,7 +43,7 @@ DEFINE_CONSTANT
 // define_function NAVModulePropertyEventCallback(_NAVModulePropertyEvent event) {}
 
 // #DEFINE USING_NAV_MODULE_BASE_PASSTHRU_EVENT_CALLBACK
-// define_function NAVModulePassthruEventCallback(char data[]) {}
+// define_function NAVModulePassthruEventCallback(_NAVModulePassthruEvent event) {}
 
 
 DEFINE_TYPE
@@ -59,6 +59,13 @@ define_function NAVModulePropertyEventInit(dev device, _NAVSnapiMessage message,
     event.FullMessage = message
     event.Name = message.Parameter[1]
     NAVArraySliceString(message.Parameter, 2, length_array(message.Parameter), event.Args)
+}
+
+
+define_function NAVModulePassthruEventInit(dev device, _NAVSnapiMessage message, _NAVModulePassthruEvent event) {
+    event.Device = device
+    event.FullMessage = message
+    event.Payload = message.Parameter[1]
 }
 
 
@@ -105,7 +112,11 @@ data_event[vdvObject] {
             }
             case NAV_MODULE_PASSTHRU_EVENT: {
                 #IF_DEFINED USING_NAV_MODULE_BASE_PASSTHRU_EVENT_CALLBACK
-                NAVModulePassthruEventCallback(message.Parameter[1])
+                stack_var _NAVModulePassthruEvent event
+
+                NAVModulePassthruEventInit(data.device, message, event)
+
+                NAVModulePassthruEventCallback(event)
                 #END_IF
             }
         }

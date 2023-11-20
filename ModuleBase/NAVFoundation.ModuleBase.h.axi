@@ -64,6 +64,12 @@ struct _NAVModulePropertyEvent {
     char Args[NAV_MAX_SNAPI_MESSAGE_PARAMETERS - 1][255]
 }
 
+struct _NAVModulePassthruEvent {
+    dev Device
+    _NAVSnapiMessage FullMessage
+    char Payload[255]
+}
+
 
 
 #END_IF // __NAV_FOUNDATION_MODULEBASE_H__
