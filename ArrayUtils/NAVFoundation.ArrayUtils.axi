@@ -63,6 +63,18 @@ define_function NAVSetArraySignedInteger(sinteger array[], sinteger value) {
 }
 
 
+define_function NAVSetArrayString(char array[][], char value[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        array[x] = value
+    }
+}
+
+
 define_function integer NAVFindInArrayINTEGER(integer array[], integer value) {
     stack_var integer x
 
@@ -168,6 +180,19 @@ define_function integer NAVFindInArrayCHAR(char array[], char value) {
 
 
 define_function integer NAVFindInArrayDEV(dev array[], dev value) {
+    stack_var integer x
+
+    for (x = 1; x <= length_array(array); x++) {
+        if (array[x] == value) {
+            return x
+        }
+    }
+
+    return 0
+}
+
+
+define_function integer NAVFindInArrayDEVICE(dev array[], dev value) {
     stack_var integer x
 
     for (x = 1; x <= length_array(array); x++) {
