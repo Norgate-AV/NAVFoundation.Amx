@@ -58,6 +58,7 @@ constant char NAV_MODULE_PROPERTY_EVENT_PASSWORD[]      = 'PASSWORD'
 DEFINE_TYPE
 
 struct _NAVModulePropertyEvent {
+    dev Device
     _NAVSnapiMessage FullMessage
     char Name[255]
     char Args[NAV_MAX_SNAPI_MESSAGE_PARAMETERS - 1][255]

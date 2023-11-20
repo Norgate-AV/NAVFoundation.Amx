@@ -54,7 +54,8 @@ DEFINE_VARIABLE
 volatile _NAVModule module
 
 
-define_function NAVModulePropertyEventInit(_NAVSnapiMessage message, _NAVModulePropertyEvent event) {
+define_function NAVModulePropertyEventInit(dev device, _NAVSnapiMessage message, _NAVModulePropertyEvent event) {
+    event.Device = device
     event.FullMessage = message
     event.Name = message.Parameter[1]
     NAVArraySliceString(message.Parameter, 2, length_array(message.Parameter), event.Args)
@@ -97,7 +98,7 @@ data_event[vdvObject] {
                 #IF_DEFINED USING_NAV_MODULE_BASE_PROPERTY_EVENT_CALLBACK
                 stack_var _NAVModulePropertyEvent event
 
-                NAVModulePropertyEventInit(message, event)
+                NAVModulePropertyEventInit(data.device, message, event)
 
                 NAVModulePropertyEventCallback(event)
                 #END_IF
