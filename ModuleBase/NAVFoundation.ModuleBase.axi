@@ -38,6 +38,8 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
+// Required to handle events on 'vdvObject'
+// #DEFINE USING_NAV_MODULE_BASE_CALLBACKS
 
 // #DEFINE USING_NAV_MODULE_BASE_PROPERTY_EVENT_CALLBACK
 // define_function NAVModulePropertyEventCallback(_NAVModulePropertyEvent event) {}
@@ -91,7 +93,7 @@ DEFINE_START {
 
 DEFINE_EVENT
 
-#IF_DEFINED USING_NAV_MODULE_BASE_PROPERTY_EVENT_CALLBACK
+#IF_DEFINED USING_NAV_MODULE_BASE_CALLBACKS
 data_event[vdvObject] {
     command: {
         stack_var _NAVSnapiMessage message
@@ -122,7 +124,7 @@ data_event[vdvObject] {
         }
     }
 }
-#END_IF // USING_NAV_MODULE_BASE_PROPERTY_EVENT_CALLBACK
+#END_IF // USING_NAV_MODULE_BASE_CALLBACKS
 
 
 #END_IF // __NAV_FOUNDATION_MODULEBASE__
