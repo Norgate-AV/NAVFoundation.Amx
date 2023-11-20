@@ -752,6 +752,15 @@ define_function char[NAV_MAX_CHARS] NAVBooleanToString(char value) {
 }
 
 
+define_function char[NAV_MAX_CHARS] NAVBooleanToOnOffString(char value) {
+    if (value) {
+        return 'on'
+    }
+
+    return 'off'
+}
+
+
 // Deprecated
 define_function char[NAV_MAX_CHARS] NAVSITOA(sinteger value) {
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
