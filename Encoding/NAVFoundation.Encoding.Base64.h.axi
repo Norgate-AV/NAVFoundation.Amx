@@ -1,4 +1,4 @@
-PROGRAM_NAME='NAVFoundation.Cryptography.Base64.h'
+PROGRAM_NAME='NAVFoundation.Encoding.Base64.h'
 
 /*
  _   _                       _          ___     __
@@ -31,8 +31,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#IF_NOT_DEFINED __NAV_FOUNDATION_CRYPTOGRAPHY_BASE64_H__
-#DEFINE __NAV_FOUNDATION_CRYPTOGRAPHY_BASE64_H__ 'NAVFoundation.Cryptography.Base64.h'
+#IF_NOT_DEFINED __NAV_FOUNDATION_ENCODING_BASE64_H__
+#DEFINE __NAV_FOUNDATION_ENCODING_BASE64_H__ 'NAVFoundation.Encoding.Base64.h'
 
 #include 'NAVFoundation.Core.axi'
 
@@ -55,4 +55,4 @@ constant char NAV_BASE64_MAP[][1]    =   {
                                         }
 
 
-#END_IF // __NAV_FOUNDATION_CRYPTOGRAPHY_BASE64_H__
+#END_IF // __NAV_FOUNDATION_ENCODING_BASE64_H__

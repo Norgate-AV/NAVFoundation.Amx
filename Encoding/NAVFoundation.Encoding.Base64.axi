@@ -1,4 +1,4 @@
-PROGRAM_NAME='NAVFoundation.Cryptography.Base64'
+PROGRAM_NAME='NAVFoundation.Encoding.Base64'
 
 /*
  _   _                       _          ___     __
@@ -31,10 +31,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#IF_NOT_DEFINED __NAV_FOUNDATION_CRYPTOGRAPHY_BASE64__
-#DEFINE __NAV_FOUNDATION_CRYPTOGRAPHY_BASE64__ 'NAVFoundation.Cryptography.Base64'
+#IF_NOT_DEFINED __NAV_FOUNDATION_ENCODING_BASE64__
+#DEFINE __NAV_FOUNDATION_ENCODING_BASE64__ 'NAVFoundation.Encoding.Base64'
 
-#include 'NAVFoundation.Cryptography.Base64.h.axi'
+#include 'NAVFoundation.Encoding.Base64.h.axi'
 
 
 define_function char[NAV_MAX_BUFFER] NAVBase64Encode(char value[]) {
@@ -151,4 +151,4 @@ define_function char[NAV_MAX_BUFFER] NAVBase64Decode(char value[]) {
 }
 
 
-#END_IF // __NAV_FOUNDATION_CRYPTOGRAPHY_BASE64__
+#END_IF // __NAV_FOUNDATION_ENCODING_BASE64__
