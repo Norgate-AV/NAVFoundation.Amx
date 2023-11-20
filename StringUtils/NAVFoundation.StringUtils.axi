@@ -506,6 +506,11 @@ define_function char[NAV_MAX_BUFFER] NAVStringSurroundWith(char buffer[], char l
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVStringSurround(char buffer[], char left[], char right[]) {
+    return "left, buffer, right"
+}
+
+
 define_function NAVStringGather(_NAVRxBuffer buffer, char delimiter[]) {
     stack_var char data[NAV_MAX_BUFFER]
 
