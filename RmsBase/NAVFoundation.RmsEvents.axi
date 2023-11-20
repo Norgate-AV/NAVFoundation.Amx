@@ -173,11 +173,11 @@ data_event[vdvRms] {
         stack_var integer x
         stack_var _NAVSnapiMessage message
 
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                    "'Command from RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
+        // NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
+        //             "'Command from RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
 
         NAVParseSnapiMessage(data.text, message)
-        NAVSnapiMessageLog(message)
+        // NAVSnapiMessageLog(message)
 
         switch (upper_string(message.Header)) {
             // Client Exception Notifications
@@ -338,42 +338,42 @@ data_event[vdvRms] {
             }
 
             // Asset Parameter Event Notifications
-            case RMS_EVENT_ASSET_PARAM_UPDATE: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Parameter Update: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Key: ', message.Parameter[2]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Change Operator: ', message.Parameter[3]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Change Value: ', message.Parameter[4]")
-            }
-            case RMS_EVENT_ASSET_PARAM_VALUE: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Parameter Value: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Key: ', message.Parameter[2]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Name: ', message.Parameter[3]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Value: ', message.Parameter[4]")
-            }
-            case RMS_EVENT_ASSET_PARAM_RESET: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Parameter Reset: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Key: ', message.Parameter[2]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Name: ', message.Parameter[3]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Value: ', message.Parameter[4]")
-            }
+            // case RMS_EVENT_ASSET_PARAM_UPDATE: {
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Parameter Update: '")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Key: ', message.Parameter[2]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Change Operator: ', message.Parameter[3]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Change Value: ', message.Parameter[4]")
+            // }
+            // case RMS_EVENT_ASSET_PARAM_VALUE: {
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Parameter Value: '")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Key: ', message.Parameter[2]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Name: ', message.Parameter[3]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Value: ', message.Parameter[4]")
+            // }
+            // case RMS_EVENT_ASSET_PARAM_RESET: {
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Parameter Reset: '")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Key: ', message.Parameter[2]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Name: ', message.Parameter[3]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Value: ', message.Parameter[4]")
+            // }
 
             // Asset Control Methods Event Notifications
             case RMS_EVENT_ASSET_METHOD_EXECUTE: {
@@ -427,10 +427,10 @@ data_event[vdvRms] {
                 NAVRmsMessageDisplayLog(rmsClient.Message, data)
             }
 
-            default: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'Command from RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
-            }
+            // default: {
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'Command from RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
+            // }
         }
     }
 }
