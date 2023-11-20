@@ -142,11 +142,6 @@ define_function integer NAVTimelineStop(long id) {
     result = timeline_active(id)
 
     if (result == 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
-                                    __NAV_FOUNDATION_TIMELINEUTILS__,
-                                    'NAVTimelineStop',
-                                    "'Timeline with ID ', itoa(id), ' has not been created'")
-
         return result
     }
 
