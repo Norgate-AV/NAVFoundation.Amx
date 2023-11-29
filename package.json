@@ -38,8 +38,8 @@
         "analyze": "size-limit --why"
     },
     "devDependencies": {
-        "@commitlint/cli": "^18.4.2",
-        "@commitlint/config-conventional": "^18.4.2",
+        "@commitlint/cli": "^18.4.3",
+        "@commitlint/config-conventional": "^18.4.3",
         "all-contributors-cli": "^6.26.1",
         "cz-conventional-changelog": "3.3.0",
         "doctoc": "^2.2.1",
