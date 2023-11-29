@@ -537,6 +537,7 @@ struct _NAVModule {
     _NAVDevice Device
     integer Enabled
     integer CommandBusy
+    dev VirtualDevice[10]
 }
 
 
