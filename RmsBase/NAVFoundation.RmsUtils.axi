@@ -40,6 +40,7 @@ SOFTWARE.
 DEFINE_CONSTANT
 
 constant char NAV_RMS_CLIENT_EVENT_SERVER_INFO[]                           = 'SERVER.INFO'
+constant char NAV_RMS_CLIENT_REINITIALIZE[]                                = 'REINIT'
 
 
 DEFINE_TYPE
@@ -185,6 +186,16 @@ define_function NAVRmsMessageCopy(_NAVRmsMessage source, _NAVRmsMessage destinat
     destination.TimeOutSeconds = source.TimeOutSeconds
     destination.Modal = source.Modal
     destination.ResponseMessage = source.ResponseMessage
+}
+
+
+define_function NAVRmsAdapterConnectionInit(_NAVRmsClient client) {
+    NAVCommand(client.Device, "'CONFIG.CLIENT.NAME-', client.Connection.Name")
+    NAVCommand(client.Device, "'CONFIG.SERVER.URL-', client.Connection.Url")
+    NAVCommand(client.Device, "'CONFIG.SERVER.PASSWORD-', client.Connection.Password")
+    NAVCommand(client.Device, "'CONFIG.CLIENT.ENABLED-', client.Connection.Enabled")
+
+    NAVCommand(client.Device, NAV_RMS_CLIENT_REINITIALIZE)
 }
 
 
