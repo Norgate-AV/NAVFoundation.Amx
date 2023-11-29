@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.Http.h'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -576,7 +576,6 @@ constant char NAV_HTTP_HEADERS[][]  =   {
 
 
 DEFINE_TYPE
-
 
 struct _NAVHttpStatus {
     integer Code;

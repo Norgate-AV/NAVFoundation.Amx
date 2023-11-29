@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.RmsEvents'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -111,7 +111,7 @@ SOFTWARE.
 
 DEFINE_EVENT
 
-#IF_DEFINED vdvRms
+// #IF_DEFINED vdvRms
 data_event[vdvRms] {
     online: {
         NAVRmsClientInit(rmsClient, data)
@@ -463,7 +463,7 @@ level_event[vdvRMS, 0] {
     NAVRmsAdapterLevelEventCallback(rmsClient, level)
     #END_IF
 }
-#END_IF
+// #END_IF
 
 
 #END_IF // __NAV_FOUNDATION_RMSEVENTS__
