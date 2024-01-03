@@ -36,7 +36,7 @@
         }
     },
     "editor.codeActionsOnSave": {
-        "source.fixAll.markdownlint": true
+        "source.fixAll.markdownlint": "explicit"
     },
     "powershell.codeFormatting.openBraceOnSameLine": true,
     "powershell.codeFormatting.newLineAfterOpenBrace": true,
