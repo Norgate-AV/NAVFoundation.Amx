@@ -111,7 +111,7 @@ SOFTWARE.
 
 DEFINE_EVENT
 
-// #IF_DEFINED vdvRms
+#IF_DEFINED USING_RMS
 data_event[vdvRms] {
     online: {
         NAVRmsClientInit(rmsClient, data)
@@ -463,7 +463,7 @@ level_event[vdvRMS, 0] {
     NAVRmsAdapterLevelEventCallback(rmsClient, level)
     #END_IF
 }
-// #END_IF
+#END_IF
 
 
 #END_IF // __NAV_FOUNDATION_RMSEVENTS__
