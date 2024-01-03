@@ -165,3 +165,34 @@ jobs:
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           tag: "${{ steps.gitversion.outputs.semVer }}"
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: "${{ steps.gitversion.outputs.semVer }}"
+          release_name: "${{ steps.gitversion.outputs.semVer }}"
+          body: "Release ${{ steps.gitversion.outputs.semVer }}"
+          draft: false
+          prerelease: false
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-artifacts
+          path: |
+            ./**/*.tkn
+            ./**/*.tko
+            ./*.build.log
+
+  deploy:
+    name: Deploy
+
+    runs-on: ["self-hosted", "windows", "server"]
+
+    needs: [release]
+
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Run Deploy
+        run: ./deploy.ps1
