@@ -106,7 +106,7 @@ define_function char[NAV_MAX_BUFFER] NAVFormatDebugConsoleLog(char log[]) {
 
 
 define_function NAVDebugConsoleLogEnqueue(char log[]) {
-    NAVQueueEnqueue(NAVDebugConsoleQueue, log)
+    // NAVQueueEnqueue(NAVDebugConsoleQueue, log)
 }
 
 
