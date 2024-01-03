@@ -45,6 +45,9 @@ try {
     $axiFiles = Get-ChildItem -Path $Path -Recurse -File -Filter *.axi -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch ".history" }
     $axsFiles = Get-ChildItem -Path $Path -Recurse -File -Filter *.axs -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch ".history" }
 
+    # Filter out any .h.axi files
+    $axiFiles = $axiFiles | Where-Object { $_.FullName -notmatch ".h.axi" }
+
     if (!$axiFiles -and !$axsFiles) {
         Write-Host "No files found in $Path" -ForegroundColor Yellow
         exit

@@ -89,8 +89,8 @@ jobs:
     needs: [setup]
 
     steps:
-      - name: Run genlinx
-        run: genlinx build -c NAVFoundation.ci.build.cfg
+      - name: Run Build
+        run: ./build.ps1
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -100,6 +100,7 @@ jobs:
             ./**/*.tkn
             ./**/*.tko
             ./*.build.log
+
   release:
     name: Release
 
