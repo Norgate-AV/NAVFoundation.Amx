@@ -16,10 +16,10 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx.git"
+        "url": "https://github.com/Norgate-AV/NAVFoundation.Amx.git"
     },
     "bugs": {
-        "url": "https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx/issues"
+        "url": "https://github.com/Norgate-AV/NAVFoundation.Amx/issues"
     },
     "engines": {
         "node": ">=14"
