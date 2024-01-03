@@ -38,6 +38,9 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.SocketUtils.axi'
 #include 'NAVFoundation.ConsoleUtils.axi'
+#include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.Queue.axi'
+#include 'NAVFoundation.Tui.axi'
 
 
 (***********************************************************)
@@ -69,14 +72,41 @@ DEFINE_VARIABLE
 
 volatile dev dvaNAVDebugConsole[MAX_NAV_DEBUG_CONSOLE_CONNECTIONS]
 volatile _NAVConsole NAVDebugConsole[MAX_NAV_DEBUG_CONSOLE_CONNECTIONS]
+volatile _NAVQueue NAVDebugConsoleQueue
 
 
 (***********************************************************)
 (*        SUBROUTINE/FUNCTION DEFINITIONS GO BELOW         *)
 (***********************************************************)
 
+define_function char[NAV_MAX_BUFFER] NAVColorLog(char log[]) {
+    select {
+        active(NAVStartsWith(log, NAVGetLogLevel(NAV_LOG_LEVEL_ERROR))): {
+            return NAVColorRed(log)
+        }
+        active(NAVStartsWith(log, NAVGetLogLevel(NAV_LOG_LEVEL_WARNING))): {
+            return NAVColorYellow(log)
+        }
+        active(NAVStartsWith(log, NAVGetLogLevel(NAV_LOG_LEVEL_INFO))): {
+            return NAVColorGreen(log)
+        }
+        active(NAVStartsWith(log, NAVGetLogLevel(NAV_LOG_LEVEL_DEBUG))): {
+            return NAVColorBlue(log)
+        }
+        active(true): {
+            return log
+        }
+    }
+}
+
+
 define_function char[NAV_MAX_BUFFER] NAVFormatDebugConsoleLog(char log[]) {
-    return "NAVGetTimeStamp(), ':: ', log, NAV_CR, NAV_LF"
+    return "NAVGetTimeStamp(), ':: ', NAVColorLog(log), NAV_CR, NAV_LF"
+}
+
+
+define_function NAVDebugConsoleLogEnqueue(char log[]) {
+    NAVQueueEnqueue(NAVDebugConsoleQueue, log)
 }
 
 
@@ -165,6 +195,8 @@ define_function NAVDebugConsoleHandleDataEvent(char event[], tdata args) {
 
 DEFINE_START {
     stack_var integer x
+
+    // NAVQueueInit(NAVDebugConsoleQueue, 2048)
 
     for (x = 0; x < MAX_NAV_DEBUG_CONSOLE_CONNECTIONS; x++) {
         stack_var integer socket
