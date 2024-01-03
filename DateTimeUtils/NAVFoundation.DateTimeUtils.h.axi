@@ -48,13 +48,23 @@ constant long NAV_DATETIME_SECONDS_IN_1_YEAR       = 31536000   // 365 days
 constant long NAV_DATETIME_SECONDS_IN_1_YEAR_AVG   = 31556926   // 365.24 days
 constant long NAV_DATETIME_SECONDS_IN_1_LEAP_YEAR  = 31622400   // 366 days
 
-constant integer NAV_DATETIME_DAY_SUNDAY           = 0
-constant integer NAV_DATETIME_DAY_MONDAY           = 1
-constant integer NAV_DATETIME_DAY_TUESDAY          = 2
-constant integer NAV_DATETIME_DAY_WEDNESDAY        = 3
-constant integer NAV_DATETIME_DAY_THURSDAY         = 4
-constant integer NAV_DATETIME_DAY_FRIDAY           = 5
-constant integer NAV_DATETIME_DAY_SATURDAY         = 6
+// constant long NAV_DATETIME_MILLISECONDS_IN_1_SECOND    = 1000
+// constant long NAV_DATETIME_MILLISECONDS_IN_1_MINUTE    = 60000
+// constant long NAV_DATETIME_MILLISECONDS_IN_1_HOUR      = 3600000
+// constant long NAV_DATETIME_MILLISECONDS_IN_1_DAY       = 86400000
+// constant long NAV_DATETIME_MILLISECONDS_IN_1_WEEK      = 604800000
+// constant long NAV_DATETIME_MILLISECONDS_IN_1_MONTH_AVG = 2629743000    // 30.44 days
+// constant double NAV_DATETIME_MILLISECONDS_IN_1_YEAR      = 31536000000   // 365 days
+// constant double NAV_DATETIME_MILLISECONDS_IN_1_YEAR_AVG  = 31556926000   // 365.24 days
+// constant double NAV_DATETIME_MILLISECONDS_IN_1_LEAP_YEAR = 31622400000   // 366 days
+
+constant integer NAV_DATETIME_DAY_SUNDAY           = 1
+constant integer NAV_DATETIME_DAY_MONDAY           = 2
+constant integer NAV_DATETIME_DAY_TUESDAY          = 3
+constant integer NAV_DATETIME_DAY_WEDNESDAY        = 4
+constant integer NAV_DATETIME_DAY_THURSDAY         = 5
+constant integer NAV_DATETIME_DAY_FRIDAY           = 6
+constant integer NAV_DATETIME_DAY_SATURDAY         = 7
 constant char NAV_DATETIME_DAY[][NAV_MAX_CHARS] =   {
                                                         'Sunday',
                                                         'Monday',
@@ -113,6 +123,16 @@ constant integer NAV_DATETIME_TIMESTAMP_FORMAT_RSS          = 13        // Thu, 
 constant integer NAV_DATETIME_TIMESTAMP_FORMAT_W3C          = 14        // 2023-11-23T21:30:00+00:00
 
 constant integer NAV_DATETIME_TIMESTAMP_FORMAT_DEFAULT      = NAV_DATETIME_TIMESTAMP_FORMAT_ISO8601
+
+
+constant integer NAV_DATETIME_TIMEZONE_ALPHA_TIME_ZONE                              = 1
+constant integer NAV_DATETIME_TIMEZONE_AUSTRALIAN_CENTRAL_DAYLIGHT_TIME             = 2
+constant integer NAV_DATETIME_TIMEZONE_AUSTRALIAN_CENTRAL_STANDARD_TIME             = 3
+constant integer NAV_DATETIME_TIMEZONE_ACRE_TIME                                    = 4
+constant integer NAV_DATETIME_TIMEZONE_AUSTRALIAN_CENTRAL_TIME                      = 5
+constant integer NAV_DATETIME_TIMEZONE_AUSTRALIAN_CENTRAL_WESTERN_STANDARD_TIME     = 6
+
+constant integer NAV_DATETIME_TIMEZONE_AUSTRALIAN_EASTERN_DAYLIGHT_TIME             = 9
 
 
 
