@@ -51,6 +51,7 @@ vdvNtpClient                  = 33501:1:0
 
 define_module 'mNtpClient' NtpClientComm(vdvNtpClient, dvNtpClient)
 
+
 DEFINE_EVENT
 
 data_event[vdvNtpClient] {
@@ -61,34 +62,7 @@ data_event[vdvNtpClient] {
 
         switch (message.Header) {
             case 'NTP_EPOCH': {
-                stack_var _NAVTimespec timespec
-                stack_var long localEpoch
-                stack_var long ntpEpoch
-                stack_var long epochDifference
-
-                NAVDateTimeGetTimespecNow(timespec)
-
-                localEpoch = NAVDateTimeGetEpoch(timespec)
-                ntpEpoch = atoi(message.Parameter[1])
-
-                if (ntpEpoch > localEpoch) {
-                    // Local clock is behind NTP clock
-                    epochDifference = ntpEpoch - localEpoch
-                } else if (ntpEpoch < localEpoch) {
-                    // Local clock is ahead of NTP clock
-                    epochDifference = localEpoch - ntpEpoch
-                } else {
-                    // Local clock is in sync with NTP clock
-                    epochDifference = 0
-                }
-
-                NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Epoch difference => ', itoa(epochDifference)")
-                if (epochDifference > 10) {
-                    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Setting clock from NTP'")
-                    NAVDateTimeSetClockFromEpoch(ntpEpoch)
-                }
-
-                NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Local Timestamp: ', NAVDateTimeGetTimestampNow()")
+                NAVNtpSyncClock(atoi(message.Parameter[1]))
             }
         }
     }

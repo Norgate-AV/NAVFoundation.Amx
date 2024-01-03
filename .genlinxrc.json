@@ -8,12 +8,14 @@
                 ".\\Core",
                 ".\\DateTimeUtils",
                 ".\\ErrorLogUtils",
+                ".\\Enova",
                 ".\\FileUtils",
                 ".\\HashTable",
                 ".\\Jsmn",
                 ".\\LogicEngine",
                 ".\\Math",
                 ".\\McpBase",
+                ".\\NtpClient",
                 ".\\Queue",
                 ".\\RmsBase",
                 ".\\SnapiHelpers",
@@ -22,6 +24,7 @@
                 ".\\StringUtils",
                 ".\\Testing",
                 ".\\TimelineUtils",
+                ".\\Tui",
                 ".\\UIUtils"
             ]
         }

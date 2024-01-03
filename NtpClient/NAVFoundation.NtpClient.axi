@@ -35,16 +35,18 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_NTP_CLIENT__ 'NAVFoundation.NtpClient'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.DateTimeUtils.axi'
 #include 'NAVFoundation.Encoding.axi'
 
 
 DEFINE_CONSTANT
 
-constant char NAV_DEFAULT_NTP_HOST_ADDRESS[] = 'pool.ntp.org'
+constant char NAV_DEFAULT_NTP_HOST_ADDRESS[] = 'uk.pool.ntp.org'
 constant integer NAV_NTP_PORT = 123
 
 constant long NTP_SYNC_INTERVAL_1_MIN = 60000
 constant long NTP_SYNC_INTERVAL_5_MINS = 300000
+constant long NTP_SYNC_INTERVAL_DEFAULT = NTP_SYNC_INTERVAL_5_MINS
 
 constant long NAV_DEFAULT_NTP_CLIENT_TIMEOUT = 1000
 
@@ -125,7 +127,7 @@ define_function NAVNtpClientInit(_NAVNtpClient client, dev device) {
     client.Device = device
     client.Socket = client.Device.PORT
 
-    client.SyncInterval[1] = NTP_SYNC_INTERVAL_1_MIN
+    client.SyncInterval[1] = NTP_SYNC_INTERVAL_DEFAULT
     set_length_array(client.SyncInterval, 1)
 
     client.TimeOut[1] = NAV_DEFAULT_NTP_CLIENT_TIMEOUT
@@ -186,6 +188,42 @@ define_function NAVNtpResponseToPacket(char data[], _NAVNtpPacket packet) {
     packet.ReceiveTimestampF = (data[37] << 24 | data[38] << 16 | data[39] << 8 | data[40])
     packet.TransmitTimestampS = (data[41] << 24 | data[42] << 16 | data[43] << 8 | data[44])
     packet.TransmitTimestampF = (data[45] << 24 | data[46] << 16 | data[47] << 8 | data[48])
+}
+
+
+define_function NAVNtpSyncClock(long epoch) {
+    stack_var _NAVTimespec timespec
+    stack_var long localEpoch
+    stack_var long difference
+
+    NAVDateTimeGetTimespecNow(timespec)
+    localEpoch = NAVDateTimeGetEpoch(timespec)
+
+    if (epoch == localEpoch) {
+        // Local clock is in sync with NTP clock
+        // Nothing to do
+        return
+    }
+
+    if (epoch > localEpoch) {
+        // Local clock is behind NTP clock
+        difference = epoch - localEpoch
+    }
+
+    if (epoch < localEpoch) {
+        // Local clock is ahead of NTP clock
+        difference = localEpoch - epoch
+    }
+
+    if (difference < 10) {
+        // If the difference is less than 10 seconds,
+        // we can ignore it
+        return
+    }
+
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Epoch difference => ', itoa(difference)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Setting clock from NTP'")
+    NAVDateTimeSetClockFromEpoch(epoch)
 }
 
 
