@@ -14,16 +14,17 @@ defaults:
     shell: pwsh
 
 jobs:
-  setup:
-    name: Setup
+  build-and-release:
+    name: Build & Release
 
-    runs-on: ["self-hosted", "windows", "server"]
+    runs-on: [self-hosted, windows, server]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Show Environment
         run: |
@@ -78,121 +79,40 @@ jobs:
           Write-Host "RUNNER_TEMP: $env:RUNNER_TEMP"
           Write-Host "RUNNER_TOOL_CACHE: $env:RUNNER_TOOL_CACHE"
 
-      - name: Check genlinx
-        run: which genlinx
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
 
-  build:
-    name: Build
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
 
-    runs-on: ["self-hosted", "windows", "server"]
+      - name: Install
+        run: pnpm install
 
-    needs: [setup]
-
-    steps:
-      - name: Run Build
+      - name: Build
         run: ./build.ps1
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifacts
-          path: |
-            ./**/*.tkn
-            ./**/*.tko
-            ./*.build.log
+      #- name: Archive
+      #  run: pnpm genlinx archive --verbose
 
-  release:
-    name: Release
+      - name: Release
+        if: github.ref == 'refs/heads/master'
+        run: pnpm semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    runs-on: ["self-hosted", "windows", "server"]
+  # deploy:
+  #   name: Deploy
 
-    needs: [build]
+  #   runs-on: ["self-hosted", "windows", "server"]
 
-    if: github.ref == 'refs/heads/master'
+  #   needs: [release]
 
-    steps:
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0
-        with:
-          versionSpec: "5.x"
+  #   if: github.ref == 'refs/heads/master'
 
-      - name: Show GitVersion config
-        uses: gittools/actions/gitversion/execute@v0
-        with:
-          additionalArguments: /showConfig
-
-      - name: Determine Version
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v0
-
-      - name: Display GitVersion outputs
-        run: |
-          echo "Major: ${{ steps.gitversion.outputs.major }}"
-          echo "Minor: ${{ steps.gitversion.outputs.minor }}"
-          echo "Patch: ${{ steps.gitversion.outputs.patch }}"
-          echo "PreReleaseTag: ${{ steps.gitversion.outputs.preReleaseTag }}"
-          echo "PreReleaseTagWithDash: ${{ steps.gitversion.outputs.preReleaseTagWithDash }}"
-          echo "PreReleaseLabel: ${{ steps.gitversion.outputs.preReleaseLabel }}"
-          echo "PreReleaseNumber: ${{ steps.gitversion.outputs.preReleaseNumber }}"
-          echo "WeightedPreReleaseNumber: ${{ steps.gitversion.outputs.weightedPreReleaseNumber }}"
-          echo "BuildMetaData: ${{ steps.gitversion.outputs.buildMetaData }}"
-          echo "BuildMetaDataPadded: ${{ steps.gitversion.outputs.buildMetaDataPadded }}"
-          echo "FullBuildMetaData: ${{ steps.gitversion.outputs.fullBuildMetaData }}"
-          echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
-          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
-          echo "LegacySemVer: ${{ steps.gitversion.outputs.legacySemVer }}"
-          echo "LegacySemVerPadded: ${{ steps.gitversion.outputs.legacySemVerPadded }}"
-          echo "AssemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}"
-          echo "AssemblySemFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}"
-          echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
-          echo "InformationalVersion: ${{ steps.gitversion.outputs.informationalVersion }}"
-          echo "BranchName: ${{ steps.gitversion.outputs.branchName }}"
-          echo "EscapedBranchName: ${{ steps.gitversion.outputs.escapedBranchName }}"
-          echo "Sha: ${{ steps.gitversion.outputs.sha }}"
-          echo "ShortSha: ${{ steps.gitversion.outputs.shortSha }}"
-          echo "NuGetVersionV2: ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
-          echo "NuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}"
-          echo "NuGetPreReleaseTagV2: ${{ steps.gitversion.outputs.nuGetPreReleaseTagV2 }}"
-          echo "NuGetPreReleaseTag: ${{ steps.gitversion.outputs.nuGetPreReleaseTag }}"
-          echo "VersionSourceSha: ${{ steps.gitversion.outputs.versionSourceSha }}"
-          echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.commitsSinceVersionSource }}"
-          echo "CommitsSinceVersionSourcePadded: ${{ steps.gitversion.outputs.commitsSinceVersionSourcePadded }}"
-          echo "UncommittedChanges: ${{ steps.gitversion.outputs.uncommittedChanges }}"
-          echo "CommitDate: ${{ steps.gitversion.outputs.commitDate }}"
-
-      - name: Create Tag
-        uses: tvdias/github-tagger@v0.0.1
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "${{ steps.gitversion.outputs.semVer }}"
-
-      - name: Create Release
-        uses: actions/create-release@v1
-        with:
-          tag_name: "${{ steps.gitversion.outputs.semVer }}"
-          release_name: "${{ steps.gitversion.outputs.semVer }}"
-          body: "Release ${{ steps.gitversion.outputs.semVer }}"
-          draft: false
-          prerelease: false
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: release-artifacts
-          path: |
-            ./**/*.tkn
-            ./**/*.tko
-            ./*.build.log
-
-  deploy:
-    name: Deploy
-
-    runs-on: ["self-hosted", "windows", "server"]
-
-    needs: [release]
-
-    if: github.ref == 'refs/heads/master'
-
-    steps:
-      - name: Run Deploy
-        run: ./deploy.ps1
+  #   steps:
+  #     - name: Run Deploy
+  #       run: ./deploy.ps1

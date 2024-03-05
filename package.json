@@ -1,8 +1,8 @@
 {
-    "name": "NAVFoundation.Amx",
+    "name": "navfoundation.amx",
+    "displayName": "NAVFoundation.Amx",
     "description": "A collection of libraries for NetLinx software development",
-    "version": "0.80.2",
-    "private": true,
+    "version": "0.114.7",
     "keywords": [
         "amx",
         "netlinx",
@@ -22,30 +22,31 @@
         "url": "https://github.com/Norgate-AV/NAVFoundation.Amx/issues"
     },
     "engines": {
-        "node": ">=14"
+        "node": ">=18"
     },
     "scripts": {
-        "lint": "echo \"Linting not setup for this project\"",
-        "lint:fix": "echo \"Linting not setup for this project\"",
+        "build": "pwsh ./build.ps1",
         "commit": "git-cz",
-        "prepare": "husky install",
+        "prepare": "husky",
         "pretty:fix": "prettier --write .",
-        "doctoc": "doctoc README.md",
+        "doctoc": "doctoc --title '## Contents 📖' README.md",
         "contrib:add": "all-contributors add",
         "contrib:generate": "all-contributors generate",
-        "contrib:check": "all-contributors check",
-        "size": "size-limit",
-        "analyze": "size-limit --why"
+        "contrib:check": "all-contributors check"
     },
     "devDependencies": {
-        "@commitlint/cli": "^18.4.3",
-        "@commitlint/config-conventional": "^18.4.3",
+        "@commitlint/cli": "^19.0.3",
+        "@commitlint/config-conventional": "^19.0.3",
+        "@norgate-av/genlinx": "^2.2.1",
+        "@semantic-release/changelog": "^6.0.3",
+        "@semantic-release/exec": "^6.0.3",
+        "@semantic-release/git": "^10.0.1",
         "all-contributors-cli": "^6.26.1",
         "cz-conventional-changelog": "3.3.0",
         "doctoc": "^2.2.1",
-        "husky": "^8.0.3",
-        "lint-staged": "^15.2.0",
+        "husky": "^9.0.11",
+        "lint-staged": "^15.2.2",
         "prettier": "^3.1.1",
-        "size-limit": "^11.0.1"
+        "semantic-release": "^23.0.2"
     }
 }
