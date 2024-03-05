@@ -171,8 +171,126 @@ constant char ENOVA_DXX_SWITCH_LEVELS[][NAV_MAX_CHARS]	=   {
                                                             }
 
 
+////////////////////////////////////////////////////////////////////
+// Video Input
+////////////////////////////////////////////////////////////////////
+constant char ENOVA_DXX_VIDIN_STATUS_GET[]              = '?VIDIN_STATUS'
+constant char ENOVA_DXX_VIDIN_STATUS_NO_SIGNAL[]        = 'NO SIGNAL'
+constant char ENOVA_DXX_VIDIN_STATUS_VALID_SIGNAL[]     = 'VALID SIGNAL'
+
+constant char ENOVA_DXX_VIDIN_PREF_EDID[]               = 'VIDIN_PREF_EDID'
+constant char ENOVA_DXX_VIDIN_PREF_EDID_GET[]           = '?VIDIN_PREF_EDID'
+
+constant char ENOVA_DXX_VIDIN_EDID[]                    = 'VIDIN_EDID'
+constant char ENOVA_DXX_VIDIN_EDID_GET[]                = '?VIDIN_EDID'
+
+constant char ENOVA_DXX_VIDIN_HDCP[]                    = 'VIDIN_HDCP'
+constant char ENOVA_DXX_VIDIN_HDCP_GET[]                = '?VIDIN_HDCP'
+
+constant char ENOVA_DXX_VIDIN_RES_REF_GET[]             = '?VIDIN_RES_REF'
+
+constant char ENOVA_DXX_VIDIN_NAME[]                    = 'VIDIN_NAME'
+constant char ENOVA_DXX_VIDIN_NAME_GET[]                = '?VIDIN_NAME'
+
+constant char ENOVA_DXX_VIDIN_HDR[]                     = 'VIDIN_HDR'
+constant char ENOVA_DXX_VIDIN_HDR_GET[]                 = '?VIDIN_HDR'
+
+constant char ENOVA_DXX_AUDIO_XPOINT[]                  = 'XPOINT'
+
+
+DEFINE_TYPE
+
+struct _NAVEnvovaDxXInput {
+    char Name[NAV_MAX_CHARS]
+    char Status[NAV_MAX_CHARS]
+    char Resolution[NAV_MAX_CHARS]
+    char HDCP[NAV_MAX_CHARS]
+    char HDR[NAV_MAX_CHARS]
+    char EDID[NAV_MAX_BUFFER]
+    char PreferredEDID[NAV_MAX_BUFFER]
+    char XPoint[NAV_MAX_BUFFER]
+}
+
+
+struct _NAVEnvovaDxXOutput {
+    char Name[NAV_MAX_CHARS]
+    char Status[NAV_MAX_CHARS]
+    char Resolution[NAV_MAX_CHARS]
+    char HDCP[NAV_MAX_CHARS]
+    char HDR[NAV_MAX_CHARS]
+    char EDID[NAV_MAX_BUFFER]
+    char PreferredEDID[NAV_MAX_BUFFER]
+    char XPoint[NAV_MAX_BUFFER]
+}
+
+
+struct _NAVEnvovaDxX {
+    char HardwareVersion[NAV_MAX_CHARS]
+
+    char SwitcherFirmwareVersion[NAV_MAX_CHARS]
+    char FirmwareVersion[NAV_MAX_CHARS]
+
+    char Temperature[NAV_MAX_CHARS]
+    char AmpTemperature[NAV_MAX_CHARS]
+    char TemperatureAlarm[NAV_MAX_CHARS]
+
+    char FanSpeed[NAV_MAX_CHARS]
+    char FanAlarm[NAV_MAX_CHARS]
+
+    char StackInfo[NAV_MAX_BUFFER]
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVEnovaDxXGetSwitchLevel(integer level) {
+    switch (level) {
+        case 0: {
+            return ENOVA_DXX_SWITCH_LEVEL_ALL
+        }
+        case 1: {
+            return ENOVA_DXX_SWITCH_LEVEL_VIDEO
+        }
+        case 2: {
+            return ENOVA_DXX_SWITCH_LEVEL_AUDIO
+        }
+        default: {
+            return ENOVA_DXX_SWITCH_LEVEL_ALL
+        }
+    }
+}
+
+
 define_function char[NAV_MAX_BUFFER] NAVEnovaDxXBuildSwitch(integer input, integer output, integer level) {
-    return "'CL', ENOVA_DXX_SWITCH_LEVELS[level], 'I', itoa(input), 'O', itoa(output)"
+    return "'CL', NAVEnovaDxXGetSwitchLevel(level), 'I', itoa(input), 'O', itoa(output)"
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVEnovaDxXBuildSwitchAll(integer input, integer output) {
+    return NAVEnovaDxXBuildSwitch(input, output, 0)
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVEnovaDxXBuildSwitchVideo(integer input, integer output) {
+    return NAVEnovaDxXBuildSwitch(input, output, 1)
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVEnovaDxXBuildSwitchAudio(integer input, integer output) {
+    return NAVEnovaDxXBuildSwitch(input, output, 2)
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVEnovaDxXBuildXpointLevel(integer input, integer output, sinteger level) {
+    return "'XPOINT-', itoa(level), ',', itoa(input), ',', itoa(output)"
+}
+
+
+define_function NAVEnovaDxXSetXpointLevel(integer input, integer output, sinteger level) {
+    NAVCommand(5002:1:0, "NAVEnovaDxXBuildXpointLevel(input, output, level)")
+}
+
+
+define_function NAVEnovaDxXGetXpointLevel(integer input, integer output) {
+    NAVCommand(5002:1:0, "'?XPOINT-', itoa(input), ',', itoa(output)")
 }
 
 
@@ -181,114 +299,5 @@ DEFINE_START {
 }
 
 
-DEFINE_EVENT
-
-data_event[5002:1:0]
-data_event[5002:2:0]
-data_event[5002:3:0]
-data_event[5002:4:0]
-data_event[5002:5:0]
-data_event[5002:6:0]
-data_event[5002:7:0]
-data_event[5002:8:0]
-data_event[5002:9:0]
-data_event[5002:10:0]
-data_event[5002:11:0]
-data_event[5002:12:0]
-data_event[5002:13:0]
-data_event[5002:14:0] {
-    online: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'EnovaDxX => OnLine: ', NAVDeviceToString(data.device)")
-
-        #IF_DEFINED USING_ENOVA_DXX_ONLINE_DATA_EVENT_CALLBACK
-        NAVEnovaDxXOnlineDataEventCallback(data)
-        #END_IF
-    }
-    offline: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'EnovaDxX => OffLine: ', NAVDeviceToString(data.device)")
-
-        #IF_DEFINED USING_ENOVA_DXX_OFFLINE_DATA_EVENT_CALLBACK
-        NAVEnovaDxXOfflineDataEventCallback(data)
-        #END_IF
-    }
-    onerror: {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'EnovaDxX => OnError: ', NAVDeviceToString(data.device), ': ', data.text")
-
-        #IF_DEFINED USING_ENOVA_DXX_ONERROR_DATA_EVENT_CALLBACK
-        NAVEnovaDxXOnErrorDataEventCallback(data)
-        #END_IF
-    }
-    string: {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_FROM, data.device, data.text))
-
-        #IF_DEFINED USING_ENOVA_DXX_STRING_DATA_EVENT_CALLBACK
-        NAVEnovaDxXStringDataEventCallback(data)
-        #END_IF
-    }
-    command: {
-        stack_var _NAVSnapiMessage message
-
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM, data.device, data.text))
-
-        #IF_DEFINED USING_ENOVA_DXX_COMMAND_DATA_EVENT_CALLBACK
-        NAVEnovaDxXCommandDataEventCallback(data)
-        #END_IF
-
-        NAVParseSnapiMessage(data.text, message)
-
-        switch (message.Header) {
-            default: {
-
-            }
-        }
-    }
-}
-
-
-level_event[5002:1:0, 0]
-level_event[5002:2:0, 0]
-level_event[5002:3:0, 0]
-level_event[5002:4:0, 0]
-level_event[5002:5:0, 0]
-level_event[5002:6:0, 0]
-level_event[5002:7:0, 0]
-level_event[5002:8:0, 0]
-level_event[5002:9:0, 0]
-level_event[5002:10:0, 0]
-level_event[5002:11:0, 0]
-level_event[5002:12:0, 0]
-level_event[5002:13:0, 0]
-level_event[5002:14:0, 0] {
-    #IF_DEFINED USING_ENOVA_DXX_LEVEL_EVENT_CALLBACK
-    NAVEnovaDxXLevelEventCallback(level)
-    #END_IF
-}
-
-
-channel_event[5002:1:0, 0]
-channel_event[5002:2:0, 0]
-channel_event[5002:3:0, 0]
-channel_event[5002:4:0, 0]
-channel_event[5002:5:0, 0]
-channel_event[5002:6:0, 0]
-channel_event[5002:7:0, 0]
-channel_event[5002:8:0, 0]
-channel_event[5002:9:0, 0]
-channel_event[5002:10:0, 0]
-channel_event[5002:11:0, 0]
-channel_event[5002:12:0, 0]
-channel_event[5002:13:0, 0]
-channel_event[5002:14:0, 0] {
-    on: {
-        #IF_DEFINED USING_ENOVA_DXX_CHANNEL_EVENT_CALLBACK
-        NAVEnovaDxXChannelEventCallback(channel)
-        #END_IF
-    }
-    off: {
-        #IF_DEFINED USING_ENOVA_DXX_CHANNEL_EVENT_CALLBACK
-        NAVEnovaDxXChannelEventCallback(channel)
-        #END_IF
-    }
-}
 
 #END_IF

@@ -76,4 +76,115 @@ constant dev DVA_ENOVA_DXX[]    =   {
 #include 'NAVFoundation.EnovaDxX.axi'
 
 
-#END_IF
+DEFINE_EVENT
+
+data_event[5002:1:0]
+data_event[5002:2:0]
+data_event[5002:3:0]
+data_event[5002:4:0]
+data_event[5002:5:0]
+data_event[5002:6:0]
+data_event[5002:7:0]
+data_event[5002:8:0]
+data_event[5002:9:0]
+data_event[5002:10:0]
+data_event[5002:11:0]
+data_event[5002:12:0]
+data_event[5002:13:0]
+data_event[5002:14:0] {
+    online: {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'EnovaDxX => OnLine: ', NAVDeviceToString(data.device)")
+
+        #IF_DEFINED USING_ENOVA_DXX_ONLINE_DATA_EVENT_CALLBACK
+        NAVEnovaDxXOnlineDataEventCallback(data)
+        #END_IF
+    }
+    offline: {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'EnovaDxX => OffLine: ', NAVDeviceToString(data.device)")
+
+        #IF_DEFINED USING_ENOVA_DXX_OFFLINE_DATA_EVENT_CALLBACK
+        NAVEnovaDxXOfflineDataEventCallback(data)
+        #END_IF
+    }
+    onerror: {
+        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'EnovaDxX => OnError: ', NAVDeviceToString(data.device), ': ', data.text")
+
+        #IF_DEFINED USING_ENOVA_DXX_ONERROR_DATA_EVENT_CALLBACK
+        NAVEnovaDxXOnErrorDataEventCallback(data)
+        #END_IF
+    }
+    string: {
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_FROM, data.device, data.text))
+
+        #IF_DEFINED USING_ENOVA_DXX_STRING_DATA_EVENT_CALLBACK
+        NAVEnovaDxXStringDataEventCallback(data)
+        #END_IF
+    }
+    command: {
+        stack_var _NAVSnapiMessage message
+
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM, data.device, data.text))
+
+        #IF_DEFINED USING_ENOVA_DXX_COMMAND_DATA_EVENT_CALLBACK
+        NAVEnovaDxXCommandDataEventCallback(data)
+        #END_IF
+
+        NAVParseSnapiMessage(data.text, message)
+
+        switch (message.Header) {
+            default: {
+
+            }
+        }
+    }
+}
+
+
+level_event[5002:1:0, 0]
+level_event[5002:2:0, 0]
+level_event[5002:3:0, 0]
+level_event[5002:4:0, 0]
+level_event[5002:5:0, 0]
+level_event[5002:6:0, 0]
+level_event[5002:7:0, 0]
+level_event[5002:8:0, 0]
+level_event[5002:9:0, 0]
+level_event[5002:10:0, 0]
+level_event[5002:11:0, 0]
+level_event[5002:12:0, 0]
+level_event[5002:13:0, 0]
+level_event[5002:14:0, 0] {
+    #IF_DEFINED USING_ENOVA_DXX_LEVEL_EVENT_CALLBACK
+    NAVEnovaDxXLevelEventCallback(level)
+    #END_IF
+}
+
+
+channel_event[5002:1:0, 0]
+channel_event[5002:2:0, 0]
+channel_event[5002:3:0, 0]
+channel_event[5002:4:0, 0]
+channel_event[5002:5:0, 0]
+channel_event[5002:6:0, 0]
+channel_event[5002:7:0, 0]
+channel_event[5002:8:0, 0]
+channel_event[5002:9:0, 0]
+channel_event[5002:10:0, 0]
+channel_event[5002:11:0, 0]
+channel_event[5002:12:0, 0]
+channel_event[5002:13:0, 0]
+channel_event[5002:14:0, 0] {
+    on: {
+        #IF_DEFINED USING_ENOVA_DXX_CHANNEL_EVENT_CALLBACK
+        NAVEnovaDxXChannelEventCallback(channel)
+        #END_IF
+    }
+    off: {
+        #IF_DEFINED USING_ENOVA_DXX_CHANNEL_EVENT_CALLBACK
+        NAVEnovaDxXChannelEventCallback(channel)
+        #END_IF
+    }
+}
+
+
+#END_IF // __NAV_FOUNDATION_ENOVA_DXX_BASE__
