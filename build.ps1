@@ -72,7 +72,7 @@ try {
         $percent = [math]::Round((($x - 1) / $files.Count) * 100, 2)
         Write-Host "[$percent%]" -ForegroundColor Cyan
 
-        & "genlinx" build -s $file
+        & pnpm "genlinx" build -s $file
 
         if ($LASTEXITCODE -ne 0) {
             Write-Host "genlinx failed with exit code $($LASTEXITCODE)" -ForegroundColor Red
