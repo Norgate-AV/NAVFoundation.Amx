@@ -1,5 +1,5 @@
 {
-    "*?(test|spec).{js,jsx,ts,tsx}": ["yarn lint:fix", "prettier --write"],
+    "*?(test|spec).{js,jsx,ts,tsx}": ["prettier --write"],
     "*.{css,scss,md,html,json,yml,yaml}": ["prettier --write"],
     "*.{axi,axs}": ["genlinx build -s"]
 }
