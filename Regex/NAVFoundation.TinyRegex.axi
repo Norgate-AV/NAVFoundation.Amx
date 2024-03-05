@@ -252,10 +252,14 @@ define_function re_print(regex_t pattern[]) {
             break;
         }
 
+        #IF_DEFINED __NAV_FOUNDAION_DEBUGCONSOLE__
         NAVDebugConsoleLog("'type: ', REGEX_TYPES[pattern[i].type]");
+        #END_IF
 
         if (pattern[i].type == REGEX_TYPE_CHAR_CLASS || pattern[i].type == REGEX_TYPE_INV_CHAR_CLASS) {
+            #IF_DEFINED __NAV_FOUNDAION_DEBUGCONSOLE__
             NAVDebugConsoleLog(' [');
+            #END_IF
 
             for (j = 1; j <= MAX_CHAR_CLASS_LENGTH; j++) {
                 c = pattern[i].char_class[j];
@@ -264,16 +268,24 @@ define_function re_print(regex_t pattern[]) {
                     break;
                 }
 
+                #IF_DEFINED __NAV_FOUNDAION_DEBUGCONSOLE__
                 NAVDebugConsoleLog("c");
+                #END_IF
             }
 
+            #IF_DEFINED __NAV_FOUNDAION_DEBUGCONSOLE__
             NAVDebugConsoleLog(']');
+            #END_IF
         }
         else if (pattern[i].type == REGEX_TYPE_CHAR) {
+            #IF_DEFINED __NAV_FOUNDAION_DEBUGCONSOLE__
             NAVDebugConsoleLog("' ', pattern[i].char_value");
+            #END_IF
         }
 
+        #IF_DEFINED __NAV_FOUNDAION_DEBUGCONSOLE__
         NAVDebugConsoleLog("13, 10");
+        #END_IF
     }
 }
 

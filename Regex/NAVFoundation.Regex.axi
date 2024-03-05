@@ -35,6 +35,7 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_REGEX__ 'NAVFoundation.Regex'
 
 #include 'NAVFoundation.Regex.h.axi'
+#include 'NAVFoundation.ArrayUtils.axi'
 
 
 define_function NAVRegexParserInit(_NAVRegexParser parser) {
