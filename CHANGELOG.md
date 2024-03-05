@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.0.0...v1.0.1) (2024-03-05)
+
+### 🐛 Bug Fixes
+
+-   fix ci to edit manifest correctly ([8a0e9ae](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/8a0e9ae9a64a57ec5b0ad9e99151d333a9d5b1c1))
+
 ## 1.0.0 (2024-03-05)
 
 ### 🌟 Features
