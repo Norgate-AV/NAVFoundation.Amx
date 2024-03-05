@@ -6,8 +6,9 @@
 
 ---
 
+[![CI](https://github.com/Norgate-AV/NAVFoundation.Amx/actions/workflows/main.yml/badge.svg)](https://github.com/Norgate-AV/NAVFoundation.Amx/actions/workflows/main.yml)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
-[![GitHub contributors](https://img.shields.io/github/contributors/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx)](https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx/graphs/contributors)
+[![GitHub contributors](https://img.shields.io/github/contributors/Norgate-AV/NAVFoundation.Amx)](https://github.com/Norgate-AV/NAVFoundation.Amx/graphs/contributors)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
@@ -20,10 +21,15 @@ It's feature rich and written in pure NetLinx.
 
 ## Contents :book:
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 -   [Libraries :books:](#libraries-books)
 -   [Team :soccer:](#team-soccer)
--   [Contributing :sparkles:](#contributing-sparkles)
+-   [Contributors :sparkles:](#contributors-sparkles)
 -   [LICENSE :balance_scale:](#license-balance_scale)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Libraries :books:
 
@@ -49,7 +55,7 @@ It's feature rich and written in pure NetLinx.
 
 ## Team :soccer:
 
-This project is maintained by the following person(s) and a bunch of [awesome contributors](https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx/graphs/contributors).
+This project is maintained by the following person(s) and a bunch of [awesome contributors](https://github.com/Norgate-AV/NAVFoundation.Amx/graphs/contributors).
 
 <table>
   <tr>
@@ -57,7 +63,24 @@ This project is maintained by the following person(s) and a bunch of [awesome co
   </tr>
 </table>
 
-## Contributing :sparkles:
+## Contributors :sparkles:
+
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-sparkles)
+
+Thanks go to these awesome people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://allcontributors.org) specification.
 
 Contributions of any kind are welcome!
 
