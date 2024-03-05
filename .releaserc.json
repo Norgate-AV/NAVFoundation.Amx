@@ -98,7 +98,7 @@
             "@semantic-release/exec",
             {
                 "shell": "pwsh",
-                "successCmd": "(Get-Content -Path manifest.json) -replace '\"version\": \".*\"', '\"version\": \"${nextRelease.version}\"' | Set-Content manifest.json"
+                "prepare": "(Get-Content -Path manifest.json) -replace '\"version\": \".*\"', '\"version\": \"${nextRelease.version}\"' | Set-Content manifest.json"
             }
         ],
         [
