@@ -95,24 +95,8 @@ jobs:
       - name: Build
         run: ./build.ps1
 
-      #- name: Archive
-      #  run: pnpm genlinx archive --verbose
-
       - name: Release
         if: github.ref == 'refs/heads/master'
         run: pnpm semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # deploy:
-  #   name: Deploy
-
-  #   runs-on: ["self-hosted", "windows", "server"]
-
-  #   needs: [release]
-
-  #   if: github.ref == 'refs/heads/master'
-
-  #   steps:
-  #     - name: Run Deploy
-  #       run: ./deploy.ps1
