@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.0.2...v1.1.0) (2024-03-06)
+
+### 🌟 Features
+
+-   add archive script to semantic-release config ([c6cb672](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c6cb672208c236c82c4301c8a7d83c869d771a53))
+
+### 🐛 Bug Fixes
+
+-   fix semantic-release config for added exec option ([e1d373e](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e1d373e8709f5eb9c3f6a00a3c86261bd30376ec))
+
+### ✨ Refactor
+
+-   remove version param from archive script ([cc50053](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/cc50053041f7f5a3a479e6a9250f0eef75b8a2b0))
+
 ## [1.0.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.0.1...v1.0.2) (2024-03-06)
 
 ### 🐛 Bug Fixes
