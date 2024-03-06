@@ -49,11 +49,11 @@ $prevPWD = $PWD
 Set-Location $PSScriptRoot
 
 try {
-    $files = Get-ChildItem -File "**/*.axi" | Where-Object { $_.FullName -notmatch "(.git|node_modules|.history|dist)" }
+    $files = Get-ChildItem -File "**/*.axi" -Recurse | Where-Object { $_.FullName -notmatch "(.git|node_modules|.history|dist)" }
 
     if (!$files) {
-        Write-Error "No files found"
-        exit
+        Write-Host "No files found"
+        exit 1
     }
 
     $Directory = Resolve-Path $Directory
