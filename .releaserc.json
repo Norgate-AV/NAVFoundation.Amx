@@ -99,7 +99,10 @@
             {
                 "shell": "pwsh",
                 "prepareCmd": "(Get-Content -Path manifest.json) -replace '\"version\": \".*\"', '\"version\": \"${nextRelease.version}\"' | Set-Content manifest.json"
-            },
+            }
+        ],
+        [
+            "@semantic-release/exec",
             {
                 "shell": "pwsh",
                 "prepareCmd": "./archive.ps1"
