@@ -99,6 +99,10 @@
             {
                 "shell": "pwsh",
                 "prepareCmd": "(Get-Content -Path manifest.json) -replace '\"version\": \".*\"', '\"version\": \"${nextRelease.version}\"' | Set-Content manifest.json"
+            },
+            {
+                "shell": "pwsh",
+                "prepareCmd": "./archive.ps1"
             }
         ],
         [
@@ -114,6 +118,9 @@
                 "assets": [
                     {
                         "path": "./**/*.{axi,AXI}"
+                    },
+                    {
+                        "path": "./dist/*.archive.zip"
                     }
                 ]
             }

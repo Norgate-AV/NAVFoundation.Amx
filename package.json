@@ -10,7 +10,7 @@
     ],
     "files": [
         "**/*.axi",
-        "./SymLink.ps1",
+        "SymLink.ps1",
         "LICENSE"
     ],
     "license": "MIT",
