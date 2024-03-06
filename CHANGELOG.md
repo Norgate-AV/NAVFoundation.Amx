@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.1.0...v1.2.0) (2024-03-06)
+
+### 🌟 Features
+
+-   create sha256 sum of archive and add to releases ([e48f46a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e48f46a474bc34ae1cabcd4bfb89401e8312ce52))
+-   update symlink script to handle deleting symlinks ([e402537](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e4025370243e55351df69a3fc8c228d991adbb23))
+
 ## [1.1.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.0.2...v1.1.0) (2024-03-06)
 
 ### 🌟 Features
