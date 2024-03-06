@@ -44,26 +44,34 @@ param (
     $OutDir = "dist"
 )
 
-$Path = Resolve-Path -Path $Path
+try {
+    $Path = Resolve-Path -Path $Path
 
-$manifest = Get-Content -Path "$Path/manifest.json" -Raw | ConvertFrom-Json
+    $manifest = Get-Content -Path "$Path/manifest.json" -Raw | ConvertFrom-Json
 
-if (!$manifest) {
-    Write-Error "No manifest.json file found in $Path"
+    if (!$manifest) {
+        Write-Error "No manifest.json file found in $Path"
+        exit 1
+    }
+
+    $version = $manifest.version
+
+    foreach ($file in $manifest.files) {
+        $files += (Get-ChildItem -File $file -ErrorAction Stop | Where-Object { $_.FullName -notmatch "(.git|node_modules|.history|dist)" })
+    }
+
+    $files += @("manifest.json")
+
+    if (-not(Test-Path -Path "$Path/$OutDir")) {
+        New-Item -Path "$Path/$OutDir" -Type Directory | Out-Null
+    }
+
+    $zip = "$Path/$OutDir/NAVFoundation.Amx.$version.archive.zip"
+    Compress-Archive -Path $files -DestinationPath $zip -Force
+
+    (Get-FileHash $zip).Hash.ToLower() | Out-File -FilePath "$zip.sha256" -Encoding ascii
+}
+catch {
+    Write-Host $_.Exception.GetBaseException().Message -ForegroundColor Red
     exit 1
 }
-
-$version = $manifest.version
-
-foreach ($file in $manifest.files) {
-    $files += (Get-ChildItem -File $file -ErrorAction Stop | Where-Object { $_.FullName -notmatch "(.git|node_modules|.history|dist)" })
-}
-
-$files += @("manifest.json")
-
-if (-not(Test-Path -Path "$Path/$OutDir")) {
-    New-Item -Path "$Path/$OutDir" -Type Directory | Out-Null
-}
-
-$zip = "$Path/$OutDir/NAVFoundation.Amx.$version.archive.zip"
-Compress-Archive -Path $files -DestinationPath $zip -Force
