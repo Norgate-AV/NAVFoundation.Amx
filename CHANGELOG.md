@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.2.0...v1.2.1) (2024-03-06)
+
+### 🐛 Bug Fixes
+
+-   set working directory to script dir in SymLink.ps1 ([f8bf98d](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/f8bf98ddc31a5f2c01c782b799c8dd545dc4a1ac))
+
+### 🤖 CI
+
+-   cleanup workflow ([b5b8f05](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b5b8f059b99d0ce3102e606affd2f874e56ec426))
+
 ## [1.2.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.1.0...v1.2.0) (2024-03-06)
 
 ### 🌟 Features
