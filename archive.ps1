@@ -41,10 +41,6 @@ param (
 
     [Parameter(Mandatory = $false)]
     [string]
-    $Version = "",
-
-    [Parameter(Mandatory = $false)]
-    [string]
     $OutDir = "dist"
 )
 
@@ -57,7 +53,7 @@ if (!$manifest) {
     exit 1
 }
 
-$Version = $manifest.version
+$version = $manifest.version
 
 foreach ($file in $manifest.files) {
     $files += (Get-ChildItem -File $file -ErrorAction Stop | Where-Object { $_.FullName -notmatch "(.git|node_modules|.history|dist)" })
@@ -69,5 +65,5 @@ if (-not(Test-Path -Path "$Path/$OutDir")) {
     New-Item -Path "$Path/$OutDir" -Type Directory | Out-Null
 }
 
-$zip = "$Path/$OutDir/NAVFoundation.Amx.$Version.archive.zip"
+$zip = "$Path/$OutDir/NAVFoundation.Amx.$version.archive.zip"
 Compress-Archive -Path $files -DestinationPath $zip -Force
