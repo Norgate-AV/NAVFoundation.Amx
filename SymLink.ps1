@@ -45,6 +45,9 @@ param(
     $Delete = $false
 )
 
+$prevPWD = $PWD
+Set-Location $PSScriptRoot
+
 try {
     $files = Get-ChildItem -File "**/*.axi" | Where-Object { $_.FullName -notmatch "(.git|node_modules|.history|dist)" }
 
@@ -58,7 +61,6 @@ try {
     !$Delete ? (Write-Host "Creating symlinks...") : (Write-Host "Deleting symlinks...")
 
     foreach ($file in $files) {
-        $target = $file.FullName
         $linkPath = "$Directory/$($file.Name)"
 
         if ($Delete) {
@@ -67,6 +69,7 @@ try {
             continue
         }
 
+        $target = $file.FullName
         Write-Verbose "Creating symlink: $linkPath -> $target"
         New-Item -ItemType SymbolicLink -Path $linkPath -Target $target -Force | Out-Null
     }
@@ -74,4 +77,7 @@ try {
 catch {
     Write-Host $_.Exception.GetBaseException().Message -ForegroundColor Red
     exit 1
+}
+finally {
+    Set-Location $prevPWD
 }
