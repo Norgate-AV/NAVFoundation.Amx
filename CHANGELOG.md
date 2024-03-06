@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.0.1...v1.0.2) (2024-03-06)
+
+### 🐛 Bug Fixes
+
+-   use correct key to issue command with semantic-release/exec ([2b696e9](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/2b696e995df2404fc9f3d1e3f61762a197f50de5))
+
 ## [1.0.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.0.0...v1.0.1) (2024-03-05)
 
 ### 🐛 Bug Fixes
