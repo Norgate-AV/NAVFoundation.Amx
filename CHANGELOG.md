@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.2.1...v1.2.2) (2024-03-06)
+
+### 🐛 Bug Fixes
+
+-   add recurse flag to GCI in SymLink script ([b6f0b19](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b6f0b19eba903e111a56037a002f544ad433f9f6))
+
 ## [1.2.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.2.0...v1.2.1) (2024-03-06)
 
 ### 🐛 Bug Fixes
