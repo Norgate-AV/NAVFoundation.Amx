@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 #Requires -RunAsAdministrator
 
 <#
@@ -37,11 +38,15 @@ param(
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
     [string]
-    $Directory = "C:/Program Files (x86)/Common Files/AMXShare/AXIs"
+    $Directory = "C:/Program Files (x86)/Common Files/AMXShare/AXIs",
+
+    [Parameter(Mandatory = $false)]
+    [switch]
+    $Delete = $false
 )
 
 try {
-    $files = Get-ChildItem -Filter *.axi -Recurse | Where-Object { $_.FullName -notmatch '\.history' }
+    $files = Get-ChildItem -File "**/*.axi" | Where-Object { $_.FullName -notmatch "(.git|node_modules|.history|dist)" }
 
     if (!$files) {
         Write-Error "No files found"
@@ -50,11 +55,19 @@ try {
 
     $Directory = Resolve-Path $Directory
 
+    !$Delete ? (Write-Host "Creating symlinks...") : (Write-Host "Deleting symlinks...")
+
     foreach ($file in $files) {
         $target = $file.FullName
         $linkPath = "$Directory/$($file.Name)"
 
-        Write-Host "Creating symlink: $linkPath -> $target"
+        if ($Delete) {
+            Write-Verbose "Deleting symlink: $linkPath"
+            Remove-Item -Path $linkPath -Force | Out-Null
+            continue
+        }
+
+        Write-Verbose "Creating symlink: $linkPath -> $target"
         New-Item -ItemType SymbolicLink -Path $linkPath -Target $target -Force | Out-Null
     }
 }
@@ -62,6 +75,3 @@ catch {
     Write-Host $_.Exception.GetBaseException().Message -ForegroundColor Red
     exit 1
 }
-
-Write-Host
-Read-Host -Prompt "Press any key to exit..."
