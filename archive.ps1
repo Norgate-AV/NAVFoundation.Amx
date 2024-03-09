@@ -55,6 +55,7 @@ try {
     }
 
     $version = $manifest.version
+    $name = $manifest.name
 
     foreach ($file in $manifest.files) {
         $files += (Get-ChildItem -File $file -ErrorAction Stop | Where-Object { $_.FullName -notmatch "(.git|node_modules|.history|dist)" })
@@ -66,7 +67,7 @@ try {
         New-Item -Path "$Path/$OutDir" -Type Directory | Out-Null
     }
 
-    $zip = "$Path/$OutDir/NAVFoundation.Amx.$version.archive.zip"
+    $zip = "$Path/$OutDir/$name.$version.archive.zip"
     Compress-Archive -Path $files -DestinationPath $zip -Force
 
     (Get-FileHash $zip).Hash.ToLower() | Out-File -FilePath "$zip.sha256" -Encoding ascii
