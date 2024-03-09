@@ -96,7 +96,50 @@ jobs:
         run: ./build.ps1
 
       - name: Release
+        id: release
         if: github.ref == 'refs/heads/master'
-        run: pnpm semantic-release
+
+        # v4 doesn't seem to be working, so using a specific commit for now
+        uses: cycjimmy/semantic-release-action@6d88447fcd3237e1d617f4f663e5ad79a6bf45b1
+        with:
+          extra_plugins: |
+            @semantic-release/changelog
+            @semantic-release/exec
+            @semantic-release/git
+            conventional-changelog-conventionalcommits
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Show Release Output Values
+        if: github.ref == 'refs/heads/master'
+        run: |
+          Write-Host "New Release Published: ${{ steps.release.outputs.new_release_published }}"
+          Write-Host "New Release Version: ${{ steps.release.outputs.new_release_version }}"
+          Write-Host "New Release Major Version: ${{ steps.release.outputs.new_release_major_version }}"
+          Write-Host "New Release Minor Version: ${{ steps.release.outputs.new_release_minor_version }}"
+          Write-Host "New Release Patch Version: ${{ steps.release.outputs.new_release_patch_version }}"
+          Write-Host "New Release Channel: ${{ steps.release.outputs.new_release_channel }}"
+          Write-Host "New Release Notes: ${{ steps.release.outputs.new_release_notes }}"
+          Write-Host "New Release Git Head: ${{ steps.release.outputs.new_release_git_head }}"
+          Write-Host "New Release Git Tag: ${{ steps.release.outputs.new_release_git_tag }}"
+          Write-Host "Last Release Version: ${{ steps.release.outputs.last_release_version }}"
+          Write-Host "Last Release Git Head: ${{ steps.release.outputs.last_release_git_head }}"
+          Write-Host "Last Release Git Tag: ${{ steps.release.outputs.last_release_git_tag }}"
+
+      - name: Dispatch Scoop Excavator
+        if: ${{ github.ref == 'refs/heads/master' && steps.release.outputs.new_release_published == 'true' }}
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.SCOOP_NORGATEAV_AMX }}
+          repository: norgate-av/scoop-norgateav-amx
+          event-type: excavate
+          client-payload: |-
+            {
+              "repo": {
+                "name": "${{ github.repository }}",
+                "owner": "${{ github.repository_owner }}",
+                "ref": "${{ github.ref }}",
+                "sha": "${{ steps.release.outputs.new_release_git_head }}",
+                "tag": "${{ steps.release.outputs.new_release_git_tag }}"
+              }
+            }
