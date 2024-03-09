@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.2.2...v1.3.0) (2024-03-09)
+
+### 🌟 Features
+
+-   auto update scoop bucket ([1f2e00e](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/1f2e00e29a45f858ce93551631b57b0203f1a7dc))
+
+### ✨ Refactor
+
+-   use manifest name for archive name ([28588d5](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/28588d5de3db3a4409fb634c4aba41ab62fde68a))
+
 ## [1.2.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.2.1...v1.2.2) (2024-03-06)
 
 ### 🐛 Bug Fixes
