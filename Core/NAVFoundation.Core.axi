@@ -1104,12 +1104,15 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringToVariableError(sinteger error)
 (*                STARTUP CODE GOES BELOW                  *)
 (***********************************************************)
 DEFINE_START {
+    #IF_DEFINED __MAIN__
+    set_log_level(NAV_LOG_LEVEL_DEBUG)
     NAVSetControllerInformation(NAVController)
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "__FILE__, ' : ', 'Program Started'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "NAVGetNAVBanner()");
+    #END_IF
 
     NAVTimelineStart(TL_NAV_BLINKER, NAVBlinkerTLArray, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
     NAVTimelineStart(TL_NAV_FEEDBACK, NAVFeedbackTLArray, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
-
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "__NAME__, ' : ', 'Program Started'")
 }
 
 
@@ -1118,6 +1121,7 @@ DEFINE_START {
 (***********************************************************)
 DEFINE_EVENT
 
+#IF_DEFINED __MAIN__
 data_event[dvNAVMaster] {
     online: {
         NAVErrorLog(NAV_LOG_LEVEL_INFO,
@@ -1148,6 +1152,7 @@ data_event[dvNAVMaster] {
                     "'Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' OnError: ', data.text")
     }
 }
+#END_IF
 
 
 timeline_event[TL_NAV_BLINKER] {
