@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.3.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.3.0...v1.3.1) (2024-03-27)
+
+### 🐛 Bug Fixes
+
+-   only get controller info and log message if we are in the main ([208e1e0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/208e1e003e6978f911c86f2b13ba929d58943ce9))
+
+### ✨ Refactor
+
+-   only log error/warnings to errorlog ([4fd6cd9](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/4fd6cd99d9ca116031dfc55600957d346e5b8e62))
+-   **core:** update banner ([a930601](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a930601d045c8f80f238c71005980f52163733b7))
+
 ## [1.3.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.2.2...v1.3.0) (2024-03-09)
 
 ### 🌟 Features
