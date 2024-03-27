@@ -93,10 +93,10 @@ define_function integer NAVTimelineStart(long id, long times[], long relative, l
         return result
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_TIMELINEUTILS__,
-                                'NAVTimelineStart',
-                                "'Created Timeline with ID ', itoa(id)")
+    // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+    //                             __NAV_FOUNDATION_TIMELINEUTILS__,
+    //                             'NAVTimelineStart',
+    //                             "'Created Timeline with ID ', itoa(id)")
 
     return result
 }
@@ -127,10 +127,10 @@ define_function integer NAVTimelineReload(long id, long times[]) {
         return result
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_TIMELINEUTILS__,
-                                'NAVTimelineReload',
-                                "'Reloaded Timeline with ID ', itoa(id)")
+    // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+    //                             __NAV_FOUNDATION_TIMELINEUTILS__,
+    //                             'NAVTimelineReload',
+    //                             "'Reloaded Timeline with ID ', itoa(id)")
 
     return result
 }
@@ -156,10 +156,10 @@ define_function integer NAVTimelineStop(long id) {
         return result
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_TIMELINEUTILS__,
-                                'NAVTimelineStop',
-                                "'Killed Timeline with ID ', itoa(id)")
+    // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+    //                             __NAV_FOUNDATION_TIMELINEUTILS__,
+    //                             'NAVTimelineStop',
+    //                             "'Killed Timeline with ID ', itoa(id)")
 
     return result
 }
@@ -190,10 +190,10 @@ define_function integer NAVTimelinePause(long id) {
         return result
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_TIMELINEUTILS__,
-                                'NAVTimelinePause',
-                                "'Paused Timeline with ID ', itoa(id)")
+    // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+    //                             __NAV_FOUNDATION_TIMELINEUTILS__,
+    //                             'NAVTimelinePause',
+    //                             "'Paused Timeline with ID ', itoa(id)")
 
     return result
 }
@@ -224,10 +224,10 @@ define_function integer NAVTimelineSetValue(long id, long value) {
         return result
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_TIMELINEUTILS__,
-                                'NAVTimelineSetValue',
-                                "'Set Timeline with ID ', itoa(id), ' to value ', itoa(value)")
+    // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+    //                             __NAV_FOUNDATION_TIMELINEUTILS__,
+    //                             'NAVTimelineSetValue',
+    //                             "'Set Timeline with ID ', itoa(id), ' to value ', itoa(value)")
 
     return result
 }

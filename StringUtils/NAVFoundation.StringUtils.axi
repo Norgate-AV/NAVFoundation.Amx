@@ -388,10 +388,10 @@ define_function char[NAV_MAX_BUFFER] NAVArrayJoinString(char array[][], char sep
         result = "result, separator, array[x]"
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_STRINGUTILS__,
-                                'NAVArrayJoinString',
-                                "'Returning result: ', result")
+    // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+    //                             __NAV_FOUNDATION_STRINGUTILS__,
+    //                             'NAVArrayJoinString',
+    //                             "'Returning result: ', result")
 
     return result
 }
