@@ -1028,8 +1028,8 @@ define_function char[NAV_MAX_BUFFER] NAVGetNAVBanner() {
         '                 |___/', NAV_CR, NAV_LF,
         NAV_CR, NAV_LF,
         'MIT License', NAV_CR, NAV_LF,
-        'Copyright (c) 2010-2023, Norgate AV Solutions Ltd.', NAV_CR, NAV_LF,
-        'https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx', NAV_CR, NAV_LF,
+        'Copyright (c) 2010-2024, Norgate AV Services Limited', NAV_CR, NAV_LF,
+        'https://github.com/Norgate-AV/NAVFoundation.Amx', NAV_CR, NAV_LF,
         NAV_CR, NAV_LF,
         '=============================================================',
         NAV_CR, NAV_LF
