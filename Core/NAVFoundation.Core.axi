@@ -1037,6 +1037,49 @@ define_function char[NAV_MAX_BUFFER] NAVGetNAVBanner() {
 }
 
 
+define_function NAVPrintBanner() {
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "' _   _                       _          ___     __'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'| \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'|  \| |/ _ \| ''__/ _` |/ _` | __/ _ \ / _ \ \ / /'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'| |\  | (_) | | | (_| | (_| | ||  __// ___ \ V /'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'|_| \_|\___/|_|  \__, |\__,_|\__\___/_/   \_\_/'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'                 |___/'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MIT License'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Copyright (c) 2010-2024, Norgate AV Services Limited'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'https://github.com/Norgate-AV/NAVFoundation.Amx'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Program Info:'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Name: ', NAVController.Program.Name")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'File: ', NAVController.Program.File")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Compiled On: ', NAVController.Program.CompileDate, ' at ', NAVController.Program.CompileTime")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Controller Info:'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Manufacturer: ', NAVController.Information.Manufacturer_String")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Model: ', NAVController.Information.Device_Id_String")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Version: ', NAVController.Information.Version")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Firmware Id: ', NAVController.Information.Firmware_Id")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Serial Number: ', NAVController.SerialNumber")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Unique Id: ', NAVController.UniqueId")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Network Info:'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Mac Address: ', NAVController.MacAddress")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'IP Address: ', NAVController.IP.IPAddress")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Subnet Mask: ', NAVController.IP.SubnetMask")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Gateway: ', NAVController.IP.Gateway")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Hostname: ', NAVController.IP.Hostname")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'DHCP Enabled: ', NAVController.IP.Flags")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
+}
+
+
 define_function char[NAV_MAX_BUFFER] NAVGetVariableToXmlError(sinteger error) {
     switch (error) {
         case NAV_VAR_TO_XML_ERROR_XML_DECODE_DATA_TYPE_MISMATCH: {
@@ -1107,8 +1150,8 @@ DEFINE_START {
     #IF_DEFINED __MAIN__
     set_log_level(NAV_LOG_LEVEL_DEBUG)
     NAVSetControllerInformation(NAVController)
+    NAVPrintBanner()
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "__FILE__, ' : ', 'Program Started'")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "NAVGetNAVBanner()");
     #END_IF
 
     NAVTimelineStart(TL_NAV_BLINKER, NAVBlinkerTLArray, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
