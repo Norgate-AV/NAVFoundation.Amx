@@ -72,7 +72,7 @@ define_function char[NAV_MAX_BUFFER] NAVFormatLibraryFunction(char libraryName[]
 
 
 define_function char[NAV_MAX_BUFFER] NAVFormatLibraryFunctionLog(char libraryName[], char functionName[], char value[]) {
-    return "NAVFormatLibraryFunction(libraryName, functionName), ' => ', value"
+    return "NAVFormatLibraryFunction(libraryName, functionName), ' => ', __FILE__, ':: ', value"
 }
 
 
