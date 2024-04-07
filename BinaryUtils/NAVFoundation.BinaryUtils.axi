@@ -38,17 +38,27 @@ SOFTWARE.
 
 
 define_function long NAVBinaryRotateLeft(long value, long count) {
-    return (((value) << (count)) | ((value) >> (32 - (count))))
+    return (value << count) | (value >> (32 - count))
+}
+
+
+define_function long NAVBitRotateLeft(long value, long count) {
+    return NAVBinaryRotateLeft(value, count)
 }
 
 
 define_function long NAVBinaryRotateRight(long value, long count) {
-    return (((value) >> (count)) | ((value) << (32 - (count))))
+    return (value >> count) | (value << (32 - count))
+}
+
+
+define_function long NAVBitRotateRight(long value, long count) {
+    return NAVBinaryRotateRight(value, count)
 }
 
 
 define_function long NAVBinaryGetBit(long value, long bit) {
-    return ((value) >> (bit)) & 1
+    return (value >> bit) & 1
 }
 
 
