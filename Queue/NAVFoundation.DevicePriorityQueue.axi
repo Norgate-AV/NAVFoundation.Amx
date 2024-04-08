@@ -209,8 +209,11 @@ define_function NAVDevicePriorityQueueInit(_NAVDevicePriorityQueue queue) {
     queue.MaxFailedCount = NAV_DEVICE_PRIORITY_QUEUE_MAX_FAILED_RESPONSE_COUNT
     queue.Resend = false
     queue.LastMessage = ""
+
     queue.FailedResponseTimeline.Id = TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE
     queue.FailedResponseTimeline.Time[1] = TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE_TIME
+    set_length_array(queue.FailedResponseTimeline.Time, 1)
+
     NAVQueueInit(queue.CommandQueue, NAV_DEVICE_PRIORITY_QUEUE_COMMAND_QUEUE_SIZE)
     NAVQueueInit(queue.QueryQueue, NAV_DEVICE_PRIORITY_QUEUE_QUERY_QUEUE_SIZE)
 }
