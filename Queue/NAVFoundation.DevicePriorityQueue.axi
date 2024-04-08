@@ -55,7 +55,7 @@ volatile _NAVDevicePriorityQueue priorityQueue
 (***********************************************************)
 
 define_function integer NAVDevicePriorityQueueIsEmpty(_NAVDevicePriorityQueue queue) {
-    return (!NAVQueueIsEmpty(queue.CommandQueue) && !NAVQueueIsEmpty(queue.QueryQueue))
+    return (NAVQueueIsEmpty(queue.CommandQueue) && NAVQueueIsEmpty(queue.QueryQueue))
 }
 
 
