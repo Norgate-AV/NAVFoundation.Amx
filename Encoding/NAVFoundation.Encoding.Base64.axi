@@ -40,114 +40,115 @@ SOFTWARE.
 define_function char[NAV_MAX_BUFFER] NAVBase64Encode(char value[]) {
     stack_var integer count
     stack_var char buffer[3]
-    stack_var char cipher[NAV_MAX_BUFFER]
-    stack_var integer x
-    stack_var integer z
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer length
+    stack_var integer i
+    stack_var integer j
 
-    cipher = ''
+    length = length_array(value)
 
-    if (!length_array(value)) {
-        return cipher
+    if (length <= 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_ENCODING_BASE64__,
+                                    'NAVBase64Encode',
+                                    "'Attempted to encode an empty string'")
+
+        return value
     }
 
-    count = 1
-    z = 1
+    count = 0
+    j = 0
 
-    for (x = 1; x <= length_array(value); x++) {
-        buffer[count] = value[x]
+    for (i = 0; i < length; i++) {
+        buffer[(count + 1)] = value[(i + 1)]
         count++
 
         if (count < 3) {
             continue
         }
 
-        cipher[z] = type_cast(NAV_BASE64_MAP[(buffer[1] >> 2)]); z++
-        cipher[z] = type_cast(NAV_BASE64_MAP[((buffer[1] & $03) << 4) | (buffer[2] >> 4)]); z++
-        cipher[z] = type_cast(NAV_BASE64_MAP[((buffer[2] & $0F) << 2) | (buffer[3] >> 6)]); z++
-        cipher[z] = type_cast(NAV_BASE64_MAP[(buffer[3] & $3F)]); z++
+        result[(j + 1)] = type_cast(NAV_BASE64_MAP[((buffer[1] >> 2) + 1)]); j++
+        result[(j + 1)] = type_cast(NAV_BASE64_MAP[(((buffer[1] & $03) << 4) | (buffer[2] >> 4) + 1)]); j++
+        result[(j + 1)] = type_cast(NAV_BASE64_MAP[(((buffer[2] & $0F) << 2) | (buffer[3] >> 6) + 1)]); j++
+        result[(j + 1)] = type_cast(NAV_BASE64_MAP[((buffer[3] & $3F) + 1)]); j++
 
-        count = 1
+        count = 0
     }
 
-    if (count > 1) {
-        cipher[z] = type_cast(NAV_BASE64_MAP[(buffer[1] >> 2)]); z++
+    if (count > 0) {
+        result[(j + 1)] = type_cast(NAV_BASE64_MAP[((buffer[1] >> 2) + 1)]); j++
 
-        if (count == 2) {
-            cipher[z] = type_cast(NAV_BASE64_MAP[((buffer[1] & $03) << 4)]); z++
-            cipher[z] = '='; z++
+        if (count == 1) {
+            result[(j + 1)] = type_cast(NAV_BASE64_MAP[(((buffer[1] & $03) << 4) + 1)]); j++
+            result[(j + 1)] = '='; j++
         }
         else {
-            cipher[z] = type_cast(NAV_BASE64_MAP[((buffer[1] & $03) << 4) | (buffer[2] >> 4)]); z++
-            cipher[z] = type_cast(NAV_BASE64_MAP[((buffer[2] & $0F) << 2)]); z++
+            result[(j + 1)] = type_cast(NAV_BASE64_MAP[(((buffer[1] & $03) << 4) | (buffer[2] >> 4) + 1)]); j++
+            result[(j + 1)] = type_cast(NAV_BASE64_MAP[(((buffer[2] & $0F) << 2) + 1)]); j++
         }
 
-        cipher[z] = '='; z++
+        result[(j + 1)] = '='; j++
     }
 
-    return cipher
+    set_length_array(result, j)
+
+    return result
 }
 
 
 define_function char[NAV_MAX_BUFFER] NAVBase64Decode(char value[]) {
     stack_var integer count
     stack_var char buffer[4]
-    stack_var char plain[NAV_MAX_BUFFER]
-    stack_var integer x
-    stack_var integer z
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer length
+    stack_var integer i
+    stack_var integer j
+    stack_var char k
 
-    plain = ''
+    length = length_array(value)
 
-    if (!length_array(value)) {
-        return plain
+    if (length <= 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_ENCODING_BASE64__,
+                                    'NAVBase64Decode',
+                                    "'Attempted to decode an empty string'")
+
+        return value
     }
 
-    count = 1
-    z = 1
+    count = 0
+    j = 0
 
-    // for (x = 1; x <= length_array(value); x++) {
-    //     buffer[count] = type_cast(NAV_BASE64_MAP[value[x]])
-    //     count++
-
-    //     if (count < 4) {
-    //         continue
-    //     }
-
-    //     plain[z] = type_cast((buffer[1] << 2) | (buffer[2] >> 4)); z++
-    //     plain[z] = type_cast((buffer[2] << 4) | (buffer[3] >> 2)); z++
-    //     plain[z] = type_cast((buffer[3] << 6) | (buffer[4])); z++
-
-    //     count = 1
-    // }
-
-    for (x = 1; x <= length_array(value); x++) {
-        stack_var integer j
-        stack_var integer size
-
-        size = length_array(NAV_BASE64_MAP)
-
-        for (j = 1; j <= size && NAV_BASE64_MAP[j] != value[x]; j++) {
-            buffer[count] = type_cast(j)
-            count++
-
-            if (count < 4) {
-                continue
+    for (i = 0; i < length; i++) {
+        for (k = 0; k < 64; k++) {
+            if (NAV_BASE64_MAP[(k + 1)] == value[(i + 1)]) {
+                break
             }
-
-            plain[z] = type_cast((buffer[1] << 2) | (buffer[2] >> 4)); z++
-
-            if (buffer[3] != size) {
-                plain[z] = type_cast((buffer[2] << 4) | (buffer[3] >> 2)); z++
-            }
-
-            if (buffer[4] != size) {
-                plain[z] = type_cast((buffer[3] << 6) | (buffer[4])); z++
-            }
-
-            count = 1
         }
+
+        buffer[(count + 1)] = k
+        count++
+
+        if (count < 4) {
+            continue
+        }
+
+        result[(j + 1)] = type_cast((buffer[1] << 2) | (buffer[2] >> 4)); j++
+
+        if (buffer[3] != 64) {
+            result[(j + 1)] = type_cast((buffer[2] << 4) | (buffer[3] >> 2)); j++
+        }
+
+        if (buffer[4] != 64) {
+            result[(j + 1)] = type_cast((buffer[3] << 6) | (buffer[4])); j++
+        }
+
+        count = 0
     }
 
-    return plain
+    set_length_array(result, j)
+
+    return result
 }
 
 

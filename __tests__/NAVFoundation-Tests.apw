@@ -16,7 +16,7 @@
                Comments?,
                Project*)>
 
-<!ATTLIST Workspace 
+<!ATTLIST Workspace
       CurrentVersion CDATA   #REQUIRED>
 
 <!ELEMENT CreateVersion     (#PCDATA)>
@@ -86,7 +86,7 @@
                DeviceMap*,
                IRDB*)>
 
-<!ATTLIST File 
+<!ATTLIST File
        Type (Source | MasterSrc | Include | Module | AXB | IR | TPD | TP4 | TP5 | KPD | TKO | AMX_IR_DB | IRN_DB | Other | DUET | TOK | TKN | KPB | XDD ) "Other"
        CompileType (Axcess | Netlinx | None) "None">
 
@@ -164,6 +164,28 @@
             <File CompileType="Netlinx" Type="MasterSrc">
                 <Identifier>sha1</Identifier>
                 <FilePathName>src\sha1.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>Base64</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.37|1320|1|NX-2200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>base64</Identifier>
+                <FilePathName>src\base64.axs</FilePathName>
                 <Comments></Comments>
             </File>
         </System>
