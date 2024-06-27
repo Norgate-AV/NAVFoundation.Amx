@@ -121,11 +121,13 @@ define_function slong NAVServerSocketClose(integer socket) {
 define_function slong NAVClientSocketOpen(integer socket, char address[], integer port, integer protocol) {
     stack_var slong result
 
+    address = NAVTrimString(address)
+
     if (!length_array(address)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_SOCKETUTILS__,
                                     'NAVClientSocketOpen',
-                                    "'Failed to open socket. ', NAVGetSocketError(NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS)")
+                                    "'Failed to open socket. The host address is an empty string.'")
         return NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS
     }
 
