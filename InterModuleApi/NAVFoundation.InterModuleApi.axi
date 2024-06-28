@@ -32,12 +32,20 @@ SOFTWARE.
 */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_INTERMODULE_API__
-#DEFINE __NAV_FOUNDATION_INTERMODULE_API__ 'NAVFoundation.Http.h'
+#DEFINE __NAV_FOUNDATION_INTERMODULE_API__ 'NAVFoundation.InterModuleApi.h'
 
 #include 'NAVFoundation.Core.axi'
 
 
 DEFINE_CONSTANT
+
+#IF_NOT_DEFINED MAX_OBJECTS
+constant integer MAX_OBJECTS	= 100
+#END_IF
+
+#IF_NOT_DEFINED MAX_OBJECT_TAGS
+constant integer MAX_OBJECT_TAGS	= 10
+#END_IF
 
 constant char OBJECT_COMMAND_MESSAGE_HEADER[] = 'COMMAND_MSG'
 constant char OBJECT_RESPONSE_MESSAGE_HEADER[] = 'RESPONSE_MSG'
@@ -45,40 +53,51 @@ constant char OBJECT_QUERY_MESSAGE_HEADER[] = 'POLL_MSG'
 constant char OBJECT_INIT_MESSAGE_HEADER[] = 'INIT'
 constant char OBJECT_INIT_DONE_MESSAGE_HEADER[] = 'INIT_DONE'
 constant char OBJECT_REGISTRATION_MESSAGE_HEADER[] = 'REGISTER'
+constant char OBJECT_RESPONSE_OK_MESSAGE_HEADER[] = 'RESPONSE_OK'
+
+
+DEFINE_TYPE
+
+struct _ModuleObject {
+    integer Id
+    integer IsInitialized
+    integer IsRegistered
+    char Tag[MAX_OBJECT_TAGS][NAV_MAX_CHARS]
+}
 
 
 define_function char[NAV_MAX_BUFFER] NAVInterModuleApiBuildCommand(char header[], char body[]) {
-    return "header, '<', body, '>'"
+    return "header, '-<', body, '>'"
 }
 
 
 define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetRegisterCommand(integer id) {
-    return NAVInterModuleApiBuildCommand('REGISTER', itoa(id))
+    return NAVInterModuleApiBuildCommand(OBJECT_REGISTRATION_MESSAGE_HEADER, itoa(id))
 }
 
 
 define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetInitCommand(integer id) {
-    return NAVInterModuleApiBuildCommand('INIT', itoa(id))
+    return NAVInterModuleApiBuildCommand(OBJECT_INIT_MESSAGE_HEADER, itoa(id))
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetInitDoneCommand() {
-    return NAVInterModuleApiBuildCommand('INIT_DONE', '')
+define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetInitDoneCommand(integer id) {
+    return NAVInterModuleApiBuildCommand(OBJECT_INIT_DONE_MESSAGE_HEADER, itoa(id))
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetCommandMessageCommand() {
-    return NAVInterModuleApiBuildCommand('COMMAND_MSG', '')
+define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetCommandMessageCommand(char payload[]) {
+    return NAVInterModuleApiBuildCommand(OBJECT_COMMAND_MESSAGE_HEADER, payload)
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetPollMessageCommand() {
-    return NAVInterModuleApiBuildCommand('POLL_MSG', '')
+define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetPollMessageCommand(char payload[]) {
+    return NAVInterModuleApiBuildCommand(OBJECT_QUERY_MESSAGE_HEADER, payload)
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetResponseOkCommand() {
-    return NAVInterModuleApiBuildCommand('RESPONSE_OK', '')
+define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetResponseOkCommand(integer id) {
+    return NAVInterModuleApiBuildCommand(OBJECT_RESPONSE_OK_MESSAGE_HEADER, itoa(id))
 }
 
 
@@ -111,9 +130,23 @@ define_function char[NAV_MAX_BUFFER] BuildObjectMessage(char header[], integer i
 
 
 define_function char[NAV_MAX_BUFFER] BuildObjectResponseMessage(char data[]) {
-    return "OBJECT_RESPONSE_MESSAGE_HEADER, '<', data, '>'"
+    return "OBJECT_RESPONSE_MESSAGE_HEADER, '-<', data, '>'"
 }
 
+
+define_function SendObjectMessage(dev device, char payload[]) {
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
+                NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_TO,
+                                            device,
+                                            payload))
+
+    NAVCommand(device, "payload")
+}
+
+
+// define_function char[NAV_MAX_BUFFER] GetObjectTagList(_ModuleObject object) {
+//     return NAVArrayJoinString(object.Tag, ',')
+// }
 
 
 #END_IF     // __NAV_FOUNDATION_INTERMODULE_API__
