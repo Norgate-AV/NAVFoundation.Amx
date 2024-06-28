@@ -562,6 +562,7 @@ struct _NAVController {
     char MacAddress[NAV_MAX_CHARS]
     _NAVProgram Program
     dev_info_struct Information
+    dev_info_struct Device
 }
 
 
@@ -942,6 +943,7 @@ define_function NAVSetControllerProgramInformation(_NAVProgram program) {
 
 define_function NAVSetControllerInformation(_NAVController controller) {
     device_info(dvNAVMaster, controller.Information)
+    device_info(5001:1:0, controller.Device)
     NAVGetDeviceIPAddressInformation(dvNAVMaster, controller.IP)
 
     controller.SerialNumber = NAVGetDeviceSerialNumber(dvNAVMaster)
@@ -1058,15 +1060,29 @@ define_function NAVPrintBanner() {
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Controller Info:'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Info:'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Device Id: 0'")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Manufacturer: ', NAVController.Information.Manufacturer_String")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Model: ', NAVController.Information.Device_Id_String")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Version: ', NAVController.Information.Version")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Firmware Id: ', NAVController.Information.Firmware_Id")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Serial Number: ', NAVController.SerialNumber")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Unique Id: ', NAVController.UniqueId")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Firmware Id: ', itoa(NAVController.Information.Firmware_Id)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Serial Number: ', NAVTrimString(NAVController.SerialNumber)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Unique Id: ', NAVFormatHex(NAVController.UniqueId)")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
+
+    if (NAVController.Device.Device_Id) {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Device Info:'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Device Id: 5001'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Manufacturer: ', NAVController.Device.Manufacturer_String")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Model: ', NAVController.Device.Device_Id_String")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Version: ', NAVController.Device.Version")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Firmware Id: ', itoa(NAVController.Device.Firmware_Id)")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
+    }
+
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Network Info:'")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Mac Address: ', NAVController.MacAddress")
@@ -1074,7 +1090,7 @@ define_function NAVPrintBanner() {
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Subnet Mask: ', NAVController.IP.SubnetMask")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Gateway: ', NAVController.IP.Gateway")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Hostname: ', NAVController.IP.Hostname")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'DHCP Enabled: ', NAVController.IP.Flags")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'DHCP Enabled: ', NAVBooleanToString(NAVController.IP.Flags)")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
 }
@@ -1152,6 +1168,7 @@ DEFINE_START {
     NAVSetControllerInformation(NAVController)
     NAVPrintBanner()
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "__FILE__, ' : ', 'Program Started'")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
     #END_IF
 
     NAVTimelineStart(TL_NAV_BLINKER, NAVBlinkerTLArray, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
