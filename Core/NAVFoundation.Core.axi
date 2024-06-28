@@ -933,6 +933,20 @@ define_function NAVCommandArray(dev device[], char value[]) {
 }
 
 
+define_function NAVSendLevel(dev device, integer level, integer value) {
+    send_level device, level, value
+}
+
+
+define_function NAVSendLevelArray(dev device[], integer level, integer value) {
+    stack_var integer x
+
+    for (x = 1; x <= length_array(device); x++) {
+        send_level device[x], level, value
+    }
+}
+
+
 define_function NAVSetControllerProgramInformation(_NAVProgram program) {
     program.Name = __NAME__
     program.File = __FILE__
