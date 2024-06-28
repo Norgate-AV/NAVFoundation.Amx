@@ -101,6 +101,13 @@ define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetResponseOkCommand(integ
 }
 
 
+define_function NAVInterModuleApiInit(_ModuleObject object) {
+    object.Id = 0
+    object.IsInitialized = false
+    object.IsRegistered = false
+}
+
+
 define_function integer GetObjectId(char buffer[]) {
     if (!NAVContains(buffer, '|')) {
         return atoi(NAVGetStringBetween(buffer, '<', '>'))
