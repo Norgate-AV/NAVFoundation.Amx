@@ -122,7 +122,7 @@ define_function integer NAVStringCount(char buffer[], char value[], integer case
 
 
 define_function integer NAVIsWhitespace(integer byte) {
-    return (byte == $20 || byte == $0D || byte == $0A || byte == $09 || byte == $0B || byte == $0C)
+    return (byte == $20 || byte == $0D || byte == $0A || byte == $09 || byte == $0B || byte == $0C || byte == $00)
 }
 
 
