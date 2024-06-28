@@ -38,10 +38,10 @@ SOFTWARE.
 define_function long NAVNetworkToHostLong(long value) {
     stack_var long result
 
-    result = (value & $FF) << 24
-    result = result | ((value >> 8) & $FF) << 16
-    result = result | ((value >> 16) & $FF) << 8
-    result = result | ((value >> 24) & $FF) << 0
+    result = result | ((value >> 00) & $FF) << 24
+    result = result | ((value >> 08) & $FF) << 16
+    result = result | ((value >> 16) & $FF) << 08
+    result = result | ((value >> 24) & $FF) << 00
 
     return result
 }
@@ -59,16 +59,16 @@ define_function long NAVHostToNetworkShort(long value) {
 
 define_function char[2] NAVIntegerToByteArray(integer value) {
     return "
-        type_cast(value & $FF),
-        type_cast((value >> 8) & $FF)
+        type_cast((value >> 00) & $FF),
+        type_cast((value >> 08) & $FF)
     "
 }
 
 
 define_function char[4] NAVLongToByteArray(long value) {
     return "
-        type_cast(value & $FF),
-        type_cast((value >> 8) & $FF),
+        type_cast((value >> 00) & $FF),
+        type_cast((value >> 08) & $FF),
         type_cast((value >> 16) & $FF),
         type_cast((value >> 24) & $FF)
     "
