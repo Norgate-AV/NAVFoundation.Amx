@@ -64,6 +64,11 @@ define_function integer NAVDevicePriorityQueueHasItems(_NAVDevicePriorityQueue q
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVDevicePriorityQueueGetLastMessage(_NAVDevicePriorityQueue queue) {
+    return queue.LastMessage
+}
+
+
 define_function NAVDevicePriorityQueueEnqueue(_NAVDevicePriorityQueue queue, char item[], integer priority) {
     stack_var integer queueWasEmpty
 
