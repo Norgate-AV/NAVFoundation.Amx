@@ -67,7 +67,16 @@ define_function char[NAV_MAX_BUFFER] NAVRemoveStringByLength(char buffer[], inte
 
 
 define_function char[NAV_MAX_BUFFER] NAVStringSubstring(char buffer[], integer index, integer count) {
-    return mid_string(buffer, index, count)
+    if (count > 0) {
+        return mid_string(buffer, index, count)
+    }
+
+    return mid_string(buffer, index, length_array(buffer))
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVStringSlice(char buffer[], integer index, integer count) {
+    return NAVStringSubString(buffer, index, count)
 }
 
 
