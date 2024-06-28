@@ -57,6 +57,16 @@ define_function long NAVHostToNetworkShort(long value) {
 }
 
 
+define_function long NAVToLittleEndian(long value) {
+    return NAVNetworkToHostLong(value)
+}
+
+
+define_function long NAVToBigEndian(long value) {
+    return NAVHostToNetworkShort(value)
+}
+
+
 define_function char[2] NAVIntegerToByteArray(integer value) {
     return "
         type_cast((value >> 00) & $FF),
