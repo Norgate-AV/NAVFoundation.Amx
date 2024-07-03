@@ -452,6 +452,7 @@ struct _NAVDisplay {
     _NAVStateInteger PowerState
     _NAVStateInteger Input
     _NAVStateInteger VideoMute
+    _NAVStateInteger Aspect
     _NAVVolume Volume
     char AutoAdjustRequired
 }
