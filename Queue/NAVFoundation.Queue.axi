@@ -67,6 +67,10 @@ define_function integer NAVQueueEnqueue(_NAVQueue queue, char item[]) {
     }
 
     queue.Tail = (queue.Tail + 1) % queue.Capacity
+    if (queue.Tail == 0) {
+        queue.Tail = queue.Capacity
+    }
+
     queue.Count++
 
     queue.Items[queue.Tail] = item
@@ -83,6 +87,10 @@ define_function char[NAV_MAX_BUFFER] NAVQueueDequeue(_NAVQueue queue) {
     }
 
     queue.Head = (queue.Head + 1) % queue.Capacity
+    if (queue.Head == 0) {
+        queue.Head = queue.Capacity
+    }
+
     queue.Count--
 
     item = queue.Items[queue.Head]
