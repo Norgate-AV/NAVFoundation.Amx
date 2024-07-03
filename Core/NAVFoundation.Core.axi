@@ -361,6 +361,7 @@ struct _NAVContact {
 struct _NAVStateBoolean {
     char Required
     char Actual
+    integer Initialized
 }
 
 
@@ -370,6 +371,7 @@ struct _NAVStateBoolean {
 struct _NAVStateInteger {
     integer Required
     integer Actual
+    integer Initialized
 }
 
 
@@ -379,6 +381,7 @@ struct _NAVStateInteger {
 struct _NAVStateSignedInteger {
     sinteger Required
     sinteger Actual
+    integer Initialized
 }
 
 
@@ -388,6 +391,7 @@ struct _NAVStateSignedInteger {
 struct _NAVStateLong {
     long Required
     long Actual
+    integer Initialized
 }
 
 
@@ -397,6 +401,7 @@ struct _NAVStateLong {
 struct _NAVStateSignedLong {
     slong Required
     slong Actual
+    integer Initialized
 }
 
 
@@ -406,6 +411,7 @@ struct _NAVStateSignedLong {
 struct _NAVStateDouble {
     double Required
     double Actual
+    integer Initialized
 }
 
 
@@ -415,6 +421,7 @@ struct _NAVStateDouble {
 struct _NAVStateFloat {
     float Required
     float Actual
+    integer Initialized
 }
 
 
@@ -424,6 +431,7 @@ struct _NAVStateFloat {
 struct _NAVStateString {
     char Required[NAV_MAX_BUFFER]
     char Actual[NAV_MAX_BUFFER]
+    integer Initialized
 }
 
 
