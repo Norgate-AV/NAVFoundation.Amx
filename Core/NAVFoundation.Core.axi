@@ -519,6 +519,7 @@ struct _NAVCredential {
 // Socket Connection
 ////////////////////////////////////////////////////////////
 struct _NAVSocketConnection {
+    integer Socket
     char Address[NAV_MAX_CHARS]
     integer Port
     integer IsConnected
