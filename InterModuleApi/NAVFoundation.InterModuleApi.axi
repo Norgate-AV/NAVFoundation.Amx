@@ -156,9 +156,20 @@ define_function NAVInterModuleApiSendObjectMessage(dev device, char payload[]) {
 }
 
 
-// define_function char[NAV_MAX_BUFFER] GetObjectTagList(_ModuleObject object) {
-//     return NAVArrayJoinString(object.Tag, ',')
-// }
+define_function integer NAVInterModuleApiGetObjectRegistrationCount(_ModuleObject object[], integer maxCount) {
+    stack_var integer x
+    stack_var integer count
+
+    count = 0
+
+    for (x = 1; x <= maxCount; x++) {
+        if (object[x].IsRegistered) {
+            count++
+        }
+    }
+
+    return count
+}
 
 
 #END_IF     // __NAV_FOUNDATION_INTERMODULE_API__
