@@ -468,6 +468,7 @@ struct _NAVProjector {
     _NAVStateInteger FilterHours[2]
     _NAVStateInteger FilterStatus[2]
     _NAVStateFloat Temperature
+    _NAVStateInteger Freeze
 }
 
 
