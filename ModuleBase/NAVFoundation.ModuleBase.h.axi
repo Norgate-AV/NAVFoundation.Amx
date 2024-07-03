@@ -51,6 +51,8 @@ constant char NAV_MODULE_EVENT_INPUT[]            = 'INPUT'
 
 constant char NAV_MODULE_PROPERTY_EVENT_IP_ADDRESS[]    = 'IP_ADDRESS'
 constant char NAV_MODULE_PROPERTY_EVENT_PORT[]          = 'PORT'
+constant char NAV_MODULE_PROPERTY_EVENT_ID[]            = 'ID'
+constant char NAV_MODULE_PROPERTY_EVENT_BAUDRATE[]      = 'BAUDRATE'
 constant char NAV_MODULE_PROPERTY_EVENT_USERNAME[]      = 'USERNAME'
 constant char NAV_MODULE_PROPERTY_EVENT_PASSWORD[]      = 'PASSWORD'
 
