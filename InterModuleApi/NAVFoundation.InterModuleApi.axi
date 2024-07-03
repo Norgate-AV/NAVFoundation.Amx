@@ -108,7 +108,7 @@ define_function NAVInterModuleApiInit(_ModuleObject object) {
 }
 
 
-define_function integer GetObjectId(char buffer[]) {
+define_function integer NAVInterModuleApiGetObjectId(char buffer[]) {
     if (!NAVContains(buffer, '|')) {
         return atoi(NAVGetStringBetween(buffer, '<', '>'))
     }
@@ -117,17 +117,17 @@ define_function integer GetObjectId(char buffer[]) {
 }
 
 
-define_function char[NAV_MAX_BUFFER] GetObjectMessage(char buffer[]) {
+define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetObjectMessage(char buffer[]) {
     return NAVGetStringBetween(buffer, '|', '>')
 }
 
 
-define_function char[NAV_MAX_BUFFER] GetObjectFullMessage(char buffer[]) {
+define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetObjectFullMessage(char buffer[]) {
     return NAVGetStringBetween(buffer, '<', '>')
 }
 
 
-define_function char[NAV_MAX_BUFFER] BuildObjectMessage(char header[], integer id, char payload[]) {
+define_function char[NAV_MAX_BUFFER] NAVInterModuleApiBuildObjectMessage(char header[], integer id, char payload[]) {
     if (!length_array(payload)) {
         return "header, '-<', itoa(id), '>'"
     }
@@ -136,12 +136,17 @@ define_function char[NAV_MAX_BUFFER] BuildObjectMessage(char header[], integer i
 }
 
 
-define_function char[NAV_MAX_BUFFER] BuildObjectResponseMessage(char data[]) {
+define_function char[NAV_MAX_BUFFER] NAVInterModuleApiBuildObjectResponseMessage(char data[]) {
     return "OBJECT_RESPONSE_MESSAGE_HEADER, '-<', data, '>'"
 }
 
 
-define_function SendObjectMessage(dev device, char payload[]) {
+define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetObjectTagList(_ModuleObject object) {
+    return NAVArrayJoinString(object.Tag, ',')
+}
+
+
+define_function NAVInterModuleApiSendObjectMessage(dev device, char payload[]) {
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
                 NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_TO,
                                             device,
