@@ -1184,6 +1184,11 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringToVariableError(sinteger error)
 }
 
 
+define_function char NAVDeviceIsOnline(dev device) {
+    return device_id(device) != 0
+}
+
+
 (***********************************************************)
 (*                STARTUP CODE GOES BELOW                  *)
 (***********************************************************)
