@@ -807,4 +807,23 @@ define_function NAVDateTimeTimestampsPrint() {
 }
 
 
+define_function NAVSetupNetworkTime() {
+    clkmgr_timeoffset_struct offset
+
+    offset.hours = 1
+    offset.minutes = 0
+    offset.seconds = 0
+
+    clkmgr_set_timezone('UTC+00:00')
+    clkmgr_set_clk_source(CLKMGR_MODE_NETWORK)
+    clkmgr_set_resync_period(5)
+    clkmgr_add_userdefined_timeserver(timeserver.Ip, timeserver.Hostname, timeserver.Description)
+    clkmgr_set_active_timeserver(timeserver.Ip)
+    clkmgr_set_daylightsavings_mode(true)
+    clkmgr_set_daylightsavings_offset(offset)
+    clkmgr_set_start_daylightsavings_rule('occurrence:5,1,3,02:00:00')
+    clkmgr_set_end_daylightsavings_rule('occurrence:5,1,10,02:00:00')
+}
+
+
 #END_IF // __NAV_FOUNDATION_DATETIMEUTILS__

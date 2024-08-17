@@ -158,4 +158,16 @@ struct _NAVTimespec {
 }
 
 
+struct _NAVTimeserver {
+    char Ip[15]
+    char Hostname[255]
+    char Description[255]
+}
+
+
+DEFINE_VARIABLE
+
+constant _NAVTimeserver timeserver = { '51.145.123.29', 'time.windows.com', 'Windows Timeserver' }
+
+
 #END_IF // __NAV_FOUNDATION_DATETIME_H__
