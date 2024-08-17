@@ -213,6 +213,9 @@ constant integer NAV_LOG_CHUNK_SIZE             = 100
 constant long TL_NAV_BLINKER	                = 255
 constant long TL_NAV_FEEDBACK	                = 256
 
+constant long TL_NAV_BLIBKER_INTERVAL[]	    = { 500 }
+constant long TL_NAV_FEEDBACK_INTERVAL[]	= { 200 }
+
 
 /////////////////////////////////////////////////////////////
 // Events
@@ -627,9 +630,6 @@ DEFINE_VARIABLE
 volatile _NAVController NAVController
 
 volatile integer NAVBlinker = FALSE
-
-volatile long NAVBlinkerTLArray[]	= { 500 }
-volatile long NAVFeedbackTLArray[]	= { 200 }
 
 
 /////////////////////////////////////////////////////////////
@@ -1201,8 +1201,8 @@ DEFINE_START {
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
     #END_IF
 
-    NAVTimelineStart(TL_NAV_BLINKER, NAVBlinkerTLArray, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
-    NAVTimelineStart(TL_NAV_FEEDBACK, NAVFeedbackTLArray, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
+    NAVTimelineStart(TL_NAV_BLINKER, TL_NAV_BLIBKER_INTERVAL, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
+    NAVTimelineStart(TL_NAV_FEEDBACK, TL_NAV_FEEDBACK_INTERVAL, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
 }
 
 
