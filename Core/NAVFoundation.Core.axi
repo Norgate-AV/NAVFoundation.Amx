@@ -1199,6 +1199,8 @@ DEFINE_START {
     NAVPrintBanner()
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "__FILE__, ' : ', 'Program Started'")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
+    #ELSE
+    NAVErrorLog(NAV_LOG_LEVEL_WARNING, "'__MAIN__ not defined'")
     #END_IF
 
     NAVTimelineStart(TL_NAV_BLINKER, TL_NAV_BLIBKER_INTERVAL, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
