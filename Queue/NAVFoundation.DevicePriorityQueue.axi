@@ -76,18 +76,18 @@ define_function NAVDevicePriorityQueueEnqueue(_NAVDevicePriorityQueue queue, cha
 
     switch (priority) {
         case true: {
-            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                        __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
-                                        'NAVDevicePriorityQueueEnqueue',
-                                        "'Enqueuing item in CommandQueue: ', item")
+            // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+            //                             __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
+            //                             'NAVDevicePriorityQueueEnqueue',
+            //                             "'Enqueuing item in CommandQueue: ', item")
 
             NAVQueueEnqueue(queue.CommandQueue, item)
         }
         case false: {
-            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                        __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
-                                        'NAVDevicePriorityQueueEnqueue',
-                                        "'Enqueuing item in QueryQueue: ', item")
+            // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+            //                             __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
+            //                             'NAVDevicePriorityQueueEnqueue',
+            //                             "'Enqueuing item in QueryQueue: ', item")
 
             NAVQueueEnqueue(queue.QueryQueue, item)
         }
@@ -97,10 +97,10 @@ define_function NAVDevicePriorityQueueEnqueue(_NAVDevicePriorityQueue queue, cha
         return
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
-                                'NAVDevicePriorityQueueEnqueue',
-                                "'Queue was empty. Item being dequeued immediately'")
+    // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+    //                             __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
+    //                             'NAVDevicePriorityQueueEnqueue',
+    //                             "'Queue was empty. Item being dequeued immediately'")
 
     NAVDevicePriorityQueueSendNextItem(queue)
 }
@@ -118,19 +118,19 @@ define_function char[NAV_MAX_BUFFER] NAVDevicePriorityQueueDequeue(_NAVDevicePri
     queue.Busy = true
 
     if (NAVQueueHasItems(queue.CommandQueue)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                    __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
-                                    'NAVDevicePriorityQueueEnqueue',
-                                    "'Dequeueing item from CommandQueue'")
+        // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+        //                             __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
+        //                             'NAVDevicePriorityQueueEnqueue',
+        //                             "'Dequeueing item from CommandQueue'")
 
         queue.LastMessage = NAVQueueDequeue(queue.CommandQueue)
         return queue.LastMessage
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
-                                'NAVDevicePriorityQueueEnqueue',
-                                "'Dequeueing item from QueryQueue'")
+    // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+    //                             __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
+    //                             'NAVDevicePriorityQueueEnqueue',
+    //                             "'Dequeueing item from QueryQueue'")
 
     queue.LastMessage = NAVQueueDequeue(queue.QueryQueue)
     return queue.LastMessage
@@ -157,28 +157,28 @@ define_function NAVDevicePriorityQueueSendNextItem(_NAVDevicePriorityQueue queue
         item = queue.LastMessage
     }
     else {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                    __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
-                                    'NAVDevicePriorityQueueEnqueue',
-                                    "'Attempting to dequeue next item'")
+        // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+        //                             __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
+        //                             'NAVDevicePriorityQueueEnqueue',
+        //                             "'Attempting to dequeue next item'")
 
         item = NAVDevicePriorityQueueDequeue(queue)
     }
 
     if (!length_array(item)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                    __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
-                                    'NAVDevicePriorityQueueEnqueue',
-                                    "'No items to send. Queue is empty'")
+        // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+        //                             __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
+        //                             'NAVDevicePriorityQueueEnqueue',
+        //                             "'No items to send. Queue is empty'")
 
         return
     }
 
     #IF_DEFINED USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
-                                'NAVDevicePriorityQueueEnqueue',
-                                "'Invoking callback: ', item")
+    // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+    //                             __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__,
+    //                             'NAVDevicePriorityQueueEnqueue',
+    //                             "'Invoking callback: ', item")
 
     NAVDevicePriorityQueueSendNextItemEventCallback(item)
     NAVTimelineStart(queue.FailedResponseTimeline.Id, queue.FailedResponseTimeline.Time, TIMELINE_ABSOLUTE, TIMELINE_ONCE)
