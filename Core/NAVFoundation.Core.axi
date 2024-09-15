@@ -290,20 +290,20 @@ struct _NAVKeyIntegerValuePair {
 
 
 struct _NAVKeyLongValuePair {
-    char Key[256];
     long Value;
+    char Key[256];
 }
 
 
 struct _NAVKeyDoubleValuePair {
-    char Key[256];
     double Value;
+    char Key[256];
 }
 
 
 struct _NAVKeyFloatValuePair {
-    char Key[256];
     float Value;
+    char Key[256];
 }
 
 
@@ -362,9 +362,9 @@ struct _NAVContact {
 // Boolean State
 ////////////////////////////////////////////////////////////
 struct _NAVStateBoolean {
+    integer Initialized
     char Required
     char Actual
-    integer Initialized
 }
 
 
@@ -372,9 +372,9 @@ struct _NAVStateBoolean {
 // Integer State
 ////////////////////////////////////////////////////////////
 struct _NAVStateInteger {
+    integer Initialized
     integer Required
     integer Actual
-    integer Initialized
 }
 
 
@@ -382,9 +382,9 @@ struct _NAVStateInteger {
 // Signed Integer State
 ////////////////////////////////////////////////////////////
 struct _NAVStateSignedInteger {
+    integer Initialized
     sinteger Required
     sinteger Actual
-    integer Initialized
 }
 
 
@@ -432,9 +432,9 @@ struct _NAVStateFloat {
 // String State
 ////////////////////////////////////////////////////////////
 struct _NAVStateString {
+    integer Initialized
     char Required[NAV_MAX_BUFFER]
     char Actual[NAV_MAX_BUFFER]
-    integer Initialized
 }
 
 
@@ -525,10 +525,10 @@ struct _NAVCredential {
 ////////////////////////////////////////////////////////////
 struct _NAVSocketConnection {
     integer Socket
-    char Address[NAV_MAX_CHARS]
     integer Port
     integer IsConnected
     integer IsAuthenticated
+    char Address[NAV_MAX_CHARS]
 }
 
 
@@ -536,10 +536,10 @@ struct _NAVSocketConnection {
 // Device
 ////////////////////////////////////////////////////////////
 struct _NAVDevice {
+    _NAVSocketConnection SocketConnection
     integer IsOnline
     integer IsCommunicating
     integer IsInitialized
-    _NAVSocketConnection SocketConnection
 }
 
 
@@ -547,8 +547,8 @@ struct _NAVDevice {
 // Module
 ////////////////////////////////////////////////////////////
 struct _NAVModule {
-    _NAVRxBuffer RxBuffer
     _NAVDevice Device
+    _NAVRxBuffer RxBuffer
     integer Enabled
     integer CommandBusy
     dev VirtualDevice[10]
@@ -571,12 +571,12 @@ struct _NAVProgram {
 ////////////////////////////////////////////////////////////
 struct _NAVController {
     ip_address_struct IP
+    dev_info_struct Information
+    dev_info_struct Device
+    _NAVProgram Program
     char SerialNumber[NAV_MAX_CHARS]
     char UniqueId[6]
     char MacAddress[NAV_MAX_CHARS]
-    _NAVProgram Program
-    dev_info_struct Information
-    dev_info_struct Device
 }
 
 
@@ -584,9 +584,9 @@ struct _NAVController {
 // Console
 /////////////////////////////////////////////////////////////
 struct _NAVConsole {
-    dev Socket
     _NAVSocketConnection SocketConnection
     slong ErrorCode
+    dev Socket
     char Semaphore
     char RxBuffer[NAV_MAX_BUFFER]
 }
@@ -596,9 +596,9 @@ struct _NAVConsole {
 // System
 /////////////////////////////////////////////////////////////
 struct _NAVSystem {
+    _NAVController Controller
     long Feedback[1]
     long Blinker[1]
-    _NAVController Controller
 }
 
 
