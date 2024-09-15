@@ -636,22 +636,13 @@ volatile integer NAVBlinker = FALSE
 // Includes
 /////////////////////////////////////////////////////////////
 #include 'NAVFoundation.ErrorLogUtils.h.axi'
-#include 'NAVFoundation.HashTable.h.axi'
-#include 'NAVFoundation.Queue.h.axi'
 #include 'NAVFoundation.SnapiHelpers.h.axi'
-#include 'NAVFoundation.Stack.h.axi'
 #include 'NAVFoundation.StringUtils.h.axi'
 
 #include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.SnapiHelpers.axi'
 #include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.TimelineUtils.axi'
-
-// #include 'NAVFoundation.DebugConsole.axi'
-
-// #IF_NOT_DEFINED NAV_MODULE
-// #include 'NAVFoundation.CommandConsole.axi'
-// #END_IF
 
 #IF_DEFINED USING_RMS
 #include 'NAVFoundation.RmsUtils.axi'
