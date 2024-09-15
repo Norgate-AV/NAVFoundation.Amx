@@ -99,6 +99,9 @@ SOFTWARE.
 // #DEFINE USING_NAV_RMS_CLIENT_ASSET_REGISTER_CONTROL_METHODS_CALLBACK
 // define_function NAVRmsClientAssetRegisterControlMethodsCallback(_NAVRmsClient client, _NAVRmsRegisteredAsset asset) {}
 
+// #DEFINE USING_NAV_RMS_CLIENT_ASSET_RELOCATED_EVENT_CALLBACK
+// define_function NAVRmsClientAssetRelocatedEventCallback(_NAVRmsClient client, tdata args) {}
+
 // #DEFINE USING_NAV_RMS_CLIENT_CONFIG_CHANGE_EVENT_CALLBACK
 // define_function NAVRmsClientConfigChangeEventCallback(_NAVRmsClient client, tdata args) {}
 
@@ -361,6 +364,10 @@ data_event[vdvRms] {
                             "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset ID: ', message.Parameter[2]")
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   New Location ID: ', message.Parameter[3]")
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSET_RELOCATED_EVENT_CALLBACK
+                NAVRmsClientAssetRelocatedEventCallback(rmsClient, data)
+                #END_IF
             }
 
             // Asset Parameter Event Notifications
