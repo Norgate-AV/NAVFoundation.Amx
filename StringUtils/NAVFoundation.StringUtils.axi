@@ -350,7 +350,7 @@ define_function integer NAVSplitString(char buffer[], char separator[], char res
     while (NAVContains(bufferCopy, separator)) {
         token = NAVStripCharsFromRight(remove_string(bufferCopy, separator, 1), length_array(separator))
 
-        if (!length_array(token) && separator == ' ') {
+        if (!length_array(token)) {
             continue
         }
 
