@@ -104,15 +104,15 @@ struct _NAVLogicEngineEvent {
 
 DEFINE_VARIABLE
 
-volatile _NAVLogicEngine navLogicEngine
+volatile _NAVLogicEngine engine
 
 
 define_function NAVLogicEngineStart() {
-    if (navLogicEngine.IsRunning) {
+    if (engine.IsRunning) {
         return
     }
 
-    if (NAVTimelineStart(TL_NAV_LOGIC_ENGINE, navLogicEngine.Timer.Ticks, TIMELINE_RELATIVE, TIMELINE_REPEAT) != 0) {
+    if (NAVTimelineStart(TL_NAV_LOGIC_ENGINE, engine.Timer.Ticks, TIMELINE_RELATIVE, TIMELINE_REPEAT) != 0) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_LOGICENGINE__,
                                     'NAVLogicEngineStart',
@@ -121,12 +121,12 @@ define_function NAVLogicEngineStart() {
         return
     }
 
-    navLogicEngine.IsRunning = true
+    engine.IsRunning = true
 }
 
 
 define_function NAVLogicEngineStop() {
-    if (!navLogicEngine.IsRunning) {
+    if (!engine.IsRunning) {
         return
     }
 
@@ -139,12 +139,12 @@ define_function NAVLogicEngineStop() {
         return
     }
 
-    navLogicEngine.IsRunning = false
+    engine.IsRunning = false
 }
 
 
 define_function NAVLogicEngineRestart() {
-    if (!navLogicEngine.IsRunning) {
+    if (!engine.IsRunning) {
         return
     }
 
@@ -215,14 +215,14 @@ define_function NAVLogicEngineInit(_NAVLogicEngine engine) {
 
 
 DEFINE_START {
-    NAVLogicEngineInit(navLogicEngine)
+    NAVLogicEngineInit(engine)
 }
 
 
 DEFINE_EVENT
 
 timeline_event[TL_NAV_LOGIC_ENGINE] {
-    NAVLogicEngineDrive(navLogicEngine, timeline)
+    NAVLogicEngineDrive(engine, timeline)
 }
 
 
