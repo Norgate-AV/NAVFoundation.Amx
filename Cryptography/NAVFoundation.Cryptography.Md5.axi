@@ -166,58 +166,7 @@ define_function NAVMd5Update(_NAVMd5Context context, char data[], integer length
     if (leftOver > 0) {
         context.buffer = right_string(data, length_array(data) - start)
     }
-
-    ////////////////////////
-    // RFC Implementation //
-    ////////////////////////
-    // byteCount = NAVMd5GetCurrentByteCount(context)
-
-    // NAVMd5UpdateBitCount(context, length)
-
-    // chunkSize = 64 - byteCount
-    // // chunkSize = NAVMd5GetChunkSize(byteCount, length)
-
-    // if (length >= chunkSize) {
-    //     // context.buffer = "left_string(context.buffer, (byteCount + 1)), mid_string(data, 1, chunkSize)"
-    //     NAVMd5MemCopy(context.buffer, data, chunkSize)
-    //     NAVMd5Transform(context.state, context.buffer)
-
-    //     // start = start + chunkSize
-
-    //     for (i = chunkSize; (i + 63) < length; i = i + 64/*, start = start + 64*/) {
-    //         // NAVMd5Transform(context.state, "right_string(data, length - start)")
-    //         // NAVMd5Transform(context.state, "right_string(data, length - i)")
-    //         NAVMd5Transform(context.state, "NAVStringSubString(data, i, 0)")
-    //         // NAVMd5Transform(context.state, "data[i]")
-    //     }
-
-    //     return
-    // }
-    // //else {
-    //     // context.buffer = right_string(data, length - start)
-    //     // context.buffer = right_string(data, length)
-    //     // set_length_array(context.buffer, length)
-    // //}
-    // NAVMd5MemCopy(context.buffer, data, length)
 }
-
-
-// define_function NAVMd5MemCopy(char output[], char input[], integer length) {
-//     stack_var integer i
-
-//     for (i = 0; i < length; i ++) {
-//         output[(i + 1)] = input[(i + 1)]
-//     }
-// }
-
-
-// define_function NAVMd5MemSet(char output[], integer value, integer length) {
-//     stack_var integer i
-
-//     for (i = 0; i < length; i++) {
-//         output[(i + 1)] = type_cast(value)
-//     }
-// }
 
 
 /**
