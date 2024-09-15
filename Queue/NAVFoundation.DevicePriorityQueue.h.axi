@@ -63,14 +63,16 @@ struct _NAVDevicePriorityQueueFailedResponseTimeline {
 
 
 struct _NAVDevicePriorityQueue {
+    _NAVQueue CommandQueue
+    _NAVQueue QueryQueue
+
+    _NAVDevicePriorityQueueFailedResponseTimeline FailedResponseTimeline
+
     integer Busy
     integer FailedCount
     integer MaxFailedCount
     integer Resend
-    _NAVDevicePriorityQueueFailedResponseTimeline FailedResponseTimeline
     char LastMessage[NAV_MAX_BUFFER]
-    _NAVQueue CommandQueue
-    _NAVQueue QueryQueue
 }
 
 
