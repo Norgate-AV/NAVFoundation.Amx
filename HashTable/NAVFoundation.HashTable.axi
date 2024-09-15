@@ -34,6 +34,7 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_HASHTABLE__
 #DEFINE __NAV_FOUNDATION_HASHTABLE__ 'NAVFoundation.HashTable'
 
+#include 'NAVFoundation.HashTable.h.axi'
 #include 'NAVFoundation.Core.axi'
 
 
