@@ -48,6 +48,10 @@ try {
     # Filter out any .h.axi files
     $axiFiles = $axiFiles | Where-Object { $_.FullName -notmatch ".h.axi" }
 
+    # Filter out files from __test__ directory
+    $axiFiles = $axiFiles | Where-Object { $_.FullName -notmatch "__tests__" }
+    $axsFiles = $axsFiles | Where-Object { $_.FullName -notmatch "__tests__" }
+
     if (!$axiFiles -and !$axsFiles) {
         Write-Host "No files found in $Path" -ForegroundColor Yellow
         exit
