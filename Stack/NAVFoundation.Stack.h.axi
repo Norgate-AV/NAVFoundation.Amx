@@ -34,11 +34,13 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_STACK_H__
 #DEFINE __NAV_FOUNDATION_STACK_H__ 'NAVFoundation.Stack.h'
 
+#include 'NAVFoundation.Core.axi'
+
 
 DEFINE_CONSTANT
 
 #IF_NOT_DEFINED NAV_MAX_STACK_SIZE
-constant integer NAV_MAX_STACK_SIZE = 500
+constant integer NAV_MAX_STACK_SIZE = 200
 #END_IF
 
 constant integer NAV_STACK_EMPTY = 0

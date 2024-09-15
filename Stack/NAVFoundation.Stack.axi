@@ -34,6 +34,7 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_STACK__
 #DEFINE __NAV_FOUNDATION_STACK__ 'NAVFoundation.Stack'
 
+#include 'NAVFoundation.Stack.h.axi'
 #include 'NAVFoundation.Core.axi'
 
 
