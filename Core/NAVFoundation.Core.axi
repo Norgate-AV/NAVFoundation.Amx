@@ -213,7 +213,7 @@ constant integer NAV_LOG_CHUNK_SIZE             = 100
 constant long TL_NAV_BLINKER	                = 255
 constant long TL_NAV_FEEDBACK	                = 256
 
-constant long TL_NAV_BLIBKER_INTERVAL[]	    = { 500 }
+constant long TL_NAV_BLINKER_INTERVAL[]	    = { 500 }
 constant long TL_NAV_FEEDBACK_INTERVAL[]	= { 200 }
 
 
@@ -1203,7 +1203,7 @@ DEFINE_START {
     NAVErrorLog(NAV_LOG_LEVEL_WARNING, "'__MAIN__ not defined'")
     #END_IF
 
-    NAVTimelineStart(TL_NAV_BLINKER, TL_NAV_BLIBKER_INTERVAL, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
+    NAVTimelineStart(TL_NAV_BLINKER, TL_NAV_BLINKER_INTERVAL, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
     NAVTimelineStart(TL_NAV_FEEDBACK, TL_NAV_FEEDBACK_INTERVAL, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
 }
 
