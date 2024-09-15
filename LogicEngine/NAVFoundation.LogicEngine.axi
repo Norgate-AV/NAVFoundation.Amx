@@ -78,25 +78,27 @@ struct _NAVLogicEngineRuntime {
 
 
 struct _NAVLogicEngineTimer {
-    long Ticks[MAX_NAV_LOGIC_ENGINE_TICKS]
     double Duration
+    long Ticks[MAX_NAV_LOGIC_ENGINE_TICKS]
 }
 
 
 struct _NAVLogicEngine {
-    char IsRunning
     _NAVLogicEngineTimer Timer
     _NAVLogicEngineRuntime Runtime
+
+    char IsRunning
     integer PreviousEventId
+
     char EventNames[NAV_LOGIC_ENGINE_NUMBER_OF_EVENTS][NAV_MAX_CHARS]
 }
 
 
 struct _NAVLogicEngineEvent {
+    _NAVLogicEngine Engine
+    ttimeline Timeline
     integer Id
     char Name[NAV_MAX_CHARS]
-    ttimeline Timeline
-    _NAVLogicEngine Engine
 }
 
 
