@@ -102,6 +102,9 @@ SOFTWARE.
 // #DEFINE USING_NAV_RMS_CLIENT_ASSET_RELOCATED_EVENT_CALLBACK
 // define_function NAVRmsClientAssetRelocatedEventCallback(_NAVRmsClient client, tdata args) {}
 
+// #DEFINE USING_NAV_RMS_CLIENT_ASSET_METHOD_EXECUTE_EVENT_CALLBACK
+// define_function NAVRmsClientAssetMethodExecuteEventCallback(_NAVRmsClient client, _NAVRmsAssetMethodExecuteEvent event) {}
+
 // #DEFINE USING_NAV_RMS_CLIENT_CONFIG_CHANGE_EVENT_CALLBACK
 // define_function NAVRmsClientConfigChangeEventCallback(_NAVRmsClient client, tdata args) {}
 
@@ -410,25 +413,20 @@ data_event[vdvRms] {
 
             // Asset Control Methods Event Notifications
             case RMS_EVENT_ASSET_METHOD_EXECUTE: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Method Execute: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Method Key: ', message.Parameter[2]")
+                stack_var _NAVRmsAssetMethodExecuteEvent event
 
-                // Loop through the parameters
-                for (x = 3; x <= length_array(message.Parameter); x++) {
-                    stack_var integer index
+                event.AssetKey = message.Parameter[1]
+                event.Method = message.Parameter[2]
 
-                    if (message.Parameter[x] == '') {
-                        break
-                    }
-
-                    index = x - 2
-                    NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                                "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Method Argument ', itoa(index), ': ', message.Parameter[x]")
+                if (length_array(message.Parameter) > 2) {
+                    NAVArraySliceString(message.Parameter, 3, length_array(message.Parameter), event.Parameter)
                 }
+
+                NAVRmsClientAssetMethodExecuteLog(event, data)
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSET_METHOD_EXECUTE_EVENT_CALLBACK
+                NAVRmsClientAssetMethodExecuteEventCallback(rmsClient, event)
+                #END_IF
             }
 
             // Hotlist Event Notifications

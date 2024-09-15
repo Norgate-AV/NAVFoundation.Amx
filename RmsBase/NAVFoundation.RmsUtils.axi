@@ -152,6 +152,13 @@ struct _NAVRmsRegisteredAsset {
 }
 
 
+struct _NAVRmsAssetMethodExecuteEvent {
+    char AssetKey[NAV_MAX_CHARS]
+    char Method[NAV_MAX_CHARS]
+    char Parameter[20][NAV_MAX_CHARS]
+}
+
+
 define_function NAVRmsClientInit(_NAVRmsClient client, tdata args) {
     client.Device = args.device
 }
@@ -330,6 +337,33 @@ define_function NAVRmsClientAssetRegisteredLog(_NAVRmsRegisteredAsset asset, tda
                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), '   New Registration: ', NAVBooleanToString(asset.NewRegistration)")
     NAVErrorLog(NAV_LOG_LEVEL_INFO,
                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), '   Asset DPS: ', NAVDeviceToString(asset.Device)")
+}
+
+
+define_function NAVRmsClientAssetMethodExecuteLog(_NAVRmsAssetMethodExecuteEvent event, tdata args) {
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), ' Asset Method Execute: '")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), '   Asset Client Key: ', event.AssetKey")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), '   Method Key: ', event.Method")
+
+    {
+        // Loop through the parameters
+        stack_var integer x
+
+        for (x = 3; x <= length_array(event.Parameter); x++) {
+            stack_var integer index
+
+            if (event.Parameter[x] == '') {
+                break
+            }
+
+            index = x - 2
+            NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                        "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), '   Method Argument ', itoa(index), ': ', event.Parameter[x]")
+        }
+    }
 }
 
 
