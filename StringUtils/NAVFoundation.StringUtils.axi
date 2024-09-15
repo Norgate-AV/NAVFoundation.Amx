@@ -84,12 +84,19 @@ define_function char[NAV_MAX_BUFFER] NAVFindAndReplace(char buffer[], char match
     stack_var integer index
     stack_var char result[NAV_MAX_BUFFER]
 
+    if (!length_array(buffer) || !length_array(match)) {
+        return buffer
+    }
+
     result = buffer
 
-    while (NAVContains(result, match)) {
-        index = NAVIndexOf(result, match, 1) - 1
+    if (!NAVContains(result, match)) {
+        return result
+    }
 
-        result = "left_string(buffer, index), value, NAVStripLeft(buffer, index)"
+    while (NAVContains(result, match)) {
+        index = NAVIndexOf(result, match, 1)
+        result = "left_string(result, index - 1), value, NAVStripLeft(result, index)"
     }
 
     return result
