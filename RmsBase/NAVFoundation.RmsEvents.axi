@@ -84,6 +84,9 @@ SOFTWARE.
 // #DEFINE USING_NAV_RMS_CLIENT_LOCATION_EVENT_CALLBACK
 // define_function NAVRmsClientLocationEventCallback(_NAVRmsClient client, tdata args) {}
 
+// #DEFINE USING_NAV_RMS_CLIENT_ASSETS_REGISTER_EVENT_CALLBACK
+// define_function NAVRmsClientAssetsRegisterEventCallback(_NAVRmsClient client, tdata args) {}
+
 // #DEFINE USING_NAV_RMS_CLIENT_CONFIG_CHANGE_EVENT_CALLBACK
 // define_function NAVRmsClientConfigChangeEventCallback(_NAVRmsClient client, tdata args) {}
 
@@ -302,6 +305,10 @@ data_event[vdvRms] {
             case RMS_EVENT_ASSETS_REGISTER: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
                             "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Assets Register Request'")
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSETS_REGISTER_EVENT_CALLBACK
+                NAVRmsClientAssetsRegisterEventCallback(rmsClient, data)
+                #END_IF
             }
             case RMS_EVENT_ASSET_REGISTERED: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
