@@ -122,6 +122,7 @@ struct _NAVRmsClient {
     dev Device
     char IsOnline
     char IsRegistered
+    char ClientKey[NAV_MAX_CHARS]
 }
 
 
@@ -140,6 +141,14 @@ struct _NAVRmsMonitorAssetProperties {
 struct _NAVRmsSource {
     char Name[NAV_MAX_CHARS]
     char Description[NAV_MAX_BUFFER]
+}
+
+
+struct _NAVRmsRegisteredAsset {
+    char Key[NAV_MAX_CHARS]
+    char Id[NAV_MAX_CHARS]
+    char NewRegistration
+    dev Device
 }
 
 
@@ -307,6 +316,20 @@ define_function NAVRmsMessageDisplayLog(_NAVRmsMessage message, tdata args) {
                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), '   Modal: ', NAVBooleanToString(message.Modal)")
     NAVErrorLog(NAV_LOG_LEVEL_INFO,
                 "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), '   Response Message: ', message.ResponseMessage")
+}
+
+
+define_function NAVRmsClientAssetRegisteredLog(_NAVRmsRegisteredAsset asset, tdata args) {
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), ' Asset Registered: '")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), '   Asset Client Key: ', asset.Key")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), '   Asset ID: ', asset.Id")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), '   New Registration: ', NAVBooleanToString(asset.NewRegistration)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(args.device), '[', ']'), '   Asset DPS: ', NAVDeviceToString(asset.Device)")
 }
 
 

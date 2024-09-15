@@ -87,6 +87,18 @@ SOFTWARE.
 // #DEFINE USING_NAV_RMS_CLIENT_ASSETS_REGISTER_EVENT_CALLBACK
 // define_function NAVRmsClientAssetsRegisterEventCallback(_NAVRmsClient client, tdata args) {}
 
+// #DEFINE USING_NAV_RMS_CLIENT_ASSET_REGISTERED_EVENT_CALLBACK
+// define_function NAVRmsClientAssetRegisteredEventCallback(_NAVRmsClient client, _NAVRmsRegisteredAsset asset) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_ASSET_REGISTER_METADATA_CALLBACK
+// define_function NAVRmsClientAssetRegisterMetadataCallback(_NAVRmsClient client, _NAVRmsRegisteredAsset asset) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_ASSET_REGISTER_PARAMETERS_CALLBACK
+// define_function NAVRmsClientAssetRegisterParametersCallback(_NAVRmsClient client, _NAVRmsRegisteredAsset asset) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_ASSET_REGISTER_CONTROL_METHODS_CALLBACK
+// define_function NAVRmsClientAssetRegisterControlMethodsCallback(_NAVRmsClient client, _NAVRmsRegisteredAsset asset) {}
+
 // #DEFINE USING_NAV_RMS_CLIENT_CONFIG_CHANGE_EVENT_CALLBACK
 // define_function NAVRmsClientConfigChangeEventCallback(_NAVRmsClient client, tdata args) {}
 
@@ -311,16 +323,34 @@ data_event[vdvRms] {
                 #END_IF
             }
             case RMS_EVENT_ASSET_REGISTERED: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Registered: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset ID: ', message.Parameter[2]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   New Registration: ', message.Parameter[3]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset DPS: ', message.Parameter[4]")
+                stack_var _NAVRmsRegisteredAsset asset
+
+                asset.Key = message.Parameter[1]
+                asset.Id = message.Parameter[2]
+                asset.NewRegistration = NAVStringToBoolean(message.Parameter[3])
+                NAVStringToDevice(message.Parameter[4], asset.Device)
+
+                if (asset.Device == 0:1:0) {
+                    rmsClient.ClientKey = asset.Key
+                }
+
+                NAVRmsClientAssetRegisteredLog(asset, data)
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSET_REGISTERED_EVENT_CALLBACK
+                NAVRmsClientAssetRegisteredEventCallback(rmsClient, asset)
+                #END_IF
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSET_REGISTER_METADATA_CALLBACK
+                NAVRmsClientAssetRegisterMetadataCallback(rmsClient, asset)
+                #END_IF
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSET_REGISTER_PARAMETERS_CALLBACK
+                NAVRmsClientAssetRegisterParametersCallback(rmsClient, asset)
+                #END_IF
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSET_REGISTER_CONTROL_METHODS_CALLBACK
+                NAVRmsClientAssetRegisterControlMethodsCallback(rmsClient, asset)
+                #END_IF
             }
             case RMS_EVENT_ASSET_RELOCATED: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
