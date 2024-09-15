@@ -164,14 +164,9 @@ data_event[vdvRms] {
                     "'String from RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-[', data.text, ']'")
     }
     command: {
-        stack_var integer x
         stack_var _NAVSnapiMessage message
 
-        // NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-        //             "'Command from RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
-
         NAVParseSnapiMessage(data.text, message)
-        // NAVSnapiMessageLog(message)
 
         switch (upper_string(message.Header)) {
             // Client Exception Notifications
@@ -420,11 +415,6 @@ data_event[vdvRms] {
 
                 NAVRmsMessageDisplayLog(rmsClient.Message, data)
             }
-
-            // default: {
-            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
-            //                 "'Command from RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
-            // }
         }
     }
 }
