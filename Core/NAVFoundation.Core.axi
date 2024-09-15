@@ -627,9 +627,7 @@ struct _NAVDataEventArgs {
 (***********************************************************)
 DEFINE_VARIABLE
 
-volatile _NAVController NAVController
-
-volatile integer NAVBlinker = FALSE
+volatile integer NAVBlinker = false
 
 
 /////////////////////////////////////////////////////////////
@@ -828,8 +826,8 @@ define_function char[NAV_MAX_CHARS] NAVDoubleToAscii(double value) {
 }
 
 
-define_function char[NAV_MAX_CHARS] NAVGetUniqueId() {
-    return NAVController.UniqueId
+define_function char[NAV_MAX_CHARS] NAVGetUniqueId(_NAVController controller) {
+    return controller.UniqueId
 }
 
 
@@ -856,8 +854,8 @@ define_function char[NAV_MAX_CHARS] NAVGetMacAddressFromUniqueId(char uniqueId[]
 }
 
 
-define_function char[NAV_MAX_CHARS] NAVGetMacAddress() {
-    return NAVController.MacAddress
+define_function char[NAV_MAX_CHARS] NAVGetMacAddress(_NAVController controller) {
+    return controller.MacAddress
 }
 
 
@@ -949,7 +947,7 @@ define_function NAVSendLevelArray(dev device[], integer level, integer value) {
 }
 
 
-define_function NAVSetControllerProgramInformation(_NAVProgram program) {
+define_function NAVGetControllerProgramInformation(_NAVProgram program) {
     program.Name = __NAME__
     program.File = __FILE__
     program.CompileDate = __LDATE__
@@ -957,17 +955,17 @@ define_function NAVSetControllerProgramInformation(_NAVProgram program) {
 }
 
 
-define_function NAVSetControllerInformation(_NAVController controller) {
-    device_info(dvNAVMaster, controller.Information)
+define_function NAVGetControllerInformation(_NAVController controller) {
+    device_info(0:1:0, controller.Information)
     device_info(5001:1:0, controller.Device)
-    NAVGetDeviceIPAddressInformation(dvNAVMaster, controller.IP)
+    NAVGetDeviceIPAddressInformation(0:1:0, controller.IP)
 
-    controller.SerialNumber = NAVGetDeviceSerialNumber(dvNAVMaster)
+    controller.SerialNumber = NAVGetDeviceSerialNumber(0:1:0)
 
     controller.UniqueId = get_unique_id()
     controller.MacAddress = NAVGetMacAddressFromUniqueId(controller.UniqueId)
 
-    NAVSetControllerProgramInformation(controller.Program)
+    NAVGetControllerProgramInformation(controller.Program)
 }
 
 
@@ -1055,7 +1053,7 @@ define_function char[NAV_MAX_BUFFER] NAVGetNAVBanner() {
 }
 
 
-define_function NAVPrintBanner() {
+define_function NAVPrintBanner(_NAVController controller) {
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "' _   _                       _          ___     __'")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'| \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /'")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'|  \| |/ _ \| ''__/ _` |/ _` | __/ _ \ / _ \ \ / /'")
@@ -1070,43 +1068,43 @@ define_function NAVPrintBanner() {
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Program Info:'")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Name: ', NAVController.Program.Name")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'File: ', NAVController.Program.File")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Compiled On: ', NAVController.Program.CompileDate, ' at ', NAVController.Program.CompileTime")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Name: ', controller.Program.Name")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'File: ', controller.Program.File")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Compiled On: ', controller.Program.CompileDate, ' at ', controller.Program.CompileTime")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Master Info:'")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Device Id: 0'")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Manufacturer: ', NAVController.Information.Manufacturer_String")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Model: ', NAVController.Information.Device_Id_String")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Version: ', NAVController.Information.Version")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Firmware Id: ', itoa(NAVController.Information.Firmware_Id)")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Serial Number: ', NAVTrimString(NAVController.SerialNumber)")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Unique Id: ', NAVFormatHex(NAVController.UniqueId)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Manufacturer: ', controller.Information.Manufacturer_String")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Model: ', controller.Information.Device_Id_String")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Version: ', controller.Information.Version")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Firmware Id: ', itoa(controller.Information.Firmware_Id)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Serial Number: ', NAVTrimString(controller.SerialNumber)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Unique Id: ', NAVFormatHex(controller.UniqueId)")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
 
-    if (NAVController.Device.Device_Id) {
+    if (controller.Device.Device_Id) {
         NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
         NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Device Info:'")
         NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Device Id: 5001'")
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Manufacturer: ', NAVController.Device.Manufacturer_String")
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Model: ', NAVController.Device.Device_Id_String")
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Version: ', NAVController.Device.Version")
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Firmware Id: ', itoa(NAVController.Device.Firmware_Id)")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Manufacturer: ', controller.Device.Manufacturer_String")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Model: ', controller.Device.Device_Id_String")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Version: ', controller.Device.Version")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Firmware Id: ', itoa(controller.Device.Firmware_Id)")
         NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
         NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
     }
 
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Network Info:'")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Mac Address: ', NAVController.MacAddress")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'IP Address: ', NAVController.IP.IPAddress")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Subnet Mask: ', NAVController.IP.SubnetMask")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Gateway: ', NAVController.IP.Gateway")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Hostname: ', NAVController.IP.Hostname")
-    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'DHCP Enabled: ', NAVBooleanToString(NAVController.IP.Flags)")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Mac Address: ', controller.MacAddress")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'IP Address: ', controller.IP.IPAddress")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Subnet Mask: ', controller.IP.SubnetMask")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Gateway: ', controller.IP.Gateway")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Hostname: ', controller.IP.Hostname")
+    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'DHCP Enabled: ', NAVBooleanToString(controller.IP.Flags)")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
 }
@@ -1185,13 +1183,15 @@ define_function char NAVDeviceIsOnline(dev device) {
 (***********************************************************)
 DEFINE_START {
     #IF_DEFINED __MAIN__
+    stack_var _NAVController controller
+
     set_log_level(NAV_LOG_LEVEL_DEBUG)
-    NAVSetControllerInformation(NAVController)
-    NAVPrintBanner()
+
+    NAVGetControllerInformation(controller)
+    NAVPrintBanner(controller)
+
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "__FILE__, ' : ', 'Program Started'")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
-    #ELSE
-    NAVErrorLog(NAV_LOG_LEVEL_WARNING, "'__MAIN__ not defined'")
     #END_IF
 
     NAVTimelineStart(TL_NAV_BLINKER, TL_NAV_BLINKER_INTERVAL, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
