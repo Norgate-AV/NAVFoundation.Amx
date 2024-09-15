@@ -139,6 +139,7 @@ struct _NAVRmsMonitorAssetProperties {
 
 
 struct _NAVRmsSource {
+    dev Device
     char Name[NAV_MAX_CHARS]
     char Description[NAV_MAX_BUFFER]
 }
