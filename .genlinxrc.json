@@ -30,7 +30,8 @@
                 ".\\Testing",
                 ".\\TimelineUtils",
                 ".\\Tui",
-                ".\\UIUtils"
+                ".\\UIUtils",
+                ".\\__tests__\\include\\string-utils"
             ]
         }
     }
