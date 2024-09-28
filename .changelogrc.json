@@ -19,17 +19,17 @@
         {
             "type": "docs",
             "section": "📖 Documentation",
-            "hidden": false
+            "hidden": true
         },
         {
             "type": "style",
             "section": "💅 Style",
-            "hidden": false
+            "hidden": true
         },
         {
             "type": "refactor",
             "section": "✨ Refactor",
-            "hidden": false
+            "hidden": true
         },
         {
             "type": "perf",
@@ -39,13 +39,13 @@
         {
             "type": "test",
             "section": "🧪 Tests",
-            "hidden": false
+            "hidden": true
         },
         {
             "type": "build",
             "section": "🛠️ Build",
-            "hidden": false
+            "hidden": true
         },
-        { "type": "ci", "section": "🤖 CI", "hidden": false }
+        { "type": "ci", "section": "🤖 CI", "hidden": true }
     ]
 }
