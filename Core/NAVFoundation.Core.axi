@@ -263,6 +263,20 @@ constant sinteger NAV_STRING_TO_VAR_ERROR_DECODE_VARIABLE_TYPE_MISMATCH     = -1
 constant sinteger NAV_STRING_TO_VAR_ERROR_DECODE_DATA_TOO_SMALL_2           = -2
 
 
+/////////////////////////////////////////////////////////////
+// Common States
+/////////////////////////////////////////////////////////////
+constant integer NAV_POWER_STATE_ON             = 1
+constant integer NAV_POWER_STATE_OFF            = 2
+constant integer NAV_POWER_STATE_LAMP_WARMING   = 3
+constant integer NAV_POWER_STATE_LAMP_COOLING   = 4
+constant integer NAV_POWER_STATE_UNKNOWN        = 5
+
+constant integer NAV_MUTE_STATE_ON          = 1
+constant integer NAV_MUTE_STATE_OFF         = 2
+constant integer NAV_MUTE_STATE_UNKNOWN     = 3
+
+
 (***********************************************************)
 (*              DATA TYPE DEFINITIONS GO BELOW             *)
 (***********************************************************)
