@@ -244,47 +244,51 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringAfter(char buffer[], char token
 define_function char[NAV_MAX_BUFFER] NAVGetStringBetween(char buffer[], char token1[], char token2[]) {
     stack_var integer tokenIndex[2]
     stack_var integer startIndex
-    stack_var char result[NAV_MAX_BUFFER]
-
-    result = ""
+    stack_var integer count
 
     if(!length_array(buffer)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_STRINGUTILS__,
-                                    'NAVGetStringBetween',
-                                    'Invalid argument. The provided argument "buffer" is an empty string')
+        // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+        //                             __NAV_FOUNDATION_STRINGUTILS__,
+        //                             'NAVGetStringBetween',
+        //                             'Invalid argument. The provided argument "buffer" is an empty string')
 
-        return result
+        return ''
     }
 
     tokenIndex[1] = NAVIndexOf(buffer, token1, 1)
 
     if (!tokenIndex[1]) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
-                                    __NAV_FOUNDATION_STRINGUTILS__,
-                                    'NAVGetStringBetween',
-                                    'The provided argument "token1" was not found in the buffer')
+        // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+        //                             __NAV_FOUNDATION_STRINGUTILS__,
+        //                             'NAVGetStringBetween',
+        //                             'The provided argument "token1" was not found in the buffer')
 
-        return result
+        return ''
     }
 
     startIndex = tokenIndex[1] + length_array(token1)
     tokenIndex[2] = NAVIndexOf(buffer, token2, startIndex)
 
     if (!tokenIndex[2]) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
-                                    __NAV_FOUNDATION_STRINGUTILS__,
-                                    'NAVGetStringBetween',
-                                    'The provided argument "token2" was not found in the buffer')
+        // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+        //                             __NAV_FOUNDATION_STRINGUTILS__,
+        //                             'NAVGetStringBetween',
+        //                             'The provided argument "token2" was not found in the buffer')
 
-        return result
+        return ''
     }
 
-    if (tokenIndex[1] < tokenIndex[2]) {
-        result = NAVStringSubstring(buffer, startIndex, tokenIndex[2] - startIndex)
+    if (tokenIndex[1] >= tokenIndex[2]) {
+        return ''
     }
 
-    return result
+    count = tokenIndex[2] - startIndex
+
+    if (count <= 0) {
+        return ''
+    }
+
+    return NAVStringSubstring(buffer, startIndex, count)
 }
 
 
