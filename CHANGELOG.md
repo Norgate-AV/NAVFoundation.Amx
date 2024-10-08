@@ -1,5 +1,52 @@
 # Changelog
 
+## [1.4.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.3.1...v1.4.0) (2024-10-08)
+
+### 🌟 Features
+
+-   **core:** add Aspect state field to Display struct ([08001f2](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/08001f272d487643e73d31ed27a9a125a2295a05))
+-   **rms-events:** add asset method event callback ([2f2554c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/2f2554c9831218fab2591986b17f80e8938f545a))
+-   **rms-events:** add asset registered event callbacks ([03de104](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/03de1048a7c78a9c97f95182a6611c4e321774f1))
+-   **rms-events:** add asset relocated event callback ([5663b18](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/5663b187f1b7f53a0ea966ec616a4b4811f2f019))
+-   **rms-events:** add assets register event callback ([b0ad149](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b0ad149f23645500a454dfe2df6b2c4e3453636a))
+-   **device-priority-queue:** add debug logging ([6839d9e](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6839d9e2301357723062e2901a2ceee38ef5d7c7))
+-   **rms-utils:** add device to \_NAVRmsSource struct ([9c0f252](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9c0f252ff4600e7b0a9f1cea26ac20496cfe0dd8))
+-   **inter-module-api:** add extra functions ([346a525](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/346a5252229f01bc84c2c0f75613648061c322fe))
+-   **core:** add Freeze state field to Projector struct ([54ea3a4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/54ea3a4bd8f9ace0041265ba2d1c9fcd258f26a6))
+-   **encoding:** add function aliases for Big/Little endian convertion ([e80450c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e80450c20881117d48a964a50068259e86c69463))
+-   **device-priority-queue:** add GetLastMessage function ([a0c76d4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a0c76d42fd08f17c9d3d4d97e4a3acc15e0fd619))
+-   **inter-module-api:** add GetObjectRegistrationCount function ([31b1801](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/31b18015a238dd5fbfa2fdd7c692dc49eb6cb84b))
+-   **module-base:** add ID and BAUDRATE constants ([a2a379f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a2a379fcc8c9484a998267447826ecb5c57c3a95))
+-   **cryptography:** add initial sha1 implementation ([63fb075](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/63fb0758c413af8d941fe3502482e0abe7cbc05f))
+-   **core:** add Initialized fields to state structs ([c2ad4ad](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c2ad4adeaec35d42c9cd79ffebd3e3e898162958))
+-   **core:** add NAVDeviceIsOnline function ([6a4a415](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6a4a415bfbf01576eff4ef7d0c1afd1cfa8056db))
+-   **data-time-utils:** add networktime setup ([6314a5c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6314a5cc531f81e348af0e12645a85c4bdbcaaba))
+-   **inter-module-api:** add object init function ([6daba2c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6daba2c40c2d89e9e39a8a189c131c93427ea8b3))
+-   **core:** add SendLevel functions ([a9cebd8](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a9cebd8c413ff513a1942752c752f063bbc47b37))
+-   **core:** add Socket number field to SocketConnection struct ([2bf3ec5](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/2bf3ec57407f1780e0595e4b37c9fd5ec9b6fc57))
+-   **core:** add some common state constants ([11e5dd3](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/11e5dd3c3c5b38f6b7d2646e98ca50e727b3a3e6))
+-   **inter-module-api:** add start_polling command header ([3153707](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3153707b929966b4d32b2f870bb64747761047bd))
+-   **string-utils:** add StringSlice function ([99d439d](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/99d439dda7ca70f2e348808c13247de7bcfb29f1))
+-   **encoding:** complete base64 implementation ([64332de](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/64332deed93b36348353e14ac30ae3f53e41edda))
+-   **cryptography:** integrate md5 implementation ([3fc6773](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3fc6773180b79bafe98fb425593d57a4bb92f37f))
+-   **errorlog-utils:** print calling file name in library function logs ([a6a0ef8](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a6a0ef82d09b89b1f85225922ea97d4c053060b5))
+-   **core:** print information banner on boot ([e944cb9](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e944cb9d657f37b516427e7b87ed265c73df9d2f))
+-   **core:** print warning to console if **MAIN** is not defined ([457cecd](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/457cecd42e5447da77e8631e87aa3cae63d997de))
+-   **hashtable:** revert previous commit reducing default hashtable size ([801de50](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/801de5059674042af03cbf8069cf552eccb15c51))
+-   **queue:** revert previous commit reducing default queue size ([bee0d57](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/bee0d571c2edee8de89e872d977098ba4f21f98f))
+-   **stack:** revert previous commit reducing default stack size ([6a28b5d](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6a28b5ddb6156b449b5a69f0b72dd84efdb4a025))
+
+### 🐛 Bug Fixes
+
+-   **string-utils:** apply fix for NAVFindAndReplace function ([2f0e5f3](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/2f0e5f3717969c2520344373b6b594605650a175))
+-   **device-priority-queue:** dont negate IsEmpty functions when checking ([2bc48df](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/2bc48dfedf8a4e988d938dcf05555a2e0b944806))
+-   **queue:** ensure head/tail indexes dont equate to 0 ([d70bdfa](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/d70bdfae6b8116d1a73a2d9fe53fa0605d488db6))
+-   **socket-utils:** ensure host address does not have whitespace at the ([9920430](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9920430484a21e7de4ed84fc65397c3a038d63af))
+-   **device-priority-queue:** ensure timeline array size is set ([456b0cb](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/456b0cb5ea37a6595d0b8264cf2866d60275e9d2))
+-   **string-utils:** fix bug with NAVGetStringBetween ([7ad3340](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/7ad3340088fe1cad8dde93e34a3d320a2d8d3fd4))
+-   **string-utils:** fix NAVSplitString function ([51f2262](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/51f226234268cde90a41df19d49e611f99175b5b))
+-   fix release scripts ([4ad6b29](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/4ad6b295e2e835b5e7f70140b92defdae80e858e))
+
 ## [1.3.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.3.0...v1.3.1) (2024-03-27)
 
 ### 🐛 Bug Fixes
