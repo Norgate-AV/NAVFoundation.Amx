@@ -5,6 +5,7 @@
         [
             "@semantic-release/commit-analyzer",
             {
+                "preset": "conventionalcommits",
                 "releaseRules": [],
                 "parserOpts": {
                     "noteKeywords": [
@@ -123,7 +124,7 @@
                         "path": "./dist/*.{zip,sha256}"
                     },
                     {
-                        "path": "./**/*.{axi,AXI}"
+                        "path": "./src/*.axi"
                     }
                 ]
             }

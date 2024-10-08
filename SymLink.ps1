@@ -34,11 +34,15 @@ SOFTWARE.
 
 [CmdletBinding()]
 
-param(
+param (
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
     [string]
-    $Directory = "C:/Program Files (x86)/Common Files/AMXShare/AXIs",
+    $ModulePath = "C:\Program Files (x86)\Common Files\AMXShare\Duet\module",
+
+    [Parameter(Mandatory = $false)]
+    [string]
+    $IncludePath = "C:\Program Files (x86)\Common Files\AMXShare\AXIs",
 
     [Parameter(Mandatory = $false)]
     [switch]
@@ -49,29 +53,36 @@ $prevPWD = $PWD
 Set-Location $PSScriptRoot
 
 try {
-    $files = Get-ChildItem -File "**/*.axi" | Where-Object { $_.FullName -notmatch "(.git|node_modules|.history|dist)" }
+    $directories = Get-ChildItem -Directory -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch "(\.\w+|node_modules|dist)" }
 
-    if (!$files) {
-        Write-Host "No files found"
+    # Needed for scoop as all files with be in the root directory
+    $directories += $PWD
+
+    $includeFiles = $directories | Get-ChildItem -Filter "*.axi"
+
+    if (!$includeFiles) {
+        Write-Host "No include files found"
         exit 1
     }
 
-    $Directory = Resolve-Path $Directory
+    $ModulePath = Resolve-Path $ModulePath
+    $IncludePath = Resolve-Path $IncludePath
 
     !$Delete ? (Write-Host "Creating symlinks...") : (Write-Host "Deleting symlinks...")
 
-    foreach ($file in $files) {
-        $linkPath = "$Directory/$($file.Name)"
+    foreach ($file in $includeFiles) {
+        $path = "$IncludePath\$($file.Name)"
 
         if ($Delete) {
-            Write-Verbose "Deleting symlink: $linkPath"
-            Remove-Item -Path $linkPath -Force | Out-Null
+            Write-Verbose "Deleting symlink: $path"
+            Remove-Item -Path $path -Force | Out-Null
             continue
         }
 
         $target = $file.FullName
-        Write-Verbose "Creating symlink: $linkPath -> $target"
-        New-Item -ItemType SymbolicLink -Path $linkPath -Target $target -Force | Out-Null
+
+        Write-Verbose "Creating symlink: $path -> $target"
+        New-Item -ItemType SymbolicLink -Path $path -Target $target -Force | Out-Null
     }
 }
 catch {

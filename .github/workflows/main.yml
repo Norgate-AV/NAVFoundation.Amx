@@ -79,9 +79,9 @@ jobs:
           Write-Host "RUNNER_TEMP: $env:RUNNER_TEMP"
           Write-Host "RUNNER_TOOL_CACHE: $env:RUNNER_TOOL_CACHE"
 
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -100,7 +100,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
 
         # v4 doesn't seem to be working, so using a specific commit for now
-        uses: cycjimmy/semantic-release-action@6d88447fcd3237e1d617f4f663e5ad79a6bf45b1
+        uses: cycjimmy/semantic-release-action@v4 # 6d88447fcd3237e1d617f4f663e5ad79a6bf45b1
         with:
           extra_plugins: |
             @semantic-release/changelog

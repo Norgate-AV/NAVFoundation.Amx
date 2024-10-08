@@ -57,11 +57,13 @@ try {
     $version = $manifest.version
     $name = $manifest.name
 
+    $files = @()
+
     foreach ($file in $manifest.files) {
-        $files += (Get-ChildItem -File $file -ErrorAction Stop | Where-Object { $_.FullName -notmatch "(.git|node_modules|.history|dist)" })
+        $files += Get-ChildItem -File $file -ErrorAction Stop | Where-Object { $_.FullName -notmatch "(.git|.history|node_modules|dist)" }
     }
 
-    $files += @("manifest.json")
+    $files += "$Path/manifest.json"
 
     if (-not(Test-Path -Path "$Path/$OutDir")) {
         New-Item -Path "$Path/$OutDir" -Type Directory | Out-Null
