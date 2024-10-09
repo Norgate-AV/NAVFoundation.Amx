@@ -35,6 +35,8 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_ERRORLOGUTILS__ 'NAVFoundation.ErrorLogUtils'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.DateTimeUtils.axi'
+#include 'NAVFoundation.FileUtils.axi'
 
 
 define_function char[NAV_MAX_CHARS] NAVGetLogLevel(long level) {
@@ -107,6 +109,77 @@ define_function char[NAV_MAX_CHARS] NAVGetStandardLogMessageType(integer type) {
 
 define_function char[NAV_MAX_BUFFER] NAVFormatStandardLogMessage(integer type, dev device, char message[]) {
     return "NAVGetStandardLogMessageType(type), ' ', NAVStringSurroundWith(NAVDeviceToString(device), '[', ']'), '-', NAVStringSurroundWith(NAVFormatHex(message), '[', ']')"
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVFormatLogToFile(long level, char value[]) {
+    stack_var char timestamp[NAV_MAX_CHARS]
+    stack_var char date[10]
+    stack_var char time[8]
+
+    if (!length_array(value)) {
+        return ''
+    }
+
+    timestamp = NAVDateTimeGetTimestampNow()
+    date = left_string(timestamp, 10)
+    time = NAVStringSubstring(timestamp, 12, 8)
+
+    return "date, ' (', time, '):: ', NAVFormatLog(level, value)"
+}
+
+
+define_function slong NAVErrorLogToFile(char file[], long level, char value[]) {
+    stack_var char log[NAV_MAX_BUFFER]
+
+    if (!length_array(value)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_ERRORLOGUTILS__,
+                                    'NAVErrorLogToFile',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_PARAMETER), ' : No value provided to log'")
+
+        return NAV_FILE_ERROR_INVALID_PARAMETER
+    }
+
+    log = NAVFormatLogToFile(level, value)
+
+    // Check if the logs directory exists, if not create it
+    if (!NAVDirectoryExists(NAV_LOGS_DIRECTORY)) {
+        NAVDirectoryCreate(NAV_LOGS_DIRECTORY)
+    }
+
+    // If the file does not exist, create it and write the message
+    if (!NAVFileExists(NAV_LOGS_DIRECTORY, file)) {
+        return NAVFileWriteLine("NAV_LOGS_DIRECTORY, '/', file", log)
+    }
+
+    // Check the size to see if we first need to rotate the log file
+    if ((NAVFileGetSize("NAV_LOGS_DIRECTORY, '/', file") + length_array(log)) > NAV_MAX_LOG_FILE_SIZE) {
+        NAVErrorLogFileRotate(file)
+        return NAVErrorLogToFile(file, level, value)
+    }
+
+    // Finally, append the current log message
+    return NAVFileAppendLine("NAV_LOGS_DIRECTORY, '/', file", log)
+}
+
+
+define_function slong NAVErrorLogFileRotate(char file[]) {
+    stack_var integer count
+
+    if (NAVFileExists(NAV_LOGS_DIRECTORY, "file, '.old.', itoa(NAV_MAX_OLD_LOG_FILES)")) {
+        NAVFileDelete("NAV_LOGS_DIRECTORY, '/', file, '.old.', itoa(NAV_MAX_OLD_LOG_FILES)")
+    }
+
+    for (count = 1; count < NAV_MAX_OLD_LOG_FILES; count++) {
+        if (!NAVFileExists(NAV_LOGS_DIRECTORY, "file, '.old.', itoa(count)")) {
+            continue
+        }
+
+        NAVFileRename("NAV_LOGS_DIRECTORY, '/', file, '.old.', itoa(count)", "file, '.old.', itoa(count + 1)")
+    }
+
+    return NAVFileRename("NAV_LOGS_DIRECTORY, '/', file", "file, '.old.1'")
 }
 
 

@@ -37,38 +37,7 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 
 
-DEFINE_CONSTANT
-
-constant slong NAV_FILE_ERROR_INVALID_FILE_HANDLE                          = -1
-constant slong NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME                    = -2
-constant slong NAV_FILE_ERROR_INVALID_VALUE_SUPPLIED_FOR_IO_FLAG           = -3
-constant slong NAV_FILE_ERROR_INVALID_FILE_PATH                            = -4
-constant slong NAV_FILE_ERROR_DISK_IO_ERROR                                = -5
-constant slong NAV_FILE_ERROR_INVALID_PARAMETER                            = -6
-constant slong NAV_FILE_ERROR_FILE_ALREADY_CLOSED                          = -7
-constant slong NAV_FILE_ERROR_FILE_NAME_EXISTS                             = -8
-constant slong NAV_FILE_ERROR_EOF_END_OF_FILE_REACHED                      = -9
-constant slong NAV_FILE_ERROR_BUFFER_TOO_SMALL                             = -10
-constant slong NAV_FILE_ERROR_DISK_FULL                                    = -11
-constant slong NAV_FILE_ERROR_FILE_PATH_NOT_LOADED                         = -12
-constant slong NAV_FILE_ERROR_DIRECTORY_NAME_EXISTS                        = -13
-constant slong NAV_FILE_ERROR_MAXIMUM_NUMBER_OF_FILES_ARE_ALREADY_OPEN     = -14
-constant slong NAV_FILE_ERROR_INVALID_FILE_FORMAT                          = -15
-
-
-DEFINE_TYPE
-
-struct _NAVFileEntity {
-    char Name[NAV_MAX_BUFFER]
-    char BaseName[NAV_MAX_BUFFER]
-    char Extension[NAV_MAX_CHARS]
-    char Path[NAV_MAX_BUFFER]
-    char Parent[NAV_MAX_BUFFER]
-    integer IsDirectory
-}
-
-
-define_function integer NAVIsDirectory(char entity[]) {
+define_function char NAVIsDirectory(char entity[]) {
     if (NAVStartsWith(entity, '/')) {
         return true
     }
@@ -115,8 +84,8 @@ define_function slong NAVFileOpen(char path[], char mode[]) {
     if (!length_array(path)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
-                                'NAVFileOpen',
-                                "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+                                    'NAVFileOpen',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
 
         return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
@@ -128,15 +97,6 @@ define_function slong NAVFileOpen(char path[], char mode[]) {
                                 __NAV_FOUNDATION_FILEUTILS__,
                                 'NAVFileOpen',
                                 "'Opening file ', fileName, ' in path ', filePath")
-
-    if (!NAVFileExists(filePath, fileName)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_FILEUTILS__,
-                                'NAVFileOpen',
-                                "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The file does not exist.'")
-
-        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
-    }
 
     switch (lower_string(mode)) {
         case 'rwa': {
@@ -275,6 +235,11 @@ define_function slong NAVFileWrite(char path[], char data[]) {
 }
 
 
+define_function slong NAVFileWriteLine(char path[], char buffer[]) {
+    return NAVFileWrite(path, "buffer, NAV_CR, NAV_LF")
+}
+
+
 define_function slong NAVFileAppend(char path[], char data[]) {
     stack_var slong result
     stack_var long handle
@@ -323,18 +288,18 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
 
     index = 1
 
-    if (!length_array(path)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
-                                    __NAV_FOUNDATION_FILEUTILS__,
-                                    'NAVReadDirectory',
-                                    'The path supplied is empty. Using root directory.')
-
-        path = '/'
+    if (!NAVStartsWith(path, '/')) {
+        path = "'/', path"
     }
 
     result = file_dir(path, entity, index)
 
     if (result < 0) {
+        if (result == NAV_FILE_ERROR_FILE_PATH_NOT_LOADED) {
+            // Empty directory
+            return 0
+        }
+
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
                                     'NAVReadDirectory',
@@ -344,10 +309,6 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
     }
 
     count = type_cast(result)
-    if (count == 0) {
-        return type_cast(count)
-    }
-
     count = count + index
     set_length_array(entities, count)
 
@@ -355,6 +316,11 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
         result = file_dir(path, entity, index)
 
         if (result < 0) {
+            if (result == NAV_FILE_ERROR_FILE_PATH_NOT_LOADED) {
+                // Empty directory
+                continue
+            }
+
             NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                         __NAV_FOUNDATION_FILEUTILS__,
                                         'NAVReadDirectory',
@@ -382,10 +348,10 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
         index++
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_FILEUTILS__,
-                                'NAVReadDirectory',
-                                "'Number of entities: ', itoa(count)")
+    // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+    //                             __NAV_FOUNDATION_FILEUTILS__,
+    //                             'NAVReadDirectory',
+    //                             "'Number of entities: ', itoa(count)")
 
     return type_cast(count)
 }
@@ -523,6 +489,10 @@ define_function integer NAVFileExists(char path[], char fileName[]) {
         path = '/'
     }
 
+    if (!NAVStartsWith(path, '/')) {
+        path = "'/', path"
+    }
+
     if (NAVReadDirectory(path, entities) <= 0) {
         return false
     }
@@ -534,6 +504,57 @@ define_function integer NAVFileExists(char path[], char fileName[]) {
     }
 
     return false
+}
+
+
+define_function integer NAVDirectoryExists(char path[]) {
+    stack_var _NAVFileEntity entities[255]
+    stack_var integer x
+
+    if (!length_array(path)) {
+        path = '/'
+    }
+
+    if (!NAVStartsWith(path, '/')) {
+        path = "'/', path"
+    }
+
+    if (NAVReadDirectory(path, entities) <= 0) {
+        return false
+    }
+
+    for (x = 1; x <= length_array(entities); x++) {
+        if (entities[x].Name == path && entities[x].IsDirectory) {
+            return true
+        }
+    }
+
+    return false
+}
+
+
+define_function slong NAVDirectoryCreate(char path[]) {
+    stack_var slong result
+
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVDirectoryCreate',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    result = file_createdir(path)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVDirectoryCreate',
+                                    "'Error creating directory "', path, '" : ', NAVGetFileError(result)")
+    }
+
+    return result
 }
 
 
@@ -593,38 +614,154 @@ define_function char[NAV_MAX_BUFFER] NAVJoinPath(char parent[], char child[]) {
 // }
 
 
-// define_function slong NAVSplitPath(char path[], char elements[][]) {
-//     stack_var char element[NAV_MAX_BUFFER]
-//     stack_var long index
-//     stack_var long count
+define_function slong NAVSplitPath(char path[], char elements[][]) {
+    stack_var slong count
 
-//     if (!length_array(path)) {
-//         return 0
-//     }
+    count = NAVSplitString(path, '/', elements)
 
-//     count = 0
-//     index = 0
+    if (count > 0) {
+        return count
+    }
 
-//     while (index < length_array(path)) {
-//         element = NAVSubstring(path, index, index + 1)
+    count = NAVSplitString(path, '\', elements)
 
-//         if (element == '/') {
-//             if (length_array(elements[count])) {
-//                 count++
-//             }
-//         } else {
-//             elements[count] = "elements[count], element"
-//         }
+    if (count > 0) {
+        return count
+    }
 
-//         index++
-//     }
+    count = NAVSplitString(path, '\\', elements)
 
-//     if (length_array(elements[count])) {
-//         count++
-//     }
+    if (count > 0) {
+        return count
+    }
 
-//     return count
-// }
+    return count
+}
+
+
+define_function slong NAVFileGetSize(char path[]) {
+    stack_var slong result
+    stack_var long handle
+    stack_var slong count
+
+    result = NAVFileOpen(path, 'r')
+
+    if (result < 0) {
+        return result
+    }
+
+    handle = type_cast(result)
+
+    count = 1
+    while (file_seek(handle, type_cast(count)) >= 0) {
+        count++
+    }
+
+    result = NAVFileClose(handle)
+
+    if (result < 0) {
+        return result
+    }
+
+    return (count - 1)
+}
+
+
+define_function slong NAVFileRename(char path[], char newName[]) {
+    stack_var slong result
+    // stack_var char newPath[NAV_MAX_BUFFER]
+
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVRenameFile',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    if (!length_array(newName)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileRename',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The new name supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    // newPath = NAVGetFileEntityParent(path)
+    // newPath = "newPath, '/', newName"
+
+    result = file_rename(path, newName)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileRename',
+                                    "'Error renaming file "', path, '" : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+define_function slong NAVFileDelete(char path[]) {
+    stack_var slong result
+
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileDelete',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    result = file_delete(path)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileDelete',
+                                    "'Error deleting file "', path, '" : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+define_function slong NAVFileCopy(char source[], char destination[]) {
+    stack_var slong result
+
+    if (!length_array(source)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileCopy',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The source path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    if (!length_array(destination)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileCopy',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The destination path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    result = file_copy(source, destination)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileCopy',
+                                    "'Error copying file "', source, '" to "', destination, '" : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
 
 
 #END_IF // __NAV_FOUNDATION_FILEUTILS__

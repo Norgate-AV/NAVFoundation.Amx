@@ -648,6 +648,7 @@ volatile integer NAVBlinker = false
 // Includes
 /////////////////////////////////////////////////////////////
 #include 'NAVFoundation.ErrorLogUtils.h.axi'
+#include 'NAVFoundation.FileUtils.h.axi'
 #include 'NAVFoundation.SnapiHelpers.h.axi'
 #include 'NAVFoundation.StringUtils.h.axi'
 
