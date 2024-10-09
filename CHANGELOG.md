@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.4.0...v1.5.0) (2024-10-09)
+
+### 🌟 Features
+
+-   add error logging to file functionality ([65227df](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/65227df340c225bc63d215add3561a55bf4a5e12))
+
 ## [1.4.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.3.1...v1.4.0) (2024-10-08)
 
 ### 🌟 Features
