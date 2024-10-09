@@ -200,7 +200,7 @@ define_function slong NAVErrorLogFileRotate(char file[]) {
         NAVFileDelete("NAV_LOGS_DIRECTORY, '/', file, '.old.', itoa(NAV_MAX_OLD_LOG_FILES)")
     }
 
-    for (count = 1; count < NAV_MAX_OLD_LOG_FILES; count++) {
+    for (count = (NAV_MAX_OLD_LOG_FILES - 1); count > 0; count--) {
         if (!NAVFileExists(NAV_LOGS_DIRECTORY, "file, '.old.', itoa(count)")) {
             continue
         }
