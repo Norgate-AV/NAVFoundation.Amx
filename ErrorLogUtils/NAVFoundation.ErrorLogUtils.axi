@@ -210,7 +210,7 @@ define_function slong NAVErrorLogFileRotate(char file[]) {
                                     'NAVErrorLogFileRotate',
                                     "'Renaming log file: ', file, '.old.', itoa(count)")
 
-        NAVFileRename("NAV_LOGS_DIRECTORY, '/', file, '.old.', itoa(count)", "file, '.old.', itoa(count + 1)")
+        NAVFileRename("NAV_LOGS_DIRECTORY, '/', file, '.old.', itoa(count)", "NAV_LOGS_DIRECTORY, '/', file, '.old.', itoa(count + 1)")
     }
 
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
@@ -218,7 +218,7 @@ define_function slong NAVErrorLogFileRotate(char file[]) {
                                 'NAVErrorLogFileRotate',
                                 "'Renaming log file: ', file")
 
-    return NAVFileRename("NAV_LOGS_DIRECTORY, '/', file", "file, '.old.1'")
+    return NAVFileRename("NAV_LOGS_DIRECTORY, '/', file", "NAV_LOGS_DIRECTORY, '/', file, '.old.1'")
 }
 
 
