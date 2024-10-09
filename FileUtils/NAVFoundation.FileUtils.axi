@@ -336,22 +336,8 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
         entities[index].Parent = NAVGetFileEntityParent(entity)
         entities[index].IsDirectory = NAVIsDirectory(entity)
 
-        #IF_DEFINED NAV_FILEUTILS_DEBUG
-        NAVLog("'Entity ', itoa(index), ' Name: ', entities[index].Name")
-        NAVLog("'Entity ', itoa(index), ' BaseName: ', entities[index].BaseName")
-        NAVLog("'Entity ', itoa(index), ' Extension: ', entities[index].Extension")
-        NAVLog("'Entity ', itoa(index), ' Path: ', entities[index].Path")
-        NAVLog("'Entity ', itoa(index), ' Parent: ', entities[index].Parent")
-        NAVLog("'Entity ', itoa(index), ' IsDirectory: ', NAVIntegerToBooleanString(entities[index].IsDirectory)")
-        #END_IF
-
         index++
     }
-
-    // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-    //                             __NAV_FOUNDATION_FILEUTILS__,
-    //                             'NAVReadDirectory',
-    //                             "'Number of entities: ', itoa(count)")
 
     return type_cast(count)
 }
@@ -684,7 +670,6 @@ define_function slong NAVFileGetSize(char path[]) {
 
 define_function slong NAVFileRename(char path[], char newName[]) {
     stack_var slong result
-    // stack_var char newPath[NAV_MAX_BUFFER]
 
     if (!length_array(path)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
@@ -703,9 +688,6 @@ define_function slong NAVFileRename(char path[], char newName[]) {
 
         return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
-
-    // newPath = NAVGetFileEntityParent(path)
-    // newPath = "newPath, '/', newName"
 
     result = file_rename(path, newName)
 
