@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.7.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.6.0...v1.7.0) (2024-10-09)
+
+### 🌟 Features
+
+-   **errorlog-utils:** log to console when rotating log file ([09b827b](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/09b827b42e3ce6f58c08b6ad4df07f579436f0d0))
+
 ## [1.6.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.5.0...v1.6.0) (2024-10-09)
 
 ### 🌟 Features
