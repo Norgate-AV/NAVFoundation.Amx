@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.7.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.7.0...v1.7.1) (2024-10-09)
+
+### 🐛 Bug Fixes
+
+-   **errorlog-utils:** provide full absolute path in rename destination ([e0177de](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e0177de7412e0fa2c1a44e512e0c1357da402cf4))
+
 ## [1.7.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.6.0...v1.7.0) (2024-10-09)
 
 ### 🌟 Features
