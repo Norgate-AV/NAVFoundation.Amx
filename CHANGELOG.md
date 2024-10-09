@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.6.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.5.0...v1.6.0) (2024-10-09)
+
+### 🌟 Features
+
+-   **errorlog-utils:** add error checking for getting file size ([202c69f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/202c69f751f81b31268aa408540f07c3fa50bded))
+-   **errorlog-utils:** add option to send standard logs to file ([1019645](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/101964570568180992f4d6ad0c853ed778f6243e))
+
+### 🚀 Performance
+
+-   **file-utils:** replace while loop with direct seek to end of file ([3dc2b1c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3dc2b1cf4a5a56e35285e06bbb57e7dfef17ca0a))
+
 ## [1.5.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.4.0...v1.5.0) (2024-10-09)
 
 ### 🌟 Features
