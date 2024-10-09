@@ -652,10 +652,25 @@ define_function slong NAVFileGetSize(char path[]) {
 
     handle = type_cast(result)
 
-    count = 1
-    while (file_seek(handle, type_cast(count)) >= 0) {
-        count++
-    }
+    /**
+     * Ref: NetLinx Keywords Help
+     *
+     * SLONG FILE_SEEK (LONG HFile, LONG Pos)
+     *
+     * Parameters:
+     *      HFile - handle to the file returned by FILE_OPEN.
+     *      Pos - The byte position to set the file pointer (0 = beginning of file, -1 = end of file)
+     */
+    // I need to seek staright to the end of the file to get the size.
+    // The help docs for "file_seek" say that -1 is the end of the file.
+    // However, the function takes an argument of type LONG for the position.
+    // Passing -1 to the function results in the compiler warning 10571.
+    // The function does work as expected, but the warning is annoying.
+    // Should the position argument be changed to type SLONG AMX?
+    // This is the first time I've had to use this compiler directive,
+    // since I'm unable to suppress the warning using "type_cast".
+    #DISABLE_WARNING 10571
+    count = file_seek(handle, type_cast(NAV_FILE_SEEK_END))
 
     result = NAVFileClose(handle)
 

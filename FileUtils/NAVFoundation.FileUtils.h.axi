@@ -55,6 +55,8 @@ constant slong NAV_FILE_ERROR_DIRECTORY_NAME_EXISTS                        = -13
 constant slong NAV_FILE_ERROR_MAXIMUM_NUMBER_OF_FILES_ARE_ALREADY_OPEN     = -14
 constant slong NAV_FILE_ERROR_INVALID_FILE_FORMAT                          = -15
 
+constant slong NAV_FILE_SEEK_END                                           = -1
+
 
 DEFINE_TYPE
 
