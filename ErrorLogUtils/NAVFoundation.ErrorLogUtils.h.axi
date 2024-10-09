@@ -49,6 +49,10 @@ constant long NAV_MAX_OLD_LOG_FILES     = 5
 constant char NAV_LOGS_DIRECTORY[] = '/logs'
 #END_IF
 
+#IF_NOT_DEFINED NAV_LOG_FILE_NAME
+constant char NAV_LOG_FILE_NAME[] = 'system.log'
+#END_IF
+
 #IF_NOT_DEFINED NAV_LOG_FILE_QUEUE_SIZE
 constant long NAV_LOG_FILE_QUEUE_SIZE = 100
 #END_IF
