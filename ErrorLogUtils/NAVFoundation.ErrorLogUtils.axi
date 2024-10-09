@@ -131,6 +131,8 @@ define_function char[NAV_MAX_BUFFER] NAVFormatLogToFile(long level, char value[]
 
 define_function slong NAVErrorLogToFile(char file[], long level, char value[]) {
     stack_var char log[NAV_MAX_BUFFER]
+    stack_var slong result
+    stack_var long size
 
     if (!length_array(value)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
@@ -153,8 +155,26 @@ define_function slong NAVErrorLogToFile(char file[], long level, char value[]) {
         return NAVFileWriteLine("NAV_LOGS_DIRECTORY, '/', file", log)
     }
 
+    result = NAVFileGetSize("NAV_LOGS_DIRECTORY, '/', file")
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_ERRORLOGUTILS__,
+                                    'NAVErrorLogToFile',
+                                    "NAVGetFileError(result), ' : Unable to get the size of the log file'")
+
+        return result
+    }
+
+    size = type_cast(result)
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                    __NAV_FOUNDATION_ERRORLOGUTILS__,
+                                    'NAVErrorLogToFile',
+                                    "'Current log file size: ', itoa(size)")
+
     // Check the size to see if we first need to rotate the log file
-    if ((NAVFileGetSize("NAV_LOGS_DIRECTORY, '/', file") + length_array(log)) > NAV_MAX_LOG_FILE_SIZE) {
+    if ((size + length_array(log)) > NAV_MAX_LOG_FILE_SIZE) {
         NAVErrorLogFileRotate(file)
         return NAVErrorLogToFile(file, level, value)
     }
