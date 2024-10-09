@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.7.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.7.1...v1.7.2) (2024-10-09)
+
+### 🐛 Bug Fixes
+
+-   **errorlog-utils:** rename log files in reverse to not to overwrite ([99bb261](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/99bb261479e9a0eab0a05f028cb5d4ef004bdc7a))
+
 ## [1.7.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.7.0...v1.7.1) (2024-10-09)
 
 ### 🐛 Bug Fixes
