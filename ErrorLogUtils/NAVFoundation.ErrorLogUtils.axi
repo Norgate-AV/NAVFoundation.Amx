@@ -149,6 +149,15 @@ define_function slong NAVErrorLogToFile(char file[], long level, char value[]) {
 
     log = NAVFormatLogToFile(level, value)
 
+    if (!length_array(log)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_ERRORLOGUTILS__,
+                                    'NAVErrorLogToFile',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_PARAMETER), ' : Unable to format log message'")
+
+        return NAV_FILE_ERROR_INVALID_PARAMETER
+    }
+
     // Check if the logs directory exists, if not create it
     if (!NAVDirectoryExists(NAV_LOGS_DIRECTORY)) {
         NAVDirectoryCreate(NAV_LOGS_DIRECTORY)
