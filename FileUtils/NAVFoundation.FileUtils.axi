@@ -172,8 +172,7 @@ define_function slong NAVFileRead(char path[], char data[]) {
                                     "'Error reading file "', path, '" : ', NAVGetFileError(result)")
     }
 
-    NAVFileClose(handle)
-    return result
+    return NAVFileClose(handle)
 }
 
 
@@ -230,8 +229,7 @@ define_function slong NAVFileWrite(char path[], char data[]) {
                                     "'Error writing file "', path, '" : ', NAVGetFileError(result)")
     }
 
-    NAVFileClose(handle)
-    return result
+    return NAVFileClose(handle)
 }
 
 
@@ -270,8 +268,7 @@ define_function slong NAVFileAppend(char path[], char data[]) {
                                     "'Error appending file "', path, '" : ', NAVGetFileError(result)")
     }
 
-    NAVFileClose(handle)
-    return result
+    return NAVFileClose(handle)
 }
 
 
