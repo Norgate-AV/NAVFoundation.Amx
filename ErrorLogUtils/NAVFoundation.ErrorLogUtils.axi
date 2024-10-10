@@ -185,11 +185,6 @@ define_function slong NAVErrorLogToFile(char file[], long level, char value[]) {
 
     size = type_cast(result)
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                    __NAV_FOUNDATION_ERRORLOGUTILS__,
-                                    'NAVErrorLogToFile',
-                                    "'Current log file size: ', itoa(size)")
-
     // Check the size to see if we first need to rotate the log file
     if ((size + length_array(log)) > NAV_MAX_LOG_FILE_SIZE) {
         NAVErrorLogFileRotate(file)
@@ -218,18 +213,8 @@ define_function slong NAVErrorLogFileRotate(char file[]) {
             continue
         }
 
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
-                                    __NAV_FOUNDATION_ERRORLOGUTILS__,
-                                    'NAVErrorLogFileRotate',
-                                    "'Renaming log file: ', file, '.old.', itoa(count)")
-
         NAVFileRename("NAV_LOGS_DIRECTORY, '/', file, '.old.', itoa(count)", "NAV_LOGS_DIRECTORY, '/', file, '.old.', itoa(count + 1)")
     }
-
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
-                                __NAV_FOUNDATION_ERRORLOGUTILS__,
-                                'NAVErrorLogFileRotate',
-                                "'Renaming log file: ', file")
 
     return NAVFileRename("NAV_LOGS_DIRECTORY, '/', file", "NAV_LOGS_DIRECTORY, '/', file, '.old.1'")
 }
