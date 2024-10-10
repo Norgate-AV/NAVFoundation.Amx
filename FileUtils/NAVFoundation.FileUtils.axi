@@ -711,40 +711,40 @@ define_function slong NAVFileGetSize(char path[]) {
 }
 
 
-define_function slong NAVFileRename(char path[], char newName[]) {
+define_function slong NAVFileRename(char source[], char destination[]) {
     stack_var slong result
 
-    if (!length_array(path)) {
+    if (!length_array(source)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
                                     'NAVRenameFile',
-                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The source path supplied is empty.'")
 
         return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
 
-    if (!length_array(newName)) {
+    if (!length_array(destination)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
                                     'NAVFileRename',
-                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The new name supplied is empty.'")
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The destination path supplied is empty.'")
 
         return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
 
-    result = file_rename(path, newName)
+    result = file_rename(source, destination)
 
     if (result < 0) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
                                     'NAVFileRename',
-                                    "'Error renaming file "', path, '" : ', NAVGetFileError(result)")
+                                    "'Error renaming file "', source, '" : ', NAVGetFileError(result)")
     }
 
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
                                 __NAV_FOUNDATION_FILEUTILS__,
                                 'NAVFileCopy',
-                                "'Renamed file "', path, '" to "', newName, '"'")
+                                "'Renamed file "', source, '" to "', destination, '"'")
 
     return result
 }
