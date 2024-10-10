@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.8.0...v1.9.0) (2024-10-10)
+
+### 🌟 Features
+
+-   **string-utils:** add NAVLastIndexOf function ([c869293](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c869293a7a6857e9d64a3c058df66a96b3ca846a))
+-   move path related function into new PathUtils library ([1cee1ad](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/1cee1adafce2173f92e85f326390203c11364468))
+
 ## [1.8.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.7.2...v1.8.0) (2024-10-10)
 
 ### 🌟 Features
