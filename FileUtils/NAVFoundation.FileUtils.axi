@@ -35,15 +35,7 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_FILEUTILS__ 'NAVFoundation.FileUtils'
 
 #include 'NAVFoundation.Core.axi'
-
-
-define_function char NAVIsDirectory(char entity[]) {
-    if (NAVStartsWith(entity, '/')) {
-        return true
-    }
-
-    return false
-}
+#include 'NAVFoundation.PathUtils.axi'
 
 
 define_function char[NAV_MAX_BUFFER] NAVGetFileError(slong error) {
@@ -335,92 +327,6 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVGetFileEntityBaseName(char path[]) {
-    stack_var char name[NAV_MAX_BUFFER]
-    stack_var integer index
-
-    if (NAVIsDirectory(path)) {
-        return name
-    }
-
-    index = length_array(path)
-
-    while (index > 0) {
-        if (path[index] == '/' || path[index] == '\') {
-            break
-        }
-
-        index--
-    }
-
-    // name = NAVGetFileEntityName(path)
-
-    return NAVStringSubstring(name, index + 1, NAVIndexOf(name, '.', 1))
-}
-
-
-define_function char[NAV_MAX_BUFFER] NAVGetFileEntityParent(char path[]) {
-    stack_var integer index
-    stack_var char parent[NAV_MAX_BUFFER]
-
-    index = length_array(path)
-
-    while (index > 0) {
-        if (path[index] == '/' || path[index] == '\') {
-            break
-        }
-
-        index--
-    }
-
-    parent = NAVStringSubstring(path, 1, index)
-
-    if (length_array(parent) == 0) {
-        parent = '/'
-    }
-
-    return parent
-}
-
-
-define_function char[NAV_MAX_BUFFER] NAVGetFileEntityName(char path[]) {
-    stack_var integer index
-
-    index = length_array(path)
-
-    while (index > 0) {
-        if (path[index] == '/' || path[index] == '\') {
-            break
-        }
-
-        index--
-    }
-
-    return NAVStringSubstring(path, index + 1, length_array(path))
-}
-
-
-define_function char[NAV_MAX_CHARS] NAVGetFileEntityExtension(char path[]) {
-    stack_var integer index
-
-    if (NAVIsDirectory(path)) {
-        return ''
-    }
-
-    index = length_array(path)
-
-    while (index > 0) {
-        if (path[index] == '.') {
-            break
-        }
-
-        index--
-    }
-
-    return NAVStringSubstring(path, index + 1, length_array(path))
-}
-
-
 define_function slong NAVWalkDirectory(char path[], char files[][]) {
     stack_var _NAVFileEntity entities[1000]
     stack_var slong count
@@ -571,30 +477,6 @@ define_function slong NAVDirectoryDelete(char path[]) {
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVJoinPath(char parent[], char child[]) {
-    stack_var char path[NAV_MAX_BUFFER]
-
-    path = ""
-
-    if (!length_array(parent)) {
-        return path
-    }
-
-    path = parent
-    if (!NAVStartsWith(path, '/')) {
-        path = "'/', path"
-    }
-
-    if (!length_array(child)) {
-        return path
-    }
-
-    path = "path, '/', child"
-
-    return path
-}
-
-
 // define_function NAVReadCsvFile(char path[], char lines[][]) {
 //     stack_var char file[NAV_MAX_BUFFER]
 //     stack_var integer index
@@ -625,31 +507,6 @@ define_function char[NAV_MAX_BUFFER] NAVJoinPath(char parent[], char child[]) {
 
 //     }
 // }
-
-
-define_function slong NAVSplitPath(char path[], char elements[][]) {
-    stack_var slong count
-
-    count = NAVSplitString(path, '/', elements)
-
-    if (count > 0) {
-        return count
-    }
-
-    count = NAVSplitString(path, '\', elements)
-
-    if (count > 0) {
-        return count
-    }
-
-    count = NAVSplitString(path, '\\', elements)
-
-    if (count > 0) {
-        return count
-    }
-
-    return count
-}
 
 
 define_function slong NAVFileGetSize(char path[]) {

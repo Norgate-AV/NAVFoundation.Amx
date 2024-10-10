@@ -20,6 +20,7 @@
                 ".\\Math",
                 ".\\McpBase",
                 ".\\NtpClient",
+                ".\\PathUtils",
                 ".\\Queue",
                 ".\\Regex",
                 ".\\RmsBase",
