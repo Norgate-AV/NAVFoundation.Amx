@@ -532,6 +532,41 @@ define_function slong NAVDirectoryCreate(char path[]) {
                                     "'Error creating directory "', path, '" : ', NAVGetFileError(result)")
     }
 
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_FILEUTILS__,
+                                'NAVDirectoryCreate',
+                                "'Created directory "', path, '"'")
+
+    return result
+}
+
+
+define_function slong NAVDirectoryDelete(char path[]) {
+    stack_var slong result
+
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVDirectoryDelete',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    result = file_removedir(path)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVDirectoryDelete',
+                                    "'Error deleting directory "', path, '" : ', NAVGetFileError(result)")
+    }
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_FILEUTILS__,
+                                'NAVDirectoryDelete',
+                                "'Deleted directory "', path, '"'")
+
     return result
 }
 
