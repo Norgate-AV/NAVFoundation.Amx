@@ -160,7 +160,11 @@ define_function slong NAVErrorLogToFile(char file[], long level, char value[]) {
 
     // Check if the logs directory exists, if not create it
     if (!NAVDirectoryExists(NAV_LOGS_DIRECTORY)) {
-        NAVDirectoryCreate(NAV_LOGS_DIRECTORY)
+        result = NAVDirectoryCreate(NAV_LOGS_DIRECTORY)
+
+        if (result < 0) {
+            return result
+        }
     }
 
     // If the file does not exist, create it and write the message
