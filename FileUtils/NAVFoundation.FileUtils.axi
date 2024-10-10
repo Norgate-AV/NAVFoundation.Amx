@@ -93,11 +93,6 @@ define_function slong NAVFileOpen(char path[], char mode[]) {
     filePath = NAVGetFileEntityParent(path)
     fileName = NAVGetFileEntityName(path)
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_FILEUTILS__,
-                                'NAVFileOpen',
-                                "'Opening file ', fileName, ' in path ', filePath")
-
     switch (lower_string(mode)) {
         case 'rwa': {
             flag = FILE_RW_APPEND
