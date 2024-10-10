@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.8.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.7.2...v1.8.0) (2024-10-10)
+
+### 🌟 Features
+
+-   **file-utils:** add debug logging to file copy/rename/delete functions ([c59f3aa](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c59f3aad48e9718bfe4ad45ed7fd0a5ddfada19e))
+-   **file-utils:** add NAVDirectoryDelete function ([3bbef95](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3bbef957a4cf8271b5d0950549c0a98df97c6ede))
+
+### 🐛 Bug Fixes
+
+-   **errorlog-utils:** ensure logs directory is created, overwise exit ([9d755c2](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9d755c2c54ce7d3d9144a04af18a766198ed3313))
+-   **errorlog-utils:** ensure NAVFormatLogToFile function returns a string ([ed743ae](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/ed743ae556eeb0e55415b5c11c3a418b7bbc0829))
+-   **file-utils:** remove return offset in NAVGetFileSize ([6d74632](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6d746327f7280c07aba22867c298d0abdcb77abf))
+
 ## [1.7.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.7.1...v1.7.2) (2024-10-09)
 
 ### 🐛 Bug Fixes
