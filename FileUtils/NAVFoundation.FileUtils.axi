@@ -714,6 +714,11 @@ define_function slong NAVFileRename(char path[], char newName[]) {
                                     "'Error renaming file "', path, '" : ', NAVGetFileError(result)")
     }
 
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_FILEUTILS__,
+                                'NAVFileCopy',
+                                "'Renamed file "', path, '" to "', newName, '"'")
+
     return result
 }
 
@@ -738,6 +743,11 @@ define_function slong NAVFileDelete(char path[]) {
                                     'NAVFileDelete',
                                     "'Error deleting file "', path, '" : ', NAVGetFileError(result)")
     }
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_FILEUTILS__,
+                                'NAVFileCopy',
+                                "'Deleted file "', path, '"'")
 
     return result
 }
@@ -772,6 +782,11 @@ define_function slong NAVFileCopy(char source[], char destination[]) {
                                     'NAVFileCopy',
                                     "'Error copying file "', source, '" to "', destination, '" : ', NAVGetFileError(result)")
     }
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_FILEUTILS__,
+                                'NAVFileCopy',
+                                "'Copied file "', source, '" to "', destination, '"'")
 
     return result
 }
