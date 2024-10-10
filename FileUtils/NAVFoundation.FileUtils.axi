@@ -656,7 +656,18 @@ define_function slong NAVFileGetSize(char path[]) {
     // This is the first time I've had to use this compiler directive,
     // since I'm unable to suppress the warning using "type_cast".
     #DISABLE_WARNING 10571
-    count = file_seek(handle, type_cast(NAV_FILE_SEEK_END))
+    result = file_seek(handle, type_cast(NAV_FILE_SEEK_END))
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileGetSize',
+                                    "'Error seeking to the end of file "', path, '" : ', NAVGetFileError(result)")
+
+        return result
+    }
+
+    count = result
 
     result = NAVFileClose(handle)
 
@@ -664,7 +675,12 @@ define_function slong NAVFileGetSize(char path[]) {
         return result
     }
 
-    return (count - 1)
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                __NAV_FOUNDATION_FILEUTILS__,
+                                'NAVFileGetSize',
+                                "'File "', path, '" size: ', itoa(count), ' bytes'")
+
+    return count
 }
 
 
