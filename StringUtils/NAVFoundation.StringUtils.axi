@@ -307,8 +307,32 @@ define_function integer NAVEndsWith(char buffer[], char match[]) {
 }
 
 
-define_function integer NAVIndexOf(char buffer[], char match[], integer tokenIndex) {
-    return find_string(buffer, match, tokenIndex)
+define_function integer NAVIndexOf(char buffer[], char match[], integer start) {
+    return find_string(buffer, match, start)
+}
+
+
+define_function integer NAVLastIndexOf(char buffer[], char match[]) {
+    stack_var integer index
+    stack_var integer next
+
+    index = NAVIndexOf(buffer, match, 1)
+
+    if (!index) {
+        return 0
+    }
+
+    while (index > 0) {
+        next = NAVIndexOf(buffer, match, index + 1)
+
+        if (!next) {
+            break
+        }
+
+        index = next
+    }
+
+    return index
 }
 
 
