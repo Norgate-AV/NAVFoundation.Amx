@@ -37,6 +37,13 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 
 
+DEFINE_CONSTANT
+
+constant char NAV_CHAR_DOT              = 46
+constant char NAV_CHAR_FORWARD_SLASH    = 47
+constant char NAV_CHAR_BACKWARD_SLASH   = 92
+
+
 define_function char NAVPathIsDirectory(char entity[]) {
     if (NAVStartsWith(entity, '/')) {
         return true
@@ -102,68 +109,45 @@ define_function char[NAV_MAX_BUFFER] NAVPathExtName(char path[]) {
 
 
 define_function char[NAV_MAX_BUFFER] NAVPathDirName(char path[]) {
-    stack_var char node[255][255]
-    stack_var integer count
+    stack_var integer x
+    stack_var char hasRoot
+    stack_var char matchedSlash
+    stack_var sinteger end
 
     if (!length_array(path)) {
-        return '.'
+        return "'.'"
     }
 
-    count = NAVSplitPath(path, node)
+    hasRoot = NAVStartsWith(path, '/')
 
-    if (count <= 0) {
-        return ''
+    end = -1
+    matchedSlash = true
+
+    for (x = length_array(path); x >= 1; x--) {
+        if (path[x] == NAV_CHAR_FORWARD_SLASH) {
+            if (!matchedSlash) {
+                end = x
+                break
+            }
+        }
+        else {
+            matchedSlash = false
+        }
     }
 
-    return node[count - 1]
-}
-
-
-define_function char[NAV_MAX_BUFFER] NAVGetFileEntityBaseName(char path[]) {
-    stack_var char name[NAV_MAX_BUFFER]
-    stack_var integer index
-
-    if (NAVIsDirectory(path)) {
-        return name
-    }
-
-    index = length_array(path)
-
-    while (index > 0) {
-        if (path[index] == '/' || path[index] == '\') {
-            break
+    if (end == -1) {
+        if (hasRoot) {
+            return "'/'"
         }
 
-        index--
+        return "'.'"
     }
 
-    // name = NAVGetFileEntityName(path)
-
-    return NAVStringSubstring(name, index + 1, NAVIndexOf(name, '.', 1))
-}
-
-
-define_function char[NAV_MAX_BUFFER] NAVGetFileEntityParent(char path[]) {
-    stack_var integer index
-    stack_var char parent[NAV_MAX_BUFFER]
-
-    index = length_array(path)
-
-    while (index > 0) {
-        if (path[index] == '/' || path[index] == '\') {
-            break
-        }
-
-        index--
+    if (hasRoot && end == 1) {
+        return "'//'"
     }
 
-    parent = NAVStringSubstring(path, 1, index)
-
-    if (length_array(parent) == 0) {
-        parent = '/'
-    }
-
-    return parent
+    return NAVStringSubstring(path, 1, end - 1)
 }
 
 
