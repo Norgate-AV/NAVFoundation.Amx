@@ -75,8 +75,12 @@ define_function char[NAV_MAX_BUFFER] NAVStringSubstring(char buffer[], integer i
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVStringSlice(char buffer[], integer index, integer count) {
-    return NAVStringSubString(buffer, index, count)
+define_function char[NAV_MAX_BUFFER] NAVStringSlice(char buffer[], integer start, integer end) {
+    if (end == 0) {
+        return NAVStringSubstring(buffer, start, end)
+    }
+
+    return NAVStringSubstring(buffer, start, end - start)
 }
 
 
