@@ -247,22 +247,12 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringBetween(char buffer[], char tok
     stack_var integer count
 
     if(!length_array(buffer)) {
-        // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-        //                             __NAV_FOUNDATION_STRINGUTILS__,
-        //                             'NAVGetStringBetween',
-        //                             'Invalid argument. The provided argument "buffer" is an empty string')
-
         return ''
     }
 
     tokenIndex[1] = NAVIndexOf(buffer, token1, 1)
 
     if (!tokenIndex[1]) {
-        // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
-        //                             __NAV_FOUNDATION_STRINGUTILS__,
-        //                             'NAVGetStringBetween',
-        //                             'The provided argument "token1" was not found in the buffer')
-
         return ''
     }
 
@@ -270,11 +260,6 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringBetween(char buffer[], char tok
     tokenIndex[2] = NAVIndexOf(buffer, token2, startIndex)
 
     if (!tokenIndex[2]) {
-        // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
-        //                             __NAV_FOUNDATION_STRINGUTILS__,
-        //                             'NAVGetStringBetween',
-        //                             'The provided argument "token2" was not found in the buffer')
-
         return ''
     }
 
@@ -362,11 +347,6 @@ define_function integer NAVSplitString(char buffer[], char separator[], char res
     }
 
     if (!NAVContains(buffer, separator)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
-                                    __NAV_FOUNDATION_STRINGUTILS__,
-                                    'NAVSplitString',
-                                    'Buffer does not contain separator')
-
         count++
         set_length_array(result, count)
         result[count] = buffer
@@ -431,11 +411,6 @@ define_function char[NAV_MAX_BUFFER] NAVArrayJoinString(char array[][], char sep
     for (x = 2; x <= length; x++) {
         result = "result, separator, array[x]"
     }
-
-    // NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-    //                             __NAV_FOUNDATION_STRINGUTILS__,
-    //                             'NAVArrayJoinString',
-    //                             "'Returning result: ', result")
 
     return result
 }
