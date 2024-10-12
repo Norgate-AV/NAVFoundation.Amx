@@ -301,7 +301,7 @@ define_function integer NAVContains(char buffer[], char match[]) {
 
 
 define_function integer NAVEndsWith(char buffer[], char match[]) {
-    return (find_string(buffer, match, 1) == length_array(buffer) - length_array(match) + 1)
+    return right_string(buffer, length_array(match)) == match
 }
 
 
