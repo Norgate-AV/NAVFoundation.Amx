@@ -87,8 +87,11 @@ define_function char[NAV_MAX_BUFFER] NAVStringSlice(char buffer[], integer start
 define_function char[NAV_MAX_BUFFER] NAVFindAndReplace(char buffer[], char match[], char value[]) {
     stack_var integer index
     stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer matchLength
 
-    if (!length_array(buffer) || !length_array(match)) {
+    matchLength = length_array(match)
+
+    if (!length_array(buffer) || !matchLength) {
         return buffer
     }
 
@@ -100,7 +103,13 @@ define_function char[NAV_MAX_BUFFER] NAVFindAndReplace(char buffer[], char match
 
     while (NAVContains(result, match)) {
         index = NAVIndexOf(result, match, 1)
-        result = "left_string(result, index - 1), value, NAVStripLeft(result, index)"
+
+        if (index == 1) {
+            result = "value, right_string(result, length_array(result) - matchLength)"
+            continue
+        }
+
+        result = "left_string(result, index - 1), value, right_string(result, (length_array(result) - (index + matchLength)) + 1)"
     }
 
     return result
