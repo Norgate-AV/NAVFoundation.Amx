@@ -99,12 +99,16 @@ define_function char[NAV_MAX_BUFFER] NAVPathExtName(char path[]) {
         return ''
     }
 
-    index = NAVLastIndexOf(basename, '.')
-    if (index < 0) {
+    if (path == '.' || path == '..') {
         return ''
     }
 
-    return NAVStringSubstring(basename, index, length_array(basename) - index)
+    index = NAVLastIndexOf(basename, '.')
+    if (index <= 0) {
+        return ''
+    }
+
+    return NAVStringSubstring(basename, index, (length_array(basename) - index) + 1)
 }
 
 
