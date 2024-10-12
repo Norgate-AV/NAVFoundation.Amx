@@ -167,41 +167,24 @@ define_function char[NAV_MAX_BUFFER] NAVGetFileEntityParent(char path[]) {
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVGetFileEntityName(char path[]) {
-    stack_var integer index
+define_function char[NAV_MAX_BUFFER] NAVPathName(char path[]) {
+    stack_var char basename[255]
 
-    index = length_array(path)
-
-    while (index > 0) {
-        if (path[index] == '/' || path[index] == '\') {
-            break
-        }
-
-        index--
-    }
-
-    return NAVStringSubstring(path, index + 1, length_array(path))
-}
-
-
-define_function char[NAV_MAX_CHARS] NAVGetFileEntityExtension(char path[]) {
-    stack_var integer index
-
-    if (NAVIsDirectory(path)) {
+    if (!length_array(path)) {
         return ''
     }
 
-    index = length_array(path)
+    basename = NAVPathBaseName(path)
 
-    while (index > 0) {
-        if (path[index] == '.') {
-            break
-        }
-
-        index--
+    if (!length_array(basename)) {
+        return ''
     }
 
-    return NAVStringSubstring(path, index + 1, length_array(path))
+    if (NAVContains(basename, '.')) {
+        return NAVStringSubstring(basename, 1, NAVIndexOf(basename, '.', 1) - 1)
+    }
+
+    return basename
 }
 
 
