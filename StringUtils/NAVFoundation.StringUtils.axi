@@ -776,4 +776,13 @@ define_function char[NAV_MAX_BUFFER] NAVStringReverse(char buffer[]) {
 }
 
 
+define_function char NAVCharCodeAt(char buffer[], integer index) {
+    if (index <= 0 || index > length_array(buffer)) {
+        return 0
+    }
+
+    return buffer[index]
+}
+
+
 #END_IF // __NAV_FOUNDATION_STRINGUTILS__
