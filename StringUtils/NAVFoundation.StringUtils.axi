@@ -71,7 +71,7 @@ define_function char[NAV_MAX_BUFFER] NAVStringSubstring(char buffer[], integer i
         return mid_string(buffer, index, count)
     }
 
-    return mid_string(buffer, index, length_array(buffer))
+    return mid_string(buffer, index, length_array(buffer) - index)
 }
 
 
