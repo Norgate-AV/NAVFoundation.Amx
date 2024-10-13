@@ -215,4 +215,9 @@ define_function slong NAVSplitPath(char path[], char elements[][]) {
 }
 
 
+define_function char NAVPathIsAbsolute(char path[]) {
+    return NAVStartsWith(path, '/')
+}
+
+
 #END_IF // __NAV_FOUNDATION_PATHUTILS__
