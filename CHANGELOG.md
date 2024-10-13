@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.12.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.11.0...v1.12.0) (2024-10-13)
+
+### 🌟 Features
+
+-   **file-utils:** update NAVWalkDirectory function ([1fd0f28](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/1fd0f284f519cca379bfdc39e7bec2b59cec35ef))
+
 ## [1.11.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.10.0...v1.11.0) (2024-10-13)
 
 ### 🌟 Features
