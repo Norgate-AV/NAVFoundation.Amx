@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.10.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.9.0...v1.10.0) (2024-10-13)
+
+### 🌟 Features
+
+-   **path-utils:** add helper function to remove escaped backslashes ([98338fa](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/98338faa5ebd5c601648a69fffcf2877d0b2218d))
+-   **path-utils:** add helper functions for identifying path slashes ([05e8a86](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/05e8a86cc7d954b25fa6c5cd7fbb8bacbe9f0896))
+-   **string-utils:** add NAVCharCodeAt function ([29e8d1b](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/29e8d1b38e62925f6c14e6f8b1aa36460bb8014b))
+-   **path-utils:** add NAVPathGetCwd function ([86e8f87](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/86e8f87b29d5f8780e00ed5fc4ff114b5e692be0))
+-   **path-utils:** add NAVPathIsAbsolute function ([5197c2a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/5197c2a6dad45d4c837e2df530c417bd9f4f8438))
+-   **path-utils:** add NAVPathName function ([01c89d1](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/01c89d18e019e8cf3b09f3e02b7d4c33f4aec2bf))
+-   **path-utils:** add NAVPathNormalize function ([22ce625](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/22ce625297cbc325c69eaf61bf15a9ac569b8fe1))
+-   **string-utils:** complete NAVStringSlice function ([3f5a06f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3f5a06f9c70818919d9cc179f806d01c80de7f6b))
+-   **file-utils:** use updated functions in new path library ([f6511e4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/f6511e4b8dd02e72df065cc84192558a4d0c7340))
+
+### 🐛 Bug Fixes
+
+-   **path-utils:** ensure escaped backslashes are removed ([e537be0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e537be0befc7d36bf3ded99c3e129a4af78e51c6))
+-   **string-utils:** fix bug with NAVEndsWith function ([f263e41](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/f263e4156b39fd710bd841d8d3216a7c458a3e7a))
+-   **string-utils:** fix bug with NAVFindAndReplace function ([a9b1d40](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a9b1d4047be9dcd6bef79553c557d51fba0fee50))
+-   **path-utils:** fix bugs with NAVPathExtName function ([c488c80](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c488c80057a293c095749c79f2a51b85769c7dbe))
+-   **string-utils:** fix NAVStringSubstring so returns the rest of string ([c274203](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c274203d473902ab17a5ecfe8bda19c8cf33f5ea))
+-   **path-utils:** revamp NAVPathDirName function ([a360c90](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a360c903a04f0bb64b823893a90440ca2abab3a6))
+
 ## [1.9.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.8.0...v1.9.0) (2024-10-10)
 
 ### 🌟 Features
