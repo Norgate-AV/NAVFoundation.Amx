@@ -43,6 +43,7 @@ constant char NAV_CHAR_DOT              = 46
 constant char NAV_CHAR_FORWARD_SLASH    = 47
 constant char NAV_CHAR_BACKWARD_SLASH   = 92
 
+constant integer NAV_PATH_RESOLVE_MAX_ARGS  = 4
 constant integer NAV_PATH_JOIN_MAX_ARGS     = 4
 
 
@@ -434,10 +435,300 @@ define_function char[NAV_MAX_BUFFER] NAVPathNormalize(char path[]) {
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVPathGetCwd() {
+// NetLinx does not support variadic functions, so we need to limit it in some way.
+// We could pass in an array of strings, but that would be a bit cumbersome.
+// Instead, we will limit the number of arguments to 4.
+// An empty string should be used to indicate the argument is not used.
+// Eg. NAVPathResolve('a', 'b', 'c', '')
+// If you only want to resolve 2 paths, then use NAVPathResolve('a', 'b', '', '')
+define_function char[NAV_MAX_BUFFER] NAVPathResolve(char arg1[], char arg2[], char arg3[], char arg4[]) {
+    stack_var char resolved[NAV_MAX_BUFFER]
+    stack_var char isAbsolute
+    stack_var char slashCheck
+    stack_var integer length
+    stack_var integer x
+
+    for (x = NAV_PATH_RESOLVE_MAX_ARGS; x >= 1; x--) {
+        length = x
+
+        switch (x) {
+            case 4: {
+                if (!length_array(arg4)) {
+                    continue
+                }
+
+                break
+            }
+            case 3: {
+                if (!length_array(arg3)) {
+                    continue
+                }
+
+                break
+            }
+            case 2: {
+                if (!length_array(arg2)) {
+                    continue
+                }
+
+                break
+            }
+            case 1: {
+                if (!length_array(arg1)) {
+                    continue
+                }
+
+                break
+            }
+            case 0: {
+                break
+            }
+        }
+
+        break
+    }
+
+    if (!length) {
+        return "'/'"
+    }
+
+    resolved = ''
+    isAbsolute = false
+    slashCheck = false
+
+    for (x = length; x >= 1 && !isAbsolute; x--) {
+        stack_var char path[255]
+        stack_var integer pathLength
+
+        switch (x) {
+            case 1: {
+                path = NAVPathRemoveEscapedBackslashes(arg1)
+            }
+            case 2: {
+                path = NAVPathRemoveEscapedBackslashes(arg2)
+            }
+            case 3: {
+                path = NAVPathRemoveEscapedBackslashes(arg3)
+            }
+            case 4: {
+                path = NAVPathRemoveEscapedBackslashes(arg4)
+            }
+        }
+
+        pathLength = length_array(path)
+
+        if (!pathLength) {
+            continue
+        }
+
+        if (x == (length - 1) && NAVPathIsPosixPathSeparator(NAVCharCodeAt(path, pathLength - 1))) {
+            slashCheck = true
+        }
+
+        if (length_array(resolved) != 0) {
+            resolved = "path, '/', resolved"
+        }
+        else {
+            resolved = path
+        }
+
+        isAbsolute = NAVPathIsAbsolute(path)
+    }
+
+    if (!isAbsolute) {
+        stack_var char cwd[255]
+
+        cwd = NAVPathGetCwd()
+
+        if (cwd == '/') {
+            resolved = "cwd, resolved"
+        }
+        else {
+            resolved = "cwd, '/', resolved"
+        }
+
+        isAbsolute = NAVPathIsAbsolute(cwd)
+    }
+
+    resolved = __NAVPathNormalizeString(resolved, !isAbsolute, '/')
+
+    if (!isAbsolute) {
+        if (!length_array(resolved)) {
+            return "'.'"
+        }
+
+        if (slashCheck) {
+            return "resolved, '/'"
+        }
+
+        return resolved
+    }
+
+    if (!length_array(resolved) || resolved == '/') {
+        return "'/'"
+    }
+
+    if (slashCheck) {
+        return "'/', resolved, '/'"
+    }
+
+    return "'/', resolved"
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVPathRelative(char pathFrom[], char pathTo[]) {
+    stack_var char resolvedPathFrom[255]
+    stack_var char resolvedPathTo[255]
+
+    stack_var integer fromStart
+    stack_var integer fromEnd
+    stack_var integer fromLength
+
+    stack_var integer toStart
+    stack_var integer toEnd
+    stack_var integer toLength
+
+    stack_var integer length
+
+    stack_var sinteger lastCommonSeparator
+    stack_var integer x
+
     stack_var char result[NAV_MAX_BUFFER]
 
-    file_getdir(result)
+    if (pathFrom == pathTo) {
+        return ''
+    }
+
+    resolvedPathFrom = NAVPathResolve(pathFrom, '', '', '')
+    resolvedPathTo = NAVPathResolve(pathTo, '', '', '')
+
+    if (resolvedPathFrom == resolvedPathTo) {
+        return ''
+    }
+
+    fromStart = 1
+    while (fromStart < length_array(resolvedPathFrom) &&
+            NAVCharCodeAt(resolvedPathFrom, fromStart + 1) == NAV_CHAR_FORWARD_SLASH) {
+        fromStart++
+    }
+
+    fromEnd = length_array(resolvedPathFrom)
+    while (fromEnd > fromStart &&
+            NAVCharCodeAt(resolvedPathFrom, fromEnd) == NAV_CHAR_FORWARD_SLASH) {
+        fromEnd--
+    }
+
+    fromLength = (fromEnd - fromStart)
+
+    toStart = 1
+    while (toStart < length_array(resolvedPathTo) &&
+            NAVCharCodeAt(resolvedPathTo, toStart + 1) == NAV_CHAR_FORWARD_SLASH) {
+        toStart++
+    }
+
+    toEnd = length_array(resolvedPathTo)
+    while (toEnd > toStart &&
+            NAVCharCodeAt(resolvedPathTo, toEnd) == NAV_CHAR_FORWARD_SLASH) {
+        toEnd--
+    }
+
+    toLength = (toEnd - toStart)
+
+    if (fromLength < toLength) {
+        length = fromLength
+    }
+    else {
+        length = toLength
+    }
+
+    lastCommonSeparator = -1
+    x = 0
+
+    for (; x < length; x++) {
+        stack_var char fromCode
+
+        fromCode = NAVCharCodeAt(resolvedPathFrom, fromStart + x)
+
+        if (fromCode != NAVCharCodeAt(resolvedPathTo, toStart + x)) {
+            break
+        }
+
+        if (fromCode == NAV_CHAR_FORWARD_SLASH) {
+            lastCommonSeparator = x
+        }
+    }
+
+    if (x == length) {
+        select {
+            active (toLength > length): {
+                if (NAVCharCodeAt(resolvedPathTo, toStart + x) == NAV_CHAR_FORWARD_SLASH) {
+                    return NAVStringSlice(resolvedPathTo, toStart + x + 1, 0)
+                }
+
+                if (x == 0) {
+                    return NAVStringSlice(resolvedPathTo, toStart + x, 0)
+                }
+            }
+            active (fromLength > length): {
+                select {
+                    active (NAVCharCodeAt(resolvedPathFrom, fromStart + x) == NAV_CHAR_FORWARD_SLASH): {
+                        lastCommonSeparator = x
+                    }
+                    active (x == 0): {
+                        lastCommonSeparator = 0
+                    }
+                }
+            }
+        }
+    }
+
+    result = ''
+
+    for (x = fromStart + lastCommonSeparator + 1; x <= fromEnd; x++) {
+        if (x == fromEnd || NAVCharCodeAt(resolvedPathFrom, fromStart + x) == NAV_CHAR_FORWARD_SLASH) {
+            if (length_array(result) == 0) {
+                result = "result, '..'"
+                continue
+            }
+
+            result = "result, '/..'"
+        }
+    }
+
+    return "result, NAVStringSlice(resolvedPathTo, toStart + lastCommonSeparator + 1, 0)"
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVPathGetCwd() {
+    stack_var slong result
+    stack_var char cwd[NAV_MAX_BUFFER]
+
+    result = file_getdir(cwd)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_PATHUTILS__,
+                                    'NAVPathGetCwd',
+                                    "'Failed to get the current working directory : ', NAVGetFileError(result)")
+
+        return ''
+    }
+
+    return cwd
+}
+
+
+define_function slong NAVPathSetCwd(char path[]) {
+    stack_var slong result
+
+    result = file_setdir(path)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_PATHUTILS__,
+                                    'NAVPathSetCwd',
+                                    "'Failed to set the current working directory : ', NAVGetFileError(result)")
+    }
 
     return result
 }
