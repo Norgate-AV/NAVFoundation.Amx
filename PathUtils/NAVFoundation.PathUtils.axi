@@ -205,12 +205,6 @@ define_function slong NAVSplitPath(char path[], char elements[][]) {
         return count
     }
 
-    count = NAVSplitString(path, '\\', elements)
-
-    if (count > 0) {
-        return count
-    }
-
     return count
 }
 
