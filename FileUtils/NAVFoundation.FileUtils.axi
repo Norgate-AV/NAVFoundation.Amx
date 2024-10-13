@@ -82,8 +82,8 @@ define_function slong NAVFileOpen(char path[], char mode[]) {
         return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
 
-    filePath = NAVGetFileEntityParent(path)
-    fileName = NAVGetFileEntityName(path)
+    filePath = NAVPathDirName(path)
+    fileName = NAVPathBaseName(path)
 
     switch (lower_string(mode)) {
         case 'rwa': {
@@ -313,12 +313,12 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
             continue
         }
 
-        entities[index].Name = NAVGetFileEntityName(entity)
-        entities[index].BaseName = NAVGetFileEntityBaseName(entity)
-        entities[index].Extension = NAVGetFileEntityExtension(entity)
+        entities[index].Name = NAVPathName(entity)
+        entities[index].BaseName = NAVPathBaseName(entity)
+        entities[index].Extension = NAVPathExtName(entity)
         entities[index].Path = entity
-        entities[index].Parent = NAVGetFileEntityParent(entity)
-        entities[index].IsDirectory = NAVIsDirectory(entity)
+        entities[index].Parent = NAVPathDirName(entity)
+        entities[index].IsDirectory = NAVPathIsDirectory(entity)
 
         index++
     }
