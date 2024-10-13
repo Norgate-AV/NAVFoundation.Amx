@@ -67,7 +67,7 @@ define_function char[NAV_MAX_BUFFER] NAVPathBaseName(char path[]) {
         return ''
     }
 
-    count = NAVSplitPath(NAVPathRemoveEscapedBackslashes(path), node)
+    count = NAVPathSplitPath(NAVPathRemoveEscapedBackslashes(path), node)
 
     if (count <= 0) {
         return ''
@@ -258,7 +258,7 @@ define_function char[NAV_MAX_BUFFER] NAVPathJoinPath(char arg1[], char arg2[], c
 }
 
 
-define_function slong NAVSplitPath(char path[], char elements[][]) {
+define_function slong NAVPathSplitPath(char path[], char elements[][]) {
     stack_var slong count
 
     count = NAVSplitString(path, '/', elements)
