@@ -220,4 +220,19 @@ define_function char NAVPathIsAbsolute(char path[]) {
 }
 
 
+define_function char NAVPathIsPathSeparator(char c) {
+    return c == NAV_CHAR_FORWARD_SLASH || c == NAV_CHAR_BACKWARD_SLASH
+}
+
+
+define_function char NAVPathIsPosixPathSeparator(char c) {
+    return c == NAV_CHAR_FORWARD_SLASH
+}
+
+
+define_function char NAVPathIsWindowsPathSeparator(char c) {
+    return c == NAV_CHAR_BACKWARD_SLASH
+}
+
+
 #END_IF // __NAV_FOUNDATION_PATHUTILS__
