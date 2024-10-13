@@ -346,7 +346,7 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
         stack_var char entityPath[NAV_MAX_BUFFER]
 
         entity = entities[x]
-        entityPath = NAVJoinPath(path, entity.Name)
+        entityPath = NAVPathJoinPath(path, entity.Name, '', '')
 
         if (entity.IsDirectory) {
             NAVWalkDirectory(entityPath, files)

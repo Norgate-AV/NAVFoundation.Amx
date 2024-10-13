@@ -43,6 +43,8 @@ constant char NAV_CHAR_DOT              = 46
 constant char NAV_CHAR_FORWARD_SLASH    = 47
 constant char NAV_CHAR_BACKWARD_SLASH   = 92
 
+constant integer NAV_PATH_JOIN_MAX_ARGS     = 4
+
 
 define_function char NAVPathIsDirectory(char entity[]) {
     if (NAVStartsWith(entity, '/')) {
@@ -166,27 +168,93 @@ define_function char[NAV_MAX_BUFFER] NAVPathName(char path[]) {
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVJoinPath(char parent[], char child[]) {
-    stack_var char path[NAV_MAX_BUFFER]
+// NetLinx does not support variadic functions, so we need to limit it in some way.
+// We could pass in an array of strings, but that would be a bit cumbersome.
+// Instead, we will limit the number of arguments to 4.
+// An empty string should be used to indicate the argument is not used.
+// Eg. NAVPathJoinPath('a', 'b', 'c', '')
+// If you only want to join 2 paths, then use NAVPathJoinPath('a', 'b', '', '')
+define_function char[NAV_MAX_BUFFER] NAVPathJoinPath(char arg1[], char arg2[], char arg3[], char arg4[]) {
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var char path[255]
+    stack_var integer length
+    stack_var integer x
 
-    path = ""
+    for (x = NAV_PATH_JOIN_MAX_ARGS; x >= 1; x--) {
+        length = x
 
-    if (!length_array(parent)) {
-        return path
+        switch (x) {
+            case 4: {
+                if (!length_array(arg4)) {
+                    continue
+                }
+
+                break
+            }
+            case 3: {
+                if (!length_array(arg3)) {
+                    continue
+                }
+
+                break
+            }
+            case 2: {
+                if (!length_array(arg2)) {
+                    continue
+                }
+
+                break
+            }
+            case 1: {
+                if (!length_array(arg1)) {
+                    continue
+                }
+
+                break
+            }
+            case 0: {
+                break
+            }
+        }
+
+        break
     }
 
-    path = parent
-    if (!NAVStartsWith(path, '/')) {
-        path = "'/', path"
+    if (!length) {
+        return "'.'"
     }
 
-    if (!length_array(child)) {
-        return path
+    result = ''
+
+    for (x = 0; x < length; x++) {
+        switch (x + 1) {
+            case 1: {
+                path = NAVPathRemoveEscapedBackslashes(arg1)
+            }
+            case 2: {
+                path = NAVPathRemoveEscapedBackslashes(arg2)
+            }
+            case 3: {
+                path = NAVPathRemoveEscapedBackslashes(arg3)
+            }
+            case 4: {
+                path = NAVPathRemoveEscapedBackslashes(arg4)
+            }
+        }
+
+        if (!length_array(result)) {
+            result = path
+            continue
+        }
+
+        result = "result, '/', path"
     }
 
-    path = "path, '/', child"
+    if (!length_array(result)) {
+        return "'.'"
+    }
 
-    return path
+    return NAVPathNormalize(result)
 }
 
 

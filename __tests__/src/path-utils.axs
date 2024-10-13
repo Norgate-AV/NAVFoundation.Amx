@@ -5,6 +5,7 @@ PROGRAM_NAME='path-utils'
 #DEFINE TESTING_NAVPATHEXTNAME
 #DEFINE TESTING_NAVPATHDIRNAME
 #DEFINE TESTING_NAVPATHNORMALIZE
+#DEFINE TESTING_NAVPATHJOINPATH
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.PathUtils.axi'
 #include 'NAVFoundation.Testing.axi'
@@ -23,6 +24,9 @@ PROGRAM_NAME='path-utils'
 
 #IF_DEFINED TESTING_NAVPATHNORMALIZE
 #include 'NAVPathNormalize.axi'
+#END_IF
+#IF_DEFINED TESTING_NAVPATHJOINPATH
+#include 'NAVPathJoinPath.axi'
 #END_IF
 
 
@@ -74,6 +78,10 @@ define_function RunTests() {
 
     #IF_DEFINED TESTING_NAVPATHNORMALIZE
     TestNAVPathNormalize(PATHS)
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVPATHJOINPATH
+    TestNAVPathJoinPath(PATHS)
     #END_IF
 }
 
