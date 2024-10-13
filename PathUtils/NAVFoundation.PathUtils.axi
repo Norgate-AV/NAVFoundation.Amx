@@ -65,7 +65,7 @@ define_function char[NAV_MAX_BUFFER] NAVPathBaseName(char path[]) {
         return ''
     }
 
-    count = NAVSplitPath(path, node)
+    count = NAVSplitPath(NAVPathRemoveEscapedBackslashes(path), node)
 
     if (count <= 0) {
         return ''
