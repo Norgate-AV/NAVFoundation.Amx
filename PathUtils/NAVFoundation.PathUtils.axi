@@ -220,6 +220,158 @@ define_function char NAVPathIsAbsolute(char path[]) {
 }
 
 
+define_function char[NAV_MAX_BUFFER] __NAVPathNormalizeString(char path[], char allowAboveRoot, char separator[]) {
+    stack_var integer x
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer length
+    stack_var integer lastSegmentLength
+    stack_var integer lastSlash
+    stack_var sinteger dots
+    stack_var char code
+
+    result = ''
+    lastSegmentLength = 0
+    lastSlash = 0
+    dots = 0
+    code = 0
+
+    length = length_array(path)
+
+    for (x = 0; x <= length; x++) {
+        select {
+            active (x < length): {
+                code = NAVCharCodeAt(path, x + 1)
+            }
+            active (NAVPathIsPosixPathSeparator(code)): {
+                break
+            }
+            active (true): {
+                code = NAV_CHAR_FORWARD_SLASH
+            }
+        }
+
+        select {
+            active (NAVPathIsPosixPathSeparator(code)): {
+                select {
+                    active (lastSlash == x || dots == 1): {
+                        // NOOP
+                    }
+                    active (dots == 2): {
+                        if (length_array(result) < 2 || lastSegmentLength != 2 ||
+                            NAVCharCodeAt(result, length_array(result)) != NAV_CHAR_DOT ||
+                            NAVCharCodeAt(result, length_array(result) - 1) != NAV_CHAR_DOT) {
+                                select {
+                                    active (length_array(result) > 2): {
+                                        stack_var integer lastSlashIndex
+
+                                        lastSlashIndex = NAVLastIndexOf(result, separator)
+
+                                        if (lastSlashIndex == 0) {
+                                            result = ''
+                                            lastSegmentLength = 0
+                                        }
+                                        else {
+                                            result = NAVStringSlice(result, 1, lastSlashIndex)
+                                            lastSegmentLength = (length_array(result) - NAVLastIndexOf(result, separator))
+                                        }
+
+                                        lastSlash = (x + 1)
+                                        dots = 0
+
+                                        continue
+                                    }
+                                    active (length_array(result) != 0): {
+                                        result = ''
+
+                                        lastSegmentLength = 0
+
+                                        lastSlash = (x + 1)
+                                        dots = 0
+
+                                        continue
+                                    }
+                                }
+                        }
+
+                        if (allowAboveRoot) {
+                            if (length_array(result) > 0) {
+                                result = "result, separator, '..'"
+                            }
+                            else {
+                                result = "result, '..'"
+                            }
+
+                            lastSegmentLength = 2
+                        }
+                    }
+                    active (true): {
+                        if (length_array(result) > 0) {
+                            result = "result, separator, NAVStringSlice(path, lastSlash + 1, x + 1)"
+                        }
+                        else {
+                            result = NAVStringSlice(path, lastSlash + 1, x + 1)
+                        }
+
+                        lastSegmentLength = (x - lastSlash)
+                    }
+                }
+
+                lastSlash = (x + 1)
+                dots = 0
+            }
+            active (code == NAV_CHAR_DOT && dots != -1): {
+                dots++
+            }
+            active (true): {
+                dots = -1
+            }
+        }
+    }
+
+    return result
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVPathNormalize(char path[]) {
+    stack_var char isAbsolute
+    stack_var char trailingSlash
+    stack_var char result[NAV_MAX_BUFFER]
+
+    if (!length_array(path)) {
+        return "'.'"
+    }
+
+    result = NAVPathRemoveEscapedBackslashes(path)
+
+    isAbsolute = NAVPathIsAbsolute(result)
+    trailingSlash = NAVEndsWith(result, '/')
+
+    result = __NAVPathNormalizeString(result, !isAbsolute, '/')
+
+    if (!length_array(result)) {
+        if (isAbsolute) {
+            return "'/'"
+        }
+
+        if (trailingSlash) {
+            return "'./'"
+        }
+
+        return "'.'"
+    }
+
+    if (trailingSlash) {
+        result = "result, '/'"
+    }
+
+    if (isAbsolute) {
+        result = "'/', result"
+    }
+
+    return result
+}
+
+
 define_function char[NAV_MAX_BUFFER] NAVPathGetCwd() {
     stack_var char result[NAV_MAX_BUFFER]
 
