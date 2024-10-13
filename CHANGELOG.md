@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.11.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.10.0...v1.11.0) (2024-10-13)
+
+### 🌟 Features
+
+-   **path-utils:** add NAVPathRelative and NAVPathResolve functions ([e804a10](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e804a1067e6616131bc4eea8c2de54b24af1ff0c))
+-   **path-utils:** rename NAVPathSplitPath ([a0e1f9e](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a0e1f9e231ffc90c182ddfa6ffa93b110e19328c))
+-   **path-utils:** update NAVPathJoinPath function ([d9aa836](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/d9aa83682afa24799f33814729d363aeff2a6922))
+
 ## [1.10.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.9.0...v1.10.0) (2024-10-13)
 
 ### 🌟 Features
