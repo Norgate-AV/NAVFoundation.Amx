@@ -235,4 +235,9 @@ define_function char NAVPathIsWindowsPathSeparator(char c) {
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVPathRemoveEscapedBackslashes(char path[]) {
+    return NAVFindAndReplace(path, '\\', '\')
+}
+
+
 #END_IF // __NAV_FOUNDATION_PATHUTILS__
