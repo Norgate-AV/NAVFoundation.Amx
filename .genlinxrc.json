@@ -32,6 +32,7 @@
                 ".\\TimelineUtils",
                 ".\\Tui",
                 ".\\UIUtils",
+                ".\\__tests__\\include\\path-utils",
                 ".\\__tests__\\include\\string-utils"
             ]
         }
