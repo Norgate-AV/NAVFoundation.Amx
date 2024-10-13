@@ -53,16 +53,6 @@ define_function char NAVPathIsDirectory(char entity[]) {
 }
 
 
-define_function char NAVIsDirectory(char entity[]) {
-    if (NAVStartsWith(entity, '/')) {
-        return true
-    }
-
-    return false
-}
-
-
-
 define_function char[NAV_MAX_BUFFER] NAVPathBaseName(char path[]) {
     stack_var char node[255][255]
     stack_var integer count
