@@ -220,6 +220,15 @@ define_function char NAVPathIsAbsolute(char path[]) {
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVPathGetCwd() {
+    stack_var char result[NAV_MAX_BUFFER]
+
+    file_getdir(result)
+
+    return result
+}
+
+
 define_function char NAVPathIsPathSeparator(char c) {
     return c == NAV_CHAR_FORWARD_SLASH || c == NAV_CHAR_BACKWARD_SLASH
 }
