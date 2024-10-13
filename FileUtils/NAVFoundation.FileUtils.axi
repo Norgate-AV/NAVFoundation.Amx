@@ -331,6 +331,7 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
     stack_var _NAVFileEntity entities[1000]
     stack_var slong count
     stack_var integer x
+    local_var integer fileCount
 
     if (!length_array(path)) {
         path = '/'
@@ -346,16 +347,21 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
         stack_var char entityPath[NAV_MAX_BUFFER]
 
         entity = entities[x]
-        entityPath = NAVPathJoinPath(path, entity.Name, '', '')
+        entityPath = NAVPathJoinPath(path, entity.BaseName, '', '')
 
         if (entity.IsDirectory) {
-            NAVWalkDirectory(entityPath, files)
+            fileCount = fileCount + NAVWalkDirectory(entityPath, files)
         }
         else {
-            // files[count] = entityPath
-            // count++
+            fileCount++
+            files[fileCount] = entityPath
         }
     }
+
+    count = fileCount
+    set_length_array(files, count)
+
+    fileCount = 0
 
     return count
 }
