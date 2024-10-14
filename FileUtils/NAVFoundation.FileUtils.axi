@@ -350,7 +350,7 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
         entityPath = NAVPathJoinPath(path, entity.BaseName, '', '')
 
         if (entity.IsDirectory) {
-            fileCount = fileCount + NAVWalkDirectory(entityPath, files)
+            fileCount = fileCount + type_cast(NAVWalkDirectory(entityPath, files))
         }
         else {
             fileCount++
@@ -358,8 +358,8 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
         }
     }
 
-    count = fileCount
-    set_length_array(files, count)
+    set_length_array(files, fileCount)
+    count = type_cast(fileCount)
 
     fileCount = 0
 
