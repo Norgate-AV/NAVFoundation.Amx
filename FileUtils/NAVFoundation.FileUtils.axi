@@ -543,9 +543,11 @@ define_function slong NAVFileGetSize(char path[]) {
     // Passing -1 to the function results in the compiler warning 10571.
     // The function does work as expected, but the warning is annoying.
     // Should the position argument be changed to type SLONG AMX?
-    // This is the first time I've had to use this compiler directive,
+    // I tried to use this compiler directive,
     // since I'm unable to suppress the warning using "type_cast".
-    #DISABLE_WARNING 10571
+    // #DISABLE_WARNING 10571
+    // However, this disables all type mismatch warnings globally,
+    // which is not desirable.
     result = file_seek(handle, type_cast(NAV_FILE_SEEK_END))
 
     if (result < 0) {
