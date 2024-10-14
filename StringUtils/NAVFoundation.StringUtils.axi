@@ -290,17 +290,17 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringBetween(char buffer[], char tok
 }
 
 
-define_function integer NAVStartsWith(char buffer[], char match[]) {
+define_function char NAVStartsWith(char buffer[], char match[]) {
     return (find_string(buffer, match, 1) == 1)
 }
 
 
-define_function integer NAVContains(char buffer[], char match[]) {
+define_function char NAVContains(char buffer[], char match[]) {
     return (find_string(buffer, match, 1) > 0)
 }
 
 
-define_function integer NAVEndsWith(char buffer[], char match[]) {
+define_function char NAVEndsWith(char buffer[], char match[]) {
     return right_string(buffer, length_array(match)) == match
 }
 
