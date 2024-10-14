@@ -123,7 +123,7 @@ define_function char[NAV_MAX_BUFFER] NAVPathDirName(char path[]) {
     for (x = length_array(path); x >= 1; x--) {
         if (path[x] == NAV_CHAR_FORWARD_SLASH) {
             if (!matchedSlash) {
-                end = x
+                end = type_cast(x)
                 break
             }
         }
@@ -144,7 +144,7 @@ define_function char[NAV_MAX_BUFFER] NAVPathDirName(char path[]) {
         return "'//'"
     }
 
-    return NAVStringSubstring(path, 1, end - 1)
+    return NAVStringSubstring(path, 1, type_cast(end - 1))
 }
 
 
@@ -259,8 +259,8 @@ define_function char[NAV_MAX_BUFFER] NAVPathJoinPath(char arg1[], char arg2[], c
 }
 
 
-define_function slong NAVPathSplitPath(char path[], char elements[][]) {
-    stack_var slong count
+define_function integer NAVPathSplitPath(char path[], char elements[][]) {
+    stack_var integer count
 
     count = NAVSplitString(path, '/', elements)
 
@@ -654,7 +654,7 @@ define_function char[NAV_MAX_BUFFER] NAVPathRelative(char pathFrom[], char pathT
         }
 
         if (fromCode == NAV_CHAR_FORWARD_SLASH) {
-            lastCommonSeparator = x
+            lastCommonSeparator = type_cast(x)
         }
     }
 
@@ -672,7 +672,7 @@ define_function char[NAV_MAX_BUFFER] NAVPathRelative(char pathFrom[], char pathT
             active (fromLength > length): {
                 select {
                     active (NAVCharCodeAt(resolvedPathFrom, fromStart + x) == NAV_CHAR_FORWARD_SLASH): {
-                        lastCommonSeparator = x
+                        lastCommonSeparator = type_cast(x)
                     }
                     active (x == 0): {
                         lastCommonSeparator = 0
@@ -684,7 +684,7 @@ define_function char[NAV_MAX_BUFFER] NAVPathRelative(char pathFrom[], char pathT
 
     result = ''
 
-    for (x = fromStart + lastCommonSeparator + 1; x <= fromEnd; x++) {
+    for (x = fromStart + type_cast(lastCommonSeparator + 1); x <= fromEnd; x++) {
         if (x == fromEnd || NAVCharCodeAt(resolvedPathFrom, fromStart + x) == NAV_CHAR_FORWARD_SLASH) {
             if (length_array(result) == 0) {
                 result = "result, '..'"
@@ -695,7 +695,7 @@ define_function char[NAV_MAX_BUFFER] NAVPathRelative(char pathFrom[], char pathT
         }
     }
 
-    return "result, NAVStringSlice(resolvedPathTo, toStart + lastCommonSeparator + 1, 0)"
+    return "result, NAVStringSlice(resolvedPathTo, toStart + type_cast(lastCommonSeparator + 1), 0)"
 }
 
 
