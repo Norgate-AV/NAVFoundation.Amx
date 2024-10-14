@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.12.0...v1.12.1) (2024-10-14)
+
+### 🐛 Bug Fixes
+
+-   **file-utils:** if file_seek fails, ensure file is closed ([74b2a37](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/74b2a372afd6fa0807dd82d4495b9e8044db8af3))
+-   **file-utils:** use type_cast to fix compiler warnings ([bc72f2a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/bc72f2ad0c7d25568784c61c24bedf31c074acdc))
+
 ## [1.12.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.11.0...v1.12.0) (2024-10-13)
 
 ### 🌟 Features
