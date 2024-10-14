@@ -556,6 +556,7 @@ define_function slong NAVFileGetSize(char path[]) {
                                     'NAVFileGetSize',
                                     "'Error seeking to the end of file "', path, '" : ', NAVGetFileError(result)")
 
+        NAVFileClose(handle)
         return result
     }
 
