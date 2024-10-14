@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.12.1...v1.12.2) (2024-10-14)
+
+### 🐛 Bug Fixes
+
+-   **path-utils:** fix type conversion warnings ([1a48651](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/1a48651494cc74296301545988e3000537c1402e))
+-   **string-utils:** return char for boolean result functions ([63bf092](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/63bf0926ae35c65c1be34651dea8d55fbc4c997d))
+
 ## [1.12.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.12.0...v1.12.1) (2024-10-14)
 
 ### 🐛 Bug Fixes
