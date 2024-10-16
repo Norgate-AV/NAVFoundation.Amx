@@ -290,6 +290,11 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringAfter(char buffer[], char token
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVStringAfter(char buffer[], char token[]) {
+    return NAVGetStringAfter(buffer, token)
+}
+
+
 define_function char[NAV_MAX_BUFFER] NAVGetStringBetween(char buffer[], char token1[], char token2[]) {
     stack_var integer tokenIndex[2]
     stack_var integer startIndex
