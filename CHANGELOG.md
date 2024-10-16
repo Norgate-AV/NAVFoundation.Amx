@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.13.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.12.2...v1.13.0) (2024-10-16)
+
+### 🌟 Features
+
+-   **string-utils:** add NAVStringAfter alias ([91fb654](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/91fb6544a9fdaf3bd9e32a4416ee9812f53c1b5d))
+-   **string-utils:** add NAVStringBefore alias ([49c931d](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/49c931d31404138bdef3f8f90b3a65ae91d0cfc1))
+-   **string-utils:** add NAVStringBetween alias ([a0a9ed2](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a0a9ed2ac0dd2e5f729fd3217d38648e92817ff5))
+-   **string-utils:** add NAVStringReplace alias ([e3d04fc](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e3d04fc70f25b1470b4efa217fc5cd0edb32d9cf))
+-   **string-utils:** add param checks on strip functions ([3592f15](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3592f15fcdc5cbecc018f5fea9c318f0d09bf317))
+
+### 🐛 Bug Fixes
+
+-   **string-utils:** add param check in NAVIndexOf to prevent bad index ([0de8ff7](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/0de8ff7113533e00d01a6c789ab98320931ecd81))
+-   **string-utils:** fix bugs with NAVStringSubstring and NAVStringSlice ([586ad3c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/586ad3cb0fbce909762ed18e46bea14776e7e571))
+
 ## [1.12.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.12.1...v1.12.2) (2024-10-14)
 
 ### 🐛 Bug Fixes
