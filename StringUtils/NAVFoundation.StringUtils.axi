@@ -152,6 +152,11 @@ define_function char[NAV_MAX_BUFFER] NAVFindAndReplace(char buffer[], char match
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVStringReplace(char buffer[], char match[], char value[]) {
+    return NAVFindAndReplace(buffer, match, value)
+}
+
+
 define_function integer NAVStringCount(char buffer[], char value[], integer caseSensitivity) {
     stack_var integer x
     stack_var integer index
