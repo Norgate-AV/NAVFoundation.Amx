@@ -342,6 +342,10 @@ define_function char NAVEndsWith(char buffer[], char match[]) {
 
 
 define_function integer NAVIndexOf(char buffer[], char match[], integer start) {
+    if (start <= 0 || start > length_array(buffer)) {
+        return 0
+    }
+
     return find_string(buffer, match, start)
 }
 
