@@ -1,11 +1,13 @@
-PROGRAM_NAME='string-utils'
+PROGRAM_NAME='NAVGetStringBetween'
 
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.Testing.axi'
 
 DEFINE_CONSTANT
 
-constant char TEST[][][NAV_MAX_BUFFER] = {
+constant char GET_STRING_BETWEEN_SUBJECT[] = 'The quick brown fox jumps over the lazy dog'
+
+constant char GET_STRING_BETWEEN_TEST[][][NAV_MAX_BUFFER] = {
     { '', '' },
     { 'The', 'fox' },
     { 'quick', 'jumps' },
@@ -18,7 +20,7 @@ constant char TEST[][][NAV_MAX_BUFFER] = {
     { 'the', 'fox' }
 }
 
-constant char TEST_EXPECTED[][NAV_MAX_BUFFER] = {
+constant char GET_STRING_BETWEEN_EXPECTED[][NAV_MAX_BUFFER] = {
     '',
     ' quick brown ',
     ' brown fox ',
@@ -32,22 +34,22 @@ constant char TEST_EXPECTED[][NAV_MAX_BUFFER] = {
 }
 
 
-define_function TestNAVGetStringBetween(char text[]) {
+define_function TestNAVGetStringBetween() {
     stack_var integer x
 
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVGetStringBetween *****************'")
 
-    for (x = 1; x <= length_array(TEST); x++) {
+    for (x = 1; x <= length_array(GET_STRING_BETWEEN_TEST); x++) {
         stack_var char token[2][NAV_MAX_BUFFER]
         stack_var char expected[NAV_MAX_BUFFER]
         stack_var char result[NAV_MAX_BUFFER]
 
-        token[1] = TEST[x][1]
-        token[2] = TEST[x][2]
+        token[1] = GET_STRING_BETWEEN_TEST[x][1]
+        token[2] = GET_STRING_BETWEEN_TEST[x][2]
 
-        expected = TEST_EXPECTED[x]
+        expected = GET_STRING_BETWEEN_EXPECTED[x]
 
-        result = NAVGetStringBetween(text, token[1], token[2])
+        result = NAVGetStringBetween(GET_STRING_BETWEEN_SUBJECT, token[1], token[2])
 
         if (!NAVAssertStringEqual(expected, result)) {
             NAVLogTestFailed(x, expected, result)
