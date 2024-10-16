@@ -273,6 +273,11 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringBefore(char buffer[], char toke
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVStringBefore(char buffer[], char token[]) {
+    return NAVGetStringBefore(buffer, token)
+}
+
+
 define_function char[NAV_MAX_BUFFER] NAVGetStringAfter(char buffer[], char token[]) {
     stack_var integer index
 
