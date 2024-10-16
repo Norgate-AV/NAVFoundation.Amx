@@ -59,7 +59,7 @@ define_function char[NAV_MAX_BUFFER] NAVStripCharsFromRight(char buffer[], integ
 
 
 define_function char[NAV_MAX_BUFFER] NAVStripRight(char buffer[], integer count) {
-    return left_string(buffer, length_array(buffer) - count)
+    return NAVStripCharsFromRight(buffer, count)
 }
 
 
@@ -81,7 +81,7 @@ define_function char[NAV_MAX_BUFFER] NAVStripCharsFromLeft(char buffer[], intege
 
 
 define_function char[NAV_MAX_BUFFER] NAVStripLeft(char buffer[], integer count) {
-    return right_string(buffer, length_array(buffer) - count)
+    return NAVStripCharsFromLeft(buffer, count)
 }
 
 
