@@ -42,6 +42,18 @@ SOFTWARE.
 
 
 define_function char[NAV_MAX_BUFFER] NAVStripCharsFromRight(char buffer[], integer count) {
+    stack_var integer length
+
+    length = length_array(buffer)
+
+    if (count <= 0 || !length) {
+        return buffer
+    }
+
+    if (count >= length) {
+        return buffer
+    }
+
     return left_string(buffer, length_array(buffer) - count)
 }
 
@@ -52,6 +64,18 @@ define_function char[NAV_MAX_BUFFER] NAVStripRight(char buffer[], integer count)
 
 
 define_function char[NAV_MAX_BUFFER] NAVStripCharsFromLeft(char buffer[], integer count) {
+    stack_var integer length
+
+    length = length_array(buffer)
+
+    if (count <= 0 || !length) {
+        return buffer
+    }
+
+    if (count >= length) {
+        return buffer
+    }
+
     return right_string(buffer, length_array(buffer) - count)
 }
 
@@ -62,6 +86,18 @@ define_function char[NAV_MAX_BUFFER] NAVStripLeft(char buffer[], integer count) 
 
 
 define_function char[NAV_MAX_BUFFER] NAVRemoveStringByLength(char buffer[], integer count) {
+    stack_var integer length
+
+    length = length_array(buffer)
+
+    if (count <= 0 || !length) {
+        return buffer
+    }
+
+    if (count >= length) {
+        return buffer
+    }
+
     return remove_string(buffer, left_string(buffer, count), 1)
 }
 
