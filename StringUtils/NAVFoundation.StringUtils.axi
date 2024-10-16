@@ -326,6 +326,11 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringBetween(char buffer[], char tok
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVStringBetween(char buffer[], char token1[], char token2[]) {
+    return NAVGetStringBetween(buffer, token1, token2)
+}
+
+
 define_function char NAVStartsWith(char buffer[], char match[]) {
     return (find_string(buffer, match, 1) == 1)
 }
