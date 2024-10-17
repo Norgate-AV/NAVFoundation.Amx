@@ -246,6 +246,15 @@ define_function char NAVIsDigit(char byte) {
 }
 
 
+define_function char NAVIsAlphaNumeric(char byte) {
+    return (
+        NAVIsAlpha(byte) ||
+        NAVIsDigit(byte) ||
+        (byte == '_')
+    )
+}
+
+
 define_function char[NAV_MAX_BUFFER] NAVTrimStringLeft(char buffer[]) {
     stack_var char result[NAV_MAX_BUFFER]
     stack_var integer count
