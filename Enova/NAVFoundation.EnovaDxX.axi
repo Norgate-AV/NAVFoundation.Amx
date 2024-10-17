@@ -38,8 +38,6 @@ SOFTWARE.
 
 
 DEFINE_CONSTANT
-
-
 ////////////////////////////////////////////////////////////////////
 // Channels
 ////////////////////////////////////////////////////////////////////
@@ -196,6 +194,7 @@ constant char ENOVA_DXX_VIDIN_HDR[]                     = 'VIDIN_HDR'
 constant char ENOVA_DXX_VIDIN_HDR_GET[]                 = '?VIDIN_HDR'
 
 constant char ENOVA_DXX_AUDIO_XPOINT[]                  = 'XPOINT'
+constant char ENOVA_DXX_AUDIO_XPOINT_GET[]              = '?XPOINT'
 
 
 DEFINE_TYPE
@@ -241,6 +240,13 @@ struct _NAVEnvovaDxX {
 }
 
 
+struct _NAVEnovaDxXAudioXpointEventArgs {
+    integer Input
+    integer Output
+    sinteger Level
+}
+
+
 define_function char[NAV_MAX_CHARS] NAVEnovaDxXGetSwitchLevel(integer level) {
     switch (level) {
         case 0: {
@@ -279,18 +285,48 @@ define_function char[NAV_MAX_BUFFER] NAVEnovaDxXBuildSwitchAudio(integer input, 
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVEnovaDxXBuildXpointLevel(integer input, integer output, sinteger level) {
-    return "'XPOINT-', itoa(level), ',', itoa(input), ',', itoa(output)"
+define_function char[NAV_MAX_BUFFER] NAVEnovaDxXBuildSetXpointLevel(integer input, integer output, sinteger level) {
+    return "ENOVA_DXX_AUDIO_XPOINT, '-', itoa(level), ',', itoa(input), ',', itoa(output)"
 }
 
 
-define_function NAVEnovaDxXSetXpointLevel(integer input, integer output, sinteger level) {
-    NAVCommand(5002:1:0, "NAVEnovaDxXBuildXpointLevel(input, output, level)")
+define_function char[NAV_MAX_BUFFER] NAVEnovaDxXBuildGetXpointLevel(integer input, integer output) {
+    return "ENOVA_DXX_AUDIO_XPOINT_GET, '-', itoa(input), ',', itoa(output)"
 }
 
 
-define_function NAVEnovaDxXGetXpointLevel(integer input, integer output) {
-    NAVCommand(5002:1:0, "'?XPOINT-', itoa(input), ',', itoa(output)")
+define_function NAVEnovaDxXSetXpointLevel(dev device[], integer input, integer output, sinteger level) {
+    NAVCommand(device[1], "NAVEnovaDxXBuildSetXpointLevel(input, output, level)")
+}
+
+
+define_function NAVEnovaDxXGetXpointLevel(dev device[], integer input, integer output) {
+    NAVCommand(device[1], "NAVEnovaDxXBuildGetXpointLevel(input, output)")
+}
+
+
+define_function char NAVEnovaDxXGetVideoMuteState(dev device[], integer output) {
+    return [device[output], ENOVA_DXX_VIDEO_MUTE_STATE]
+}
+
+
+define_function NAVEnovaDxXSetVideoMuteState(dev device[], integer output, integer state) {
+    [device[output], ENOVA_DXX_VIDEO_MUTE_STATE] = state
+}
+
+
+define_function NAVEnovaDxXSetMicMuteState(dev device[], integer mic, integer state) {
+    [device[mic], ENOVA_DXX_MIC_ENABLE] = !state
+}
+
+
+define_function char NAVEnovaDxXGetMicMuteState(dev device[], integer mic) {
+    return ![device[mic], ENOVA_DXX_MIC_ENABLE]
+}
+
+
+define_function char NAVEnovaDxXIsReady(dev device[]) {
+    return NAVDeviceIsOnline(device[length_array(device)])
 }
 
 

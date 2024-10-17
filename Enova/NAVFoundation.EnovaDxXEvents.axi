@@ -35,6 +35,10 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_ENOVA_DXX_EVENTS__ 'NAVFoundation.EnovaDxXEvents'
 
 
+// #DEFINE USING_NAV_DXX_AUDIO_XPOINT_EVENT_CALLBACK
+// define_function NAVEnovaDxXAudioXPointEventCallback(_NAVEnovaDxXAudioXpointEventArgs args) {}
+
+
 DEFINE_DEVICE
 
 dvEnovaDxXPort_1    =   5002:1:0
@@ -51,6 +55,7 @@ dvEnovaDxXPort_11   =   5002:11:0
 dvEnovaDxXPort_12   =   5002:12:0
 dvEnovaDxXPort_13   =   5002:13:0
 dvEnovaDxXPort_14   =   5002:14:0
+dvEnovaDxXPort_15   =   5002:15:0
 
 
 DEFINE_CONSTANT
@@ -69,7 +74,8 @@ constant dev DVA_ENOVA_DXX[]    =   {
                                         dvEnovaDxXPort_11,
                                         dvEnovaDxXPort_12,
                                         dvEnovaDxXPort_13,
-                                        dvEnovaDxXPort_14
+                                        dvEnovaDxXPort_14,
+                                        dvEnovaDxXPort_15
                                     }
 
 
@@ -86,37 +92,16 @@ data_event[DVA_ENOVA_DXX] {
         NAVParseSnapiMessage(data.text, message)
 
         switch (message.Header) {
-            case 'XPOINT': {
-                switch (message.Parameter[2]) {
-                    case '1': {                             // Input 1 = Selected Audio
-                        switch (message.Parameter[3]) {
-                            case '1': {}                    // Output 1
-                            case '2': {}                    // Output 2
-                            case '3': {}                    // Output 3
-                        }
-                    }
-                    case '2': {                             // Input 2 = Mic 1
-                        switch (message.Parameter[3]) {
-                            case '1': {}                    // Output 1
-                            case '2': {}                    // Output 2
-                            case '3': {}                    // Output 3
-                        }
-                    }
-                    case '3': {                             // Input 3 = Mic 2
-                        switch (message.Parameter[3]) {
-                            case '1': {}                    // Output 1
-                            case '2': {}                    // Output 2
-                            case '3': {}                    // Output 3
-                        }
-                    }
-                    case '4': {                             // Input 3 = Mic 3
-                        switch (message.Parameter[3]) {
-                            case '1': {}                    // Output 1
-                            case '2': {}                    // Output 2
-                            case '3': {}                    // Output 3
-                        }
-                    }
-                }
+            case ENOVA_DXX_AUDIO_XPOINT: {
+                stack_var _NAVEnovaDxXAudioXpointEventArgs args
+
+                args.Input = atoi(message.Parameter[2])
+                args.Output = atoi(message.Parameter[3])
+                args.Level = atoi(message.Parameter[1])
+
+                #IF_DEFINED USING_NAV_DXX_AUDIO_XPOINT_EVENT_CALLBACK
+                NAVEnovaDxXAudioXPointEventCallback(args)
+                #END_IF
             }
             case 'AUDMIC_GAIN': {}
             case 'AUDMIC_PREAMP_GAIN': {}
