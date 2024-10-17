@@ -223,12 +223,12 @@ define_function integer NAVIsWhitespace(integer byte) {
 define_function char[NAV_MAX_BUFFER] NAVTrimStringLeft(char buffer[]) {
     stack_var char result[NAV_MAX_BUFFER]
     stack_var integer count
-    stack_var integer byte
+    stack_var char byte
 
     result = buffer
 
     for (count = 1; count <= length_array(result); count++) {
-        byte = result[count]
+        byte = NAVCharCodeAt(result, count)
 
         if (!NAVIsWhitespace(byte)) {
             break
@@ -246,14 +246,14 @@ define_function char[NAV_MAX_BUFFER] NAVTrimStringLeft(char buffer[]) {
 define_function char[NAV_MAX_BUFFER] NAVTrimStringRight(char buffer[]) {
     stack_var char result[NAV_MAX_BUFFER]
     stack_var integer count
-    stack_var integer byte
+    stack_var char byte
     stack_var integer length
 
     result = buffer
     length = length_array(result)
 
     for (count = length; count > 1; count--) {
-        byte = result[count]
+        byte = NAVCharCodeAt(result, count)
 
         if (!NAVIsWhitespace(byte)) {
             break
