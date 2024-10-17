@@ -215,8 +215,16 @@ define_function integer NAVStringCount(char buffer[], char value[], integer case
 }
 
 
-define_function integer NAVIsWhitespace(integer byte) {
-    return (byte == $20 || byte == $0D || byte == $0A || byte == $09 || byte == $0B || byte == $0C || byte == $00)
+define_function char NAVIsWhitespace(char byte) {
+    return (
+        (byte == NAV_NULL) ||
+        (byte == NAV_TAB) ||
+        (byte == NAV_LF)||
+        (byte == NAV_VT) ||
+        (byte == NAV_FF) ||
+        (byte == NAV_CR) ||
+        (byte == ' ')
+    )
 }
 
 
