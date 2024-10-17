@@ -228,6 +228,11 @@ define_function char NAVIsWhitespace(char byte) {
 }
 
 
+define_function char NAVIsSpace(char byte) {
+    return NAVIsWhitespace(byte)
+}
+
+
 define_function char[NAV_MAX_BUFFER] NAVTrimStringLeft(char buffer[]) {
     stack_var char result[NAV_MAX_BUFFER]
     stack_var integer count
