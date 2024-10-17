@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.14.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.13.0...v1.14.0) (2024-10-17)
+
+### 🌟 Features
+
+-   **string-utils:** add NAVIsAlpha function ([4276835](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/42768356db47aaa4e5c3cb947c6f65ef1141a8ae))
+-   **string-utils:** add NAVIsAlphaNumeric function ([3d728db](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3d728db784c1aa044a38c9dfb503af031c74483e))
+-   **string-utils:** add NAVIsDigit function ([7295814](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/72958142d9550aba70f51dc4fe63d1f72f3590a1))
+-   **string-utils:** add NAVIsSpace alias ([db39ff4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/db39ff4c1fcd2dd36ed22fb9e862c0439278778c))
+
 ## [1.13.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.12.2...v1.13.0) (2024-10-16)
 
 ### 🌟 Features
