@@ -233,6 +233,14 @@ define_function char NAVIsSpace(char byte) {
 }
 
 
+define_function char NAVIsAlpha(char byte) {
+    return (
+        ((byte >= 'a') && (byte <= 'z')) ||
+        ((byte >= 'A') && (byte <= 'Z'))
+    )
+}
+
+
 define_function char[NAV_MAX_BUFFER] NAVTrimStringLeft(char buffer[]) {
     stack_var char result[NAV_MAX_BUFFER]
     stack_var integer count
