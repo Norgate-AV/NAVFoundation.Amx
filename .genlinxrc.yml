@@ -1,0 +1,36 @@
+build:
+  nlrc:
+    includePath:
+      - ./ArrayUtils
+      - ./BinaryUtils
+      - ./Console
+      - ./Core
+      - ./Cryptography
+      - ./DateTimeUtils
+      - ./ErrorLogUtils
+      - ./Encoding
+      - ./Enova
+      - ./FileUtils
+      - ./HashTable
+      - ./Http
+      - ./Jsmn
+      - ./Json
+      - ./LogicEngine
+      - ./Math
+      - ./McpBase
+      - ./NtpClient
+      - ./PathUtils
+      - ./Queue
+      - ./Regex
+      - ./RmsBase
+      - ./SnapiHelpers
+      - ./SocketUtils
+      - ./Stack
+      - ./StringUtils
+      - ./Testing
+      - ./TimelineUtils
+      - ./Tui
+      - ./UIUtils
+      - ./__tests__/include/path-utils
+      - ./__tests__/include/regex
+      - ./__tests__/include/string-utils
