@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.15.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.15.0...v1.15.1) (2024-10-18)
+
+### 🐛 Bug Fixes
+
+-   **queue:** ensure count is set to 0 on init ([ddea693](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/ddea6932841ea2f9a32c6c996fb2b71fea13ed2a))
+
 ## [1.15.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.14.0...v1.15.0) (2024-10-18)
 
 ### 🌟 Features
