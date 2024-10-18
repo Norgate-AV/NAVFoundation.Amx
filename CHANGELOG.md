@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.15.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.14.0...v1.15.0) (2024-10-18)
+
+### 🌟 Features
+
+-   **queue:** add more detailed logging ([9137599](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9137599d8c1d61dd69224e1c8510436c25d60b42))
+
 ## [1.14.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.13.0...v1.14.0) (2024-10-17)
 
 ### 🌟 Features
