@@ -51,6 +51,7 @@ define_function NAVQueueInit(_NAVQueue queue, integer capacity) {
     queue.Capacity = capacity
     queue.Head = 0
     queue.Tail = capacity
+    queue.Count = 0
 
     set_length_array(queue.Items, capacity)
 
