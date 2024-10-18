@@ -62,7 +62,10 @@ define_function NAVQueueInit(_NAVQueue queue, integer capacity) {
 
 define_function integer NAVQueueEnqueue(_NAVQueue queue, char item[]) {
     if (NAVQueueIsFull(queue)) {
-        NAVLog("'NAVQueueEnqueue(): Queue is full. Cannot enqueue item.'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_QUEUE__,
+                                    'NAVQueueEnqueue',
+                                    "'Queue is full. Cannot enqueue item: ', item")
         return false
     }
 
