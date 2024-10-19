@@ -34,6 +34,7 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_ARRAYUTILS__
 #DEFINE __NAV_FOUNDATION_ARRAYUTILS__ 'NAVFoundation.ArrayUtils'
 
+#include 'NAVFoundation.ArrayUtils.h.axi'
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.Stack.axi'
 #include 'NAVFoundation.Math.axi'
@@ -1165,6 +1166,854 @@ define_function integer NAVArraySliceInteger(integer array[], integer start, int
     }
 
     return sliceLength
+}
+
+
+define_function NAVArrayCharSetInit(_NAVArrayCharSet set, integer capacity) {
+    set.size = 0
+    set.capacity = capacity
+
+    set_length_array(set.free, capacity)
+    set_length_array(set.data, capacity)
+
+    NAVSetArrayChar(set.free, true)
+    NAVSetArrayChar(set.data, 0)
+}
+
+
+define_function char NAVArrayCharSetAdd(_NAVArrayCharSet set, char value) {
+    stack_var integer index
+
+    index = NAVFindInArrayChar(set.data, value)
+
+    if (index && !set.free[index]) {
+        // Already in the set
+        return false
+    }
+
+    if (set.size >= set.capacity) {
+        // Set is full
+        return false
+    }
+
+    set.size++
+
+    // Get the first free index
+    index = NAVFindInArrayChar(set.free, true)
+
+    if (!index) {
+        // No free index
+        // Should never happen, but just in case
+        return false
+    }
+
+    set.data[index] = value
+    set.free[index] = false
+
+    return true
+}
+
+
+define_function char NAVArrayCharSetRemove(_NAVArrayCharSet set, char value) {
+    stack_var integer index
+
+    index = NAVFindInArrayChar(set.data, value)
+
+    if (!index || (index && set.free[index])) {
+        // Not in the set
+        return false
+    }
+
+    set.size--
+
+    set.free[index] = true
+    set.data[index] = 0
+
+    return true
+}
+
+
+define_function char NAVArrayCharSetFrom(_NAVArrayCharSet set, char array[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    if (length > set.capacity) {
+        return false
+    }
+
+    NAVArrayCharSetInit(set, set.capacity)
+
+    for (x = 1; x <= length; x++) {
+        NAVArrayCharSetAdd(set, array[x])
+    }
+
+    return true
+}
+
+
+define_function integer NAVArrayCharSetFind(_NAVArrayCharSet set, char value) {
+    stack_var integer x
+
+    for (x = 1; x <= set.capacity; x++) {
+        if (set.free[x]) {
+            continue
+        }
+
+        if (set.data[x] == value) {
+            return x
+        }
+    }
+
+    return 0
+}
+
+
+define_function char NAVArrayCharSetContains(_NAVArrayCharSet set, char value) {
+    return NAVArrayCharSetFind(set, value) > 0
+}
+
+
+define_function NAVArrayIntegerSetInit(_NAVArrayIntegerSet set, integer capacity) {
+    set.size = 0
+    set.capacity = capacity
+
+    set_length_array(set.free, capacity)
+    set_length_array(set.data, capacity)
+
+    NAVSetArrayChar(set.free, true)
+    NAVSetArrayInteger(set.data, 0)
+}
+
+
+define_function char NAVArrayIntegerSetAdd(_NAVArrayIntegerSet set, integer value) {
+    stack_var integer index
+
+    index = NAVFindInArrayInteger(set.data, value)
+
+    if (index && !set.free[index]) {
+        // Already in the set
+        return false
+    }
+
+    if (set.size >= set.capacity) {
+        // Set is full
+        return false
+    }
+
+    set.size++
+
+    // Get the first free index
+    index = NAVFindInArrayChar(set.free, true)
+
+    if (!index) {
+        // No free index
+        // Should never happen, but just in case
+        return false
+    }
+
+    set.data[index] = value
+    set.free[index] = false
+
+    return true
+}
+
+
+define_function char NAVArrayIntegerSetRemove(_NAVArrayIntegerSet set, integer value) {
+    stack_var integer index
+
+    index = NAVFindInArrayInteger(set.data, value)
+
+    if (!index || (index && set.free[index])) {
+        // Not in the set
+        return false
+    }
+
+    set.size--
+
+    set.free[index] = true
+    set.data[index] = 0
+
+    return true
+}
+
+
+define_function char NAVArrayIntegerSetFrom(_NAVArrayIntegerSet set, integer array[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    if (length > set.capacity) {
+        return false
+    }
+
+    NAVArrayIntegerSetInit(set, set.capacity)
+
+    for (x = 1; x <= length; x++) {
+        NAVArrayIntegerSetAdd(set, array[x])
+    }
+
+    return true
+}
+
+
+define_function integer NAVArrayIntegerSetFind(_NAVArrayIntegerSet set, integer value) {
+    stack_var integer x
+
+    for (x = 1; x <= set.capacity; x++) {
+        if (set.free[x]) {
+            continue
+        }
+
+        if (set.data[x] == value) {
+            return x
+        }
+    }
+
+    return 0
+}
+
+
+define_function char NAVArrayIntegerSetContains(_NAVArrayIntegerSet set, integer value) {
+    return NAVArrayIntegerSetFind(set, value) > 0
+}
+
+
+define_function NAVArraySignedIntegerSetInit(_NAVArraySignedIntegerSet set, integer capacity) {
+    set.size = 0
+    set.capacity = capacity
+
+    set_length_array(set.free, capacity)
+    set_length_array(set.data, capacity)
+
+    NAVSetArrayChar(set.free, true)
+    NAVSetArraySignedInteger(set.data, 0)
+}
+
+
+define_function char NAVArraySignedIntegerSetAdd(_NAVArraySignedIntegerSet set, sinteger value) {
+    stack_var integer index
+
+    index = NAVFindInArraySinteger(set.data, value)
+
+    if (index && !set.free[index]) {
+        // Already in the set
+        return false
+    }
+
+    if (set.size >= set.capacity) {
+        // Set is full
+        return false
+    }
+
+    set.size++
+
+    // Get the first free index
+    index = NAVFindInArrayChar(set.free, true)
+
+    if (!index) {
+        // No free index
+        // Should never happen, but just in case
+        return false
+    }
+
+    set.data[index] = value
+    set.free[index] = false
+
+    return true
+}
+
+
+define_function char NAVArraySignedIntegerSetRemove(_NAVArraySignedIntegerSet set, sinteger value) {
+    stack_var integer index
+
+    index = NAVFindInArraySinteger(set.data, value)
+
+    if (!index || (index && set.free[index])) {
+        // Not in the set
+        return false
+    }
+
+    set.size--
+
+    set.free[index] = true
+    set.data[index] = 0
+
+    return true
+}
+
+
+define_function char NAVArraySignedIntegerSetFrom(_NAVArraySignedIntegerSet set, sinteger array[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    if (length > set.capacity) {
+        return false
+    }
+
+    NAVArraySignedIntegerSetInit(set, set.capacity)
+
+    for (x = 1; x <= length; x++) {
+        NAVArraySignedIntegerSetAdd(set, array[x])
+    }
+
+    return true
+}
+
+
+define_function integer NAVArraySignedIntegerSetFind(_NAVArraySignedIntegerSet set, sinteger value) {
+    stack_var integer x
+
+    for (x = 1; x <= set.capacity; x++) {
+        if (set.free[x]) {
+            continue
+        }
+
+        if (set.data[x] == value) {
+            return x
+        }
+    }
+
+    return 0
+}
+
+
+define_function char NAVArraySignedIntegerSetContains(_NAVArraySignedIntegerSet set, sinteger value) {
+    return NAVArraySignedIntegerSetFind(set, value) > 0
+}
+
+
+define_function NAVArrayLongSetInit(_NAVArrayLongSet set, integer capacity) {
+    set.size = 0
+    set.capacity = capacity
+
+    set_length_array(set.free, capacity)
+    set_length_array(set.data, capacity)
+
+    NAVSetArrayChar(set.free, true)
+    NAVSetArrayLong(set.data, 0)
+}
+
+
+define_function char NAVArrayLongSetAdd(_NAVArrayLongSet set, long value) {
+    stack_var integer index
+
+    index = NAVFindInArrayLong(set.data, value)
+
+    if (index && !set.free[index]) {
+        // Already in the set
+        return false
+    }
+
+    if (set.size >= set.capacity) {
+        // Set is full
+        return false
+    }
+
+    set.size++
+
+    // Get the first free index
+    index = NAVFindInArrayChar(set.free, true)
+
+    if (!index) {
+        // No free index
+        // Should never happen, but just in case
+        return false
+    }
+
+    set.data[index] = value
+    set.free[index] = false
+
+    return true
+}
+
+
+define_function char NAVArrayLongSetRemove(_NAVArrayLongSet set, long value) {
+    stack_var integer index
+
+    index = NAVFindInArrayLong(set.data, value)
+
+    if (!index || (index && set.free[index])) {
+        // Not in the set
+        return false
+    }
+
+    set.size--
+
+    set.free[index] = true
+    set.data[index] = 0
+
+    return true
+}
+
+
+define_function char NAVArrayLongSetFrom(_NAVArrayLongSet set, long array[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    if (length > set.capacity) {
+        return false
+    }
+
+    NAVArrayLongSetInit(set, set.capacity)
+
+    for (x = 1; x <= length; x++) {
+        NAVArrayLongSetAdd(set, array[x])
+    }
+
+    return true
+}
+
+
+define_function integer NAVArrayLongSetFind(_NAVArrayLongSet set, long value) {
+    stack_var integer x
+
+    for (x = 1; x <= set.capacity; x++) {
+        if (set.free[x]) {
+            continue
+        }
+
+        if (set.data[x] == value) {
+            return x
+        }
+    }
+
+    return 0
+}
+
+
+define_function char NAVArrayLongSetContains(_NAVArrayLongSet set, long value) {
+    return NAVArrayLongSetFind(set, value) > 0
+}
+
+
+define_function NAVArraySignedLongSetInit(_NAVArraySignedLongSet set, integer capacity) {
+    set.size = 0
+    set.capacity = capacity
+
+    set_length_array(set.free, capacity)
+    set_length_array(set.data, capacity)
+
+    NAVSetArrayChar(set.free, true)
+    NAVSetArraySignedLong(set.data, 0)
+}
+
+
+define_function char NAVArraySignedLongSetAdd(_NAVArraySignedLongSet set, slong value) {
+    stack_var integer index
+
+    index = NAVFindInArraySlong(set.data, value)
+
+    if (index && !set.free[index]) {
+        // Already in the set
+        return false
+    }
+
+    if (set.size >= set.capacity) {
+        // Set is full
+        return false
+    }
+
+    set.size++
+
+    // Get the first free index
+    index = NAVFindInArrayChar(set.free, true)
+
+    if (!index) {
+        // No free index
+        // Should never happen, but just in case
+        return false
+    }
+
+    set.data[index] = value
+    set.free[index] = false
+
+    return true
+}
+
+
+define_function char NAVArraySignedLongSetRemove(_NAVArraySignedLongSet set, slong value) {
+    stack_var integer index
+
+    index = NAVFindInArraySlong(set.data, value)
+
+    if (!index || (index && set.free[index])) {
+        // Not in the set
+        return false
+    }
+
+    set.size--
+
+    set.free[index] = true
+    set.data[index] = 0
+
+    return true
+}
+
+
+define_function char NAVArraySignedLongSetFrom(_NAVArraySignedLongSet set, slong array[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    if (length > set.capacity) {
+        return false
+    }
+
+    NAVArraySignedLongSetInit(set, set.capacity)
+
+    for (x = 1; x <= length; x++) {
+        NAVArraySignedLongSetAdd(set, array[x])
+    }
+
+    return true
+}
+
+
+define_function integer NAVArraySignedLongSetFind(_NAVArraySignedLongSet set, slong value) {
+    stack_var integer x
+
+    for (x = 1; x <= set.capacity; x++) {
+        if (set.free[x]) {
+            continue
+        }
+
+        if (set.data[x] == value) {
+            return x
+        }
+    }
+
+    return 0
+}
+
+
+define_function char NAVArraySignedLongSetContains(_NAVArraySignedLongSet set, slong value) {
+    return NAVArraySignedLongSetFind(set, value) > 0
+}
+
+
+define_function NAVArrayFloatSetInit(_NAVArrayFloatSet set, integer capacity) {
+    set.size = 0
+    set.capacity = capacity
+
+    set_length_array(set.free, capacity)
+    set_length_array(set.data, capacity)
+
+    NAVSetArrayChar(set.free, true)
+    NAVSetArrayFloat(set.data, 0)
+}
+
+
+define_function char NAVArrayFloatSetAdd(_NAVArrayFloatSet set, float value) {
+    stack_var integer index
+
+    index = NAVFindInArrayFloat(set.data, value)
+
+    if (index && !set.free[index]) {
+        // Already in the set
+        return false
+    }
+
+    if (set.size >= set.capacity) {
+        // Set is full
+        return false
+    }
+
+    set.size++
+
+    // Get the first free index
+    index = NAVFindInArrayChar(set.free, true)
+
+    if (!index) {
+        // No free index
+        // Should never happen, but just in case
+        return false
+    }
+
+    set.data[index] = value
+    set.free[index] = false
+
+    return true
+}
+
+
+define_function char NAVArrayFloatSetRemove(_NAVArrayFloatSet set, float value) {
+    stack_var integer index
+
+    index = NAVFindInArrayFloat(set.data, value)
+
+    if (!index || (index && set.free[index])) {
+        // Not in the set
+        return false
+    }
+
+    set.size--
+
+    set.free[index] = true
+    set.data[index] = 0
+
+    return true
+}
+
+
+define_function char NAVArrayFloatSetFrom(_NAVArrayFloatSet set, float array[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    if (length > set.capacity) {
+        return false
+    }
+
+    NAVArrayFloatSetInit(set, set.capacity)
+
+    for (x = 1; x <= length; x++) {
+        NAVArrayFloatSetAdd(set, array[x])
+    }
+
+    return true
+}
+
+
+define_function integer NAVArrayFloatSetFind(_NAVArrayFloatSet set, float value) {
+    stack_var integer x
+
+    for (x = 1; x <= set.capacity; x++) {
+        if (set.free[x]) {
+            continue
+        }
+
+        if (set.data[x] == value) {
+            return x
+        }
+    }
+
+    return 0
+}
+
+
+define_function char NAVArrayFloatSetContains(_NAVArrayFloatSet set, float value) {
+    return NAVArrayFloatSetFind(set, value) > 0
+}
+
+
+define_function NAVArrayDoubleSetInit(_NAVArrayDoubleSet set, integer capacity) {
+    set.size = 0
+    set.capacity = capacity
+
+    set_length_array(set.free, capacity)
+    set_length_array(set.data, capacity)
+
+    NAVSetArrayChar(set.free, true)
+    NAVSetArrayDouble(set.data, 0)
+}
+
+
+define_function char NAVArrayDoubleSetAdd(_NAVArrayDoubleSet set, double value) {
+    stack_var integer index
+
+    index = NAVFindInArrayDouble(set.data, value)
+
+    if (index && !set.free[index]) {
+        // Already in the set
+        return false
+    }
+
+    if (set.size >= set.capacity) {
+        // Set is full
+        return false
+    }
+
+    set.size++
+
+    // Get the first free index
+    index = NAVFindInArrayChar(set.free, true)
+
+    if (!index) {
+        // No free index
+        // Should never happen, but just in case
+        return false
+    }
+
+    set.data[index] = value
+    set.free[index] = false
+
+    return true
+}
+
+
+define_function char NAVArrayDoubleSetRemove(_NAVArrayDoubleSet set, double value) {
+    stack_var integer index
+
+    index = NAVFindInArrayDouble(set.data, value)
+
+    if (!index || (index && set.free[index])) {
+        // Not in the set
+        return false
+    }
+
+    set.size--
+
+    set.free[index] = true
+    set.data[index] = 0
+
+    return true
+}
+
+
+define_function char NAVArrayDoubleSetFrom(_NAVArrayDoubleSet set, double array[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    if (length > set.capacity) {
+        return false
+    }
+
+    NAVArrayDoubleSetInit(set, set.capacity)
+
+    for (x = 1; x <= length; x++) {
+        NAVArrayDoubleSetAdd(set, array[x])
+    }
+
+    return true
+}
+
+
+define_function integer NAVArrayDoubleSetFind(_NAVArrayDoubleSet set, double value) {
+    stack_var integer x
+
+    for (x = 1; x <= set.capacity; x++) {
+        if (set.free[x]) {
+            continue
+        }
+
+        if (set.data[x] == value) {
+            return x
+        }
+    }
+
+    return 0
+}
+
+
+define_function char NAVArrayDoubleSetContains(_NAVArrayDoubleSet set, double value) {
+    return NAVArrayDoubleSetFind(set, value) > 0
+}
+
+
+define_function NAVArrayStringSetInit(_NAVArrayStringSet set, integer capacity) {
+    set.size = 0
+    set.capacity = capacity
+
+    set_length_array(set.free, capacity)
+    set_length_array(set.data, capacity)
+
+    NAVSetArrayChar(set.free, true)
+    NAVSetArrayString(set.data, "")
+}
+
+
+define_function char NAVArrayStringSetAdd(_NAVArrayStringSet set, char value[]) {
+    stack_var integer index
+
+    index = NAVFindInArrayString(set.data, value)
+
+    if (index && !set.free[index]) {
+        // Already in the set
+        return false
+    }
+
+    if (set.size >= set.capacity) {
+        // Set is full
+        return false
+    }
+
+    set.size++
+
+    // Get the first free index
+    index = NAVFindInArrayChar(set.free, true)
+
+    if (!index) {
+        // No free index
+        // Should never happen, but just in case
+        return false
+    }
+
+    set.data[index] = value
+    set.free[index] = false
+
+    return true
+}
+
+
+define_function char NAVArrayStringSetRemove(_NAVArrayStringSet set, char value[]) {
+    stack_var integer index
+
+    index = NAVFindInArrayString(set.data, value)
+
+    if (!index || (index && set.free[index])) {
+        // Not in the set
+        return false
+    }
+
+    set.size--
+
+    set.free[index] = true
+    set.data[index] = ""
+
+    return true
+}
+
+
+define_function char NAVArrayStringSetFrom(_NAVArrayStringSet set, char array[][]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    if (length > set.capacity) {
+        return false
+    }
+
+    NAVArrayStringSetInit(set, set.capacity)
+
+    for (x = 1; x <= length; x++) {
+        NAVArrayStringSetAdd(set, array[x])
+    }
+
+    return true
+}
+
+
+define_function integer NAVArrayStringSetFind(_NAVArrayStringSet set, char value[]) {
+    stack_var integer x
+
+    for (x = 1; x <= set.capacity; x++) {
+        if (set.free[x]) {
+            continue
+        }
+
+        if (set.data[x] == value) {
+            return x
+        }
+    }
+
+    return 0
+}
+
+
+define_function char NAVArrayStringSetContains(_NAVArrayStringSet set, char value[]) {
+    return NAVArrayStringSetFind(set, value) > 0
 }
 
 
