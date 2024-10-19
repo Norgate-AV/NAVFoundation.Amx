@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.15.1...v1.16.0) (2024-10-19)
+
+### 🌟 Features
+
+-   **array-utils:** add SetArray function for all types ([b7663f0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b7663f06e20f1771f65209097a2cec03448f771b))
+-   **array-utils:** add types and functions for working with sets ([6dfa6af](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6dfa6af2956b4c979f17165b4801b2891fa80206))
+
 ## [1.15.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.15.0...v1.15.1) (2024-10-18)
 
 ### 🐛 Bug Fixes
