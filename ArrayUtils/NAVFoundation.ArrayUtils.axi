@@ -39,6 +39,18 @@ SOFTWARE.
 #include 'NAVFoundation.Math.axi'
 
 
+define_function NAVSetArrayChar(char array[], char value) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        array[x] = value
+    }
+}
+
+
 define_function NAVSetArrayInteger(integer array[], integer value) {
     stack_var integer x
     stack_var integer length
@@ -52,6 +64,54 @@ define_function NAVSetArrayInteger(integer array[], integer value) {
 
 
 define_function NAVSetArraySignedInteger(sinteger array[], sinteger value) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        array[x] = value
+    }
+}
+
+
+define_function NAVSetArrayLong(long array[], long value) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        array[x] = value
+    }
+}
+
+
+define_function NAVSetArraySignedLong(slong array[], slong value) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        array[x] = value
+    }
+}
+
+
+define_function NAVSetArrayFloat(float array[], float value) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        array[x] = value
+    }
+}
+
+
+define_function NAVSetArrayDouble(double array[], double value) {
     stack_var integer x
     stack_var integer length
 
