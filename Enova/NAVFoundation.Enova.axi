@@ -324,6 +324,14 @@ define_function NAVEnovaSetVideoMuteStateAll(dev device[], char state) {
 }
 
 
+define_function NAVEnovaSetVideoMuteStateArray(dev device[], integer output[], char state) {
+    stack_var integer x
+
+    for (x = 1; x <= length_array(output); x++) {
+        NAVEnovaSetVideoMuteState(device, output[x], state)
+    }
+}
+
 
 define_function NAVEnovaSetMicMuteState(dev device[], integer mic, integer state) {
     [device[mic], NAV_ENOVA_MIC_ENABLE] = !state
