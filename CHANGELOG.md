@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.18.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.17.0...v1.18.0) (2024-10-23)
+
+### 🌟 Features
+
+-   **enova:** add NAVEnovaSetVideoMuteStateArray function ([0358a2e](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/0358a2ed54db7387f7ded3b3d112c2a24779117d))
+
 ## [1.17.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.16.0...v1.17.0) (2024-10-23)
 
 ### 🌟 Features
