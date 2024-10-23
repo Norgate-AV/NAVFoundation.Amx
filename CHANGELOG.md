@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.17.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.16.0...v1.17.0) (2024-10-23)
+
+### 🌟 Features
+
+-   **enova:** add new renamed library files ([5ba2c4e](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/5ba2c4e64968eb50f883b7292805ff153dcb2889))
+
 ## [1.16.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.15.1...v1.16.0) (2024-10-19)
 
 ### 🌟 Features
