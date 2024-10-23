@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.19.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.18.0...v1.19.0) (2024-10-23)
+
+### 🌟 Features
+
+-   **lexer:** add a basic lexer library ([ee4919e](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/ee4919e0664a6395a3806160e4541003c96fe545))
+
 ## [1.18.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.17.0...v1.18.0) (2024-10-23)
 
 ### 🌟 Features
