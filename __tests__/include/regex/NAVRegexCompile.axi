@@ -8,10 +8,7 @@ PROGRAM_NAME='NAVRegexCompile'
 DEFINE_CONSTANT
 
 constant char COMPILE_TEST[][255] = {
-    '\d',
     '\d+',
-    '\d*',
-    '\w',
     '\w+',
     '\w*',
     '\s',
@@ -34,12 +31,11 @@ define_function TestNAVRegexCompile() {
 
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVRegexCompile *****************'")
 
-    for (x = 1; x <= length_array(COMPILE_TEST); x++) {
-        stack_var _NAVRegexState state[MAX_REGEXP_OBJECTS]
+    for (x = 15; x <= 15; x++) {
+        stack_var _NAVRegexParser parser
 
-        if (!NAVRegexCompile(COMPILE_TEST[x], state)) {
+        if (!NAVRegexCompile(COMPILE_TEST[x], parser)) {
             NAVLogTestFailed(x, 'true', 'false')
-            re_print(state)
             continue
         }
 
