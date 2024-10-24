@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.19.0...v1.20.0) (2024-10-24)
+
+### 🌟 Features
+
+-   **string-utils:** add aliases for NAVContains, StartsWith, EndsWith ([163899c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/163899c4c79e71ac5bbb67bcce35387939ed02a0))
+-   **string-utils:** add NAVStringBetweenGreedy function ([590de8f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/590de8fd611a0f5d1ee3f5b7a665b84a8c8f3223))
+
 ## [1.19.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.18.0...v1.19.0) (2024-10-23)
 
 ### 🌟 Features
