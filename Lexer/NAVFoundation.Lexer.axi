@@ -54,13 +54,7 @@ struct _NAVLexer {
 }
 
 
-struct _NAVLevelTokenType {
-    char type[50]
-    char pattern[100]
-}
-
-
-struct _NAVToken {
+struct _NAVLexerToken {
     char type[50]
     char value[255]
 }
@@ -95,7 +89,7 @@ define_function char NAVLexerHasMoreTokens(_NAVLexer lexer) {
 }
 
 
-define_function char NAVLexerGetNextToken(_NAVLexer lexer, _NAVToken token) {
+define_function char NAVLexerGetNextToken(_NAVLexer lexer, _NAVLexerToken token) {
     stack_var char source[NAV_MAX_BUFFER]
     stack_var integer x
 
