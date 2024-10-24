@@ -405,6 +405,51 @@ define_function char[NAV_MAX_BUFFER] NAVStringBetween(char buffer[], char token1
 }
 
 
+/**
+ * Get the string between two tokens
+ * Greedy will return the string between the token1 and the "last" occurance of token2
+ */
+define_function char[NAV_MAX_BUFFER] NAVGetStringBetweenGreedy(char buffer[], char token1[], char token2[]) {
+    stack_var integer tokenIndex[2]
+    stack_var integer startIndex
+    stack_var integer count
+
+    if(!length_array(buffer)) {
+        return ''
+    }
+
+    tokenIndex[1] = NAVIndexOf(buffer, token1, 1)
+
+    if (!tokenIndex[1]) {
+        return ''
+    }
+
+    startIndex = tokenIndex[1] + length_array(token1)
+    tokenIndex[2] = NAVLastIndexOf(buffer, token2)
+
+    if (!tokenIndex[2]) {
+        return ''
+    }
+
+    if (tokenIndex[1] >= tokenIndex[2]) {
+        return ''
+    }
+
+    count = tokenIndex[2] - startIndex
+
+    if (count <= 0) {
+        return ''
+    }
+
+    return NAVStringSubstring(buffer, startIndex, count)
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVStringBetweenGreedy(char buffer[], char token1[], char token2[]) {
+    return NAVGetStringBetweenGreedy(buffer, token1, token2)
+}
+
+
 define_function char NAVStartsWith(char buffer[], char match[]) {
     return (find_string(buffer, match, 1) == 1)
 }
