@@ -68,6 +68,49 @@ constant dev DVA_ENOVA[]    =   {
 DEFINE_EVENT
 
 data_event[DVA_ENOVA] {
+    online: {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                    "'Enova => OnLine: ', NAVDeviceToString(data.device)")
+
+        #IF_DEFINED USING_NAV_ENOVA_ONLINE_DATA_EVENT_CALLBACK
+        NAVEnovaOnlineDataEventCallback(data)
+        #END_IF
+
+        if (NAVEnovaIsReady(DVA_ENOVA)) {
+            NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                        "'Enova => Ready: ', NAVDeviceToString(data.device)")
+
+            #IF_DEFINED USING_NAV_ENOVA_READY_DATA_EVENT_CALLBACK
+            NAVEnovaReadyDataEventCallback(data)
+            #END_IF
+        }
+    }
+    offline: {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO,
+                    "'Enova => OffLine: ', NAVDeviceToString(data.device)")
+
+        #IF_DEFINED USING_NAV_ENOVA_OFFLINE_DATA_EVENT_CALLBACK
+        NAVEnovaOfflineDataEventCallback(data)
+        #END_IF
+    }
+    onerror: {
+        NAVErrorLog(NAV_LOG_LEVEL_ERROR,
+                    "'Enova => OnError: ', NAVDeviceToString(data.device), ': ', data.text")
+
+        #IF_DEFINED USING_NAV_ENOVA_ONERROR_DATA_EVENT_CALLBACK
+        NAVEnovaOnErrorDataEventCallback(data)
+        #END_IF
+    }
+    string: {
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
+                    NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_FROM,
+                                                data.device,
+                                                data.text))
+
+        #IF_DEFINED USING_NAV_ENOVA_STRING_DATA_EVENT_CALLBACK
+        NAVEnovaStringDataEventCallback(data)
+        #END_IF
+    }
     command: {
         stack_var _NAVSnapiMessage message
 
@@ -88,6 +131,27 @@ data_event[DVA_ENOVA] {
             case 'AUDMIC_GAIN': {}
             case 'AUDMIC_PREAMP_GAIN': {}
         }
+    }
+}
+
+
+level_event[DVA_ENOVA, 0] {
+    #IF_DEFINED USING_NAV_ENOVA_LEVEL_EVENT_CALLBACK
+    NAVEnovaLevelEventCallback(level)
+    #END_IF
+}
+
+
+channel_event[DVA_ENOVA, 0] {
+    on: {
+        #IF_DEFINED USING_NAV_ENOVA_CHANNEL_EVENT_CALLBACK
+        NAVEnovaChannelEventCallback(channel)
+        #END_IF
+    }
+    off: {
+        #IF_DEFINED USING_NAV_ENOVA_CHANNEL_EVENT_CALLBACK
+        NAVEnovaChannelEventCallback(channel)
+        #END_IF
     }
 }
 

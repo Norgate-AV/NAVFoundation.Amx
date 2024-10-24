@@ -1,4 +1,4 @@
-#WARN 'This library is deprecated and will be removed in a future release. Please use the new NAVFoundation.EnovaBase library instead.'
+#WARN 'This library is deprecated and will be removed in a future release. Please use the new NAVFoundation.EnovaDvxBase library instead.'
 PROGRAM_NAME='NAVFoundation.EnovaDxXBase'
 
 /*
