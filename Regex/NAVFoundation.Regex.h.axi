@@ -165,6 +165,12 @@ constant char REGEX_CHAR_HEX            = 120   // 'x'
 
 DEFINE_TYPE
 
+struct _NAVRegexCharClass {
+    char value[MAX_CHAR_CLASS_LENGTH]
+    integer length
+    integer cursor
+}
+
 
 struct _NAVRegexState {
     char type
@@ -172,7 +178,8 @@ struct _NAVRegexState {
     char accepting
 
     char value
-    char charclass[MAX_CHAR_CLASS_LENGTH]
+    // char charclass[MAX_CHAR_CLASS_LENGTH]
+    _NAVRegexCharClass charclass
 
     integer quantifier
 
@@ -216,6 +223,14 @@ struct _NAVRegexInput {
 // }
 
 
+struct _NAVRegexOptions {
+    char value[5]
+    char case_insensitive
+    char global
+    char multiline
+}
+
+
 struct _NAVRegexParser {
     _NAVRegexPattern pattern
 
@@ -225,6 +240,8 @@ struct _NAVRegexParser {
     _NAVRegexGroups groups
 
     _NAVRegexInput input
+
+    _NAVRegexOptions options
 }
 
 
