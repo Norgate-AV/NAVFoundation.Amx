@@ -13,8 +13,10 @@ build:
       - ./FileUtils
       - ./HashTable
       - ./Http
+      - ./IniParser
       - ./Jsmn
       - ./Json
+      - ./Lexer
       - ./LogicEngine
       - ./Math
       - ./McpBase

@@ -136,8 +136,8 @@ define_function char[NAV_MAX_BUFFER] NAVLexerMatchPattern(_NAVLexer lexer, char 
         return ''
     }
 
-    lexer.cursor = lexer.cursor + match.length
-    return match.text
+    lexer.cursor = lexer.cursor + match.matches[1].length
+    return match.matches[1].text
 }
 
 
