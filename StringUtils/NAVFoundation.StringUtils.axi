@@ -455,13 +455,28 @@ define_function char NAVStartsWith(char buffer[], char match[]) {
 }
 
 
+define_function char NAVStringStartsWith(char buffer[], char match[]) {
+    return NAVStartsWith(buffer, match)
+}
+
+
 define_function char NAVContains(char buffer[], char match[]) {
     return (find_string(buffer, match, 1) > 0)
 }
 
 
+define_function char NAVStringContains(char buffer[], char match[]) {
+    return NAVContains(buffer, match)
+}
+
+
 define_function char NAVEndsWith(char buffer[], char match[]) {
     return right_string(buffer, length_array(match)) == match
+}
+
+
+define_function char NAVStringEndsWith(char buffer[], char match[]) {
+    return NAVEndsWith(buffer, match)
 }
 
 
