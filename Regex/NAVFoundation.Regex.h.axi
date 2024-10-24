@@ -175,15 +175,14 @@ struct _NAVRegexCharClass {
 struct _NAVRegexState {
     char type
 
-    char accepting
+    // char accepting
 
     char value
-    // char charclass[MAX_CHAR_CLASS_LENGTH]
     _NAVRegexCharClass charclass
 
-    integer quantifier
+    // integer quantifier
 
-    integer next[255]
+    // integer next[255]
 }
 
 
@@ -195,11 +194,19 @@ struct _NAVRegexGroups {
 }
 
 
-struct _NAVRegexMatchResult {
+struct _NAVRegexMatch {
     integer length
     integer start
     integer end
     char text[NAV_MAX_BUFFER]
+}
+
+
+struct _NAVRegexMatchResult {
+    integer count
+
+    integer current // current match index
+    _NAVRegexMatch matches[255]
 }
 
 
