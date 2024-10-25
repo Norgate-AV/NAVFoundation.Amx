@@ -91,6 +91,9 @@ constant integer REGEX_TYPE_EPSILON                = 21
 constant integer REGEX_TYPE_WORD_BOUNDARY          = 22
 constant integer REGEX_TYPE_NOT_WORD_BOUNDARY      = 23
 constant integer REGEX_TYPE_HEX                    = 24
+constant integer REGEX_TYPE_NEWLINE                = 25
+constant integer REGEX_TYPE_RETURN                 = 26
+constant integer REGEX_TYPE_TAB                    = 27
 
 constant integer NAV_REGEX_TYPE_WILDCARD        = REGEX_TYPE_DOT
 constant integer NAV_REGEX_TYPE_CHARACTER       = REGEX_TYPE_CHAR
@@ -129,7 +132,10 @@ constant char REGEX_TYPES[][NAV_MAX_CHARS]  =   {
                                                     'EPSILON',
                                                     'WORD_BOUNDARY',
                                                     'NOT_WORD_BOUNDARY',
-                                                    'HEX'
+                                                    'HEX',
+                                                    'NEWLINE',
+                                                    'RETURN',
+                                                    'TAB'
                                                 }
 
 constant integer NAV_REGEX_QUANTIFIER_EXACTLY_ONE  = 1  // '1'
@@ -161,6 +167,9 @@ constant char REGEX_CHAR_EPSILON        = 0     // ''
 constant char REGEX_CHAR_WORD_BOUNDARY  = 98    // 'b'
 constant char REGEX_CHAR_NOT_WORD_BOUNDARY = 66 // 'B'
 constant char REGEX_CHAR_HEX            = 120   // 'x'
+constant char REGEX_CHAR_NEWLINE        = 110   // 'n'
+constant char REGEX_CHAR_RETURN         = 114   // 'r'
+constant char REGEX_CHAR_TAB            = 116   // 't'
 
 
 DEFINE_TYPE
