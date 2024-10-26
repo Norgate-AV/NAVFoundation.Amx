@@ -42,7 +42,7 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_REGEX__
 #DEFINE __NAV_FOUNDATION_REGEX__ 'NAVFoundation.Regex'
 
-// #DEFINE REGEX_DEBUG 1
+#DEFINE REGEX_DEBUG 1
 
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.Regex.h.axi'
@@ -155,8 +155,6 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
         return false
     }
 
-    c = 0
-
     parser.pattern.cursor = 0
 
     while ((parser.pattern.cursor + 1) <= parser.pattern.length && ((parser.count + 1) < MAX_REGEXP_OBJECTS)) {
@@ -196,20 +194,26 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                 }
             }
 
-            // case '{': {} // Not implemented
-            // case '(': {} // Not implemented
+            case '{': { return false } // Not implemented
+            case '(': { return false } // Not implemented
             case '[': {
                 stack_var char charclass[MAX_CHAR_CLASS_LENGTH]
                 stack_var integer length
 
                 length = 0
 
-                if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1)) == '^') {
+                // Lookahead to see if this is a negated character class first
+                if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 2)) == '^') {
                     parser.state[(parser.count + 1)].type = REGEX_TYPE_INV_CHAR_CLASS
 
                     parser.pattern.cursor++
 
-                    if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1)) == 0) {
+                    if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 2)) == 0) {
+                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                    __NAV_FOUNDATION_REGEX__,
+                                                    'NAVRegexCompile',
+                                                    "'Incomplete pattern. Missing non-zero character after ^'")
+
                         return false
                     }
                 }
@@ -656,12 +660,16 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
         return true
     }
 
-    NAVRegexAdvancePatternCursor(parser, 2)
-    if (NAVRegexMatchPattern(parser, match)) {
-        return true
-    }
+    // NAVRegexAdvancePatternCursor(parser, 2)
+    // if (NAVRegexMatchPattern(parser, match)) {
+    //     return true
+    // }
 
-    NAVRegexBacktrackPatternCursor(parser, 2)
+    // NAVRegexBacktrackPatternCursor(parser, 2)
+
+    // ? matches the previous token between zero and one times, as many times as possible, giving back as needed (greedy)
+    // We try to match the current pattern first
+    // If that succeeds, we consume the character and increase the match length
     if (NAVRegexMatchOne(parser)) {
         #IF_DEFINED REGEX_DEBUG
         NAVLog("'NAVRegexMatchQuestion: Matched 1 character => "',
@@ -669,14 +677,29 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
         #END_IF
 
         NAVRegexAdvanceInputCursor(parser, 1)
+        // NAVRegexAdvancePatternCursor(parser, 2)
+        NAVRegexMatchIncreaseLength(match, 1)
 
-        if (NAVRegexMatchPattern(parser, match)) {
-            NAVRegexMatchIncreaseLength(match, 1)
-            return true
-        }
+        // if (NAVRegexMatchPattern(parser, match)) {
+        //     return true
+        // }
+
+        // return NAVRegexMatchPattern(parser, match)
     }
 
-    return false
+    // If the current pattern does not match, we advance the pattern cursor by 2
+    // and try to match the next pattern
+    #IF_DEFINED REGEX_DEBUG
+    NAVLog("'NAVRegexMatchQuestion: No match => Advance pattern cursor by 2 and continue'")
+    #END_IF
+
+    NAVRegexAdvancePatternCursor(parser, 2)
+    // if (NAVRegexMatchPattern(parser, match)) {
+    //     return true
+    // }
+
+    // return false
+    return NAVRegexMatchPattern(parser, match)
 }
 
 
