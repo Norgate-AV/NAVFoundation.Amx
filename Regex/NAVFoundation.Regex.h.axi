@@ -189,7 +189,7 @@ struct _NAVRegexState {
     char value
     _NAVRegexCharClass charclass
 
-    // integer quantifier
+    integer quantifier
 
     // integer next[255]
 }
@@ -216,6 +216,8 @@ struct _NAVRegexMatchResult {
 
     integer current // current match index
     _NAVRegexMatch matches[255]
+
+    char debug
 }
 
 
@@ -257,7 +259,10 @@ struct _NAVRegexParser {
 
     _NAVRegexInput input
 
+    // Should the options live here or on the pattern?
     _NAVRegexOptions options
+
+    char debug
 }
 
 
