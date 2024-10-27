@@ -1133,20 +1133,11 @@ define_function NAVRegexPrintCurrentState(_NAVRegexParser parser) {
     }
 
     c = NAVCharCodeAt(parser.input.value, parser.input.cursor)
-    // if (!c) {
-    //     return
-    // }
-
     type = parser.state[parser.pattern.cursor].type
 
-    // if (!type || type == REGEX_TYPE_UNUSED) {
-    //     return
-    // }
     if (!type) {
         return
     }
-
-    // NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Current state type: ', itoa(type)")
 
     switch (type) {
         case REGEX_TYPE_CHAR:           { pattern = "parser.state[parser.pattern.cursor].value" }

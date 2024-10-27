@@ -720,6 +720,7 @@ define_function TestNAVRegexCompile() {
         }
 
         NAVLogTestPassed(x)
+        NAVRegexPrintState(parser)
     }
 }
 
