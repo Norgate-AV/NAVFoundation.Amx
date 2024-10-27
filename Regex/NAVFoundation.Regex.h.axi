@@ -241,6 +241,13 @@ struct _NAVRegexInput {
 // }
 
 
+struct _NAVRegexBacktrackState {
+    _NAVRegexPattern pattern
+    _NAVRegexInput input
+    _NAVRegexMatchResult match
+}
+
+
 struct _NAVRegexOptions {
     char value[5]
     char case_insensitive
