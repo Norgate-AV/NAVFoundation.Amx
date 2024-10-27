@@ -128,8 +128,13 @@ define_function char NAVRegexMatchCompiled(_NAVRegexParser parser, char subject[
     while (true) {
         NAVRegexMatchIncreaseStart(parser, 'MatchCompiled', match, 1)
 
+        // if (NAVRegexMatchGetStart(match) > parser.input.length) {
+        //     return false
+        // }
+
         if (NAVRegexMatchPattern(parser, match)) {
             if (parser.input.cursor == parser.input.length) {
+            // if (parser.input.cursor > parser.input.length) {
                 return false
             }
 
@@ -138,7 +143,9 @@ define_function char NAVRegexMatchCompiled(_NAVRegexParser parser, char subject[
 
         // NAVRegexAdvanceInputCursor(parser, 1)
 
-        if (parser.input.cursor <= parser.input.length) {
+        // if (parser.input.cursor <= parser.input.length) {
+        if (parser.input.cursor < parser.input.length) {
+            NAVRegexAdvanceInputCursor(parser, 'MatchCompiled', 1)
             continue
         }
 
@@ -618,10 +625,18 @@ define_function char NAVRegexMatchOne(_NAVRegexParser parser) {
     stack_var char c
 
     if (parser.input.cursor > parser.input.length) {
+        NAVRegexDebug(parser,
+                        'MatchOne',
+                        'Input cursor is greater than input length')
+
         return false
     }
 
     if (parser.pattern.cursor > parser.count) {
+        NAVRegexDebug(parser,
+                        'MatchOne',
+                        'Pattern cursor is greater than pattern count')
+
         return false
     }
 
@@ -631,6 +646,10 @@ define_function char NAVRegexMatchOne(_NAVRegexParser parser) {
     c = NAVCharCodeAt(parser.input.value, parser.input.cursor)
 
     if (!c) {
+        NAVRegexDebug(parser,
+                        'MatchOne',
+                        'The current character is null')
+
         return false
     }
 
@@ -662,6 +681,8 @@ define_function char NAVRegexMatchStar(_NAVRegexParser parser, _NAVRegexMatchRes
     prelength = NAVRegexMatchGetLength(match)
     precursor = parser.input.cursor
 
+    NAVRegexPrintCurrentState(parser, 'MatchStar')
+
     while (NAVRegexMatchOne(parser)) {
         NAVRegexDebug(parser,
                         'MatchStar',
@@ -670,7 +691,12 @@ define_function char NAVRegexMatchStar(_NAVRegexParser parser, _NAVRegexMatchRes
 
         count++
         NAVRegexAdvanceInputCursor(parser, 'MatchStar', 1)
+        NAVRegexPrintCurrentState(parser, 'MatchStar')
     }
+
+    NAVRegexDebug(parser,
+                    'MatchStar',
+                    "'No. It doesn`t match'")
 
     NAVRegexMatchIncreaseLength(parser, 'MatchStar', match, count)
 
@@ -683,6 +709,10 @@ define_function char NAVRegexMatchStar(_NAVRegexParser parser, _NAVRegexMatchRes
 
     while (parser.input.cursor >= precursor) {
         if (NAVRegexMatchPattern(parser, match)) {
+            NAVRegexDebug(parser,
+                            'MatchStar',
+                            'Yes. It matches')
+
             return true
         }
 
@@ -690,8 +720,16 @@ define_function char NAVRegexMatchStar(_NAVRegexParser parser, _NAVRegexMatchRes
         NAVRegexBacktrackInputCursor(parser, 'MatchStar', 1)
     }
 
+    NAVRegexDebug(parser,
+                    'MatchStar',
+                    'Does it match epsilon?')
+
     // Try to match epsilon?
     if (NAVRegexMatchEpsilon(NAVCharCodeAt(parser.input.value, parser.input.cursor))) {
+        NAVRegexDebug(parser,
+                        'MatchStar',
+                        'Yes. It matches epsilon')
+
         return true
     }
 
@@ -712,6 +750,8 @@ define_function char NAVRegexMatchPlus(_NAVRegexParser parser, _NAVRegexMatchRes
 
     precursor = parser.input.cursor
 
+    NAVRegexPrintCurrentState(parser, 'MatchPlus')
+
     while (NAVRegexMatchOne(parser)) {
         NAVRegexDebug(parser,
                         'MatchPlus',
@@ -720,7 +760,12 @@ define_function char NAVRegexMatchPlus(_NAVRegexParser parser, _NAVRegexMatchRes
 
         count++
         NAVRegexAdvanceInputCursor(parser, 'MatchPlus', 1)
+        NAVRegexPrintCurrentState(parser, 'MatchPlus')
     }
+
+    NAVRegexDebug(parser,
+                    'MatchPlus',
+                    "'No. It doesn`t match'")
 
     NAVRegexMatchIncreaseLength(parser, 'MatchPlus', match, count)
 
@@ -733,6 +778,10 @@ define_function char NAVRegexMatchPlus(_NAVRegexParser parser, _NAVRegexMatchRes
 
     while (parser.input.cursor > precursor) {
         if (NAVRegexMatchPattern(parser, match)) {
+            NAVRegexDebug(parser,
+                            'MatchPlus',
+                            'Yes. It matches')
+
             return true
         }
 
@@ -759,6 +808,10 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
 
     if (NAVRegexQuantifierIsLazy(parser)) {
         // Dont support lazy quantifier yet
+        NAVRegexDebug(parser,
+                        'MatchQuestion',
+                        'No. Lazy quantifier not supported yet')
+
         return false
     }
 
@@ -766,6 +819,10 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
     // and then try to match again. This is being greedy
     NAVRegexAdvancePatternCursor(parser, 'MatchQuestion', 2)
     if (NAVRegexMatchPattern(parser, match)) {
+        NAVRegexDebug(parser,
+                        'MatchQuestion',
+                        'Yes. It matches')
+
         return true
     }
 
@@ -777,6 +834,7 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
     // And then try to match the current pattern one time
     NAVRegexRestoreState(parser, 'MatchQuestion', match, state)
 
+    NAVRegexPrintCurrentState(parser, 'MatchQuestion')
 
     if (NAVRegexMatchOne(parser)) {
         NAVRegexDebug(parser,
@@ -790,12 +848,24 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
 
         if (NAVRegexMatchPattern(parser, match)) {
             // NAVRegexMatchIncreaseLength(parser, 'MatchQuestion', match, 1)
+            NAVRegexDebug(parser,
+                            'MatchQuestion',
+                            'Yes. It matches')
+
             return true
         }
     }
 
+    NAVRegexDebug(parser,
+                    'MatchStar',
+                    'Does it match epsilon?')
+
     // Try to match epsilon?
     if (NAVRegexMatchEpsilon(NAVCharCodeAt(parser.input.value, parser.input.cursor))) {
+        NAVRegexDebug(parser,
+                        'MatchQuestion',
+                        'Yes. It matches epsilon')
+
         return true
     }
 
@@ -813,8 +883,6 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
     NAVRegexSaveState(parser, match, state)
 
     while (true) {
-        NAVRegexPrintCurrentState(parser)
-
         select {
             active (parser.state[parser.pattern.cursor].type == REGEX_TYPE_UNUSED): {
                 NAVRegexDebug(parser,
@@ -842,6 +910,12 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
             //     return (NAVRegexMatchPattern(parser.state, buffer, matchLength) || NAVRegexMatchPattern(parser.state[(x + 1)], buffer, matchLength))
             // }
             active (true): {
+                // NAVRegexMatchIncreaseLength(parser, 'MatchPattern', match, 1)
+                // NAVRegexAdvanceInputCursor(parser, 'MatchPattern', 1)
+                // NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
+
+                NAVRegexPrintCurrentState(parser, 'MatchPattern')
+
                 if (NAVRegexMatchOne(parser)) {
                     NAVRegexDebug(parser,
                                     'MatchPattern',
@@ -856,6 +930,9 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
                 }
             }
         }
+
+        NAVRegexAdvanceInputCursor(parser, 'MatchPattern', 1)
+        NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
 
         break
     }
@@ -1157,14 +1234,10 @@ define_function NAVRegexDebugSync(_NAVRegexParser parser, _NAVRegexMatchResult m
 }
 
 
-define_function NAVRegexPrintCurrentState(_NAVRegexParser parser) {
+define_function NAVRegexPrintCurrentState(_NAVRegexParser parser, char caller[]) {
     stack_var char c
     stack_var integer type
     stack_var char pattern[50]
-
-    if(!NAVRegexGetParserDebug(parser)) {
-        return
-    }
 
     if (parser.pattern.cursor > parser.count) {
         return
@@ -1187,7 +1260,7 @@ define_function NAVRegexPrintCurrentState(_NAVRegexParser parser) {
         default:                        { pattern = REGEX_TYPES[type] }
     }
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Current state => Does "', c, '" match "', pattern, '"?'")
+    NAVRegexDebug(parser, caller, "'Current state => Does "', c, '" match "', pattern, '"?'")
 }
 
 
