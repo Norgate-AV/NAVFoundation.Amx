@@ -654,6 +654,7 @@ volatile integer NAVBlinker = false
 
 #include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.SnapiHelpers.axi'
+#include 'NAVFoundation.SocketUtils.axi'
 #include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.TimelineUtils.axi'
 
@@ -1193,6 +1194,16 @@ define_function char NAVDeviceIsOnline(dev device) {
 }
 
 
+// define_function NAVSendStringTtl(dev device, char buffer[], integer ttl) {
+//     if (ttl == 0) {
+//         send_string device, buffer
+//         return
+//     }
+
+//     wait 10 NAVSendStringTtl(device, buffer, ttl - 1)
+// }
+
+
 (***********************************************************)
 (*                STARTUP CODE GOES BELOW                  *)
 (***********************************************************)
@@ -1247,7 +1258,7 @@ data_event[dvNAVMaster] {
     }
     onerror: {
         NAVErrorLog(NAV_LOG_LEVEL_ERROR,
-                    "'Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' OnError: ', data.text")
+                    "'Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' OnError: ', NAVGetSocketError(type_cast(data.number))")
     }
 }
 #END_IF
