@@ -157,6 +157,32 @@ constant integer NAV_ENOVA_DANTE_MIC_8_MIX         =   78  // (-100 - 0)
 
 
 ////////////////////////////////////////////////////////////////////
+// XPoints
+////////////////////////////////////////////////////////////////////
+constant sinteger NAV_ENOVA_AUDIO_XPOINT_LEVEL_MAX    =   0
+constant sinteger NAV_ENOVA_AUDIO_XPOINT_LEVEL_MIN    =   -99
+constant sinteger NAV_ENOVA_AUDIO_XPOINT_LEVEL_MUTE   =   -100
+
+constant integer NAV_ENOVA_AUDIO_XPOINT_INPUT_PROGRAM       =   1
+constant integer NAV_ENOVA_AUDIO_XPOINT_INPUT_LINE_MIC_1    =   2
+constant integer NAV_ENOVA_AUDIO_XPOINT_INPUT_LINE_MIC_2    =   3
+constant char NAV_ENOVA_AUDIO_XPOINT_INPUTS[][NAV_MAX_CHARS]    =   {
+                                                                        'Source',
+                                                                        'Line/Mic 1',
+                                                                        'Line/Mic 2'
+                                                                    }
+
+constant integer NAV_ENOVA_AUDIO_XPOINT_OUTPUT_PROGRAM      =   1
+constant integer NAV_ENOVA_AUDIO_XPOINT_OUTPUT_AUX_1        =   2
+constant integer NAV_ENOVA_AUDIO_XPOINT_OUTPUT_AUX_2        =   3
+constant char NAV_ENOVA_AUDIO_XPOINT_OUTPUTS[][NAV_MAX_CHARS]   =   {
+                                                                        'Program (Output 1)',
+                                                                        'Aux 1 (Output 2)',
+                                                                        'Aux 2 (Output 3)'
+                                                                    }
+
+
+////////////////////////////////////////////////////////////////////
 // Commands
 ////////////////////////////////////////////////////////////////////
 constant char NAV_ENOVA_SWITCH_LEVEL_ALL[]      = 'ALL'
@@ -345,6 +371,44 @@ define_function char NAVEnovaGetMicMuteState(dev device[], integer mic) {
 
 define_function char NAVEnovaIsReady(dev device[]) {
     return NAVDeviceIsOnline(device[length_array(device)])
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVEnovaGetXPointInput(integer input) {
+    switch (input) {
+        case NAV_ENOVA_AUDIO_XPOINT_INPUT_PROGRAM:
+        case NAV_ENOVA_AUDIO_XPOINT_INPUT_LINE_MIC_1:
+        case NAV_ENOVA_AUDIO_XPOINT_INPUT_LINE_MIC_2: {
+            return NAV_ENOVA_AUDIO_XPOINT_INPUTS[input]
+        }
+        default: {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_ENOVA__,
+                                        'NAVEnovaGetXPointInput',
+                                        "'Index out of range : ', itoa(input)")
+
+            return ''
+        }
+    }
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVEnovaGetXPointOutput(integer output) {
+    switch (output) {
+        case NAV_ENOVA_AUDIO_XPOINT_OUTPUT_PROGRAM:
+        case NAV_ENOVA_AUDIO_XPOINT_OUTPUT_AUX_1:
+        case NAV_ENOVA_AUDIO_XPOINT_OUTPUT_AUX_2: {
+            return NAV_ENOVA_AUDIO_XPOINT_OUTPUTS[output]
+        }
+        default: {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_ENOVA__,
+                                        'NAVEnovaGetXPointOutput',
+                                        "'Index out of range : ', itoa(output)")
+
+            return ''
+        }
+    }
 }
 
 
