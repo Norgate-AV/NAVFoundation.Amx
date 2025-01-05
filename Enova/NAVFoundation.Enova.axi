@@ -172,13 +172,15 @@ constant char NAV_ENOVA_AUDIO_XPOINT_INPUTS[][NAV_MAX_CHARS]    =   {
                                                                         'Line/Mic 2'
                                                                     }
 
-constant integer NAV_ENOVA_AUDIO_XPOINT_OUTPUT_PROGRAM      =   1
-constant integer NAV_ENOVA_AUDIO_XPOINT_OUTPUT_AUX_1        =   2
-constant integer NAV_ENOVA_AUDIO_XPOINT_OUTPUT_AUX_2        =   3
+constant integer NAV_ENOVA_AUDIO_XPOINT_OUTPUT_1    =   1
+constant integer NAV_ENOVA_AUDIO_XPOINT_OUTPUT_2    =   2
+constant integer NAV_ENOVA_AUDIO_XPOINT_OUTPUT_3    =   3
+constant integer NAV_ENOVA_AUDIO_XPOINT_OUTPUT_4    =   4
 constant char NAV_ENOVA_AUDIO_XPOINT_OUTPUTS[][NAV_MAX_CHARS]   =   {
-                                                                        'Program (Output 1)',
-                                                                        'Aux 1 (Output 2)',
-                                                                        'Aux 2 (Output 3)'
+                                                                        'Output 1 (AMP)',
+                                                                        'Output 2',
+                                                                        'Output 3',
+                                                                        'Output 4'
                                                                     }
 
 
@@ -395,9 +397,10 @@ define_function char[NAV_MAX_CHARS] NAVEnovaGetXPointInput(integer input) {
 
 define_function char[NAV_MAX_CHARS] NAVEnovaGetXPointOutput(integer output) {
     switch (output) {
-        case NAV_ENOVA_AUDIO_XPOINT_OUTPUT_PROGRAM:
-        case NAV_ENOVA_AUDIO_XPOINT_OUTPUT_AUX_1:
-        case NAV_ENOVA_AUDIO_XPOINT_OUTPUT_AUX_2: {
+        case NAV_ENOVA_AUDIO_XPOINT_OUTPUT_1:
+        case NAV_ENOVA_AUDIO_XPOINT_OUTPUT_2:
+        case NAV_ENOVA_AUDIO_XPOINT_OUTPUT_3:
+        case NAV_ENOVA_AUDIO_XPOINT_OUTPUT_4: {
             return NAV_ENOVA_AUDIO_XPOINT_OUTPUTS[output]
         }
         default: {
