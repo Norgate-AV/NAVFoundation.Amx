@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.21.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.20.1...v1.21.0) (2025-01-05)
+
+### 🌟 Features
+
+- **enova:** add audio xpoint definitions and helper functions ([44d6c6f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/44d6c6f30aaf2f4a8d572a8991cfb44eba5e1fde))
+
 ## [1.20.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.20.0...v1.20.1) (2024-12-17)
 
 ### 🐛 Bug Fixes
