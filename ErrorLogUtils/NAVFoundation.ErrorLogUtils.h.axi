@@ -62,6 +62,13 @@ constant long NAV_LOG_LEVEL_WARNING     = AMX_WARNING
 constant long NAV_LOG_LEVEL_INFO        = AMX_INFO
 constant long NAV_LOG_LEVEL_DEBUG       = AMX_DEBUG
 
+constant char NAV_LOG_LEVELS[][NAV_MAX_CHARS]   =   {
+                                                        'ERROR',
+                                                        'WARNING',
+                                                        'INFO',
+                                                        'DEBUG'
+                                                    }
+
 constant integer NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_TO           = 1
 constant integer NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM         = 2
 constant integer NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_TO            = 3

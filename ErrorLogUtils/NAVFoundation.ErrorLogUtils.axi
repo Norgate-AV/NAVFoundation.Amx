@@ -41,17 +41,11 @@ SOFTWARE.
 
 define_function char[NAV_MAX_CHARS] NAVGetLogLevel(long level) {
     switch (level) {
-        case NAV_LOG_LEVEL_ERROR: {
-            return 'ERROR'
-        }
-        case NAV_LOG_LEVEL_WARNING: {
-            return 'WARNING'
-        }
-        case NAV_LOG_LEVEL_INFO: {
-            return 'INFO'
-        }
+        case NAV_LOG_LEVEL_ERROR:
+        case NAV_LOG_LEVEL_WARNING:
+        case NAV_LOG_LEVEL_INFO:
         case NAV_LOG_LEVEL_DEBUG: {
-            return 'DEBUG'
+            return NAV_LOG_LEVELS[level]
         }
         default: {
             return NAVGetLogLevel(NAV_LOG_LEVEL_INFO)
