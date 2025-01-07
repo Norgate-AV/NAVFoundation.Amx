@@ -60,6 +60,11 @@ define_function NAVModulePropertyEventInit(dev device, _NAVSnapiMessage message,
     event.Device = device
     event.FullMessage = message
     event.Name = message.Parameter[1]
+
+    if (length_array(message.Parameter) < 2) {
+        return
+    }
+
     NAVArraySliceString(message.Parameter, 2, length_array(message.Parameter), event.Args)
 }
 
