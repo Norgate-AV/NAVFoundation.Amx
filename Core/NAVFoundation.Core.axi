@@ -587,6 +587,7 @@ struct _NAVController {
     ip_address_struct IP
     dev_info_struct Information
     dev_info_struct Device
+    dev_info_struct Switcher
     _NAVProgram Program
     char SerialNumber[NAV_MAX_CHARS]
     char UniqueId[6]
@@ -974,6 +975,7 @@ define_function NAVGetControllerProgramInformation(_NAVProgram program) {
 define_function NAVGetControllerInformation(_NAVController controller) {
     device_info(0:1:0, controller.Information)
     device_info(5001:1:0, controller.Device)
+    device_info(5002:1:0, controller.Switcher)
     NAVGetDeviceIPAddressInformation(0:1:0, controller.IP)
 
     controller.SerialNumber = NAVGetDeviceSerialNumber(0:1:0)
@@ -1109,6 +1111,18 @@ define_function NAVPrintBanner(_NAVController controller) {
         NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Model: ', controller.Device.Device_Id_String")
         NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Version: ', controller.Device.Version")
         NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Firmware Id: ', itoa(controller.Device.Firmware_Id)")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
+    }
+
+    if (controller.Switcher.Device_Id) {
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Switcher Info:'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Device Id: 5002'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Manufacturer: ', controller.Switcher.Manufacturer_String")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Model: ', controller.Switcher.Device_Id_String")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Version: ', controller.Switcher.Version")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Firmware Id: ', itoa(controller.Switcher.Firmware_Id)")
         NAVErrorLog(NAV_LOG_LEVEL_INFO, "")
         NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
     }
