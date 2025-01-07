@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.21.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.21.0...v1.21.1) (2025-01-05)
+
+### 🐛 Bug Fixes
+
+- **enova:** correct output labels and add output 4 ([41b7255](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/41b72554d40c9ac1bcafa89dfa9efd4183ae87e0))
+
 ## [1.21.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.20.1...v1.21.0) (2025-01-05)
 
 ### 🌟 Features
