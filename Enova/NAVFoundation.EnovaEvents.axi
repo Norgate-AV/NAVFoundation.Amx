@@ -95,7 +95,7 @@ data_event[DVA_ENOVA] {
     }
     onerror: {
         NAVErrorLog(NAV_LOG_LEVEL_ERROR,
-                    "'Enova => OnError: ', NAVDeviceToString(data.device), ': ', data.text")
+                    "'Enova => OnError: ', NAVDeviceToString(data.device), ': ', NAVGetSocketError(type_cast(data.number))")
 
         #IF_DEFINED USING_NAV_ENOVA_ONERROR_DATA_EVENT_CALLBACK
         NAVEnovaOnErrorDataEventCallback(data)
