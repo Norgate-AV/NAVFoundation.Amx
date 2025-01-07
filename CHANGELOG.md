@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.22.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.21.1...v1.22.0) (2025-01-07)
+
+### 🌟 Features
+
+- **core:** get and show switcher device info if available ([27fc0ce](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/27fc0ce3c73642904554548b3e4327bf5c7d11c0))
+
+### 🐛 Bug Fixes
+
+- **enova-events:** display onerror correctly ([91fe619](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/91fe619234bd5bf11118f2fd31efb7e7a4a36cea))
+- **module-base:** dont populate Property event.Args if there are none ([f3b8fdd](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/f3b8fdd498d2e211cedab0cf072126a3f5f57db3))
+
 ## [1.21.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.21.0...v1.21.1) (2025-01-05)
 
 ### 🐛 Bug Fixes
