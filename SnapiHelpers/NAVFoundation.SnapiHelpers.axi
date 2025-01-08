@@ -116,6 +116,7 @@ define_function NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
         count++
         set_length_array(message.Parameter, count)
         message.Parameter[count] = parameter
+        message.ParameterCount = count
     }
 }
 

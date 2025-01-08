@@ -114,6 +114,7 @@ DEFINE_TYPE
 struct _NAVSnapiMessage {
     char Header[NAV_MAX_BUFFER]
     char Parameter[NAV_MAX_SNAPI_MESSAGE_PARAMETERS][255]
+    integer ParameterCount
 }
 
 
