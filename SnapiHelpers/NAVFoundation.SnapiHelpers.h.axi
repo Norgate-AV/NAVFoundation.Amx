@@ -102,9 +102,10 @@ constant integer NAV_PRESET[]           =   {
 /////////////////////////////////////////////////////////////
 // Switching
 /////////////////////////////////////////////////////////////
-constant integer NAV_SWITCH_LEVEL_VID    = 1
-constant integer NAV_SWITCH_LEVEL_AUD    = 2
-constant integer NAV_SWITCH_LEVEL_ALL    = 3
+constant integer NAV_SWITCH_LEVEL_COUNT     = 3
+constant integer NAV_SWITCH_LEVEL_VID       = 1
+constant integer NAV_SWITCH_LEVEL_AUD       = 2
+constant integer NAV_SWITCH_LEVEL_ALL       = 3
 constant char NAV_SWITCH_LEVELS[][NAV_MAX_CHARS]    = { 'VID', 'AUD', 'ALL' }
 
 
