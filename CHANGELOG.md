@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.23.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.22.0...v1.23.0) (2025-01-08)
+
+### 🌟 Features
+
+- **snapi-helpers:** add constant for switch level count ([1baea15](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/1baea15be856b4b53d3fb20df3b314d76c84dbc4))
+- **snapi-helper:** add ParamaterCount member to NAVSnapiMessage type ([d68bb77](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/d68bb778f4f281424ccd538ab957cfe5cd417cda))
+- **enova:** allow for up to 81 ports on switch device ([757df5c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/757df5c2bb543ac89919ab071d392e5c387ea081))
+
 ## [1.22.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.21.1...v1.22.0) (2025-01-07)
 
 ### 🌟 Features
