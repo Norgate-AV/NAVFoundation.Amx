@@ -194,6 +194,7 @@ constant char NAV_ENOVA_AUDIO_XPOINT_OUTPUTS[][NAV_MAX_CHARS]   =   {
 ////////////////////////////////////////////////////////////////////
 // Commands
 ////////////////////////////////////////////////////////////////////
+constant integer NAV_ENOVA_SWITCH_LEVEL_COUNT   = 3
 constant char NAV_ENOVA_SWITCH_LEVEL_ALL[]      = 'ALL'
 constant char NAV_ENOVA_SWITCH_LEVEL_VIDEO[]    = 'VIDEO'
 constant char NAV_ENOVA_SWITCH_LEVEL_AUDIO[]    = 'AUDIO'
