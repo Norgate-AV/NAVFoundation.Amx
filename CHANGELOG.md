@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.24.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.23.0...v1.24.0) (2025-01-09)
+
+### 🌟 Features
+
+- **enova:** add constant for mac inputs/outputs ([ea56c44](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/ea56c448d2694649706dac5daffab8e422fb937d))
+- **enova:** add constant for switch level count ([cfde65a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/cfde65ac2de8c4c60d4d009b7e8575f7a02655d1))
+- **enova:** add new functions for dynamically getting IO info ([e067c82](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e067c825c3322b1820360130d5dc070b1c561284))
+- **enova:** compare current port to port count for ready status ([1de4ac0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/1de4ac084a61fb9e3bdec61a0cd0d5efac133295))
+
 ## [1.23.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.22.0...v1.23.0) (2025-01-08)
 
 ### 🌟 Features
