@@ -283,6 +283,20 @@ struct _NAVEnovaAudioXpointEventArgs {
 }
 
 
+struct _NAVEnovaIOCount {
+    integer Video
+    integer Audio
+}
+
+
+struct _NAVEnovaPortInfo {
+    integer PortCount
+
+    _NAVEnovaIOCount InputCount
+    _NAVEnovaIOCount OutputCount
+}
+
+
 define_function char[NAV_MAX_CHARS] NAVEnovaGetSwitchLevel(integer level) {
     switch (level) {
         case 0: {
@@ -381,6 +395,160 @@ define_function char NAVEnovaGetMicMuteState(dev device[], integer mic) {
 
 define_function char NAVEnovaIsReady(dev device[]) {
     return NAVDeviceIsOnline(device[length_array(device)])
+}
+
+
+define_function char[NAV_MAX_CHARS] NAVEnovaGetModel() {
+    stack_var _NAVController controller
+
+    NAVGetControllerInformation(controller)
+
+    if (!controller.Switcher.Device_Id) {
+        // No Switcher Device
+        return ''
+    }
+
+    return controller.Switcher.Device_Id_String
+}
+
+
+define_function char NAVEnovaGetPortInfo(_NAVEnovaPortInfo info) {
+    stack_var char model[NAV_MAX_CHARS]
+
+    model = NAVEnovaGetModel()
+
+    if (!length_array(model)) {
+        return false
+    }
+
+    select {
+        active (NAVStartsWith(model, 'DVX-2210')): {
+            // DVX-2210HD
+            info.PortCount = 6
+            info.InputCount.Video = 4
+            info.InputCount.Audio = 6
+            info.OutputCount.Video = 2
+            info.OutputCount.Audio = 3
+        }
+        active (NAVStartsWith(model, 'DVX-22') && !NAVContains(model, '4K')): {
+            // DVX-2250HD, DVX2255HD
+            info.PortCount = 9
+            info.InputCount.Video = 6
+            info.InputCount.Audio = 8
+            info.OutputCount.Video = 3
+            info.OutputCount.Audio = 3
+        }
+        active (NAVStartsWith(model, 'DVX-22') && NAVContains(model, '4K')): {
+            // DVX-2265-4K
+            info.PortCount = 14
+            info.InputCount.Video = 6
+            info.InputCount.Audio = 14
+            info.OutputCount.Video = 2
+            info.OutputCount.Audio = 4
+        }
+        active (NAVStartsWith(model, 'DVX-32') && !NAVContains(model, '4K')): {
+            // DVX-3250HD, DVX-3255HD, DVX-3256HD
+            info.PortCount = 14
+            info.InputCount.Video = 10
+            info.InputCount.Audio = 14
+            info.OutputCount.Video = 4
+            info.OutputCount.Audio = 4
+        }
+        active (NAVStartsWith(model, 'DVX-32') && NAVContains(model, '4K')): {
+            // DVX-3266-4K
+            info.PortCount = 14
+            info.InputCount.Video = 8
+            info.InputCount.Audio = 14
+            info.OutputCount.Video = 4
+            info.OutputCount.Audio = 4
+        }
+        active (NAVStartsWith(model, 'DGX-8')): {
+            // DGX-8, DGX-800
+            info.PortCount = 17
+            info.InputCount.Video = 8
+            info.InputCount.Audio = 17
+            info.OutputCount.Video = 8
+            info.OutputCount.Audio = 16
+        }
+        active (NAVStartsWith(model, 'DGX-16')): {
+            // DGX-16, DGX-1600
+            info.PortCount = 25
+            info.InputCount.Video = 16
+            info.InputCount.Audio = 25
+            info.OutputCount.Video = 16
+            info.OutputCount.Audio = 24
+        }
+        active (NAVStartsWith(model, 'DGX-32')): {
+            // DGX-32, DGX-3200
+            info.PortCount = 41
+            info.InputCount.Video = 32
+            info.InputCount.Audio = 41
+            info.OutputCount.Video = 32
+            info.OutputCount.Audio = 40
+        }
+        active (NAVStartsWith(model, 'DGX-64')): {
+            // DGX-64, DGX-6400
+            info.PortCount = 81
+            info.InputCount.Video = 64
+            info.InputCount.Audio = 81
+            info.OutputCount.Video = 64
+            info.OutputCount.Audio = 80
+        }
+        active (true): {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_ENOVA__,
+                                        'NAVEnovaGetPortInfo',
+                                        "'Unknown Model : ', model")
+
+            return false
+        }
+    }
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+                                __NAV_FOUNDATION_ENOVA__,
+                                'NAVEnovaGetPortInfo',
+                                "'It`s a ', NAVGetStringBefore(model, ' ')")
+
+    return true
+}
+
+
+define_function integer NAVEnovaGetPortCount() {
+    stack_var _NAVEnovaPortInfo info
+
+    if (!NAVEnovaGetPortInfo(info)) {
+        return 0
+    }
+
+    return info.PortCount
+}
+
+
+define_function char NAVEnovaGetInputCount(_NAVEnovaIOCount count) {
+    stack_var _NAVEnovaPortInfo info
+
+    if (!NAVEnovaGetPortInfo(info)) {
+        return false
+    }
+
+    count.Video = info.InputCount.Video
+    count.Audio = info.InputCount.Audio
+
+    return true
+}
+
+
+define_function char NAVEnovaGetOutputCount(_NAVEnovaIOCount count) {
+    stack_var _NAVEnovaPortInfo info
+
+    if (!NAVEnovaGetPortInfo(info)) {
+        return false
+    }
+
+    count.Video = info.OutputCount.Video
+    count.Audio = info.OutputCount.Audio
+
+    return true
 }
 
 
