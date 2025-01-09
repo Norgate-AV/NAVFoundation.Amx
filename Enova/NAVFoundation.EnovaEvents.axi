@@ -142,7 +142,7 @@ data_event[DVA_ENOVA] {
         NAVEnovaOnlineDataEventCallback(data)
         #END_IF
 
-        if (NAVEnovaIsReady(DVA_ENOVA)) {
+        if (data.device.port == NAVEnovaGetPortCount()) {
             NAVErrorLog(NAV_LOG_LEVEL_INFO,
                         "'Enova => Ready: ', NAVDeviceToString(data.device)")
 
