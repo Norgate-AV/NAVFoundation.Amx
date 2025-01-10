@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.25.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.24.0...v1.25.0) (2025-01-10)
+
+### 🌟 Features
+
+- **enova:** add SWITCH event callback ([10b79e6](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/10b79e6a6135bd756cab226492cb50e67b5dcacb))
+
 ## [1.24.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.23.0...v1.24.0) (2025-01-09)
 
 ### 🌟 Features
