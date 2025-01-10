@@ -195,13 +195,13 @@ constant char NAV_ENOVA_AUDIO_XPOINT_OUTPUTS[][NAV_MAX_CHARS]   =   {
 // Commands
 ////////////////////////////////////////////////////////////////////
 constant integer NAV_ENOVA_SWITCH_LEVEL_COUNT   = 3
-constant char NAV_ENOVA_SWITCH_LEVEL_ALL[]      = 'ALL'
 constant char NAV_ENOVA_SWITCH_LEVEL_VIDEO[]    = 'VIDEO'
 constant char NAV_ENOVA_SWITCH_LEVEL_AUDIO[]    = 'AUDIO'
+constant char NAV_ENOVA_SWITCH_LEVEL_ALL[]      = 'ALL'
 constant char NAV_ENOVA_SWITCH_LEVELS[][NAV_MAX_CHARS]	=   {
-                                                                NAV_ENOVA_SWITCH_LEVEL_ALL,
                                                                 NAV_ENOVA_SWITCH_LEVEL_VIDEO,
-                                                                NAV_ENOVA_SWITCH_LEVEL_AUDIO
+                                                                NAV_ENOVA_SWITCH_LEVEL_AUDIO,
+                                                                NAV_ENOVA_SWITCH_LEVEL_ALL
                                                             }
 
 
@@ -231,6 +231,8 @@ constant char NAV_ENOVA_VIDIN_HDR_GET[]                 = '?VIDIN_HDR'
 
 constant char NAV_ENOVA_AUDIO_XPOINT[]                  = 'XPOINT'
 constant char NAV_ENOVA_AUDIO_XPOINT_GET[]              = '?XPOINT'
+
+constant char NAV_ENOVA_SWITCH_EVENT[]                  = 'SWITCH'
 
 
 DEFINE_TYPE
@@ -280,6 +282,13 @@ struct _NAVEnovaAudioXpointEventArgs {
     integer Input
     integer Output
     sinteger Level
+}
+
+
+struct _NAVEnovaSwitchEventArgs {
+    integer Input
+    integer Output
+    integer Level
 }
 
 

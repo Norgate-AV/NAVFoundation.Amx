@@ -38,6 +38,9 @@ SOFTWARE.
 // #DEFINE USING_NAV_ENOVA_AUDIO_XPOINT_EVENT_CALLBACK
 // define_function NAVEnovaAudioXPointEventCallback(_NAVEnovaAudioXpointEventArgs args) {}
 
+// #DEFINE USING_NAV_ENOVA_SWITCH_EVENT_CALLBACK
+// define_function NAVEnovaSwitchEventCallback(_NAVEnovaSwitchEventArgs args) {}
+
 
 DEFINE_CONSTANT
 
@@ -184,14 +187,32 @@ data_event[DVA_ENOVA] {
 
         switch (message.Header) {
             case NAV_ENOVA_AUDIO_XPOINT: {
+                #IF_DEFINED USING_NAV_ENOVA_AUDIO_XPOINT_EVENT_CALLBACK
                 stack_var _NAVEnovaAudioXpointEventArgs args
 
                 args.Input = atoi(message.Parameter[2])
                 args.Output = atoi(message.Parameter[3])
                 args.Level = atoi(message.Parameter[1])
 
-                #IF_DEFINED USING_NAV_ENOVA_AUDIO_XPOINT_EVENT_CALLBACK
                 NAVEnovaAudioXPointEventCallback(args)
+                #END_IF
+            }
+            case NAV_ENOVA_SWITCH_EVENT: {
+                #IF_DEFINED USING_NAV_ENOVA_SWITCH_EVENT_CALLBACK
+                stack_var _NAVEnovaSwitchEventArgs args
+
+                stack_var integer input
+                stack_var integer output
+
+                input = NAVLastIndexOf(message.Parameter[1], 'I')
+                output = NAVLastIndexOf(message.Parameter[1], 'O')
+
+                args.Level = NAVFindInArrayString(NAV_ENOVA_SWITCH_LEVELS, NAVStringSlice(message.Parameter[1], 2, inputStart))
+
+                args.Input = atoi(NAVStringSlice(message.Parameter[1], input + 1, output))
+                args.Output = atoi(NAVStringSlice(message.Parameter[1], output + 1, 0))
+
+                NAVEnovaSwitchEventCallback(args)
                 #END_IF
             }
             case 'AUDMIC_GAIN': {}
