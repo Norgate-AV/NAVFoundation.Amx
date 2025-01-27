@@ -10,5 +10,19 @@
     },
     "bugs": {
         "url": "https://github.com/Norgate-AV/NAVFoundation.Amx/issues"
-    }
+    },
+    "dependencies": [
+        {
+            "version": "~1.1.1",
+            "url": "github.com/Norgate-AV/NAVDatabase.Amx.EnovaDVX"
+        },
+        {
+            "version": "~1.0.0",
+            "url": "github.com/Norgate-AV/NAVDatabase.Amx.NtpClient"
+        },
+        {
+            "version": "4.7.18",
+            "url": "github.com/Norgate-AV/RMS-SDK"
+        }
+    ]
 }
