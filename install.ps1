@@ -224,6 +224,11 @@ function Update-GenlinxRc {
 
     $genlinxrc = Get-Content -Path $Path -Raw | & $convertFrom
 
+    # Ensure `.` is replaced with `-` in the owner and repo names, and version
+    $DependencyOwner = $DependencyOwner.Replace(".", "-")
+    $DependencyUrl = $DependencyUrl.Replace(".", "-")
+    $DependencyVersion = $DependencyVersion.Replace(".", "-")
+
     $genlinxrc.build.nlrc.includePath += "./$OutDir/$DependencyOwner/$DependencyUrl/$DependencyVersion"
     $genlinxrc.build.nlrc.modulePath += "./$OutDir/$DependencyOwner/$DependencyUrl/$DependencyVersion"
 
@@ -498,7 +503,7 @@ try {
 
             $version = Get-Version -Version $dependency.version
 
-            $packagePath = Join-Path $vendorPath "$($repoInfo.Owner)/$($repoInfo.Repo)/$($version)"
+            $packagePath = Join-Path $vendorPath "$($repoInfo.Owner.Replace(".", "-"))/$($repoInfo.Repo.Replace(".", "-"))/$($version.Replace(".", "-"))"
             if (-not (Test-Path $packagePath)) {
                 New-Item -ItemType Directory -Path $packagePath | Out-Null
             }
@@ -530,11 +535,11 @@ try {
             } else {
                 # This will allow the NLRC to find the files without having to add them to the .genlinxrc file
                 # This is a workaround until we can figure out how to add the paths to the .genlinxrc file
-                Add-Symlinks -Path $packagePath -Extension "axi" -TargetDirectory "$Path/Include" -GitIgnore
+                Add-Symlinks -Path $packagePath -Extension "axi" -TargetDirectory "$Path/include" -GitIgnore
 
                 # tko, jar files are already ignored by Git
-                Add-Symlinks -Path $packagePath -Extension "tko" -TargetDirectory "$Path/Module"
-                Add-Symlinks -Path $packagePath -Extension "jar" -TargetDirectory "$Path/Module"
+                Add-Symlinks -Path $packagePath -Extension "tko" -TargetDirectory "$Path/module"
+                Add-Symlinks -Path $packagePath -Extension "jar" -TargetDirectory "$Path/module"
             }
 
             Write-Host "Successfully installed $($repoInfo.Repo)@$($version)"
