@@ -81,16 +81,30 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: latest
 
       - name: Setup Node.js
+        id: setup-node
         uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
 
+      - name: Update Global Node.js
+        run: |
+          fnm install ${{ steps.setup-node.outputs.node-version }}
+          fnm use ${{ steps.setup-node.outputs.node-version }}
+
       - name: Install
-        run: pnpm install
+        run: |
+          pnpm install --frozen-lockfile
+          Write-Host "Environment Check:"
+          Write-Host "CI: $env:CI"
+          Write-Host "GITHUB_TOKEN via `$env:`: $env:GITHUB_TOKEN"
+          Write-Host "GITHUB_TOKEN via Get-ChildItem:" (Get-ChildItem env: | Where-Object {$_.Name -eq 'GITHUB_TOKEN'})
+          ./install.ps1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build
         run: ./build.ps1
@@ -110,21 +124,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Show Release Output Values
-        if: github.ref == 'refs/heads/master'
-        run: |
-          Write-Host "New Release Published: ${{ steps.release.outputs.new_release_published }}"
-          Write-Host "New Release Version: ${{ steps.release.outputs.new_release_version }}"
-          Write-Host "New Release Major Version: ${{ steps.release.outputs.new_release_major_version }}"
-          Write-Host "New Release Minor Version: ${{ steps.release.outputs.new_release_minor_version }}"
-          Write-Host "New Release Patch Version: ${{ steps.release.outputs.new_release_patch_version }}"
-          Write-Host "New Release Channel: ${{ steps.release.outputs.new_release_channel }}"
-          Write-Host "New Release Notes: ${{ steps.release.outputs.new_release_notes }}"
-          Write-Host "New Release Git Head: ${{ steps.release.outputs.new_release_git_head }}"
-          Write-Host "New Release Git Tag: ${{ steps.release.outputs.new_release_git_tag }}"
-          Write-Host "Last Release Version: ${{ steps.release.outputs.last_release_version }}"
-          Write-Host "Last Release Git Head: ${{ steps.release.outputs.last_release_git_head }}"
-          Write-Host "Last Release Git Tag: ${{ steps.release.outputs.last_release_git_tag }}"
+      # - name: Show Release Output Values
+      #   if: github.ref == 'refs/heads/master'
+      #   run: |
+      #     Write-Host "New Release Published: ${{ steps.release.outputs.new_release_published }}"
+      #     Write-Host "New Release Version: ${{ steps.release.outputs.new_release_version }}"
+      #     Write-Host "New Release Major Version: ${{ steps.release.outputs.new_release_major_version }}"
+      #     Write-Host "New Release Minor Version: ${{ steps.release.outputs.new_release_minor_version }}"
+      #     Write-Host "New Release Patch Version: ${{ steps.release.outputs.new_release_patch_version }}"
+      #     Write-Host "New Release Channel: ${{ steps.release.outputs.new_release_channel }}"
+      #     Write-Host "New Release Notes: ${{ steps.release.outputs.new_release_notes }}"
+      #     Write-Host "New Release Git Head: ${{ steps.release.outputs.new_release_git_head }}"
+      #     Write-Host "New Release Git Tag: ${{ steps.release.outputs.new_release_git_tag }}"
+      #     Write-Host "Last Release Version: ${{ steps.release.outputs.last_release_version }}"
+      #     Write-Host "Last Release Git Head: ${{ steps.release.outputs.last_release_git_head }}"
+      #     Write-Host "Last Release Git Tag: ${{ steps.release.outputs.last_release_git_tag }}"
+
+      - name: Wait before Dispatch
+        if: ${{ github.ref == 'refs/heads/master' && steps.release.outputs.new_release_published == 'true' }}
+        run: Start-Sleep -Seconds 30
 
       - name: Dispatch Scoop Excavator
         if: ${{ github.ref == 'refs/heads/master' && steps.release.outputs.new_release_published == 'true' }}
