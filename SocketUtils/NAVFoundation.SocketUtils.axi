@@ -178,4 +178,61 @@ define_function slong NAVClientSocketClose(integer socket) {
 }
 
 
+define_function slong NAVClientSecureSocketOpen(integer socket,
+                                                char address[],
+                                                integer port,
+                                                char username[],
+                                                char password[],
+                                                char privateKey[],
+                                                char privateKeyPassphrase[]) {
+
+    address = NAVTrimString(address)
+
+    if (!length_array(address)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientSecureSocketOpen',
+                                    "'Failed to open secure socket. The host address is an empty string.'")
+        return NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS
+    }
+
+    if (!length_array(username)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientSecureSocketOpen',
+                                    "'Failed to open secure socket. The username is an empty string.'")
+        return NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE
+    }
+
+    if (!length_array(password) && !length_array(privateKey)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientSecureSocketOpen',
+                                    "'Failed to open secure socket. Both the password and private key are empty strings.'")
+        return NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE
+    }
+
+    if (port <= 0) {
+        port = NAV_SSH_PORT
+    }
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+                                __NAV_FOUNDATION_SOCKETUTILS__,
+                                'NAVClientSecureSocketOpen',
+                                "'Attemping to open secure socket to ', username, '@', address, ':', itoa(port)")
+
+    return ssh_client_open(socket, address, port, username, password, privateKey, privateKeyPassphrase)
+}
+
+
+define_function slong NAVClientSecureSocketClose(integer socket) {
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+                                __NAV_FOUNDATION_SOCKETUTILS__,
+                                'NAVClientSecureSocketClose',
+                                'Closing secure client socket...')
+
+    return ssh_client_close(socket)
+}
+
+
 #END_IF // __NAV_FOUNDATION_SOCKETUTILS__
