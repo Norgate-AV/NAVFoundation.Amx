@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.26.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.25.0...v1.26.0) (2025-01-29)
+
+### 🌟 Features
+
+- **socket-utils:** add helper functions for ssh client open/close ([16556ba](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/16556bafa770165aca8fc8e5b0a6c43a8c6b428f))
+
 ## [1.25.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.24.0...v1.25.0) (2025-01-10)
 
 ### 🌟 Features
