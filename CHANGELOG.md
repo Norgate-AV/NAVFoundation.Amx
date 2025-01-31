@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.26.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.26.0...v1.26.1) (2025-01-31)
+
+### 🐛 Bug Fixes
+
+- **socket-utils:** fix spelling error in socket logging ([8ff1e28](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/8ff1e2855fc357ff4e483f42c304f72b882d0663))
+
 ## [1.26.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.25.0...v1.26.0) (2025-01-29)
 
 ### 🌟 Features
