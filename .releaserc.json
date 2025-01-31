@@ -99,7 +99,7 @@
             "@semantic-release/exec",
             {
                 "shell": "pwsh",
-                "prepareCmd": "(Get-Content -Path manifest.json) -replace '\"version\": \".*\"', '\"version\": \"${nextRelease.version}\"' | Set-Content manifest.json"
+                "prepareCmd": "$manifest = Get-Content manifest.json -Raw | ConvertFrom-Json; $manifest.version = \"${nextRelease.version}\"; $manifest | ConvertTo-Json -Depth 10 | Set-Content manifest.json && pnpm prettier --write manifest.json"
             }
         ],
         [
