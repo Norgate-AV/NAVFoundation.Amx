@@ -142,7 +142,7 @@ define_function slong NAVClientSocketOpen(integer socket, char address[], intege
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
                                 __NAV_FOUNDATION_SOCKETUTILS__,
                                 'NAVClientSocketOpen',
-                                "'Attemping to open socket to ', address, ':', itoa(port), ' (', NAVGetSocketProtocol(protocol), ')'")
+                                "'Attempting to open socket to ', address, ':', itoa(port), ' (', NAVGetSocketProtocol(protocol), ')'")
 
     result = ip_client_open(socket, address, port, protocol)
 
@@ -219,7 +219,7 @@ define_function slong NAVClientSecureSocketOpen(integer socket,
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
                                 __NAV_FOUNDATION_SOCKETUTILS__,
                                 'NAVClientSecureSocketOpen',
-                                "'Attemping to open secure socket to ', username, '@', address, ':', itoa(port)")
+                                "'Attempting to open secure socket to ', username, '@', address, ':', itoa(port)")
 
     return ssh_client_open(socket, address, port, username, password, privateKey, privateKeyPassphrase)
 }
