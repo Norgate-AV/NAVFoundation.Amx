@@ -79,21 +79,6 @@ data_event[5001:28:0] {
     offline: {
         NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Offline'")
     }
-    awake: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Awake'")
-    }
-    standby: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Standby'")
-    }
-    string: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'String from MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
-    }
-    command: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Command from MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
-    }
-    onerror: {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' OnError: ', data.text")
-    }
 }
 
 
