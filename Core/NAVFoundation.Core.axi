@@ -1254,14 +1254,6 @@ data_event[dvNAVMaster] {
         NAVErrorLog(NAV_LOG_LEVEL_INFO,
                     "'Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Offline'")
     }
-    awake: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                    "'Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Awake'")
-    }
-    standby: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                    "'Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Standby'")
-    }
     string: {
         NAVErrorLog(NAV_LOG_LEVEL_INFO,
                     "'String from Master Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
