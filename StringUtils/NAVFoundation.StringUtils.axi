@@ -530,11 +530,6 @@ define_function integer NAVSplitString(char buffer[], char separator[], char res
     }
 
     if (!length_array(separator)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
-                                    __NAV_FOUNDATION_STRINGUTILS__,
-                                    'NAVSplitString',
-                                    'Separator is an empty string. Using default separator (" ")')
-
         separator = ' '
     }
 
@@ -590,11 +585,6 @@ define_function char[NAV_MAX_BUFFER] NAVArrayJoinString(char array[][], char sep
     }
 
     if (!length_array(separator)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
-                                    __NAV_FOUNDATION_STRINGUTILS__,
-                                    'NAVArrayJoinString',
-                                    'Separator is an empty string. Using default separator (" ")')
-
         separator = ' '
     }
 
