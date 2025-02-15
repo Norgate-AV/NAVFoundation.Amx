@@ -172,18 +172,6 @@ data_event[vdvRms] {
         NAVErrorLog(NAV_LOG_LEVEL_INFO,
                     "'RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Adapter Device OnError: ', data.text")
     }
-    awake: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                    "'RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Adapter Device Awake'")
-    }
-    standby: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                    "'RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Adapter Device Standby'")
-    }
-    string: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                    "'String from RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-[', data.text, ']'")
-    }
     command: {
         stack_var _NAVSnapiMessage message
 
