@@ -109,11 +109,6 @@ define_function slong NAVServerSocketOpen(integer socket, integer port, integer 
 
 
 define_function slong NAVServerSocketClose(integer socket) {
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
-                                __NAV_FOUNDATION_SOCKETUTILS__,
-                                'NAVServerSocketClose',
-                                'Closing server socket...')
-
     return ip_server_close(socket)
 }
 
@@ -127,7 +122,7 @@ define_function slong NAVClientSocketOpen(integer socket, char address[], intege
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_SOCKETUTILS__,
                                     'NAVClientSocketOpen',
-                                    "'Failed to open socket. The host address is an empty string.'")
+                                    "'The host address is an empty string.'")
         return NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS
     }
 
@@ -135,14 +130,9 @@ define_function slong NAVClientSocketOpen(integer socket, char address[], intege
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_SOCKETUTILS__,
                                     'NAVClientSocketOpen',
-                                    "'Failed to open socket. ', NAVGetSocketError(NAV_SOCKET_ERROR_INVALID_PORT)")
+                                    "NAVGetSocketError(NAV_SOCKET_ERROR_INVALID_PORT)")
         return NAV_SOCKET_ERROR_INVALID_PORT
     }
-
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
-                                __NAV_FOUNDATION_SOCKETUTILS__,
-                                'NAVClientSocketOpen',
-                                "'Attempting to open socket to ', address, ':', itoa(port), ' (', NAVGetSocketProtocol(protocol), ')'")
 
     result = ip_client_open(socket, address, port, protocol)
 
@@ -150,7 +140,11 @@ define_function slong NAVClientSocketOpen(integer socket, char address[], intege
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_SOCKETUTILS__,
                                     'NAVClientSocketOpen',
-                                    "'Failed to open socket. ', NAVGetSocketError(result)")
+                                    "'Failed to open socket to ', address, ':', itoa(port), ' (', NAVGetSocketProtocol(protocol), ')'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientSocketOpen',
+                                    "'Socket error: ', NAVGetSocketError(result)")
     }
 
     return result
@@ -160,17 +154,12 @@ define_function slong NAVClientSocketOpen(integer socket, char address[], intege
 define_function slong NAVClientSocketClose(integer socket) {
     stack_var slong result
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
-                                __NAV_FOUNDATION_SOCKETUTILS__,
-                                'NAVClientSocketClose',
-                                'Closing client socket...')
-
     result = ip_client_close(socket)
 
     if (result < 0) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_SOCKETUTILS__,
-                                    'NAVClientSocketOpen',
+                                    'NAVClientSocketClose',
                                     "'Failed to close socket. ', NAVGetSocketError(result)")
     }
 
@@ -192,7 +181,7 @@ define_function slong NAVClientSecureSocketOpen(integer socket,
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_SOCKETUTILS__,
                                     'NAVClientSecureSocketOpen',
-                                    "'Failed to open secure socket. The host address is an empty string.'")
+                                    "'The host address is an empty string.'")
         return NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS
     }
 
@@ -200,7 +189,7 @@ define_function slong NAVClientSecureSocketOpen(integer socket,
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_SOCKETUTILS__,
                                     'NAVClientSecureSocketOpen',
-                                    "'Failed to open secure socket. The username is an empty string.'")
+                                    "'The username is an empty string.'")
         return NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE
     }
 
@@ -208,7 +197,7 @@ define_function slong NAVClientSecureSocketOpen(integer socket,
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_SOCKETUTILS__,
                                     'NAVClientSecureSocketOpen',
-                                    "'Failed to open secure socket. Both the password and private key are empty strings.'")
+                                    "'Both the password and private key are empty strings.'")
         return NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE
     }
 
@@ -216,21 +205,11 @@ define_function slong NAVClientSecureSocketOpen(integer socket,
         port = NAV_SSH_PORT
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
-                                __NAV_FOUNDATION_SOCKETUTILS__,
-                                'NAVClientSecureSocketOpen',
-                                "'Attempting to open secure socket to ', username, '@', address, ':', itoa(port)")
-
     return ssh_client_open(socket, address, port, username, password, privateKey, privateKeyPassphrase)
 }
 
 
 define_function slong NAVClientSecureSocketClose(integer socket) {
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
-                                __NAV_FOUNDATION_SOCKETUTILS__,
-                                'NAVClientSecureSocketClose',
-                                'Closing secure client socket...')
-
     return ssh_client_close(socket)
 }
 
