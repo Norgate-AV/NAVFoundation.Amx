@@ -444,11 +444,6 @@ define_function slong NAVDirectoryCreate(char path[]) {
                                     "'Error creating directory "', path, '" : ', NAVGetFileError(result)")
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_FILEUTILS__,
-                                'NAVDirectoryCreate',
-                                "'Created directory "', path, '"'")
-
     return result
 }
 
@@ -474,45 +469,8 @@ define_function slong NAVDirectoryDelete(char path[]) {
                                     "'Error deleting directory "', path, '" : ', NAVGetFileError(result)")
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_FILEUTILS__,
-                                'NAVDirectoryDelete',
-                                "'Deleted directory "', path, '"'")
-
     return result
 }
-
-
-// define_function NAVReadCsvFile(char path[], char lines[][]) {
-//     stack_var char file[NAV_MAX_BUFFER]
-//     stack_var integer index
-//     stack_var integer lineIndex
-
-//     if (!length_array(path)) {
-//         return
-//     }
-
-//     file = NAVFileRead(path)
-//     if (!length_array(file)) {
-//         return
-//     }
-
-//     index = 0
-//     lineIndex = 0
-
-//     while (index < length_array(file)) {
-//         stack_var char line[NAV_MAX_BUFFER]
-//         stack_var integer lineLength
-
-//         line = NAVStringSubstring(file, index, index + 1)
-//         lineLength = length_array(line)
-
-//         if (lineLength == 0) {
-//             break
-//         }
-
-//     }
-// }
 
 
 define_function slong NAVFileGetSize(char path[]) {
@@ -568,11 +526,6 @@ define_function slong NAVFileGetSize(char path[]) {
         return result
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_FILEUTILS__,
-                                'NAVFileGetSize',
-                                "'File "', path, '" size: ', itoa(count), ' bytes'")
-
     return count
 }
 
@@ -607,11 +560,6 @@ define_function slong NAVFileRename(char source[], char destination[]) {
                                     "'Error renaming file "', source, '" : ', NAVGetFileError(result)")
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_FILEUTILS__,
-                                'NAVFileCopy',
-                                "'Renamed file "', source, '" to "', destination, '"'")
-
     return result
 }
 
@@ -636,11 +584,6 @@ define_function slong NAVFileDelete(char path[]) {
                                     'NAVFileDelete',
                                     "'Error deleting file "', path, '" : ', NAVGetFileError(result)")
     }
-
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_FILEUTILS__,
-                                'NAVFileCopy',
-                                "'Deleted file "', path, '"'")
 
     return result
 }
@@ -675,11 +618,6 @@ define_function slong NAVFileCopy(char source[], char destination[]) {
                                     'NAVFileCopy',
                                     "'Error copying file "', source, '" to "', destination, '" : ', NAVGetFileError(result)")
     }
-
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_FILEUTILS__,
-                                'NAVFileCopy',
-                                "'Copied file "', source, '" to "', destination, '"'")
 
     return result
 }
