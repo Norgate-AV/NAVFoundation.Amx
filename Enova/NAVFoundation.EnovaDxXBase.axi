@@ -109,22 +109,12 @@ data_event[DVA_ENOVA_DXX] {
         #END_IF
     }
     string: {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                    NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_FROM,
-                                                data.device,
-                                                data.text))
-
         #IF_DEFINED USING_ENOVA_DXX_STRING_DATA_EVENT_CALLBACK
         NAVEnovaDxXStringDataEventCallback(data)
         #END_IF
     }
     command: {
         stack_var _NAVSnapiMessage message
-
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                    NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_FROM,
-                                                data.device,
-                                                data.text))
 
         #IF_DEFINED USING_ENOVA_DXX_COMMAND_DATA_EVENT_CALLBACK
         NAVEnovaDxXCommandDataEventCallback(data)

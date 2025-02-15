@@ -171,11 +171,6 @@ data_event[DVA_ENOVA] {
         #END_IF
     }
     string: {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                    NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_FROM,
-                                                data.device,
-                                                data.text))
-
         #IF_DEFINED USING_NAV_ENOVA_STRING_DATA_EVENT_CALLBACK
         NAVEnovaStringDataEventCallback(data)
         #END_IF
