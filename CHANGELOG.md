@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.26.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.26.1...v1.26.2) (2025-02-15)
+
+### 🚀 Performance
+
+- **core:** remove unnecessary logging ([830d30d](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/830d30d5b781f795e5095ba58e612a7fe00a619e))
+- **enova:** remove unnecessary logging ([2ae95d9](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/2ae95d94dd96e302ee1cbdfe893f0dba02c3b71d))
+- **errorlog-utils:** remove unnecessary logging ([9800c1f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9800c1f9b9e591ba36bf4e9012781cc7a9a430c3))
+- **file-utils:** remove unnecessary logging ([b14aae2](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b14aae2a1860ade91980d3d5780448a594d12ceb))
+- **mcp-base:** remove unnecessary logging ([61e870d](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/61e870dd30b6ec9e8f98a627942a04d42447e82d))
+- **module-base:** remove unnecessary logging ([a5ea177](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a5ea1771228a4bfddf00932135fde8798e17ff1f))
+- **rms-base:** remove unnecessary logging ([a070444](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a070444c5e56c7b11c1e66dc76cc3cd4a609a0bf))
+- **socket-utils:** remove unnecessary logging ([8fc1df6](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/8fc1df6e8aa525090f139982242a97fa9806be75))
+- **string-utils:** remove unnecessary logging ([6fc87ff](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6fc87ff37dbf85fb3c815d143bf7c425a63a36f1))
+- **timeline-utils:** remove unnecessary logging ([4e52730](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/4e5273012cccdb15109dd6fa01094f1d5d11e6d9))
+
 ## [1.26.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.26.0...v1.26.1) (2025-01-31)
 
 ### 🐛 Bug Fixes
