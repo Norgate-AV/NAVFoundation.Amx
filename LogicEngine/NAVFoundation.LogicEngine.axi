@@ -206,10 +206,10 @@ define_function NAVLogicEngineInit(_NAVLogicEngine engine) {
     engine.EventNames[NAV_LOGIC_ENGINE_EVENT_ID_IDLE] = NAV_LOGIC_ENGINE_EVENT_IDLE
 
     for (x = 1; x <= length_array(NAV_LOGIC_ENGINE_EVENT_IDS); x++) {
-        set_length_array(engine.Timer.Ticks, x)
         engine.Timer.Ticks[x] = NAV_LOGIC_ENGINE_TICK
     }
 
+    set_length_array(engine.Timer.Ticks, length_array(NAV_LOGIC_ENGINE_EVENT_IDS))
     engine.Timer.Duration = NAVArraySumLong(engine.Timer.Ticks)
 }
 
