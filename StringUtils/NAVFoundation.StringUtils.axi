@@ -550,17 +550,17 @@ define_function integer NAVSplitString(char buffer[], char separator[], char res
         }
 
         count++
-        set_length_array(result, count)
         result[count] = token
     }
 
     if (!length_array(bufferCopy)) {
+        set_length_array(result, count)
         return count
     }
 
     count++
-    set_length_array(result, count)
     result[count] = bufferCopy
+    set_length_array(result, count)
 
     return count
 }
