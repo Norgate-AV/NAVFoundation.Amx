@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.26.3](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.26.2...v1.26.3) (2025-02-16)
+
+### 🚀 Performance
+
+- **string-utils:** use set_length_array only once before returning ([223c569](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/223c56941826cb0f2f81fb5dbff8ca5c1935c36e))
+- **logic-engine:** use set_length_array only once before return ([3b67e94](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3b67e9433c71b3e592e01581934da8c1fe45ed06))
+- **snapi-helpers:** use set_length_array only once before return ([c9ed1ee](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c9ed1ee1ac7fb3beaa6679c6f246700c1df6e067))
+
 ## [1.26.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.26.1...v1.26.2) (2025-02-15)
 
 ### 🚀 Performance
