@@ -4,6 +4,7 @@ PROGRAM_NAME='string-utils'
 #DEFINE TESTING_NAVGETSTRINGBETWEEN
 #DEFINE TESTING_NAVSTRINGSUBSTRING
 #DEFINE TESTING_NAVSTRINGSLICE
+#DEFINE TESTING_NAVSPLITSTRING
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.Testing.axi'
 
@@ -17,6 +18,10 @@ PROGRAM_NAME='string-utils'
 
 #IF_DEFINED TESTING_NAVSTRINGSLICE
 #include 'NAVStringSlice.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVSPLITSTRING
+#include 'NAVSplitString.axi'
 #END_IF
 
 
@@ -36,6 +41,10 @@ define_function RunTests() {
 
     #IF_DEFINED TESTING_NAVSTRINGSLICE
     TestNAVStringSlice()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVSPLITSTRING
+    TestNAVSplitString()
     #END_IF
 }
 
