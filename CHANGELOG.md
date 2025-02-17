@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.27.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.26.3...v1.27.0) (2025-02-17)
+
+### 🌟 Features
+
+- **encoding:** add NAVCharToLong ([2322be8](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/2322be848e4d5c013fb783c310b930b30deffe7a))
+- **encoding:** add specific ToByteArray functions for big/little endian ([e7c6dc4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e7c6dc4034b978a4adee3ea8a52319ae5a1235ab))
+- complete initial SHA1 implementation ([81a56f2](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/81a56f274acb1e65d5cadb20e59f1458bdb964df))
+
 ## [1.26.3](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.26.2...v1.26.3) (2025-02-16)
 
 ### 🚀 Performance
