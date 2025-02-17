@@ -41,6 +41,7 @@ https://www.rfc-editor.org/rfc/rfc3174
 
 #include 'NAVFoundation.Cryptography.Sha1.h.axi'
 #include 'NAVFoundation.BinaryUtils.axi'
+#include 'NAVFoundation.Encoding.axi'
 
 
 /**
@@ -68,7 +69,6 @@ define_function char[40] NAVSha1GetHash(char value[]) {
         return ""
     }
 
-    // set_length_array(digest, SHA1_HASH_SIZE)
     error = NAVSha1Result(context, digest)
 
     if (error > 0) {
@@ -77,7 +77,6 @@ define_function char[40] NAVSha1GetHash(char value[]) {
     }
 
     for (i = 0; i < SHA1_HASH_SIZE; i++) {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Digest[', itoa(i + 1), '] => ', digest[(i + 1)]")
         hash = "hash, format('%02x', digest[(i + 1)])"
     }
 
@@ -111,8 +110,10 @@ define_function integer NAVSha1Reset(_NAVSha1Context context) {
     context.IntermediateHash[4] = $10325476
     context.IntermediateHash[5] = $c3d2e1f0
 
-    context.Computed    = 0
-    context.Corrupted   = 0
+    context.Computed    = false
+    context.Corrupted   = false
+
+    context.MessageBlock = ""
 
     return SHA_SUCCESS
 }
@@ -138,8 +139,6 @@ define_function integer NAVSha1Reset(_NAVSha1Context context) {
  *
 **/
 define_function integer NAVSha1Result(_NAVSha1Context context, char digest[SHA1_HASH_SIZE]) {
-    stack_var integer i
-
     if (context.Corrupted) {
         return context.Corrupted
     }
@@ -147,18 +146,20 @@ define_function integer NAVSha1Result(_NAVSha1Context context, char digest[SHA1_
     if (!context.Computed) {
         NAVSha1PadMessage(context)
 
-        for (i = 0; i < 64; i++) {
-            context.MessageBlock[(i + 1)] = 0
-        }
+        context.MessageBlock = ""
 
         context.LengthLow = 0
         context.LengthHigh = 0
-        context.Computed = 1
+        context.Computed = true
     }
 
-    for (i = 0; i < SHA1_HASH_SIZE; i++) {
-        digest[(i + 1)] = type_cast(context.IntermediateHash[((i >> 2) + 1)] >> 8 * (3 - ((i + 1) & $03)))
-    }
+    digest = "
+        NAVLongToByteArrayBE(context.IntermediateHash[1]),
+        NAVLongToByteArrayBE(context.IntermediateHash[2]),
+        NAVLongToByteArrayBE(context.IntermediateHash[3]),
+        NAVLongToByteArrayBE(context.IntermediateHash[4]),
+        NAVLongToByteArrayBE(context.IntermediateHash[5])
+    "
 
     return SHA_SUCCESS
 }
@@ -191,10 +192,6 @@ define_function integer NAVSha1Input(_NAVSha1Context context, char message[], in
         return SHA_SUCCESS
     }
 
-    if (!length_array(message)) {
-        return SHA_NULL
-    }
-
     if (context.Computed) {
         context.Corrupted = SHA_STATE_ERROR
         return SHA_STATE_ERROR
@@ -204,12 +201,11 @@ define_function integer NAVSha1Input(_NAVSha1Context context, char message[], in
         return context.Corrupted
     }
 
-    while (length > 0 && !context.Corrupted) {
-        context.MessageBlock[(context.MessageBlockIndex + 1)] = (message[(messageIndex + 1)] & $FF)
-        // NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'context.MessageBlock[', itoa(context.MessageBlockIndex + 1), '] = (message[', itoa(messageIndex + 1), '] & $FF)'")
-        // NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'context.MessageBlock[', itoa(context.MessageBlockIndex + 1), '] = ', (message[(messageIndex + 1)] & $FF)")
-        context.MessageBlockIndex++
+    messageIndex = 0
 
+    while (length > 0 && !context.Corrupted) {
+        context.MessageBlock = "context.MessageBlock, message[(messageIndex + 1)] & $FF"
+        context.MessageBlockIndex++
 
         context.LengthLow = context.LengthLow + 8
 
@@ -218,7 +214,7 @@ define_function integer NAVSha1Input(_NAVSha1Context context, char message[], in
 
             if (context.LengthHigh == 0) {
                 // Message is too long
-                context.Corrupted = 1
+                context.Corrupted = true
             }
         }
 
@@ -264,22 +260,14 @@ define_function NAVSha1ProcessMessageBlock(_NAVSha1Context context) {
     stack_var long w[80]
     stack_var long temp
 
-    // set_length_array(w, 80)
-    // set_length_array(context.MessageBlock, 64)
-
     /**
     *  Initialize the first 16 words in the array w
     **/
     for (i = 0; i < 16; i++) {
-        // w[(i + 1)] =    context.MessageBlock[(i * 4) + 1] << 24 |
-        //                 context.MessageBlock[(i * 4) + 2] << 16 |
-        //                 context.MessageBlock[(i * 4) + 3] << 08 |
-        //                 context.MessageBlock[(i * 4) + 4] << 00
-        w[(i + 1)] = context.MessageBlock[(i * 4) + 1] << 24
-        w[(i + 1)] = w[(i + 1)] | context.MessageBlock[(i * 4) + 2] << 16
-        w[(i + 1)] = w[(i + 1)] | context.MessageBlock[(i * 4) + 3] << 08
-        w[(i + 1)] = w[(i + 1)] | context.MessageBlock[(i * 4) + 4] << 00
-
+        w[(i + 1)] = (context.MessageBlock[(i * 4) + 1] & $FF) << 24
+        w[(i + 1)] = w[(i + 1)] | (context.MessageBlock[(i * 4) + 2] & $FF) << 16
+        w[(i + 1)] = w[(i + 1)] | (context.MessageBlock[(i * 4) + 3] & $FF) << 08
+        w[(i + 1)] = w[(i + 1)] | (context.MessageBlock[(i * 4) + 4] & $FF) << 00
     }
 
     for (i = 16; i < 80; i++) {
@@ -293,7 +281,7 @@ define_function NAVSha1ProcessMessageBlock(_NAVSha1Context context) {
     e = context.IntermediateHash[5]
 
     for (i = 0; i < 20; i++) {
-        temp = NAVBitRotateLeft(a, 5) + ((b & c) | (~b & d)) + e + w[(i + 1)] + K[1]
+        temp = NAVBitRotateLeft(a, 5) + ((b & c) | (~b & d)) + e + w[(i + 1)] + K[(0) + 1]
 
         e = d
         d = c
@@ -304,7 +292,7 @@ define_function NAVSha1ProcessMessageBlock(_NAVSha1Context context) {
     }
 
     for (i = 20; i < 40; i++) {
-        temp = NAVBitRotateLeft(a, 5) + (b ^ c ^ d) + e + w[(i + 1)] + K[2]
+        temp = NAVBitRotateLeft(a, 5) + (b ^ c ^ d) + e + w[(i + 1)] + K[(1) + 1]
 
         e = d
         d = c
@@ -315,7 +303,7 @@ define_function NAVSha1ProcessMessageBlock(_NAVSha1Context context) {
     }
 
     for (i = 40; i < 60; i++) {
-        temp = NAVBitRotateLeft(a, 5) + ((b & c) | (b & d) | (c & d)) + e + w[(i + 1)] + K[3]
+        temp = NAVBitRotateLeft(a, 5) + ((b & c) | (b & d) | (c & d)) + e + w[(i + 1)] + K[(2) + 1]
 
         e = d
         d = c
@@ -326,7 +314,7 @@ define_function NAVSha1ProcessMessageBlock(_NAVSha1Context context) {
     }
 
     for (i = 60; i < 80; i++) {
-        temp = NAVBitRotateLeft(a, 5) + (b ^ c ^ d) + e + w[(i + 1)] + K[4]
+        temp = NAVBitRotateLeft(a, 5) + (b ^ c ^ d) + e + w[(i + 1)] + K[(3) + 1]
 
         e = d
         d = c
@@ -342,6 +330,7 @@ define_function NAVSha1ProcessMessageBlock(_NAVSha1Context context) {
     context.IntermediateHash[4] = context.IntermediateHash[4] + d
     context.IntermediateHash[5] = context.IntermediateHash[5] + e
 
+    context.MessageBlock = ""
     context.MessageBlockIndex = 0
 }
 
@@ -375,28 +364,29 @@ define_function NAVSha1PadMessage(_NAVSha1Context context) {
      *  block, process it, and then continue padding into a second
      *  block.
     **/
+
     if (context.MessageBlockIndex > 55) {
-        context.MessageBlock[(context.MessageBlockIndex + 1)] = $80
+        context.MessageBlock = "context.MessageBlock, $80"
         context.MessageBlockIndex++
 
         while (context.MessageBlockIndex < 64) {
-            context.MessageBlock[(context.MessageBlockIndex + 1)] = 0
+            context.MessageBlock = "context.MessageBlock, $00"
             context.MessageBlockIndex++
         }
 
         NAVSha1ProcessMessageBlock(context)
 
         while (context.MessageBlockIndex < 56) {
-            context.MessageBlock[(context.MessageBlockIndex + 1)] = 0
+            context.MessageBlock = "context.MessageBlock, $00"
             context.MessageBlockIndex++
         }
     }
     else {
-        context.MessageBlock[(context.MessageBlockIndex + 1)] = $80
+        context.MessageBlock = "context.MessageBlock, $80"
         context.MessageBlockIndex++
 
         while (context.MessageBlockIndex < 56) {
-            context.MessageBlock[(context.MessageBlockIndex + 1)] = 0
+            context.MessageBlock = "context.MessageBlock, $00"
             context.MessageBlockIndex++
         }
     }
@@ -404,14 +394,14 @@ define_function NAVSha1PadMessage(_NAVSha1Context context) {
     /**
      *  Store the message length as the last 8 octets
     **/
-    context.MessageBlock[(56 + 1)] = type_cast(context.LengthHigh >> 24)
-    context.MessageBlock[(57 + 1)] = type_cast(context.LengthHigh >> 16)
-    context.MessageBlock[(58 + 1)] = type_cast(context.LengthHigh >> 08)
-    context.MessageBlock[(59 + 1)] = type_cast(context.LengthHigh >> 00)
-    context.MessageBlock[(60 + 1)] = type_cast(context.LengthLow >> 24)
-    context.MessageBlock[(61 + 1)] = type_cast(context.LengthLow >> 16)
-    context.MessageBlock[(62 + 1)] = type_cast(context.LengthLow >> 08)
-    context.MessageBlock[(63 + 1)] = type_cast(context.LengthLow >> 00)
+    context.MessageBlock = "context.MessageBlock, type_cast(context.LengthHigh >> 24)"
+    context.MessageBlock = "context.MessageBlock, type_cast(context.LengthHigh >> 16)"
+    context.MessageBlock = "context.MessageBlock, type_cast(context.LengthHigh >> 08)"
+    context.MessageBlock = "context.MessageBlock, type_cast(context.LengthHigh >> 00)"
+    context.MessageBlock = "context.MessageBlock, type_cast(context.LengthLow >> 24)"
+    context.MessageBlock = "context.MessageBlock, type_cast(context.LengthLow >> 16)"
+    context.MessageBlock = "context.MessageBlock, type_cast(context.LengthLow >> 08)"
+    context.MessageBlock = "context.MessageBlock, type_cast(context.LengthLow >> 00)"
 
     NAVSha1ProcessMessageBlock(context)
 }

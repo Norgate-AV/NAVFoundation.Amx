@@ -21,7 +21,10 @@ constant char TEST[][2048] = {
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
     '12345678901234567890123456789012345678901234567890123456789012345678901234567890',
     'The quick brown fox jumps over the lazy dog',
-    'The quick brown fox jumps over the lazy dog.'
+    'The quick brown fox jumps over the lazy dog.',
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    'The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.',
+    'This is a longer test case to check the SHA-1 implementation. It should handle longer strings correctly and produce the expected hash value.'
 }
 
 
@@ -34,7 +37,10 @@ constant char EXPECTED[][40] = {
     '761c457bf73b14d27e9e9265c46f4b4dda11f940',
     '50abf5706a150990a08b2c5ea40fa0e585554732',
     '2fd4e1c67a2d28fced849ee1bb76e7391b93eb12',
-    '408d94384216f890ff7a0c3528e8bed1e0b01621'
+    '408d94384216f890ff7a0c3528e8bed1e0b01621',
+    'ada4442f42004e0ee7620938bd4d3e8dac8621a4',
+    '7823706b4aafa08ca50170f1995e7aeface888cd',
+    '59749d06441ba8ad69f8a6a0c5ddce0f5f999b8e'
 }
 
 
