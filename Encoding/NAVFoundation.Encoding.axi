@@ -85,4 +85,19 @@ define_function char[4] NAVLongToByteArray(long value) {
 }
 
 
+define_function NAVCharToLong(long output[], char input[], integer length) {
+    stack_var integer i
+    stack_var integer j
+
+    for (i = 0, j = 0; j < length; i++, j = j + 4) {
+        output[(i + 1)] =   input[(j + 1) + 0] << 00 |
+                            input[(j + 1) + 1] << 08 |
+                            input[(j + 1) + 2] << 16 |
+                            input[(j + 1) + 3] << 24
+    }
+
+    set_length_array(output, j)
+}
+
+
 #END_IF // __NAV_FOUNDATION_ENCODING__
