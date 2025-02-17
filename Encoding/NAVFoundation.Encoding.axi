@@ -68,6 +68,11 @@ define_function long NAVToBigEndian(long value) {
 
 
 define_function char[2] NAVIntegerToByteArray(integer value) {
+    return NAVIntegerToByteArrayLE(value)
+}
+
+
+define_function char[2] NAVIntegerToByteArrayLE(integer value) {
     return "
         type_cast((value >> 00) & $FF),
         type_cast((value >> 08) & $FF)
@@ -75,12 +80,35 @@ define_function char[2] NAVIntegerToByteArray(integer value) {
 }
 
 
+define_function char[2] NAVIntegerToByteArrayBE(integer value) {
+    return "
+        type_cast((value >> 08) & $FF),
+        type_cast((value >> 00) & $FF)
+    "
+}
+
+
 define_function char[4] NAVLongToByteArray(long value) {
+    return NAVLongToByteArrayLE(value)
+}
+
+
+define_function char[4] NAVLongToByteArrayLE(long value) {
     return "
         type_cast((value >> 00) & $FF),
         type_cast((value >> 08) & $FF),
         type_cast((value >> 16) & $FF),
         type_cast((value >> 24) & $FF)
+    "
+}
+
+
+define_function char[4] NAVLongToByteArrayBE(long value) {
+    return "
+        type_cast((value >> 24) & $FF),
+        type_cast((value >> 16) & $FF),
+        type_cast((value >> 08) & $FF),
+        type_cast((value >> 00) & $FF)
     "
 }
 
