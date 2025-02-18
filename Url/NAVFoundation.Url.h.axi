@@ -65,6 +65,7 @@ struct _NAVUrl {
     char Host[512];
     integer Port;
     char Path[256];
+    char FullPath[1024];
     _NAVKeyStringValuePair Queries[NAV_URL_MAX_QUERIES];
     char Fragment[256];
 }

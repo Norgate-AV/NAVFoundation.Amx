@@ -168,6 +168,24 @@ constant char EXPECTED_PATH[][255] = {
     ''
 }
 
+constant char EXPECTED_FULL_PATH[][1024] = {
+    '',
+    '/resource',
+    '/test?foo=bar&baz=123#frag-01',
+    '/test-page',
+    '/v1/users/123/posts',
+    '/api/data?key=value&sort=desc&page=1',
+    '/results?q=test%20query&lang=en',
+    '/path/to/resource',
+    '/products?category=electronics&brand=samsung&inStock=true',
+    '/v2/users/123/posts/comments/456/replies?sort=newest&limit=50#comment-section',
+    '/very/deep/path/structure/file.html?param1=value1&param2=value2&param3=value3#section-2',
+    '/search?q=test+with+spaces&category=all&page=1&filter=active#results',
+    '/path?param=value#fragment?with?questions',
+    '/path#fragment&with&ampersands',
+    '/path/with/trailing/slash/'
+}
+
 constant integer EXPECTED_QUERY_COUNT[] = {
     0,
     0,
@@ -305,6 +323,11 @@ define_function RunTests() {
 
         if (url.Port != EXPECTED_PORT[x]) {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Expected port ', itoa(EXPECTED_PORT[x]), ' but got ', itoa(url.Port)")
+            continue
+        }
+
+        if (url.FullPath != EXPECTED_FULL_PATH[x]) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Expected full path "', EXPECTED_FULL_PATH[x], '" but got "', url.FullPath, '"'")
             continue
         }
 

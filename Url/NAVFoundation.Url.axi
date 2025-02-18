@@ -175,6 +175,8 @@ define_function char NAVParseUrl(char buffer[], _NAVUrl url) {
     if (path) {
         stack_var integer pathEnd
 
+        url.FullPath = NAVStringSubstring(buffer, path, (length - path) + 1)
+
         select {
             active (query && query > path): {
                 pathEnd = query - 1
