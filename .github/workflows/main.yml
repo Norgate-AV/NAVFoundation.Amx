@@ -2,12 +2,28 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
+    paths:
+      - "./**/*.axi"
+      - "./!__tests__/**/*"
+      - ".genlinxrc.yml"
+      - "build.ps1"
+      - "install.ps1"
+      - "manifest.json"
+      - ".github/workflows/main.yml"
 
   pull_request:
-    branches: [master]
-
-  workflow_dispatch:
+    branches:
+      - master
+    paths:
+      - "./**/*.axi"
+      - "./!__tests__/**/*"
+      - ".genlinxrc.yml"
+      - "build.ps1"
+      - "install.ps1"
+      - "manifest.json"
+      - ".github/workflows/main.yml"
 
 defaults:
   run:
@@ -36,50 +52,11 @@ jobs:
           Write-Host whoami:
           whoami
           Write-Host
-          Write-Host Default Environment Variables:
-          Write-Host "CI: $env:CI"
-          Write-Host "GITHUB_ACTION: $env:GITHUB_ACTION"
-          Write-Host "GITHUB_ACTION_PATH: $env:GITHUB_ACTION_PATH"
-          Write-Host "GITHUB_ACTION_REPOSITORY: $env:GITHUB_ACTION_REPOSITORY"
-          Write-Host "GITHUB_ACTIONS: $env:GITHUB_ACTIONS"
-          Write-Host "GITHUB_ACTOR: $env:GITHUB_ACTOR"
-          Write-Host "GITHUB_ACTOR_ID: $env:GITHUB_ACTOR_ID"
-          Write-Host "GITHUB_API_URL: $env:GITHUB_API_URL"
-          Write-Host "GITHUB_BASE_REF: $env:GITHUB_BASE_REF"
-          Write-Host "GITHUB_ENV: $env:GITHUB_ENV"
-          Write-Host "GITHUB_EVENT_NAME: $env:GITHUB_EVENT_NAME"
-          Write-Host "GITHUB_EVENT_PATH: $env:GITHUB_EVENT_PATH"
-          Write-Host "GITHUB_GRAPHQL_URL: $env:GITHUB_GRAPHQL_URL"
-          Write-Host "GITHUB_HEAD_REF: $env:GITHUB_HEAD_REF"
-          Write-Host "GITHUB_JOB: $env:GITHUB_JOB"
-          Write-Host "GITHUB_PATH: $env:GITHUB_PATH"
-          Write-Host "GITHUB_REF: $env:GITHUB_REF"
-          Write-Host "GITHUB_REF_NAME: $env:GITHUB_REF_NAME"
-          Write-Host "GITHUB_REF_PROTECTED: $env:GITHUB_REF_PROTECTED"
-          Write-Host "GITHUB_REF_TYPE: $env:GITHUB_REF_TYPE"
-          Write-Host "GITHUB_REPOSITORY: $env:GITHUB_REPOSITORY"
-          Write-Host "GITHUB_REPOSITORY_ID: $env:GITHUB_REPOSITORY_ID"
-          Write-Host "GITHUB_REPOSITORY_OWNER: $env:GITHUB_REPOSITORY_OWNER"
-          Write-Host "GITHUB_REPOSITORY_OWNER_ID: $env:GITHUB_REPOSITORY_OWNER_ID"
-          Write-Host "GITHUB_RETENTION_DAYS: $env:GITHUB_RETENTION_DAYS"
-          Write-Host "GITHUB_RUN_ATTEMPT: $env:GITHUB_RUN_ATTEMPT"
-          Write-Host "GITHUB_RUN_ID: $env:GITHUB_RUN_ID"
-          Write-Host "GITHUB_RUN_NUMBER: $env:GITHUB_RUN_NUMBER"
-          Write-Host "GITHUB_SERVER_URL: $env:GITHUB_SERVER_URL"
-          Write-Host "GITHUB_SHA: $env:GITHUB_SHA"
-          Write-Host "GITHUB_STEP_SUMMARY: $env:GITHUB_STEP_SUMMARY"
-          Write-Host "GITHUB_WORKFLOW: $env:GITHUB_WORKFLOW"
-          Write-Host "GITHUB_WORKFLOW_REF: $env:GITHUB_WORKFLOW_REF"
-          Write-Host "GITHUB_WORKFLOW_SHA: $env:GITHUB_WORKFLOW_SHA"
-          Write-Host "GITHUB_WORKSPACE: $env:GITHUB_WORKSPACE"
-          Write-Host "RUNNER_ARCH: $env:RUNNER_ARCH"
-          Write-Host "RUNNER_DEBUG: $env:RUNNER_DEBUG"
-          Write-Host "RUNNER_NAME: $env:RUNNER_NAME"
-          Write-Host "RUNNER_OS: $env:RUNNER_OS"
-          Write-Host "RUNNER_TEMP: $env:RUNNER_TEMP"
-          Write-Host "RUNNER_TOOL_CACHE: $env:RUNNER_TOOL_CACHE"
+          Write-Host Environment Variables:
+          Get-ChildItem env:
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
         with:
           version: latest
 
@@ -107,14 +84,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build
-        run: ./build.ps1
+        run: ./build.ps1 -Verbose
 
       - name: Release
         id: release
         if: github.ref == 'refs/heads/master'
-
-        # v4 doesn't seem to be working, so using a specific commit for now
-        uses: cycjimmy/semantic-release-action@v4 # 6d88447fcd3237e1d617f4f663e5ad79a6bf45b1
+        uses: cycjimmy/semantic-release-action@v4
         with:
           extra_plugins: |
             @semantic-release/changelog
@@ -123,22 +98,6 @@ jobs:
             conventional-changelog-conventionalcommits
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Show Release Output Values
-      #   if: github.ref == 'refs/heads/master'
-      #   run: |
-      #     Write-Host "New Release Published: ${{ steps.release.outputs.new_release_published }}"
-      #     Write-Host "New Release Version: ${{ steps.release.outputs.new_release_version }}"
-      #     Write-Host "New Release Major Version: ${{ steps.release.outputs.new_release_major_version }}"
-      #     Write-Host "New Release Minor Version: ${{ steps.release.outputs.new_release_minor_version }}"
-      #     Write-Host "New Release Patch Version: ${{ steps.release.outputs.new_release_patch_version }}"
-      #     Write-Host "New Release Channel: ${{ steps.release.outputs.new_release_channel }}"
-      #     Write-Host "New Release Notes: ${{ steps.release.outputs.new_release_notes }}"
-      #     Write-Host "New Release Git Head: ${{ steps.release.outputs.new_release_git_head }}"
-      #     Write-Host "New Release Git Tag: ${{ steps.release.outputs.new_release_git_tag }}"
-      #     Write-Host "Last Release Version: ${{ steps.release.outputs.last_release_version }}"
-      #     Write-Host "Last Release Git Head: ${{ steps.release.outputs.last_release_git_head }}"
-      #     Write-Host "Last Release Git Tag: ${{ steps.release.outputs.last_release_git_tag }}"
 
       - name: Wait before Dispatch
         if: ${{ github.ref == 'refs/heads/master' && steps.release.outputs.new_release_published == 'true' }}
