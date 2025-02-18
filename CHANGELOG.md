@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.28.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.27.0...v1.28.0) (2025-02-18)
+
+### 🌟 Features
+
+- add Url library ([c4d6742](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c4d6742892b7ecf9c16de8af9f21b10f89f8ae51))
+
 ## [1.27.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.26.3...v1.27.0) (2025-02-17)
 
 ### 🌟 Features
