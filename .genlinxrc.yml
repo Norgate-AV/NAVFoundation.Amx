@@ -33,6 +33,7 @@ build:
       - ./TimelineUtils
       - ./Tui
       - ./UIUtils
+      - ./Url
       - ./__tests__/include/path-utils
       - ./__tests__/include/regex
       - ./__tests__/include/string-utils
