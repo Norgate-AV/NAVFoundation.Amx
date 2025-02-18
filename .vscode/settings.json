@@ -50,5 +50,8 @@
     "dotenv.enableAutocloaking": true,
     "[powershell]": {
         "editor.defaultFormatter": "ms-vscode.powershell"
+    },
+    "[xml]": {
+        "editor.defaultFormatter": "DotJoshJohnson.xml"
     }
 }
