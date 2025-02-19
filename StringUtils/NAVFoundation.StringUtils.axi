@@ -754,7 +754,7 @@ define_function NAVStringGather(_NAVRxBuffer buffer, char delimiter[]) {
         }
 
         #IF_DEFINED USING_NAV_STRING_GATHER_CALLBACK
-        if (true) {
+        {
             stack_var _NAVStringGatherResult result
 
             result.Data = data
