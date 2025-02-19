@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.29.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.28.0...v1.29.0) (2025-02-19)
+
+### 🌟 Features
+
+- **url:** add FullPath member to struct ([83dd725](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/83dd7254e8fdcc1b3c4b84a71ed83db56c46b8bc))
+- **string-utils:** add NAVStringNormalizeAndReplace function ([46a0f5f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/46a0f5fd9b6ab1782956da7d4f68280c57e48262))
+- **string-utils:** add NAVStringTainCase function + various updates ([fbdbef4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/fbdbef4223e0ad0003c50d5d22147f5c4beefce4))
+- **http-utils:** complete initial implementation ([0e5f40e](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/0e5f40e2582344186560968d8c4e6f96db88aa32))
+
 ## [1.28.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.27.0...v1.28.0) (2025-02-18)
 
 ### 🌟 Features
