@@ -12,7 +12,7 @@ build:
       - ./Enova
       - ./FileUtils
       - ./HashTable
-      - ./Http
+      - ./HttpUtils
       - ./IniParser
       - ./Jsmn
       - ./Json

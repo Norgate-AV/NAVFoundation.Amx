@@ -44,6 +44,7 @@ It's feature rich and written in pure NetLinx.
 - [ErrorLogUtils](./ErrorLogUtils)
 - [FileUtils](./FileUtils)
 - [HashTable](./HashTable)
+- [HttpUtils](./HttpUtils)
 - [InterModuleApi](./InterModuleApi)
 - [Jsmn](./Jsmn)
 - [LogicEngine](./LogicEngine)

@@ -31,10 +31,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#IF_NOT_DEFINED __NAV_FOUNDATION_HTTP_H__
-#DEFINE __NAV_FOUNDATION_HTTP_H__ 'NAVFoundation.Http.h'
+#IF_NOT_DEFINED __NAV_FOUNDATION_HTTPUTILS_H__
+#DEFINE __NAV_FOUNDATION_HTTPUTILS_H__ 'NAVFoundation.HttpUtils.h'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Url.h.axi'
 
 
 /*
@@ -46,8 +47,6 @@ SOFTWARE.
     Content-Length: 13\r\n
     \r\n
     Hello, World!
-
-
 */
 
 
@@ -57,47 +56,41 @@ constant char NAV_HTTP_HOST_DEFAULT[]       = 'localhost'
 
 constant char NAV_HTTP_PATH_DEFAULT[]      = '/'
 
-constant char NAV_HTTP_SCHEME_HTTP[]      = 'http'
-constant char NAV_HTTP_SCHEME_HTTPS[]     = 'https'
 
-constant char NAV_HTTP_SCHEME_DEFAULT[]   = "NAV_HTTP_SCHEME_HTTP"
 
-constant char NAV_HTTP_SCHEMES[][]  =   {
-                                            NAV_HTTP_SCHEME_HTTP,
-                                            NAV_HTTP_SCHEME_HTTPS
+// constant char NAV_HTTP_SCHEME_DEFAULT[]   = "NAV_URL_SCHEME_HTTP"
+
+constant char NAV_HTTP_SCHEMES[][20]  =   {
+                                            'http',
+                                            'https'
                                         }
 
-constant char NAV_HTTP_SCHEME_TOKEN[]     = '://'
-constant char NAV_HTTP_PORT_TOKEN[]       = ':'
-constant char NAV_HTTP_PATH_TOKEN[]       = '/'
-constant char NAV_HTTP_QUERY_TOKEN[]      = '?'
-constant char NAV_HTTP_FRAGMENT_TOKEN[]   = '#'
 
 constant integer NAV_HTTP_MAX_REQUEST_LENGTH    = 4096
 constant integer NAV_HTTP_MAX_RESPONSE_LENGTH   = 16384
 
-constant char NAV_HTTP_METHOD_CONNECT[]  = 'CONNECT'
-constant char NAV_HTTP_METHOD_DELETE[]   = 'DELETE'
-constant char NAV_HTTP_METHOD_GET[]      = 'GET'
-constant char NAV_HTTP_METHOD_HEAD[]     = 'HEAD'
-constant char NAV_HTTP_METHOD_OPTIONS[]  = 'OPTIONS'
-constant char NAV_HTTP_METHOD_PATCH[]    = 'PATCH'
-constant char NAV_HTTP_METHOD_POST[]     = 'POST'
-constant char NAV_HTTP_METHOD_PUT[]      = 'PUT'
-constant char NAV_HTTP_METHOD_TRACE[]    = 'TRACE'
+NAV_HTTP_METHOD_CONNECT  = 'CONNECT'
+NAV_HTTP_METHOD_DELETE   = 'DELETE'
+NAV_HTTP_METHOD_GET      = 'GET'
+NAV_HTTP_METHOD_HEAD     = 'HEAD'
+NAV_HTTP_METHOD_OPTIONS   = 'OPTIONS'
+NAV_HTTP_METHOD_PATCH    = 'PATCH'
+NAV_HTTP_METHOD_POST     = 'POST'
+NAV_HTTP_METHOD_PUT      = 'PUT'
+NAV_HTTP_METHOD_TRACE    = 'TRACE'
 
-constant char NAV_HTTP_METHOD_DEFAULT[] = "NAV_HTTP_METHOD_GET"
+// constant char NAV_HTTP_METHOD_DEFAULT[] = "NAV_HTTP_METHOD_GET"
 
-constant char NAV_HTTP_METHODS[][] =    {
-                                            NAV_HTTP_METHOD_CONNECT,
-                                            NAV_HTTP_METHOD_DELETE,
-                                            NAV_HTTP_METHOD_GET,
-                                            NAV_HTTP_METHOD_HEAD,
-                                            NAV_HTTP_METHOD_OPTIONS,
-                                            NAV_HTTP_METHOD_PATCH,
-                                            NAV_HTTP_METHOD_POST,
-                                            NAV_HTTP_METHOD_PUT,
-                                            NAV_HTTP_METHOD_TRACE
+constant char NAV_HTTP_METHODS[][20]=  {
+                                            'CONNECT',
+                                            'DELETE',
+                                            'GET',
+                                            'HEAD',
+                                            'OPTIONS',
+                                            'PATCH',
+                                            'POST',
+                                            'PUT',
+                                            'TRACE'
                                         }
 
 
@@ -105,13 +98,13 @@ constant char NAV_HTTP_VERSION_1_0[]    = 'HTTP/1.0'
 constant char NAV_HTTP_VERSION_1_1[]    = 'HTTP/1.1'
 constant char NAV_HTTP_VERSION_2_0[]    = 'HTTP/2.0'
 
-constant char NAV_HTTP_VERSION_DEFAULT[] = "NAV_HTTP_VERSION_1_1"
+// constant char NAV_HTTP_VERSION_DEFAULT[] = "NAV_HTTP_VERSION_1_1"
 
-constant char NAV_HTTP_VERSIONS[][] =   {
-                                            NAV_HTTP_VERSION_1_0,
-                                            NAV_HTTP_VERSION_1_1,
-                                            NAV_HTTP_VERSION_2_0
-                                        }
+constant char NAV_HTTP_VERSIONS[][20]   =   {
+                                                'HTTP/1.0',
+                                                'HTTP/1.1',
+                                                'HTTP/2.0'
+                                            }
 
 
 constant integer NAV_HTTP_STATUS_CODE_INFO_CONTINUE             = 100
@@ -320,6 +313,51 @@ constant char NAV_HTTP_CONTENT_TYPE_FONT_WOFF[]            = 'font/woff'
 constant char NAV_HTTP_CONTENT_TYPE_FONT_WOFF2[]           = 'font/woff2'
 
 
+// Additional Content Types
+constant char NAV_HTTP_CONTENT_TYPE_APPLICATION_OCTET_STREAM[]    = 'application/octet-stream'
+constant char NAV_HTTP_CONTENT_TYPE_APPLICATION_PDF[]             = 'application/pdf'
+constant char NAV_HTTP_CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED[] = 'application/x-www-form-urlencoded'
+constant char NAV_HTTP_CONTENT_TYPE_APPLICATION_FORM_DATA[]       = 'application/form-data'
+constant char NAV_HTTP_CONTENT_TYPE_APPLICATION_ZIP[]             = 'application/zip'
+constant char NAV_HTTP_CONTENT_TYPE_APPLICATION_XML[]             = 'application/xml'
+constant char NAV_HTTP_CONTENT_TYPE_APPLICATION_JAVASCRIPT[]      = 'application/javascript'
+constant char NAV_HTTP_CONTENT_TYPE_APPLICATION_GRAPHQL[]         = 'application/graphql'
+constant char NAV_HTTP_CONTENT_TYPE_APPLICATION_MSGPACK[]         = 'application/msgpack'
+constant char NAV_HTTP_CONTENT_TYPE_APPLICATION_PROTOBUF[]        = 'application/protobuf'
+
+// Image Content Types
+constant char NAV_HTTP_CONTENT_TYPE_IMAGE_GIF[]                   = 'image/gif'
+constant char NAV_HTTP_CONTENT_TYPE_IMAGE_JPEG[]                  = 'image/jpeg'
+constant char NAV_HTTP_CONTENT_TYPE_IMAGE_PNG[]                   = 'image/png'
+constant char NAV_HTTP_CONTENT_TYPE_IMAGE_SVG_XML[]              = 'image/svg+xml'
+constant char NAV_HTTP_CONTENT_TYPE_IMAGE_WEBP[]                 = 'image/webp'
+constant char NAV_HTTP_CONTENT_TYPE_IMAGE_BMP[]                  = 'image/bmp'
+constant char NAV_HTTP_CONTENT_TYPE_IMAGE_X_ICON[]              = 'image/x-icon'
+constant char NAV_HTTP_CONTENT_TYPE_IMAGE_TIFF[]                = 'image/tiff'
+
+// Audio Content Types
+constant char NAV_HTTP_CONTENT_TYPE_AUDIO_MPEG[]                = 'audio/mpeg'
+constant char NAV_HTTP_CONTENT_TYPE_AUDIO_OGG[]                 = 'audio/ogg'
+constant char NAV_HTTP_CONTENT_TYPE_AUDIO_WAV[]                 = 'audio/wav'
+constant char NAV_HTTP_CONTENT_TYPE_AUDIO_WEBM[]                = 'audio/webm'
+constant char NAV_HTTP_CONTENT_TYPE_AUDIO_AAC[]                 = 'audio/aac'
+
+// Video Content Types
+constant char NAV_HTTP_CONTENT_TYPE_VIDEO_MP4[]                 = 'video/mp4'
+constant char NAV_HTTP_CONTENT_TYPE_VIDEO_MPEG[]                = 'video/mpeg'
+constant char NAV_HTTP_CONTENT_TYPE_VIDEO_OGG[]                 = 'video/ogg'
+constant char NAV_HTTP_CONTENT_TYPE_VIDEO_WEBM[]                = 'video/webm'
+constant char NAV_HTTP_CONTENT_TYPE_VIDEO_X_FLV[]              = 'video/x-flv'
+constant char NAV_HTTP_CONTENT_TYPE_VIDEO_3GPP[]               = 'video/3gpp'
+
+// Additional Text Content Types
+constant char NAV_HTTP_CONTENT_TYPE_TEXT_CSS[]                  = 'text/css'
+constant char NAV_HTTP_CONTENT_TYPE_TEXT_JAVASCRIPT[]           = 'text/javascript'
+constant char NAV_HTTP_CONTENT_TYPE_TEXT_MARKDOWN[]             = 'text/markdown'
+constant char NAV_HTTP_CONTENT_TYPE_TEXT_CACHE_MANIFEST[]       = 'text/cache-manifest'
+constant char NAV_HTTP_CONTENT_TYPE_TEXT_CALENDAR[]             = 'text/calendar'
+
+
 constant char NAV_HTTP_HEADER_ACCEPT[]                              = 'Accept'
 constant char NAV_HTTP_HEADER_ACCEPT_CH[]                           = 'Accept-CH'
 constant char NAV_HTTP_HEADER_ACCEPT_CH_LIFETIME[]                  = 'Accept-CH-Lifetime'
@@ -446,133 +484,299 @@ constant char NAV_HTTP_HEADER_X_FORWARDED_PROTO[]                   = 'X-Forward
 constant char NAV_HTTP_HEADER_X_FRAME_OPTIONS[]                     = 'X-Frame-Options'
 constant char NAV_HTTP_HEADER_X_XSS_PROTECTION[]                    = 'X-XSS-Protection'
 
-constant char NAV_HTTP_HEADERS[][]  =   {
-                                            NAV_HTTP_HEADER_ACCEPT,
-                                            NAV_HTTP_HEADER_ACCEPT_CH,
-                                            NAV_HTTP_HEADER_ACCEPT_CH_LIFETIME,
-                                            NAV_HTTP_HEADER_ACCEPT_CHARSET,
-                                            NAV_HTTP_HEADER_ACCEPT_ENCODING,
-                                            NAV_HTTP_HEADER_ACCEPT_LANGUAGE,
-                                            NAV_HTTP_HEADER_ACCEPT_PATCH,
-                                            NAV_HTTP_HEADER_ACCEPT_POST,
-                                            NAV_HTTP_HEADER_ACCEPT_RANGES,
-                                            NAV_HTTP_HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS,
-                                            NAV_HTTP_HEADER_ACCESS_CONTROL_ALLOW_HEADERS,
-                                            NAV_HTTP_HEADER_ACCESS_CONTROL_ALLOW_METHODS,
-                                            NAV_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN,
-                                            NAV_HTTP_HEADER_ACCESS_CONTROL_EXPOSE_HEADERS,
-                                            NAV_HTTP_HEADER_ACCESS_CONTROL_MAX_AGE,
-                                            NAV_HTTP_HEADER_ACCESS_CONTROL_REQUEST_HEADERS,
-                                            NAV_HTTP_HEADER_ACCESS_CONTROL_REQUEST_METHOD,
-                                            NAV_HTTP_HEADER_AGE,
-                                            NAV_HTTP_HEADER_ALLOW,
-                                            NAV_HTTP_HEADER_ALT_SVC,
-                                            NAV_HTTP_HEADER_ALT_USED,
-                                            NAV_HTTP_HEADER_AUTHORIZATION,
-                                            NAV_HTTP_HEADER_CACHE_CONTROL,
-                                            NAV_HTTP_HEADER_CLEAR_SITE_DATA,
-                                            NAV_HTTP_HEADER_CONNECTION,
-                                            NAV_HTTP_HEADER_CONTENT_DISPOSITION,
-                                            NAV_HTTP_HEADER_CONTENT_DPR,
-                                            NAV_HTTP_HEADER_CONTENT_ENCODING,
-                                            NAV_HTTP_HEADER_CONTENT_LANGUAGE,
-                                            NAV_HTTP_HEADER_CONTENT_LENGTH,
-                                            NAV_HTTP_HEADER_CONTENT_LOCATION,
-                                            NAV_HTTP_HEADER_CONTENT_RANGE,
-                                            NAV_HTTP_HEADER_CONTENT_SECURITY_POLICY,
-                                            NAV_HTTP_HEADER_CONTENT_SECURITY_POLICY_REPORT_ONLY,
-                                            NAV_HTTP_HEADER_CONTENT_TYPE,
-                                            NAV_HTTP_HEADER_COOKIE,
-                                            NAV_HTTP_HEADER_CRITIAL_CH,
-                                            NAV_HTTP_HEADER_CROSS_ORIGIN_EMBEDDER_POLICY,
-                                            NAV_HTTP_HEADER_CROSS_ORIGIN_OPENER_POLICY,
-                                            NAV_HTTP_HEADER_CROSS_ORIGIN_RESOURCE_POLICY,
-                                            NAV_HTTP_HEADER_DATE,
-                                            NAV_HTTP_HEADER_DEVICE_MEMORY,
-                                            NAV_HTTP_HEADER_DIGEST,
-                                            NAV_HTTP_HEADER_DNT,
-                                            NAV_HTTP_HEADER_DOWNLINK,
-                                            NAV_HTTP_HEADER_DPR,
-                                            NAV_HTTP_HEADER_EARLY_DATA,
-                                            NAV_HTTP_HEADER_ECT,
-                                            NAV_HTTP_HEADER_ETAG,
-                                            NAV_HTTP_HEADER_EXPECT,
-                                            NAV_HTTP_HEADER_EXPECT_CT,
-                                            NAV_HTTP_HEADER_EXPIRES,
-                                            NAV_HTTP_HEADER_FORWARDED,
-                                            NAV_HTTP_HEADER_FROM,
-                                            NAV_HTTP_HEADER_HOST,
-                                            NAV_HTTP_HEADER_IF_MATCH,
-                                            NAV_HTTP_HEADER_IF_MODIFIED_SINCE,
-                                            NAV_HTTP_HEADER_IF_NONE_MATCH,
-                                            NAV_HTTP_HEADER_IF_RANGE,
-                                            NAV_HTTP_HEADER_IF_UNMODIFIED_SINCE,
-                                            NAV_HTTP_HEADER_KEEP_ALIVE,
-                                            NAV_HTTP_HEADER_LARGE_ALLOCATION,
-                                            NAV_HTTP_HEADER_LAST_MODIFIED,
-                                            NAV_HTTP_HEADER_LINK,
-                                            NAV_HTTP_HEADER_LOCATION,
-                                            NAV_HTTP_HEADER_MAX_FORWARDS,
-                                            NAV_HTTP_HEADER_NEL,
-                                            NAV_HTTP_HEADER_ORIGIN,
-                                            NAV_HTTP_HEADER_PERMISSIONS_POLICY,
-                                            NAV_HTTP_HEADER_PRAGMA,
-                                            NAV_HTTP_HEADER_PROXY_AUTHENTICATE,
-                                            NAV_HTTP_HEADER_PROXY_AUTHORIZATION,
-                                            NAV_HTTP_HEADER_PROXY_RANGE,
-                                            NAV_HTTP_HEADER_PROXY_REFERER,
-                                            NAV_HTTP_HEADER_REFERER_POLICY,
-                                            NAV_HTTP_HEADER_RETRY_AFTER,
-                                            NAV_HTTP_HEADER_RTT,
-                                            NAV_HTTP_HEADER_SAVE_DATA,
-                                            NAV_HTTP_HEADER_SEC_CH_PREFERS_COLOR_SCHEME,
-                                            NAV_HTTP_HEADER_SEC_CH_PREFERS_REDUCED_MOTION,
-                                            NAV_HTTP_HEADER_SEC_CH_PREFERS_REDUCED_TRANSPARENCY,
-                                            NAV_HTTP_HEADER_SEC_CH_UA,
-                                            NAV_HTTP_HEADER_SEC_CH_UA_ARCH,
-                                            NAV_HTTP_HEADER_SEC_CH_UA_BITNESS,
-                                            NAV_HTTP_HEADER_SEC_CH_UA_FULL_VERSION,
-                                            NAV_HTTP_HEADER_SEC_CH_UA_FULL_VERSION_LIST,
-                                            NAV_HTTP_HEADER_SEC_CH_UA_MOBILE,
-                                            NAV_HTTP_HEADER_SEC_CH_UA_MODEL,
-                                            NAV_HTTP_HEADER_SEC_CH_UA_PLATFORM,
-                                            NAV_HTTP_HEADER_SEC_CH_UA_PLATFORM_VERSION,
-                                            NAV_HTTP_HEADER_SEC_FETCH_DEST,
-                                            NAV_HTTP_HEADER_SEC_FETCH_MODE,
-                                            NAV_HTTP_HEADER_SEC_FETCH_SITE,
-                                            NAV_HTTP_HEADER_SEC_FETCH_USER,
-                                            NAV_HTTP_HEADER_SEC_GPC,
-                                            NAV_HTTP_HEADER_SEC_PURPOSE,
-                                            NAV_HTTP_HEADER_SEC_WEBSOCKET_ACCEPT,
-                                            NAV_HTTP_HEADER_SERVER,
-                                            NAV_HTTP_HEADER_SERVER_TIMING,
-                                            NAV_HTTP_HEADER_SERVICE_WORKER_NAVIGATION_PRELOAD,
-                                            NAV_HTTP_HEADER_SET_COOKIE,
-                                            NAV_HTTP_HEADER_SOURCEMAP,
-                                            NAV_HTTP_HEADER_STRICT_TRANSPORT_SECURITY,
-                                            NAV_HTTP_HEADER_TE,
-                                            NAV_HTTP_HEADER_TIMING_ALLOW_ORIGIN,
-                                            NAV_HTTP_HEADER_TK,
-                                            NAV_HTTP_HEADER_TRAILER,
-                                            NAV_HTTP_HEADER_TRANSFER_ENCODING,
-                                            NAV_HTTP_HEADER_UPGRADE,
-                                            NAV_HTTP_HEADER_UPGRADE_INSECURE_REQUESTS,
-                                            NAV_HTTP_HEADER_USER_AGENT,
-                                            NAV_HTTP_HEADER_VARY,
-                                            NAV_HTTP_HEADER_VIA,
-                                            NAV_HTTP_HEADER_VIEWPORT_WIDTH,
-                                            NAV_HTTP_HEADER_WANT_DIGEST,
-                                            NAV_HTTP_HEADER_WARNING,
-                                            NAV_HTTP_HEADER_WIDTH,
-                                            NAV_HTTP_HEADER_WWW_AUTHENTICATE,
-                                            NAV_HTTP_HEADER_X_CONTENT_TYPE_OPTIONS,
-                                            NAV_HTTP_HEADER_X_DNS_PREFETCH_CONTROL,
-                                            NAV_HTTP_HEADER_X_FORWARDED_FOR,
-                                            NAV_HTTP_HEADER_X_FORWARDED_HOST,
-                                            NAV_HTTP_HEADER_X_FORWARDED_PROTO,
-                                            NAV_HTTP_HEADER_X_FRAME_OPTIONS,
-                                            NAV_HTTP_HEADER_X_XSS_PROTECTION
-                                        }
+// Additional Headers
+constant char NAV_HTTP_HEADER_ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK[] = 'Access-Control-Request-Private-Network'
+constant char NAV_HTTP_HEADER_ACCEPT_PUSH_POLICY[]              = 'Accept-Push-Policy'
+constant char NAV_HTTP_HEADER_ACCEPT_SIGNATURE[]                = 'Accept-Signature'
+constant char NAV_HTTP_HEADER_AUTHENTICATION_CONTROL[]          = 'Authentication-Control'
+constant char NAV_HTTP_HEADER_AUTHENTICATION_INFO[]             = 'Authentication-Info'
+constant char NAV_HTTP_HEADER_CDN_CACHE_CONTROL[]              = 'CDN-Cache-Control'
+constant char NAV_HTTP_HEADER_CONTENT_SECURITY_POLICY_PIN[]     = 'Content-Security-Policy-Pin'
+constant char NAV_HTTP_HEADER_CROSS_ORIGIN_ISOLATION[]          = 'Cross-Origin-Isolation'
+constant char NAV_HTTP_HEADER_DELTA_BASE[]                      = 'Delta-Base'
+constant char NAV_HTTP_HEADER_DEPRECATION[]                     = 'Deprecation'
+constant char NAV_HTTP_HEADER_DEVICE_CHANGE[]                   = 'Device-Change'
+constant char NAV_HTTP_HEADER_EARLY_HINTS[]                     = 'Early-Hints'
+constant char NAV_HTTP_HEADER_EXPECT_STAPLE[]                   = 'Expect-Staple'
+constant char NAV_HTTP_HEADER_FEATURE_POLICY[]                  = 'Feature-Policy'
+constant char NAV_HTTP_HEADER_IDENT[]                          = 'Ident'
+constant char NAV_HTTP_HEADER_IDEMPOTENCY_KEY[]                = 'Idempotency-Key'
+constant char NAV_HTTP_HEADER_IF_SCHEDULE_TAG_MATCH[]          = 'If-Schedule-Tag-Match'
+constant char NAV_HTTP_HEADER_LAST_EVENT_ID[]                  = 'Last-Event-ID'
+constant char NAV_HTTP_HEADER_LINK_TEMPLATE[]                  = 'Link-Template'
+constant char NAV_HTTP_HEADER_METADATA[]                       = 'Metadata'
+constant char NAV_HTTP_HEADER_NETWORK_CONTROL[]                = 'Network-Control'
+constant char NAV_HTTP_HEADER_PRIORITY[]                       = 'Priority'
+constant char NAV_HTTP_HEADER_PROTOCOL[]                       = 'Protocol'
+constant char NAV_HTTP_HEADER_PUSH_POLICY[]                    = 'Push-Policy'
+constant char NAV_HTTP_HEADER_RECEIVED_TTL[]                   = 'Received-TTL'
+constant char NAV_HTTP_HEADER_SCHEDULING_REALM[]               = 'Scheduling-Realm'
+constant char NAV_HTTP_HEADER_SEC_TOKEN_BINDING[]              = 'Sec-Token-Binding'
+constant char NAV_HTTP_HEADER_SERVER_TIMING_ALLOW_ORIGIN[]     = 'Server-Timing-Allow-Origin'
+constant char NAV_HTTP_HEADER_SIGNATURE[]                      = 'Signature'
+constant char NAV_HTTP_HEADER_SIGNED_HEADERS[]                 = 'Signed-Headers'
+constant char NAV_HTTP_HEADER_STATUS_URI[]                     = 'Status-URI'
+constant char NAV_HTTP_HEADER_SUNSET[]                         = 'Sunset'
+constant char NAV_HTTP_HEADER_SURROGATE_CAPABILITY[]           = 'Surrogate-Capability'
+constant char NAV_HTTP_HEADER_TTL[]                           = 'TTL'
+constant char NAV_HTTP_HEADER_VARIANT_VARY[]                   = 'Variant-Vary'
+constant char NAV_HTTP_HEADER_X_CORRELATION_ID[]               = 'X-Correlation-ID'
+constant char NAV_HTTP_HEADER_X_REQUEST_ID[]                   = 'X-Request-ID'
+constant char NAV_HTTP_HEADER_X_ROBOTS_TAG[]                   = 'X-Robots-Tag'
+
+
+constant char NAV_HTTP_HEADERS[][255] = {
+    'Accept',
+    'Accept-CH',
+    'Accept-CH-Lifetime',
+    'Accept-Charset',
+    'Accept-Encoding',
+    'Accept-Language',
+    'Accept-Patch',
+    'Accept-Post',
+    'Accept-Push-Policy',
+    'Accept-Ranges',
+    'Accept-Signature',
+    'Access-Control-Allow-Credentials',
+    'Access-Control-Allow-Headers',
+    'Access-Control-Allow-Methods',
+    'Access-Control-Allow-Origin',
+    'Access-Control-Expose-Headers',
+    'Access-Control-Max-Age',
+    'Access-Control-Request-Headers',
+    'Access-Control-Request-Method',
+    'Access-Control-Request-Private-Network',
+    'Age',
+    'Allow',
+    'Alt-Svc',
+    'Alt-Used',
+    'Authentication-Control',
+    'Authentication-Info',
+    'Authorization',
+    'Cache-Control',
+    'CDN-Cache-Control',
+    'Clear-Site-Data',
+    'Connection',
+    'Content-Disposition',
+    'Content-DPR',
+    'Content-Encoding',
+    'Content-Language',
+    'Content-Length',
+    'Content-Location',
+    'Content-Range',
+    'Content-Security-Policy',
+    'Content-Security-Policy-Pin',
+    'Content-Security-Policy-Report-Only',
+    'Content-Type',
+    'Cookie',
+    'Critical-CH',
+    'Cross-Origin-Embedder-Policy',
+    'Cross-Origin-Isolation',
+    'Cross-Origin-Opener-Policy',
+    'Cross-Origin-Resource-Policy',
+    'Date',
+    'Delta-Base',
+    'Deprecation',
+    'Device-Change',
+    'Device-Memory',
+    'Digest',
+    'DNT',
+    'Downlink',
+    'DPR',
+    'Early-Data',
+    'Early-Hints',
+    'ECT',
+    'ETag',
+    'Expect',
+    'Expect-CT',
+    'Expect-Staple',
+    'Expires',
+    'Feature-Policy',
+    'Forwarded',
+    'From',
+    'Host',
+    'Ident',
+    'Idempotency-Key',
+    'If-Match',
+    'If-Modified-Since',
+    'If-None-Match',
+    'If-Range',
+    'If-Schedule-Tag-Match',
+    'If-Unmodified-Since',
+    'Keep-Alive',
+    'Large-Allocation',
+    'Last-Event-ID',
+    'Last-Modified',
+    'Link',
+    'Link-Template',
+    'Location',
+    'Max-Forwards',
+    'Metadata',
+    'NEL',
+    'Network-Control',
+    'Origin',
+    'Permissions-Policy',
+    'Pragma',
+    'Priority',
+    'Protocol',
+    'Proxy-Authenticate',
+    'Proxy-Authorization',
+    'Push-Policy',
+    'Range',
+    'Received-TTL',
+    'Referer',
+    'Referer-Policy',
+    'Retry-After',
+    'RTT',
+    'Save-Data',
+    'Scheduling-Realm',
+    'Sec-CH-Prefers-Color-Scheme',
+    'Sec-CH-Prefers-Reduced-Motion',
+    'Sec-CH-Prefers-Reduced-Transparency',
+    'Sec-CH-UA',
+    'Sec-CH-UA-Arch',
+    'Sec-CH-UA-Bitness',
+    'Sec-CH-UA-Full-Version',
+    'Sec-CH-UA-Full-Version-List',
+    'Sec-CH-UA-Mobile',
+    'Sec-CH-UA-Model',
+    'Sec-CH-UA-Platform',
+    'Sec-CH-UA-Platform-Version',
+    'Sec-Fetch-Dest',
+    'Sec-Fetch-Mode',
+    'Sec-Fetch-Site',
+    'Sec-Fetch-User',
+    'Sec-GPC',
+    'Sec-Purpose',
+    'Sec-Token-Binding',
+    'Sec-WebSocket-Accept',
+    'Server',
+    'Server-Timing',
+    'Server-Timing-Allow-Origin',
+    'Service-Worker-Navigation-Preload',
+    'Set-Cookie',
+    'Signature',
+    'Signed-Headers',
+    'SourceMap',
+    'Status-URI',
+    'Strict-Transport-Security',
+    'Sunset',
+    'Surrogate-Capability',
+    'TE',
+    'Timing-Allow-Origin',
+    'Tk',
+    'Trailer',
+    'Transfer-Encoding',
+    'TTL',
+    'Upgrade',
+    'Upgrade-Insecure-Requests',
+    'User-Agent',
+    'Variant-Vary',
+    'Vary',
+    'Via',
+    'Viewport-Width',
+    'Want-Digest',
+    'Warning',
+    'Width',
+    'WWW-Authenticate',
+    'X-Content-Type-Options',
+    'X-Correlation-ID',
+    'X-DNS-Prefetch-Control',
+    'X-Forwarded-For',
+    'X-Forwarded-Host',
+    'X-Forwarded-Proto',
+    'X-Frame-Options',
+    'X-Request-ID',
+    'X-Robots-Tag',
+    'X-XSS-Protection'
+}
+
+// Common HTTP Ports
+constant integer NAV_HTTP_PORT_DEFAULT                = 80
+constant integer NAV_HTTPS_PORT_DEFAULT              = 443
+constant integer NAV_HTTP_ALT_PORT                   = 8080
+constant integer NAV_HTTPS_ALT_PORT                  = 8443
+
+// HTTP Authentication Schemes
+constant char NAV_HTTP_AUTH_SCHEME_BASIC[]           = 'Basic'
+constant char NAV_HTTP_AUTH_SCHEME_BEARER[]          = 'Bearer'
+constant char NAV_HTTP_AUTH_SCHEME_DIGEST[]          = 'Digest'
+constant char NAV_HTTP_AUTH_SCHEME_NEGOTIATE[]       = 'Negotiate'
+constant char NAV_HTTP_AUTH_SCHEME_OAUTH[]           = 'OAuth'
+
+// Cache Control Directives
+constant char NAV_HTTP_CACHE_CONTROL_NO_CACHE[]      = 'no-cache'
+constant char NAV_HTTP_CACHE_CONTROL_NO_STORE[]      = 'no-store'
+constant char NAV_HTTP_CACHE_CONTROL_NO_TRANSFORM[]  = 'no-transform'
+constant char NAV_HTTP_CACHE_CONTROL_ONLY_IF_CACHED[] = 'only-if-cached'
+constant char NAV_HTTP_CACHE_CONTROL_MUST_REVALIDATE[] = 'must-revalidate'
+constant char NAV_HTTP_CACHE_CONTROL_PUBLIC[]        = 'public'
+constant char NAV_HTTP_CACHE_CONTROL_PRIVATE[]       = 'private'
+constant char NAV_HTTP_CACHE_CONTROL_MAX_AGE[]       = 'max-age'
+constant char NAV_HTTP_CACHE_CONTROL_S_MAXAGE[]      = 's-maxage'
+
+// Common Content Encodings
+constant char NAV_HTTP_ENCODING_GZIP[]               = 'gzip'
+constant char NAV_HTTP_ENCODING_COMPRESS[]           = 'compress'
+constant char NAV_HTTP_ENCODING_DEFLATE[]            = 'deflate'
+constant char NAV_HTTP_ENCODING_BR[]                 = 'br'
+constant char NAV_HTTP_ENCODING_IDENTITY[]           = 'identity'
+
+// Transfer Encodings
+constant char NAV_HTTP_TRANSFER_ENCODING_CHUNKED[]   = 'chunked'
+constant char NAV_HTTP_TRANSFER_ENCODING_COMPRESS[]  = 'compress'
+constant char NAV_HTTP_TRANSFER_ENCODING_DEFLATE[]   = 'deflate'
+constant char NAV_HTTP_TRANSFER_ENCODING_GZIP[]      = 'gzip'
+
+// Connection Types
+constant char NAV_HTTP_CONNECTION_CLOSE[]            = 'close'
+constant char NAV_HTTP_CONNECTION_KEEP_ALIVE[]       = 'keep-alive'
+constant char NAV_HTTP_CONNECTION_UPGRADE[]          = 'upgrade'
+
+// Common Character Constants
+constant char NAV_HTTP_CRLF[]                        = '$0D,$0A'
+constant char NAV_HTTP_HEADER_SEPARATOR[]            = ': '
+constant char NAV_HTTP_QUERY_SEPARATOR[]             = '?'
+constant char NAV_HTTP_FRAGMENT_SEPARATOR[]          = '#'
+constant char NAV_HTTP_PATH_SEPARATOR[]              = '/'
+constant char NAV_HTTP_QUERY_PARAM_SEPARATOR[]       = '&'
+constant char NAV_HTTP_QUERY_VALUE_SEPARATOR[]       = '='
+
+// Security Related
+constant char NAV_HTTP_HSTS_MAX_AGE[]               = 'max-age=31536000'
+constant char NAV_HTTP_HSTS_INCLUDE_SUBDOMAINS[]    = 'includeSubDomains'
+constant char NAV_HTTP_HSTS_PRELOAD[]               = 'preload'
+
+constant char NAV_HTTP_CSP_DEFAULT_SRC[]            = 'default-src'
+constant char NAV_HTTP_CSP_SCRIPT_SRC[]             = 'script-src'
+constant char NAV_HTTP_CSP_STYLE_SRC[]              = 'style-src'
+constant char NAV_HTTP_CSP_IMG_SRC[]                = 'img-src'
+constant char NAV_HTTP_CSP_CONNECT_SRC[]            = 'connect-src'
+constant char NAV_HTTP_CSP_FONT_SRC[]               = 'font-src'
+constant char NAV_HTTP_CSP_OBJECT_SRC[]             = 'object-src'
+constant char NAV_HTTP_CSP_MEDIA_SRC[]              = 'media-src'
+
+// Common Response Types
+constant char NAV_HTTP_RESPONSE_TYPE_SUCCESS[]       = 'SUCCESS'
+constant char NAV_HTTP_RESPONSE_TYPE_ERROR[]         = 'ERROR'
+constant char NAV_HTTP_RESPONSE_TYPE_TIMEOUT[]       = 'TIMEOUT'
+
+// HTTP Request Timeouts (in seconds)
+constant integer NAV_HTTP_TIMEOUT_DEFAULT            = 30
+constant integer NAV_HTTP_TIMEOUT_QUICK             = 5
+constant integer NAV_HTTP_TIMEOUT_LONG              = 120
+
+// Maximum Sizes
+constant integer NAV_HTTP_MAX_HEADER_SIZE           = 8192
+constant integer NAV_HTTP_MAX_URL_LENGTH            = 2048
+constant integer NAV_HTTP_MAX_PATH_LENGTH           = 1024
+constant integer NAV_HTTP_MAX_QUERY_LENGTH          = 1024
+constant integer NAV_HTTP_MAX_HEADERS              = 50
+constant integer NAV_HTTP_MAX_COOKIES              = 20
+
+// Websocket Related
+constant char NAV_HTTP_WEBSOCKET_VERSION[]          = '13'
+constant char NAV_HTTP_WEBSOCKET_PROTOCOL[]         = 'websocket'
 
 
 DEFINE_TYPE
@@ -589,47 +793,44 @@ struct _NAVHttpHeader {
 }
 
 
-struct _NAVHttpHost {
-    char Address[256];
-    integer Port;
-}
-
-
 struct _NAVHttpRequest {
     char Method[7];
     char Path[256];
     char Version[8];
-    _NAVHttpHost Host;
+    char Host[256];
+    integer Port;
     char Body[2048];
 
     _NAVHttpHeader Headers;
 }
 
 
+struct _NAVHttpRequestObject {
+    long Id
+    char Host[256];
+    integer Port;
+    _NAVHttpRequest Request
+}
+
+
 struct _NAVHttpResponse {
     _NAVHttpStatus Status;
-    char Body[16384];
-
     _NAVHttpHeader Headers;
+    char Body[16384];
+    char ContentType[256];
+    long ContentLength;
 }
 
 
-struct _NAVHttpUrl {
-    char Scheme[16];
-    _NAVHttpHost Host;
-    char Path[256];
-    _NAVKeyStringValuePair Queries[10];
-    _NAVKeyStringValuePair Fragments[10];
+struct _NAVHttpRequestConfig {
+    integer Timeout;
+    char AuthScheme[32];
+    char AuthToken[1024];
+    char CacheControl[256];
+    integer MaxRedirects;
+    integer ValidateCertificates;
+    integer FollowRedirects;
+    integer UseCompression;
 }
 
-
-struct _NAVHttpUrlParser {
-    char Scheme;
-    char Host;
-    char Path;
-    char Query;
-    char Fragment;
-}
-
-
-#END_IF // __NAV_FOUNDATION_HTTP_H__
+#END_IF // __NAV_FOUNDATION_HTTPUTILS_H__
