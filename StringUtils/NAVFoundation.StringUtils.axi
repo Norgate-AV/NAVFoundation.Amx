@@ -802,26 +802,33 @@ define_function char[NAV_MAX_BUFFER] NAVStringPascalCase(char buffer[]) {
     stack_var char result[NAV_MAX_BUFFER]
     stack_var integer length
     stack_var integer x
-    stack_var integer byte
+    stack_var char newWord
 
-    result = buffer
-    length = length_array(result)
+    result = NAVInsertSpacesBeforeUppercase(buffer)
+    result = NAVStringReplace(result, '-', ' ')
+    result = NAVStringReplace(result, '_', ' ')
+    result = NAVStringReplace(result, '.', ' ')
 
-    if (!length) {
-        return result
+    while (NAVContains(result, '  ')) {
+        result = NAVStringReplace(result, '  ', ' ')
     }
 
-    result[1] = result[1] - 32
+    length = length_array(result)
+    newWord = true
 
-    for (x = 2; x <= length; x++) {
-        byte = result[x]
-
-        if (byte != $20 && byte != $2D && byte != $5F) {
+    for (x = 1; x <= length; x++) {
+        if (result[x] == ' ') {
+            newWord = true
             continue
         }
 
-        result[x + 1] = result[x + 1] - 32
+        if (newWord && NAVIsLowerCase(result[x])) {
+            result[x] = NAVCharToUpper(result[x])
+            newWord = false
+        }
     }
+
+    result = NAVStringReplace(result, ' ', '')
 
     return result
 }
@@ -829,27 +836,11 @@ define_function char[NAV_MAX_BUFFER] NAVStringPascalCase(char buffer[]) {
 
 define_function char[NAV_MAX_BUFFER] NAVStringCamelCase(char buffer[]) {
     stack_var char result[NAV_MAX_BUFFER]
-    stack_var integer length
-    stack_var integer x
-    stack_var integer byte
 
-    result = buffer
-    length = length_array(result)
+    result = NAVStringPascalCase(buffer)
 
-    if (!length) {
-        return result
-    }
-
-    result[1] = result[1] + 32
-
-    for (x = 2; x <= length; x++) {
-        byte = result[x]
-
-        if (byte != $20 && byte != $2D && byte != $5F) {
-            continue
-        }
-
-        result[x + 1] = result[x + 1] - 32
+    if (length_array(result)) {
+        result[1] = NAVCharToLower(result[1])
     }
 
     return result
@@ -858,26 +849,18 @@ define_function char[NAV_MAX_BUFFER] NAVStringCamelCase(char buffer[]) {
 
 define_function char[NAV_MAX_BUFFER] NAVStringSnakeCase(char buffer[]) {
     stack_var char result[NAV_MAX_BUFFER]
-    stack_var integer length
-    stack_var integer x
-    stack_var integer byte
 
-    result = lower_string(buffer)
-    length = length_array(result)
+    result = NAVInsertSpacesBeforeUppercase(buffer)
 
-    if (!length) {
-        return result
+    result = NAVStringReplace(result, '-', ' ')
+    result = NAVStringReplace(result, '_', ' ')
+    result = NAVStringReplace(result, '.', ' ')
+
+    while (NAVContains(result, '  ')) {
+        result = NAVStringReplace(result, '  ', ' ')
     }
 
-    for (x = 1; x <= length; x++) {
-        byte = result[x]
-
-        if (byte != $20 && byte != $2D) {
-            continue
-        }
-
-        result[x] = $5F
-    }
+    result = NAVStringReplace(result, ' ', '_')
 
     return result
 }
@@ -885,25 +868,35 @@ define_function char[NAV_MAX_BUFFER] NAVStringSnakeCase(char buffer[]) {
 
 define_function char[NAV_MAX_BUFFER] NAVStringKebabCase(char buffer[]) {
     stack_var char result[NAV_MAX_BUFFER]
+
+    result = NAVStringSnakeCase(buffer)
+    result = NAVStringReplace(result, '_', '-')
+
+    return result
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVStringTrainCase(char buffer[]) {
+    stack_var char result[NAV_MAX_BUFFER]
     stack_var integer length
     stack_var integer x
-    stack_var integer byte
+    stack_var char byte
+    stack_var char prev
 
-    result = lower_string(buffer)
+    result = NAVStringKebabCase(buffer)
     length = length_array(result)
 
-    if (!length) {
-        return result
+    if (length) {
+        result[1] = NAVCharToUpper(result[1])
     }
 
-    for (x = 1; x <= length; x++) {
+    for (x = 2; x <= length; x++) {
         byte = result[x]
+        prev = result[x - 1]
 
-        if (byte != $20 && byte != $5F) {
-            continue
+        if (prev == '-') {
+            result[x] = NAVCharToUpper(byte)
         }
-
-        result[x] = $2D
     }
 
     return result
@@ -911,29 +904,7 @@ define_function char[NAV_MAX_BUFFER] NAVStringKebabCase(char buffer[]) {
 
 
 define_function char[NAV_MAX_BUFFER] NAVStringScreamKebabCase(char buffer[]) {
-    stack_var char result[NAV_MAX_BUFFER]
-    stack_var integer length
-    stack_var integer x
-    stack_var integer byte
-
-    result = upper_string(buffer)
-    length = length_array(result)
-
-    if (!length) {
-        return result
-    }
-
-    for (x = 1; x <= length; x++) {
-        byte = result[x]
-
-        if (byte != $20 && byte != $5F) {
-            continue
-        }
-
-        result[x] = $2D
-    }
-
-    return result
+    return upper_string(NAVStringKebabCase(buffer))
 }
 
 
@@ -964,6 +935,65 @@ define_function char NAVCharCodeAt(char buffer[], integer index) {
     }
 
     return buffer[index]
+}
+
+
+define_function char NAVIsUpperCase(char byte) {
+    return (byte >= 'A' && byte <= 'Z')
+}
+
+
+define_function char NAVIsLowerCase(char byte) {
+    return (byte >= 'a' && byte <= 'z')
+}
+
+
+define_function char NAVCharToLower(char byte) {
+    if (NAVIsUpperCase(byte)) {
+        return byte + 32
+    }
+
+    return byte
+}
+
+
+define_function char NAVCharToUpper(char byte) {
+    if (NAVIsLowerCase(byte)) {
+        return byte - 32
+    }
+
+    return byte
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVInsertSpacesBeforeUppercase(char buffer[]) {
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer x
+    stack_var integer length
+    stack_var char c
+
+    length = length_array(buffer)
+
+    if (!length) {
+        return buffer
+    }
+
+    for(x = 1; x <= length; x++) {
+        c = buffer[x]
+
+        if (x == 1) {
+            result = "result, NAVCharToLower(c)"
+            continue
+        }
+
+        if (NAVIsUpperCase(c) && !NAVIsUpperCase(buffer[x - 1]) && buffer[x - 1] != ' ') {
+            result = "result, ' '"
+        }
+
+        result = "result, NAVCharToLower(c)"
+    }
+
+    return result
 }
 
 
