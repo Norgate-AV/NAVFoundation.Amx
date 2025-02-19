@@ -181,6 +181,31 @@ define_function char[NAV_MAX_BUFFER] NAVStringReplace(char buffer[], char match[
 }
 
 
+define_function char[NAV_MAX_BUFFER] NAVStringNormalizeAndReplace(char buffer[], char match[], char replacement[]) {
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var char doubleMatch[NAV_MAX_BUFFER]
+
+    if (!length_array(buffer) || !length_array(match)) {
+        return buffer
+    }
+
+    if (!NAVContains(buffer, match)) {
+        return buffer
+    }
+
+    result = buffer
+    doubleMatch = "match, match"
+
+    while (NAVContains(result, doubleMatch)) {
+        result = NAVStringReplace(result, doubleMatch, match)
+    }
+
+    result = NAVStringReplace(result, match, replacement)
+
+    return result
+}
+
+
 define_function integer NAVStringCount(char buffer[], char value[], integer caseSensitivity) {
     stack_var integer x
     stack_var integer index
