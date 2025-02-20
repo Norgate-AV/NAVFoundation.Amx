@@ -25,6 +25,8 @@ on:
       - "manifest.json"
       - ".github/workflows/main.yml"
 
+  workflow_dispatch:
+
 defaults:
   run:
     shell: pwsh
