@@ -42,19 +42,8 @@ SOFTWARE.
 
 define_function char NAVHttpRequestInit(_NAVHttpRequest req,
                                         char method[],
-                                        char resource[],
+                                        _NAVUrl url,
                                         char body[]) {
-    stack_var _NAVUrl url
-
-    if (!NAVParseUrl(resource, url)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_HTTPUTILS__,
-                                    'NAVHttpRequestInit',
-                                    "'Failed to parse URL'")
-
-        return false
-    }
-
     req.Version = NAV_HTTP_VERSION_1_1
 
     req.Method = method

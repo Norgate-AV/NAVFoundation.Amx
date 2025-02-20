@@ -287,11 +287,17 @@ define_function RunTests() {
     ExpectedRequestPayloadInit(expectedRequestPayload)
 
     for (x = 1; x <= length_array(TEST); x++) {
+        stack_var _NAVUrl url
         stack_var _NAVHttpRequest request
         stack_var char result
         stack_var char payload[NAV_HTTP_MAX_REQUEST_LENGTH]
 
-        result = NAVHttpRequestInit(request, TEST[x][1], TEST[x][2], TEST[x][3])
+        if (!NAVParseUrl(TEST[x][2], url)) {
+            NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Test ', itoa(x), ' failed. Failed to parse URL'")
+            continue
+        }
+
+        result = NAVHttpRequestInit(request, TEST[x][1], url, TEST[x][3])
 
         if (result != EXPECTED_RESULT[x]) {
             NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Test ', itoa(x), ' failed. Expected init result "', NAVBooleanToString(EXPECTED_RESULT[x]), '" but got "', NAVBooleanToString(result), '"'")
