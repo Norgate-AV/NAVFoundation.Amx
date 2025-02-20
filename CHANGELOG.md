@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.30.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.29.0...v1.30.0) (2025-02-20)
+
+### 🌟 Features
+
+- **http-utils:** update NAVHttpRequestInit to take a \_NAVUrl struct ([54f80fd](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/54f80fd7bc0a880bbc7f5a55f48f0c2142191974))
+
 ## [1.29.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.28.0...v1.29.0) (2025-02-19)
 
 ### 🌟 Features
