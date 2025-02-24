@@ -28,6 +28,7 @@ build:
       - ./SnapiHelpers
       - ./SocketUtils
       - ./Stack
+      - ./Stopwatch
       - ./StringUtils
       - ./Testing
       - ./TimelineUtils

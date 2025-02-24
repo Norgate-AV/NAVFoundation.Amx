@@ -59,6 +59,7 @@ It's feature rich and written in pure NetLinx.
 - [SnapiHelpers](./SnapiHelpers)
 - [SocketUtils](./SocketUtils)
 - [Stack](./Stack)
+- [Stopwatch](./Stopwatch)
 - [StringUtils](./StringUtils)
 - [TimelineUtils](./TimelineUtils)
 - [Tui](./Tui)
