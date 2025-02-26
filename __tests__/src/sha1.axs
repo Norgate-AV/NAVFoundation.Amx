@@ -28,19 +28,19 @@ constant char TEST[][2048] = {
 }
 
 
-constant char EXPECTED[][40] = {
-    'da39a3ee5e6b4b0d3255bfef95601890afd80709',
-    '86f7e437faa5a7fce15d1ddcb9eaeaea377667b8',
-    'a9993e364706816aba3e25717850c26c9cd0d89d',
-    'c12252ceda8be8994d5fa0290a47231c1d16aae3',
-    '32d10c7b8cf96570ca04ce37f2a19d84240d3a89',
-    '761c457bf73b14d27e9e9265c46f4b4dda11f940',
-    '50abf5706a150990a08b2c5ea40fa0e585554732',
-    '2fd4e1c67a2d28fced849ee1bb76e7391b93eb12',
-    '408d94384216f890ff7a0c3528e8bed1e0b01621',
-    'ada4442f42004e0ee7620938bd4d3e8dac8621a4',
-    '7823706b4aafa08ca50170f1995e7aeface888cd',
-    '59749d06441ba8ad69f8a6a0c5ddce0f5f999b8e'
+constant char EXPECTED[][20] = {
+    {$DA, $39, $A3, $EE, $5E, $6B, $4B, $0D, $32, $55, $BF, $EF, $95, $60, $18, $90, $AF, $D8, $07, $09},
+    {$86, $F7, $E4, $37, $FA, $A5, $A7, $FC, $E1, $5D, $1D, $DC, $B9, $EA, $EA, $EA, $37, $76, $67, $B8},
+    {$A9, $99, $3E, $36, $47, $06, $81, $6A, $BA, $3E, $25, $71, $78, $50, $C2, $6C, $9C, $D0, $D8, $9D},
+    {$C1, $22, $52, $CE, $DA, $8B, $E8, $99, $4D, $5F, $A0, $29, $0A, $47, $23, $1C, $1D, $16, $AA, $E3},
+    {$32, $D1, $0C, $7B, $8C, $F9, $65, $70, $CA, $04, $CE, $37, $F2, $A1, $9D, $84, $24, $0D, $3A, $89},
+    {$76, $1C, $45, $7B, $F7, $3B, $14, $D2, $7E, $9E, $92, $65, $C4, $6F, $4B, $4D, $DA, $11, $F9, $40},
+    {$50, $AB, $F5, $70, $6A, $15, $09, $90, $A0, $8B, $2C, $5E, $A4, $0F, $A0, $E5, $85, $55, $47, $32},
+    {$2F, $D4, $E1, $C6, $7A, $2D, $28, $FC, $ED, $84, $9E, $E1, $BB, $76, $E7, $39, $1B, $93, $EB, $12},
+    {$40, $8D, $94, $38, $42, $16, $F8, $90, $FF, $7A, $0C, $35, $28, $E8, $BE, $D1, $E0, $B0, $16, $21},
+    {$AD, $A4, $44, $2F, $42, $00, $4E, $0E, $E7, $62, $09, $38, $BD, $4D, $3E, $8D, $AC, $86, $21, $A4},
+    {$78, $23, $70, $6B, $4A, $AF, $A0, $8C, $A5, $01, $70, $F1, $99, $5E, $7A, $EF, $AC, $E8, $88, $CD},
+    {$59, $74, $9D, $06, $44, $1B, $A8, $AD, $69, $F8, $A6, $A0, $C5, $DD, $CE, $0F, $5F, $99, $9B, $8E}
 }
 
 
@@ -48,18 +48,17 @@ define_function RunTests() {
     stack_var integer x
 
     for (x = 1; x <= length_array(TEST); x++) {
-        stack_var char result[40]
+        stack_var char result[20]
 
         result = NAVSha1GetHash(TEST[x])
 
         if (result != EXPECTED[x]) {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                        "'Test ', itoa(x), ' failed. Expected ', EXPECTED[x], ' but got "', result, '"'")
-
+                        "'Test ', itoa(x), ' failed'")
             continue
         }
 
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' passed. Got "', result, '"'")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' passed'")
     }
 }
 

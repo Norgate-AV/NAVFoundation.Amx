@@ -145,7 +145,7 @@
                 <Comments></Comments>
             </File>
         </System>
-        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+        <System IsActive="true" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
             <Identifier>Sha1</Identifier>
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
@@ -211,6 +211,7 @@
                 <Comments></Comments>
             </File>
         </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
             <Identifier>StringUtils</Identifier>
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
@@ -298,7 +299,7 @@
                 <Comments></Comments>
             </File>
         </System>
-        <System IsActive="true" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
             <Identifier>HttpUtils</Identifier>
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>

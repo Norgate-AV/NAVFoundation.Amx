@@ -46,14 +46,12 @@ https://www.rfc-editor.org/rfc/rfc3174
 
 /**
  * Digests a string and returns the result as a
- * 40-byte hexadecimal string
+ * 20-byte digest.
 **/
 define_function char[40] NAVSha1GetHash(char value[]) {
-    stack_var integer i
     stack_var integer error
     stack_var _NAVSha1Context context
     stack_var char digest[SHA1_HASH_SIZE]
-    stack_var char hash[40]
 
     error = NAVSha1Reset(context)
 
@@ -76,11 +74,7 @@ define_function char[40] NAVSha1GetHash(char value[]) {
         return ""
     }
 
-    for (i = 0; i < SHA1_HASH_SIZE; i++) {
-        hash = "hash, format('%02x', digest[(i + 1)])"
-    }
-
-    return hash
+    return digest
 }
 
 
