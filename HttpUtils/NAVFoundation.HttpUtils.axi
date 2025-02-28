@@ -31,6 +31,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+/**
+ * @file NAVFoundation.HttpUtils.axi
+ * @brief Implementation of HTTP protocol utilities.
+ *
+ * This module provides functions for creating, modifying, and processing HTTP requests
+ * and responses. It handles request initialization, header management, content type
+ * inference, and message building according to HTTP/1.1 specification.
+ *
+ * The library facilitates building HTTP clients and basic servers, with support for
+ * standard HTTP methods, status codes, headers, and content types.
+ */
+
 #IF_NOT_DEFINED __NAV_FOUNDATION_HTTPUTILS__
 #DEFINE __NAV_FOUNDATION_HTTPUTILS__ 'NAVFoundation.HttpUtils'
 
@@ -40,6 +52,33 @@ SOFTWARE.
 #include 'NAVFoundation.Url.axi'
 
 
+/**
+ * @function NAVHttpRequestInit
+ * @public
+ * @description Initializes an HTTP request structure with essential values.
+ *
+ * This function sets up a request with the specified method, URL details, and body.
+ * It automatically adds required headers such as Host and, if a body is present,
+ * Content-Length and Content-Type.
+ *
+ * @param {_NAVHttpRequest} req - The request structure to initialize
+ * @param {char[]} method - HTTP method (GET, POST, etc.)
+ * @param {_NAVUrl} url - URL structure containing host, path, and other components
+ * @param {char[]} body - Request body (can be empty)
+ *
+ * @returns {char} TRUE if initialization succeeded, FALSE otherwise
+ *
+ * @example
+ * stack_var _NAVHttpRequest request
+ * stack_var _NAVUrl url
+ * stack_var char success
+ *
+ * // Assume url is already populated
+ * success = NAVHttpRequestInit(request, 'GET', url, '')
+ *
+ * @see NAVHttpParseUrl
+ * @see NAVHttpRequestAddHeader
+ */
 define_function char NAVHttpRequestInit(_NAVHttpRequest req,
                                         char method[],
                                         _NAVUrl url,
@@ -68,12 +107,34 @@ define_function char NAVHttpRequestInit(_NAVHttpRequest req,
 }
 
 
+/**
+ * @function NAVHttpStatusInit
+ * @public
+ * @description Initializes an HTTP status structure.
+ *
+ * @param {_NAVHttpStatus} status - The status structure to initialize
+ *
+ * @returns {void}
+ *
+ * @see NAVHttpResponseInit
+ */
 define_function NAVHttpStatusInit(_NAVHttpStatus status) {
     status.Code = 0
     status.Message = ''
 }
 
 
+/**
+ * @function NAVHttpResponseInit
+ * @public
+ * @description Initializes an HTTP response structure.
+ *
+ * @param {_NAVHttpResponse} res - The response structure to initialize
+ *
+ * @returns {void}
+ *
+ * @see NAVHttpStatusInit
+ */
 define_function NAVHttpResponseInit(_NAVHttpResponse res) {
     NAVHttpStatusInit(res.Status)
     res.Body = ''
@@ -82,6 +143,21 @@ define_function NAVHttpResponseInit(_NAVHttpResponse res) {
 }
 
 
+/**
+ * @function NAVHttpHeaderInit
+ * @internal
+ * @description Initializes an HTTP header key-value pair.
+ *
+ * This converts the header name to train case (capitalized words separated by hyphens).
+ *
+ * @param {_NAVKeyStringValuePair} header - The header structure to initialize
+ * @param {char[]} key - Header name
+ * @param {char[]} value - Header value
+ *
+ * @returns {void}
+ *
+ * @see NAVStringTrainCase
+ */
 define_function NAVHttpHeaderInit(_NAVKeyStringValuePair header,
                                     char key[],
                                     char value[]) {
@@ -90,6 +166,20 @@ define_function NAVHttpHeaderInit(_NAVKeyStringValuePair header,
 }
 
 
+/**
+ * @function NAVHttpGetDefaultPort
+ * @public
+ * @description Returns the default port number for the specified scheme.
+ *
+ * @param {char[]} scheme - URL scheme ('http' or 'https')
+ *
+ * @returns {integer} Default port number for the scheme
+ *
+ * @example
+ * stack_var integer port
+ *
+ * port = NAVHttpGetDefaultPort('https')  // Returns 443
+ */
 define_function integer NAVHttpGetDefaultPort(char scheme[]) {
     switch (scheme) {
         case NAV_URL_SCHEME_HTTP: {
@@ -105,6 +195,29 @@ define_function integer NAVHttpGetDefaultPort(char scheme[]) {
 }
 
 
+/**
+ * @function NAVHttpParseUrl
+ * @public
+ * @description Parses a URL string into a structured URL object.
+ *
+ * This function handles URL parsing and ensures the scheme is valid for HTTP.
+ * If the scheme is missing, it defaults to 'http'.
+ *
+ * @param {char[]} buffer - The URL string to parse
+ * @param {_NAVUrl} url - The URL structure to populate with parsed data
+ *
+ * @returns {char} TRUE if parsing was successful, FALSE otherwise
+ *
+ * @example
+ * stack_var char urlString[256]
+ * stack_var _NAVUrl url
+ * stack_var char success
+ *
+ * urlString = 'https://example.com:8443/api/v1/data?id=123'
+ * success = NAVHttpParseUrl(urlString, url)
+ *
+ * @see NAVParseUrl
+ */
 define_function char NAVHttpParseUrl(char buffer[], _NAVUrl url) {
     if (!NAVParseUrl(buffer, url)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
@@ -133,6 +246,28 @@ define_function char NAVHttpParseUrl(char buffer[], _NAVUrl url) {
 }
 
 
+/**
+ * @function NAVHttpRequestAddHeader
+ * @public
+ * @description Adds a header to an HTTP request.
+ *
+ * If the header already exists with a different value, it will be updated.
+ *
+ * @param {_NAVHttpRequest} req - The request to add the header to
+ * @param {char[]} key - Header name
+ * @param {char[]} value - Header value
+ *
+ * @returns {char} TRUE if the header was added successfully, FALSE otherwise
+ *
+ * @example
+ * stack_var _NAVHttpRequest request
+ * stack_var char success
+ *
+ * // Assume request is already initialized
+ * success = NAVHttpRequestAddHeader(request, 'User-Agent', 'AMX NetLinx/1.0')
+ *
+ * @see NAVHttpRequestUpdateHeader
+ */
 define_function char NAVHttpRequestAddHeader(_NAVHttpRequest req,
                                             char key[],
                                             char value[]) {
@@ -182,6 +317,21 @@ define_function char NAVHttpRequestAddHeader(_NAVHttpRequest req,
 }
 
 
+/**
+ * @function NAVHttpRequestUpdateHeader
+ * @public
+ * @description Updates an existing header in an HTTP request.
+ *
+ * If the header doesn't exist, the function will fail.
+ *
+ * @param {_NAVHttpRequest} req - The request containing the header to update
+ * @param {char[]} key - Header name to update
+ * @param {char[]} value - New header value
+ *
+ * @returns {char} TRUE if header was updated, FALSE if header doesn't exist or other error
+ *
+ * @see NAVHttpRequestAddHeader
+ */
 define_function char NAVHttpRequestUpdateHeader(_NAVHttpRequest req,
                                                 char key[],
                                                 char value[]) {
@@ -236,6 +386,21 @@ define_function char NAVHttpRequestUpdateHeader(_NAVHttpRequest req,
 }
 
 
+/**
+ * @function NAVHttpResponseAddHeader
+ * @public
+ * @description Adds a header to an HTTP response.
+ *
+ * If the header already exists with a different value, it will be updated.
+ *
+ * @param {_NAVHttpResponse} res - The response to add the header to
+ * @param {char[]} key - Header name
+ * @param {char[]} value - Header value
+ *
+ * @returns {char} TRUE if the header was added successfully, FALSE otherwise
+ *
+ * @see NAVHttpResponseUpdateHeader
+ */
 define_function char NAVHttpResponseAddHeader(_NAVHttpResponse res,
                                                 char key[],
                                                 char value[]) {
@@ -260,7 +425,7 @@ define_function char NAVHttpResponseAddHeader(_NAVHttpResponse res,
     }
 
     if (!NAVFindInArrayString(NAV_HTTP_HEADERS, key)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_HTTPUTILS__,
                                     'NAVHttpResponseAddHeader',
                                     "'Key ', key, ' is not a valid HTTP header'")
@@ -285,6 +450,21 @@ define_function char NAVHttpResponseAddHeader(_NAVHttpResponse res,
 }
 
 
+/**
+ * @function NAVHttpResponseUpdateHeader
+ * @public
+ * @description Updates an existing header in an HTTP response.
+ *
+ * If the header doesn't exist, the function will fail.
+ *
+ * @param {_NAVHttpResponse} res - The response containing the header to update
+ * @param {char[]} key - Header name to update
+ * @param {char[]} value - New header value
+ *
+ * @returns {char} TRUE if header was updated, FALSE if header doesn't exist or other error
+ *
+ * @see NAVHttpResponseAddHeader
+ */
 define_function char NAVHttpResponseUpdateHeader(_NAVHttpResponse res,
                                                 char key[],
                                                 char value[]) {
@@ -339,6 +519,22 @@ define_function char NAVHttpResponseUpdateHeader(_NAVHttpResponse res,
 }
 
 
+/**
+ * @function NAVHttpBuildHeaders
+ * @public
+ * @description Constructs a string of HTTP headers from a header structure.
+ *
+ * @param {_NAVHttpHeader} headers - The headers to build into a string
+ *
+ * @returns {char[NAV_MAX_BUFFER]} A string containing all headers formatted for HTTP
+ *
+ * @example
+ * stack_var _NAVHttpHeader headers
+ * stack_var char headerString[NAV_MAX_BUFFER]
+ *
+ * // Assume headers are already populated
+ * headerString = NAVHttpBuildHeaders(headers)
+ */
 define_function char[NAV_MAX_BUFFER] NAVHttpBuildHeaders(_NAVHttpHeader headers) {
     stack_var char result[NAV_MAX_BUFFER]
     stack_var integer x
@@ -355,6 +551,22 @@ define_function char[NAV_MAX_BUFFER] NAVHttpBuildHeaders(_NAVHttpHeader headers)
 }
 
 
+/**
+ * @function NAVHttpBuildResponse
+ * @public
+ * @description Constructs a full HTTP response message from a response structure.
+ *
+ * @param {_NAVHttpResponse} res - The response structure to build into a message
+ *
+ * @returns {char[NAV_MAX_BUFFER]} A string containing the full HTTP response message
+ *
+ * @example
+ * stack_var _NAVHttpResponse response
+ * stack_var char responseString[NAV_MAX_BUFFER]
+ *
+ * // Assume response is already populated
+ * responseString = NAVHttpBuildResponse(response)
+ */
 define_function char[NAV_MAX_BUFFER] NAVHttpBuildResponse(_NAVHttpResponse res) {
     stack_var char result[NAV_MAX_BUFFER]
 
@@ -372,6 +584,18 @@ define_function char[NAV_MAX_BUFFER] NAVHttpBuildResponse(_NAVHttpResponse res) 
 }
 
 
+/**
+ * @function NAVHttpFindHeader
+ * @internal
+ * @description Finds the index of a header in a header structure by key.
+ *
+ * @param {_NAVHttpHeader} headers - The headers to search
+ * @param {char[]} key - The header name to find
+ *
+ * @returns {integer} The index of the header, or 0 if not found
+ *
+ * @see NAVHttpHeaderKeyExists
+ */
 define_function integer NAVHttpFindHeader(_NAVHttpHeader headers, char key[]) {
     stack_var integer x
 
@@ -387,11 +611,35 @@ define_function integer NAVHttpFindHeader(_NAVHttpHeader headers, char key[]) {
 }
 
 
+/**
+ * @function NAVHttpHeaderKeyExists
+ * @internal
+ * @description Checks if a header key exists in a header structure.
+ *
+ * @param {_NAVHttpHeader} headers - The headers to check
+ * @param {char[]} key - The header name to check for
+ *
+ * @returns {char} TRUE if the header exists, FALSE otherwise
+ *
+ * @see NAVHttpFindHeader
+ */
 define_function char NAVHttpHeaderKeyExists(_NAVHttpHeader headers, char key[]) {
     return NAVHttpFindHeader(headers, key) > 0
 }
 
 
+/**
+ * @function NAVHttpGetHeaderValue
+ * @public
+ * @description Retrieves the value of a header by key.
+ *
+ * @param {_NAVHttpHeader} headers - The headers to search
+ * @param {char[]} key - The header name to find
+ *
+ * @returns {char[256]} The header value, or an empty string if not found
+ *
+ * @see NAVHttpHeaderKeyExists
+ */
 define_function char[256] NAVHttpGetHeaderValue(_NAVHttpHeader headers, char key[]) {
     stack_var integer x
 
@@ -410,6 +658,19 @@ define_function char[256] NAVHttpGetHeaderValue(_NAVHttpHeader headers, char key
 }
 
 
+/**
+ * @function NAVHttpValidateHeaders
+ * @public
+ * @description Validates the headers in a header structure.
+ *
+ * Ensures that all headers have non-empty keys and values, and that the keys are valid HTTP headers.
+ *
+ * @param {_NAVHttpHeader} headers - The headers to validate
+ *
+ * @returns {char} TRUE if all headers are valid, FALSE otherwise
+ *
+ * @see NAVHttpHeaderKeyExists
+ */
 define_function char NAVHttpValidateHeaders(_NAVHttpHeader headers) {
     stack_var integer x
 
@@ -450,6 +711,22 @@ define_function char NAVHttpValidateHeaders(_NAVHttpHeader headers) {
 }
 
 
+/**
+ * @function NAVHttpInferContentType
+ * @public
+ * @description Infers the content type of a request body based on its content.
+ *
+ * @param {char[]} body - The request body to infer the content type for
+ *
+ * @returns {char[NAV_MAX_BUFFER]} The inferred content type
+ *
+ * @example
+ * stack_var char body[256]
+ * stack_var char contentType[NAV_MAX_BUFFER]
+ *
+ * body = '{"key": "value"}'
+ * contentType = NAVHttpInferContentType(body)  // Returns 'application/json'
+ */
 define_function char[NAV_MAX_BUFFER] NAVHttpInferContentType(char body[]) {
     select {
         active (NAVStartsWith(body, '{') && NAVEndsWith(body, '}')): {
@@ -471,6 +748,24 @@ define_function char[NAV_MAX_BUFFER] NAVHttpInferContentType(char body[]) {
 }
 
 
+/**
+ * @function NAVHttpBuildRequest
+ * @public
+ * @description Constructs a full HTTP request message from a request structure.
+ *
+ * @param {_NAVHttpRequest} req - The request structure to build into a message
+ * @param {char[]} payload - The string to populate with the full HTTP request message
+ *
+ * @returns {char} TRUE if the request was built successfully, FALSE otherwise
+ *
+ * @example
+ * stack_var _NAVHttpRequest request
+ * stack_var char requestString[NAV_MAX_BUFFER]
+ * stack_var char success
+ *
+ * // Assume request is already populated
+ * success = NAVHttpBuildRequest(request, requestString)
+ */
 define_function char NAVHttpBuildRequest(_NAVHttpRequest req, char payload[]) {
     if (!NAVHttpValidateHeaders(req.Headers)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
@@ -520,6 +815,22 @@ define_function char NAVHttpBuildRequest(_NAVHttpRequest req, char payload[]) {
 }
 
 
+/**
+ * @function NAVHttpGetStatusMessage
+ * @public
+ * @description Returns the status message corresponding to an HTTP status code.
+ *
+ * @param {integer} status - The HTTP status code
+ *
+ * @returns {char[NAV_MAX_CHARS]} The corresponding status message
+ *
+ * @example
+ * stack_var integer statusCode
+ * stack_var char statusMessage[NAV_MAX_CHARS]
+ *
+ * statusCode = 200
+ * statusMessage = NAVHttpGetStatusMessage(statusCode)  // Returns 'OK'
+ */
 define_function char[NAV_MAX_CHARS] NAVHttpGetStatusMessage(integer status) {
     switch (status) {
         case NAV_HTTP_STATUS_CODE_INFO_CONTINUE:              { return NAV_HTTP_STATUS_MESSAGE_INFO_CONTINUE }
