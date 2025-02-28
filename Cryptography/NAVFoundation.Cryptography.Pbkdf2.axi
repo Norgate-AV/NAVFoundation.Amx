@@ -43,7 +43,19 @@ SOFTWARE.
  * Based on RFC 2898: https://tools.ietf.org/html/rfc2898
  */
 
-// HMAC-SHA1 function using key and message
+/**
+ * @function NAVPbkdf2HmacSha1
+ * @internal
+ * @description Computes HMAC-SHA1 digest using the provided key and message.
+ * HMAC is defined as H(K XOR opad, H(K XOR ipad, message)) where H is SHA-1.
+ *
+ * @param {char[]} key - Secret key for HMAC operation
+ * @param {char[]} message - Message to authenticate
+ *
+ * @returns {char[20]} 20-byte HMAC-SHA1 digest
+ *
+ * @note Internal function used by PBKDF2 implementation
+ */
 define_function char[20] NAVPbkdf2HmacSha1(char key[], char message[]) {
     stack_var char innerKey[64]
     stack_var char outerKey[64]
@@ -109,8 +121,25 @@ define_function char[20] NAVPbkdf2HmacSha1(char key[], char message[]) {
 }
 
 
-// F function for PBKDF2 as defined in RFC 2898
-define_function char[20] NAVPbkdf2F(char password[], char salt[], integer iterations, integer blockIndex) {
+/**
+ * @function NAVPbkdf2F
+ * @internal
+ * @description F function for PBKDF2 as defined in RFC 2898.
+ * Computes the XOR of iterations iterations of HMAC-SHA1 for a specific block.
+ *
+ * @param {char[]} password - Password input for key derivation
+ * @param {char[]} salt - Salt value for key derivation
+ * @param {integer} iterations - Number of iterations to perform
+ * @param {integer} blockIndex - The block number being processed (1-based)
+ *
+ * @returns {char[20]} 20-byte result for this block
+ *
+ * @note Internal function used by PBKDF2 implementation
+ */
+define_function char[20] NAVPbkdf2F(char password[],
+                                    char salt[],
+                                    integer iterations,
+                                    integer blockIndex) {
     stack_var char blockIndexBytes[4]
     stack_var char saltWithIndex[NAV_MAX_BUFFER]
     stack_var char u[20]
@@ -161,8 +190,40 @@ define_function char[20] NAVPbkdf2F(char password[], char salt[], integer iterat
 }
 
 
-// Main PBKDF2 function to derive a key
-define_function sinteger NAVPbkdf2Sha1(char password[], char salt[], integer iterations, char derivedKey[], integer keyLength) {
+/**
+ * @function NAVPbkdf2Sha1
+ * @public
+ * @description Derives a cryptographic key from a password using PBKDF2-HMAC-SHA1.
+ * This implements the Password-Based Key Derivation Function 2 from RFC 2898.
+ *
+ * @param {char[]} password - Password input for key derivation (any length, must not be empty)
+ * @param {char[]} salt - Salt value for key derivation (at least 8 bytes recommended)
+ * @param {integer} iterations - Number of iterations to perform (higher values increase security)
+ * @param {char[]} derivedKey - Output buffer to receive the derived key
+ * @param {integer} keyLength - Desired length of the derived key in bytes
+ *
+ * @returns {sinteger} NAV_KDF_SUCCESS on success, or an error code on failure
+ *
+ * @example
+ * stack_var char password[50]
+ * stack_var char salt[16]
+ * stack_var char key[32]
+ * stack_var sinteger result
+ *
+ * password = 'SecurePassword123'
+ * salt = NAVPbkdf2GetRandomSalt(16)
+ * result = NAVPbkdf2Sha1(password, salt, NAV_KDF_DEFAULT_ITERATIONS, key, 32)
+ *
+ * @note Higher iteration counts improve security but slow down derivation
+ * @note Always use a unique salt for each key derivation
+ * @note Salt should be stored alongside the encrypted data
+ * @see NAVPbkdf2GetRandomSalt
+ */
+define_function sinteger NAVPbkdf2Sha1(char password[],
+                                        char salt[],
+                                        integer iterations,
+                                        char derivedKey[],
+                                        integer keyLength) {
     stack_var integer l, r, i, j, offset
     stack_var char block[20]
 
@@ -210,7 +271,26 @@ define_function sinteger NAVPbkdf2Sha1(char password[], char salt[], integer ite
 }
 
 
-// Helper function to generate a random salt
+/**
+ * @function NAVPbkdf2GetRandomSalt
+ * @public
+ * @description Generates a random salt of the specified length for use with PBKDF2.
+ * A salt should be unique for each password/key derivation.
+ *
+ * @param {integer} saltLength - Desired length of the salt in bytes
+ *
+ * @returns {char[]} Random salt of specified length
+ *
+ * @example
+ * stack_var char salt[16]
+ *
+ * // Generate a 16-byte random salt
+ * salt = NAVPbkdf2GetRandomSalt(16)
+ *
+ * @note If saltLength is <= 0, the default salt size (16 bytes) will be used
+ * @note The salt is not a secret but should be stored with the encrypted data
+ * @note Each encrypted item should have its own unique salt
+ */
 define_function char[NAV_MAX_BUFFER] NAVPbkdf2GetRandomSalt(integer saltLength) {
     stack_var char salt[NAV_MAX_BUFFER]
     stack_var integer i
@@ -230,7 +310,23 @@ define_function char[NAV_MAX_BUFFER] NAVPbkdf2GetRandomSalt(integer saltLength) 
 }
 
 
-// Helper function to get error message for KDF errors
+/**
+ * @function NAVPbkdf2GetError
+ * @public
+ * @description Converts a PBKDF2 error code to a human-readable error message.
+ *
+ * @param {sinteger} error - Error code returned by a PBKDF2 function
+ *
+ * @returns {char[100]} Human-readable description of the error
+ *
+ * @example
+ * stack_var sinteger result
+ *
+ * result = NAVPbkdf2Sha1(password, salt, iterations, key, keyLength)
+ * if (result != NAV_KDF_SUCCESS) {
+ *     NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Error: ', NAVPbkdf2GetError(result)")
+ * }
+ */
 define_function char[100] NAVPbkdf2GetError(sinteger error) {
     switch (error) {
         case NAV_KDF_SUCCESS:                 { return 'Success' }
