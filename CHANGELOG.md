@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.31.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.30.0...v1.31.0) (2025-02-28)
+
+### 🌟 Features
+
+- **cryptography:** add initial aes128 implementation ([b422838](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b422838f13d6979fca099edfe9fd5e03f7a1d6c9))
+- add Stopwatch library ([7502d54](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/7502d549ca4b4919512ae4d25b26fdfbbe375bba))
+
+### 🐛 Bug Fixes
+
+- **cryptography:** output 20 byte digest for sha1 as per the RFC ([911f679](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/911f679389039d599c22b6af309135dcd34915d7))
+
 ## [1.30.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.29.0...v1.30.0) (2025-02-20)
 
 ### 🌟 Features
