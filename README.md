@@ -25,6 +25,11 @@ It's feature rich and written in pure NetLinx.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Libraries :books:](#libraries-books)
+- [Key Features :sparkles:](#key-features-sparkles)
+- [Installation :package:](#installation-package)
+- [Quick Start :rocket:](#quick-start-rocket)
+- [Documentation :page_facing_up:](#documentation-page_facing_up)
+- [Support :question:](#support-question)
 - [Team :soccer:](#team-soccer)
 - [Contributors :sparkles:](#contributors-sparkles)
 - [LICENSE :balance_scale:](#license-balance_scale)
@@ -65,6 +70,54 @@ It's feature rich and written in pure NetLinx.
 - [Tui](./Tui)
 - [UIUtils](./UIUtils)
 - [Url](./Url)
+
+## Key Features :sparkles:
+
+- Modern, object-oriented approach to NetLinx programming
+- Comprehensive utility libraries for common tasks
+- Well-tested and production-ready components
+- Consistent API design across all modules
+- Full compatibility with AMX NetLinx Studio
+- Extensive error handling and logging capabilities
+
+## Installation :package:
+
+This library can be installed using [Scoop](https://scoop.sh/).
+
+```powershell
+scoop bucket add norgate-av-amx
+scoop install navfoundation-amx
+```
+
+## Quick Start :rocket:
+
+Here are some basic usage examples:
+
+```netlinx
+// Example 1: Using the Core library
+#include 'NAVFoundation.Core.axi'
+
+DEFINE_START
+{
+    // Your code here
+}
+
+// Example 2: Using the HttpUtils library
+#include 'NAVFoundation.HttpUtils.axi'
+
+DEFINE_START
+{
+    // Your code here
+}
+```
+
+## Documentation :page_facing_up:
+
+For more detailed guides and documentation, please refer to the [official documentation](https://github.com/Norgate-AV/NAVFoundation.Amx/wiki).
+
+## Support :question:
+
+If you have any questions or issues, please open an issue on the [GitHub repository](https://github.com/Norgate-AV/NAVFoundation.Amx/issues).
 
 ## Team :soccer:
 
