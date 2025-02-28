@@ -1,5 +1,5 @@
 {
     "*?(test|spec).{js,jsx,ts,tsx}": ["prettier --write"],
     "*.{css,scss,md,html,json,yml,yaml}": ["prettier --write"],
-    "*[^\\.h].{axi,axs}": ["genlinx build -s"]
+    "{,!(__tests__)/}**/*[^\\.h].{axi,axs}": ["genlinx build -s"]
 }

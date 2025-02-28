@@ -34,6 +34,8 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_ENCODING__
 #DEFINE __NAV_FOUNDATION_ENCODING__ 'NAVFoundation.Encoding'
 
+#include 'NAVFoundation.Core.axi'
+
 
 define_function long NAVNetworkToHostLong(long value) {
     stack_var long result
@@ -125,6 +127,43 @@ define_function NAVCharToLong(long output[], char input[], integer length) {
     }
 
     set_length_array(output, j)
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVByteArrayToHexString(char array[]) {
+    return NAVByteArrayToHexStringWithOptions(array, '', '')
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVByteArrayToNetLinxHexString(char array[]) {
+    return upper_string(NAVByteArrayToHexStringWithOptions(array, '$', ''))
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVByteArrayToCStyleHexString(char array[]) {
+    return upper_string(NAVByteArrayToHexStringWithOptions(array, '0x', ', '))
+}
+
+
+define_function char[NAV_MAX_BUFFER] NAVByteArrayToHexStringWithOptions(char array[],
+                                                                        char prefix[],
+                                                                        char separator[]) {
+    stack_var integer x
+    stack_var integer length
+    stack_var char result[NAV_MAX_BUFFER]
+
+    length = length_array(array)
+
+    for (x = 1; x <= length; x++) {
+        if (x < length) {
+            result = "result, format("prefix, '%02x', separator", array[x])"
+            continue
+        }
+
+        result = "result, format("prefix, '%02x'", array[x])"
+    }
+
+    return result
 }
 
 

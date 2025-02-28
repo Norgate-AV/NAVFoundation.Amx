@@ -38,6 +38,8 @@ build:
       - ./__tests__/include/path-utils
       - ./__tests__/include/regex
       - ./__tests__/include/string-utils
+      - ./__tests__/include/aes128
+      - ./__tests__/include/pbkdf2
       - ./include
     modulePath:
       - ./module
