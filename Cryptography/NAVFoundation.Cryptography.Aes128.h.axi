@@ -37,35 +37,101 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
-// Success code
+/**
+ * @constant NAV_AES_SUCCESS
+ * @description Operation completed successfully
+ */
 constant sinteger NAV_AES_SUCCESS                     = 0
 
-// General errors
+/**
+ * @constant NAV_AES_ERROR_NULL_CONTEXT
+ * @description AES context is null or invalid
+ */
 constant sinteger NAV_AES_ERROR_NULL_CONTEXT          = -100
+
+/**
+ * @constant NAV_AES_ERROR_NULL_PARAMETER
+ * @description A required parameter was null or empty
+ */
 constant sinteger NAV_AES_ERROR_NULL_PARAMETER        = -101
+
+/**
+ * @constant NAV_AES_ERROR_MEMORY
+ * @description Memory allocation failed
+ */
 constant sinteger NAV_AES_ERROR_MEMORY                = -102
 
-// Key related errors
+/**
+ * @constant NAV_AES_ERROR_INVALID_KEY_LENGTH
+ * @description Invalid key length
+ */
 constant sinteger NAV_AES_ERROR_INVALID_KEY_LENGTH    = -110
+
+/**
+ * @constant NAV_AES_ERROR_KEY_EXPANSION_FAILED
+ * @description Key expansion failed
+ */
 constant sinteger NAV_AES_ERROR_KEY_EXPANSION_FAILED  = -111
+
+/**
+ * @constant NAV_AES_ERROR_KEY_DERIVATION_FAILED
+ * @description Key derivation failed
+ */
 constant sinteger NAV_AES_ERROR_KEY_DERIVATION_FAILED = -112
 
-// Block operation errors
+/**
+ * @constant NAV_AES_ERROR_INVALID_BLOCK_LENGTH
+ * @description Invalid block length
+ */
 constant sinteger NAV_AES_ERROR_INVALID_BLOCK_LENGTH  = -120
+
+/**
+ * @constant NAV_AES_ERROR_CIPHER_OPERATION
+ * @description Cipher operation failed
+ */
 constant sinteger NAV_AES_ERROR_CIPHER_OPERATION      = -121
 
-// Padding related errors
+/**
+ * @constant NAV_AES_ERROR_INVALID_PADDING
+ * @description Invalid padding
+ */
 constant sinteger NAV_AES_ERROR_INVALID_PADDING       = -130
+
+/**
+ * @constant NAV_AES_ERROR_PADDING_VERIFICATION
+ * @description Padding verification failed
+ */
 constant sinteger NAV_AES_ERROR_PADDING_VERIFICATION  = -131
 
-// IV related errors
+/**
+ * @constant NAV_AES_ERROR_INVALID_IV_LENGTH
+ * @description Invalid IV length
+ */
 constant sinteger NAV_AES_ERROR_INVALID_IV_LENGTH     = -140
 
-// AES-128 specific constants
+/**
+ * @constant AES_BLOCK_LENGTH
+ * @description Size of an AES block in bytes (always 16 bytes/128 bits)
+ */
 constant integer AES_BLOCK_LENGTH = 16
-constant integer AES_KEY_LENGTH   = 16    // 128 bits
-constant integer AES_ROUNDS       = 10    // Number of rounds for AES-128
 
+/**
+ * @constant AES_KEY_LENGTH
+ * @description Size of AES-128 key in bytes (16 bytes/128 bits)
+ */
+constant integer AES_KEY_LENGTH   = 16
+
+/**
+ * @constant AES_ROUNDS
+ * @description Number of rounds in AES-128 algorithm
+ */
+constant integer AES_ROUNDS       = 10
+
+/**
+ * @constant SBOX
+ * @description Substitution box used in SubBytes transformation
+ * @note This is a precomputed lookup table for byte substitution
+ */
 constant char SBOX[256] = {
     //0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
     $63, $7c, $77, $7b, $f2, $6b, $6f, $c5, $30, $01, $67, $2b, $fe, $d7, $ab, $76,
@@ -86,6 +152,11 @@ constant char SBOX[256] = {
     $8c, $a1, $89, $0d, $bf, $e6, $42, $68, $41, $99, $2d, $0f, $b0, $54, $bb, $16
 }
 
+/**
+ * @constant RSBOX
+ * @description Inverse substitution box used in InvSubBytes transformation
+ * @note This is a precomputed lookup table for inverse byte substitution
+ */
 constant char RSBOX[256] = {
     $52, $09, $6a, $d5, $30, $36, $a5, $38, $bf, $40, $a3, $9e, $81, $f3, $d7, $fb,
     $7c, $e3, $39, $82, $9b, $2f, $ff, $87, $34, $8e, $43, $44, $c4, $de, $e9, $cb,
@@ -105,17 +176,30 @@ constant char RSBOX[256] = {
     $17, $2b, $04, $7e, $ba, $77, $d6, $26, $e1, $69, $14, $63, $55, $21, $0c, $7d
 }
 
+/**
+ * @constant RCON
+ * @description Round constants used in key expansion
+ */
 constant char RCON[11] = {
     $8d, $01, $02, $04, $08, $10, $20, $40, $80, $1b, $36
 }
 
 DEFINE_TYPE
 
+/**
+ * @struct _NAVAesContext
+ * @description Context structure for AES-128 encryption/decryption operations
+ *
+ * @property {char[4][4]} State - Current block state matrix
+ * @property {char[176]} RoundKey - Expanded key schedule (11 round keys of 16 bytes each)
+ * @property {char[16]} Iv - Initialization vector for CBC mode (future implementation)
+ *
+ * @note This structure must be initialized via NAVAes128ContextInit before use
+ * @see NAVAes128ContextInit
+ */
 struct _NAVAesContext {
     char State[4][4]        // Current block state
-
     char RoundKey[176]      // Expanded key (AES-128 needs 11 round keys of 16 bytes each)
-
     char Iv[16]             // Initialization vector for CBC mode
 }
 

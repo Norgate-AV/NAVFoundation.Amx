@@ -53,12 +53,34 @@ constant integer Nk = 4    // Number of 32-bit words in key (4 for AES-128)
 constant integer Nr = 10   // Number of rounds (10 for AES-128)
 
 
+/**
+ * @function NAVAes128GetSboxValue
+ * @internal
+ * @description Retrieves the substitution value for a byte from the S-box.
+ *
+ * @param {char} box - Input byte to substitute
+ *
+ * @returns {char} Substituted value from the S-box
+ */
 define_function char NAVAes128GetSboxValue(char box) {
     return SBOX[box + 1]
 }
 
 
-// This function produces Nb(Nr+1) round keys. The round keys are used in each round to encrypt the states.
+/**
+ * @function NAVAes128KeyExpansion
+ * @internal
+ * @description Expands a 16-byte AES key into the round key schedule.
+ * This produces the round keys used in each round of encryption/decryption.
+ *
+ * @param {char[]} roundKey - Output buffer for expanded key schedule (176 bytes)
+ * @param {char[]} key - Input 16-byte AES key
+ *
+ * @returns {void}
+ *
+ * @note This is an internal function used by NAVAes128ContextInit
+ * @see NAVAes128ContextInit
+ */
 define_function NAVAes128KeyExpansion(char roundKey[], char key[]) {
     stack_var integer i
     stack_var integer j
@@ -133,6 +155,30 @@ define_function NAVAes128KeyExpansion(char roundKey[], char key[]) {
 }
 
 
+/**
+ * @function NAVAes128ContextInit
+ * @public
+ * @description Initializes an AES context with a 16-byte encryption key.
+ * This must be called before any encryption or decryption operations.
+ *
+ * @param {_NAVAesContext} context - AES context structure to initialize
+ * @param {char[]} key - 16-byte (128-bit) encryption key
+ *
+ * @returns {sinteger} NAV_AES_SUCCESS on success, or an error code on failure
+ *
+ * @example
+ * stack_var _NAVAesContext context
+ * stack_var char key[16]
+ * stack_var sinteger result
+ *
+ * // Initialize with a key
+ * key = "$00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0A, $0B, $0C, $0D, $0E, $0F"
+ * result = NAVAes128ContextInit(context, key)
+ *
+ * @note The context contains the expanded key schedule needed for encryption/decryption
+ * @see NAVAes128ECBEncrypt
+ * @see NAVAes128ECBDecrypt
+ */
 define_function sinteger NAVAes128ContextInit(_NAVAesContext context, char key[]) {
     if (length_array(key) != 16) {
         return NAV_AES_ERROR_INVALID_KEY_LENGTH
@@ -143,12 +189,38 @@ define_function sinteger NAVAes128ContextInit(_NAVAesContext context, char key[]
 }
 
 
+/**
+ * @function NAVAes128SetKey
+ * @public
+ * @description Sets both the encryption key and initialization vector for an AES context.
+ * This is primarily for use with CBC mode (future implementation).
+ *
+ * @param {_NAVAesContext} context - AES context to modify
+ * @param {char[]} key - 16-byte (128-bit) encryption key
+ * @param {char[]} iv - 16-byte initialization vector (for CBC mode)
+ *
+ * @returns {void}
+ *
+ * @note For ECB mode, the IV is ignored but should still be valid
+ * @see NAVAes128ContextInit
+ */
 define_function NAVAes128SetKey(_NAVAesContext context, char key[], char iv[]) {
     NAVAes128KeyExpansion(context.RoundKey, key)
     NAVAes128SetIv(context, iv)
 }
 
 
+/**
+ * @function NAVAes128SetIv
+ * @public
+ * @description Sets the initialization vector for an AES context.
+ * This is used for CBC mode (future implementation).
+ *
+ * @param {_NAVAesContext} context - AES context to modify
+ * @param {char[]} iv - 16-byte initialization vector
+ *
+ * @returns {void}
+ */
 define_function NAVAes128SetIv(_NAVAesContext context, char iv[]) {
     stack_var integer i
 
@@ -158,7 +230,17 @@ define_function NAVAes128SetIv(_NAVAesContext context, char iv[]) {
 }
 
 
-// This function adds the round key to state.
+/**
+ * @function NAVAes128AddRoundKey
+ * @internal
+ * @description Adds (XORs) the round key to the state matrix.
+ *
+ * @param {char} round - The current round number (0-10)
+ * @param {char[4][4]} state - The AES state matrix to modify
+ * @param {char[]} roundKey - The expanded round key schedule (176 bytes)
+ *
+ * @returns {void}
+ */
 define_function NAVAes128AddRoundKey(char round, char state[4][4], char roundKey[]) {
     stack_var integer i, j
     stack_var integer base
@@ -178,8 +260,16 @@ define_function NAVAes128AddRoundKey(char round, char state[4][4], char roundKey
 }
 
 
-// The SubBytes Function Substitutes the values in the
-// state matrix with values in an S-box.
+/**
+ * @function NAVAes128SubBytes
+ * @internal
+ * @description Substitutes each byte in the state matrix with its corresponding S-box value.
+ * This provides the non-linearity in the AES cipher.
+ *
+ * @param {char[4][4]} state - The AES state matrix to transform
+ *
+ * @returns {void}
+ */
 define_function NAVAes128SubBytes(char state[4][4]) {
     stack_var integer i
     stack_var integer j
@@ -192,7 +282,16 @@ define_function NAVAes128SubBytes(char state[4][4]) {
 }
 
 
-// The ShiftRows() function shifts the rows in the state to the left.
+/**
+ * @function NAVAes128ShiftRows
+ * @internal
+ * @description Shifts the rows of the state matrix to provide diffusion.
+ * Row 1 is unchanged, row 2 shifts left by 1, row 3 by 2, and row 4 by 3.
+ *
+ * @param {char[4][4]} state - The AES state matrix to transform
+ *
+ * @returns {void}
+ */
 define_function NAVAes128ShiftRows(char state[4][4]) {
     stack_var char temp
 
@@ -221,12 +320,32 @@ define_function NAVAes128ShiftRows(char state[4][4]) {
 }
 
 
+/**
+ * @function NAVAes128xtime
+ * @internal
+ * @description Performs the xtime operation used in Galois field multiplication.
+ * This implements the polynomial multiplication by x in GF(2^8).
+ *
+ * @param {char} x - Byte value to transform
+ *
+ * @returns {char} Result of xtime operation
+ */
 define_function char NAVAes128xtime(char x) {
     return type_cast((x << 1) ^ (((x >> 7) & 1) * $1B))
 }
 
 
-// MixColumns function mixes the columns of the state matrix
+/**
+ * @function NAVAes128MixColumns
+ * @internal
+ * @description Mixes the columns of the state matrix to provide diffusion.
+ * Each column is treated as a polynomial over GF(2^8) and multiplied with
+ * a fixed polynomial a(x) = {03}x^3 + {01}x^2 + {01}x + {02}.
+ *
+ * @param {char[4][4]} state - The AES state matrix to transform
+ *
+ * @returns {void}
+ */
 define_function NAVAes128MixColumns(char state[4][4]) {
     stack_var integer j
     stack_var char tmp, tm, t
@@ -259,7 +378,17 @@ define_function NAVAes128MixColumns(char state[4][4]) {
 }
 
 
-// Multiply is used to multiply numbers in the field GF(2^8)
+/**
+ * @function NAVAes128Multiply
+ * @internal
+ * @description Multiplies two numbers in the GF(2^8) finite field.
+ * This is used in the MixColumns and InvMixColumns transformations.
+ *
+ * @param {char} x - First byte to multiply
+ * @param {char} y - Second byte to multiply
+ *
+ * @returns {char} Result of the multiplication in GF(2^8)
+ */
 define_function char NAVAes128Multiply(char x, char y) {
     stack_var char result
     stack_var char powers[8]  // Store all powers of x
@@ -285,14 +414,30 @@ define_function char NAVAes128Multiply(char x, char y) {
 }
 
 
+/**
+ * @function NAVAes128GetSboxInvert
+ * @internal
+ * @description Retrieves the inverse substitution value for a byte from the inverse S-box.
+ *
+ * @param {char} box - Input byte to substitute
+ *
+ * @returns {char} Inverse substituted value from the R-box
+ */
 define_function char NAVAes128GetSboxInvert(char box) {
     return RSBOX[box + 1]
 }
 
 
-// MixColumns function mixes the columns of the state matrix.
-// The method used to multiply may be difficult to understand for the inexperienced.
-// Please use the references to gain more information.
+/**
+ * @function NAVAes128InvMixColumns
+ * @internal
+ * @description Performs the inverse MixColumns transformation on the state matrix.
+ * This is used during decryption to revert the MixColumns transformation.
+ *
+ * @param {char[4][4]} state - The AES state matrix to transform
+ *
+ * @returns {void}
+ */
 define_function NAVAes128InvMixColumns(char state[4][4]) {
     stack_var integer j
     stack_var char a, b, c, d
@@ -312,8 +457,16 @@ define_function NAVAes128InvMixColumns(char state[4][4]) {
 }
 
 
-// The SubBytes Function Substitutes the values in the
-// state matrix with values in an S-box.
+/**
+ * @function NAVAes128InvSubBytes
+ * @internal
+ * @description Applies the inverse S-box substitution to each byte in the state matrix.
+ * This is used during decryption to revert the SubBytes transformation.
+ *
+ * @param {char[4][4]} state - The AES state matrix to transform
+ *
+ * @returns {void}
+ */
 define_function NAVAes128InvSubBytes(char state[4][4]) {
     stack_var integer i, j
 
@@ -327,6 +480,16 @@ define_function NAVAes128InvSubBytes(char state[4][4]) {
 }
 
 
+/**
+ * @function NAVAes128InvShiftRows
+ * @internal
+ * @description Performs the inverse ShiftRows transformation on the state matrix.
+ * This is used during decryption to revert the ShiftRows transformation.
+ *
+ * @param {char[4][4]} state - The AES state matrix to transform
+ *
+ * @returns {void}
+ */
 define_function NAVAes128InvShiftRows(char state[4][4]) {
     stack_var char temp
 
@@ -356,7 +519,19 @@ define_function NAVAes128InvShiftRows(char state[4][4]) {
 }
 
 
-// Cipher is the main function that encrypts the PlainText.
+/**
+ * @function NAVAes128Cipher
+ * @internal
+ * @description Performs the main AES encryption operation on a single state matrix.
+ * This implements the core AES algorithm to transform plaintext into ciphertext.
+ *
+ * @param {char[4][4]} state - The AES state matrix to encrypt
+ * @param {char[]} roundKey - The expanded key schedule (176 bytes)
+ *
+ * @returns {void}
+ *
+ * @note This operates on a single 16-byte block and does not handle padding
+ */
 define_function NAVAes128Cipher(char state[4][4], char roundKey[]) {
     stack_var char round
 
@@ -384,6 +559,19 @@ define_function NAVAes128Cipher(char state[4][4], char roundKey[]) {
 }
 
 
+/**
+ * @function NAVAes128InvCipher
+ * @internal
+ * @description Performs the main AES decryption operation on a single state matrix.
+ * This implements the core AES algorithm to transform ciphertext back to plaintext.
+ *
+ * @param {char[4][4]} state - The AES state matrix to decrypt
+ * @param {char[]} roundKey - The expanded key schedule (176 bytes)
+ *
+ * @returns {void}
+ *
+ * @note This operates on a single 16-byte block and does not handle padding
+ */
 define_function NAVAes128InvCipher(char state[4][4], char roundKey[]) {
     stack_var char round
 
@@ -408,7 +596,17 @@ define_function NAVAes128InvCipher(char state[4][4], char roundKey[]) {
 }
 
 
-// Convert buffer to AES state matrix - following AES specification
+/**
+ * @function NAVAes128BufferToState
+ * @internal
+ * @description Converts a 16-byte buffer to the AES state matrix format.
+ * This follows the AES specification for column-major ordering.
+ *
+ * @param {char[]} buffer - 16-byte input buffer
+ * @param {char[4][4]} state - Output state matrix
+ *
+ * @returns {void}
+ */
 define_function NAVAes128BufferToState(char buffer[], char state[4][4]) {
     stack_var integer r, c, idx
 
@@ -423,7 +621,17 @@ define_function NAVAes128BufferToState(char buffer[], char state[4][4]) {
 }
 
 
-// Convert AES state matrix back to buffer - following AES specification
+/**
+ * @function NAVAes128StateToBuffer
+ * @internal
+ * @description Converts an AES state matrix back to a 16-byte buffer.
+ * This follows the AES specification for column-major ordering.
+ *
+ * @param {char[4][4]} state - Input state matrix
+ * @param {char[]} buffer - Output buffer (will be set to 16 bytes)
+ *
+ * @returns {void}
+ */
 define_function NAVAes128StateToBuffer(char state[4][4], char buffer[]) {
     stack_var integer r, c, idx
 
@@ -440,7 +648,17 @@ define_function NAVAes128StateToBuffer(char state[4][4], char buffer[]) {
 }
 
 
-// Helper function to XOR blocks
+/**
+ * @function NAVAes128XorWithIv
+ * @internal
+ * @description XORs a block with the initialization vector or previous ciphertext block.
+ * This is used in CBC mode to chain blocks together.
+ *
+ * @param {char[]} buf - The buffer to XOR (modified in-place)
+ * @param {char[]} iv - The initialization vector or previous block
+ *
+ * @returns {void}
+ */
 define_function NAVAes128XorWithIv(char buf[], char iv[]) {
     stack_var integer i
 
@@ -450,6 +668,25 @@ define_function NAVAes128XorWithIv(char buf[], char iv[]) {
 }
 
 
+/**
+ * @function NAVAes128PKCS7Pad
+ * @public
+ * @description Applies PKCS#7 padding to a buffer to make its length a multiple of 16 bytes.
+ * Even if the input is already a multiple of 16, a full block of padding is added.
+ *
+ * @param {char[]} input - Data to pad
+ *
+ * @returns {char[]} Padded data
+ *
+ * @example
+ * stack_var char data[10]
+ * stack_var char padded[NAV_MAX_BUFFER]
+ *
+ * data = 'HelloWorld'  // 10 bytes
+ * padded = NAVAes128PKCS7Pad(data)  // Results in 16 bytes with padding value 0x06
+ *
+ * @note Always adds between 1 and 16 bytes of padding
+ */
 define_function char[NAV_MAX_BUFFER] NAVAes128PKCS7Pad(char input[]) {
     stack_var char output[NAV_MAX_BUFFER]
     stack_var integer paddingLength
@@ -480,6 +717,23 @@ define_function char[NAV_MAX_BUFFER] NAVAes128PKCS7Pad(char input[]) {
 }
 
 
+/**
+ * @function NAVAes128PKCS7Unpad
+ * @public
+ * @description Removes PKCS#7 padding from a buffer and verifies its integrity.
+ * Returns an empty string if the padding is invalid.
+ *
+ * @param {char[]} buffer - Padded data to process
+ *
+ * @returns {char[]} Unpadded data, or empty string if padding is invalid
+ *
+ * @example
+ * stack_var char padded[16]
+ * stack_var char original[NAV_MAX_BUFFER]
+ *
+ * // Padded data with padding value 0x06 in the last 6 bytes
+ * original = NAVAes128PKCS7Unpad(padded)
+ */
 define_function char[2048] NAVAes128PKCS7Unpad(char buffer[]) {
     stack_var integer totalLen
     stack_var integer paddingLen
@@ -519,7 +773,19 @@ define_function char[2048] NAVAes128PKCS7Unpad(char buffer[]) {
 }
 
 
-// Core block operation - encrypts a single 16-byte block in place
+/**
+ * @function NAVAes128ECBEncryptBlock
+ * @internal
+ * @description Encrypts a single 16-byte block using AES-128 in ECB mode.
+ * The buffer is modified in place with the encrypted result.
+ *
+ * @param {_NAVAesContext} context - Initialized AES context
+ * @param {char[]} buffer - 16-byte block to encrypt (modified in-place)
+ *
+ * @returns {void}
+ *
+ * @note Does not handle padding or blocks of other sizes
+ */
 define_function NAVAes128ECBEncryptBlock(_NAVAesContext context, char buffer[]) {
     stack_var char state[4][4]
 
@@ -529,8 +795,35 @@ define_function NAVAes128ECBEncryptBlock(_NAVAesContext context, char buffer[]) 
 }
 
 
-// Higher level function that handles padding and encrypts data using ECB mode
-// Returns an error code and updates the ciphertext parameter
+/**
+ * @function NAVAes128ECBEncrypt
+ * @public
+ * @description Encrypts data using AES-128 in Electronic Code Book (ECB) mode.
+ * Automatically applies PKCS#7 padding to handle data of any length.
+ *
+ * @param {_NAVAesContext} context - Initialized AES context containing the key schedule
+ * @param {char[]} plaintext - Data to encrypt (any length, including empty)
+ * @param {char[]} ciphertext - Output buffer to receive encrypted data
+ *
+ * @returns {sinteger} NAV_AES_SUCCESS on success, or an error code on failure
+ *
+ * @example
+ * stack_var _NAVAesContext context
+ * stack_var char plaintext[100]
+ * stack_var char ciphertext[200]
+ * stack_var sinteger result
+ *
+ * // Assume context is initialized
+ * plaintext = 'Secret message'
+ * result = NAVAes128ECBEncrypt(context, plaintext, ciphertext)
+ *
+ * @note Output length will always be a multiple of 16 bytes
+ * @note Even an empty input will produce 16 bytes of output (one block of padding)
+ * @note ECB mode should not be used for encrypting more than one block of
+ *       sensitive data as it does not hide data patterns
+ * @see NAVAes128ContextInit
+ * @see NAVAes128ECBDecrypt
+ */
 define_function sinteger NAVAes128ECBEncrypt(_NAVAesContext context, char plaintext[], char ciphertext[]) {
     stack_var integer i, blocks
     stack_var char block[16]
@@ -581,13 +874,36 @@ define_function sinteger NAVAes128ECBEncrypt(_NAVAesContext context, char plaint
 }
 
 
-// For backward compatibility
+/**
+ * @function NAVAes128Encrypt
+ * @public
+ * @description Legacy wrapper for NAVAes128ECBEncrypt.
+ * Provided for backward compatibility.
+ *
+ * @param {_NAVAesContext} context - Initialized AES context
+ * @param {char[]} plaintext - Data to encrypt
+ * @param {char[]} ciphertext - Output buffer to receive encrypted data
+ *
+ * @returns {sinteger} Result from NAVAes128ECBEncrypt
+ *
+ * @see NAVAes128ECBEncrypt
+ */
 define_function sinteger NAVAes128Encrypt(_NAVAesContext context, char plaintext[], char ciphertext[]) {
     return NAVAes128ECBEncrypt(context, plaintext, ciphertext)
 }
 
 
-// Add helper function to log state matrix
+/**
+ * @function NAVAes128LogStateMatrix
+ * @internal
+ * @description Debug helper function to log the contents of an AES state matrix.
+ *
+ * @param {char[4][4]} state - AES state matrix to log
+ *
+ * @returns {void}
+ *
+ * @note This is a debug/diagnostic function not intended for normal operation
+ */
 define_function NAVAes128LogStateMatrix(char state[4][4]) {
     stack_var char msg[100]
     stack_var integer r, c
@@ -604,7 +920,19 @@ define_function NAVAes128LogStateMatrix(char state[4][4]) {
 }
 
 
-// Core block operation - decrypts a single 16-byte block in place
+/**
+ * @function NAVAes128ECBDecryptBlock
+ * @internal
+ * @description Decrypts a single 16-byte block using AES-128 in ECB mode.
+ * The buffer is modified in place with the decrypted result.
+ *
+ * @param {_NAVAesContext} context - Initialized AES context
+ * @param {char[]} buffer - 16-byte block to decrypt (modified in-place)
+ *
+ * @returns {void}
+ *
+ * @note Does not handle padding or blocks of other sizes
+ */
 define_function NAVAes128ECBDecryptBlock(_NAVAesContext context, char buffer[]) {
     stack_var char state[4][4]
 
@@ -614,6 +942,34 @@ define_function NAVAes128ECBDecryptBlock(_NAVAesContext context, char buffer[]) 
 }
 
 
+/**
+ * @function NAVAes128ECBDecrypt
+ * @public
+ * @description Decrypts data that was encrypted using AES-128 in ECB mode.
+ * Automatically handles PKCS#7 padding verification and removal.
+ *
+ * @param {_NAVAesContext} context - Initialized AES context (must be the same used for encryption)
+ * @param {char[]} ciphertext - Encrypted data (must be a multiple of 16 bytes)
+ * @param {char[]} plaintext - Output buffer to receive decrypted data
+ *
+ * @returns {sinteger} NAV_AES_SUCCESS on success, or an error code on failure
+ *
+ * @example
+ * stack_var _NAVAesContext context
+ * stack_var char ciphertext[100]
+ * stack_var char plaintext[100]
+ * stack_var sinteger result
+ *
+ * // Assume context is initialized and ciphertext contains encrypted data
+ * result = NAVAes128ECBDecrypt(context, ciphertext, plaintext)
+ * if (result == NAV_AES_SUCCESS) {
+ *     // Use decrypted data in plaintext
+ * }
+ *
+ * @note Empty ciphertext input will produce empty plaintext output
+ * @note The function verifies PKCS#7 padding integrity during decryption
+ * @see NAVAes128ECBEncrypt
+ */
 define_function sinteger NAVAes128ECBDecrypt(_NAVAesContext context, char ciphertext[], char plaintext[]) {
     stack_var char decodedText[NAV_MAX_BUFFER]
     stack_var char unpaddedText[NAV_MAX_BUFFER]
@@ -705,12 +1061,36 @@ define_function sinteger NAVAes128ECBDecrypt(_NAVAesContext context, char cipher
 }
 
 
-// For backward compatibility
+/**
+ * @function NAVAes128Decrypt
+ * @public
+ * @description Legacy wrapper for NAVAes128ECBDecrypt.
+ * Provided for backward compatibility.
+ *
+ * @param {_NAVAesContext} context - Initialized AES context
+ * @param {char[]} ciphertext - Encrypted data
+ * @param {char[]} plaintext - Output buffer to receive decrypted data
+ *
+ * @returns {sinteger} Result from NAVAes128ECBDecrypt
+ *
+ * @see NAVAes128ECBDecrypt
+ */
 define_function sinteger NAVAes128Decrypt(_NAVAesContext context, char ciphertext[], char plaintext[]) {
     return NAVAes128ECBDecrypt(context, ciphertext, plaintext)
 }
 
 
+/**
+ * @function NAVAes128LogAllRoundKeys
+ * @internal
+ * @description Debug helper function to log all round keys.
+ *
+ * @param {char[]} roundKey - The expanded key schedule (176 bytes)
+ *
+ * @returns {void}
+ *
+ * @note This is a debug/diagnostic function not intended for normal operation
+ */
 define_function NAVAes128LogAllRoundKeys(char roundKey[]) {
     stack_var integer round
     stack_var integer start
@@ -737,6 +1117,23 @@ define_function NAVAes128LogAllRoundKeys(char roundKey[]) {
 }
 
 
+/**
+ * @function NAVAes128GetError
+ * @public
+ * @description Converts an AES error code to a human-readable error message.
+ *
+ * @param {sinteger} error - Error code returned by an AES function
+ *
+ * @returns {char[100]} Human-readable description of the error
+ *
+ * @example
+ * stack_var sinteger result
+ *
+ * result = NAVAes128ECBEncrypt(context, plaintext, ciphertext)
+ * if (result != NAV_AES_SUCCESS) {
+ *     NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Error: ', NAVAes128GetError(result)")
+ * }
+ */
 define_function char[100] NAVAes128GetError(sinteger error) {
     switch (error) {
         case NAV_AES_SUCCESS:                       { return 'Success' }
@@ -756,11 +1153,35 @@ define_function char[100] NAVAes128GetError(sinteger error) {
 }
 
 
-// AES-specific key derivation function
-define_function sinteger NAVAes128DeriveKey(char password[],
-                                            char salt[],
-                                            integer iterations,
-                                            char key[]) {
+/**
+ * @function NAVAes128DeriveKey
+ * @public
+ * @description Derives a 16-byte encryption key from a password and salt using PBKDF2-HMAC-SHA1.
+ * This provides a secure way to generate encryption keys from user passwords.
+ *
+ * @param {char[]} password - Password string (any length, must not be empty)
+ * @param {char[]} salt - Cryptographic salt (at least 8 bytes recommended)
+ * @param {integer} iterations - Number of PBKDF2 iterations (use NAV_KDF_DEFAULT_ITERATIONS if unsure)
+ * @param {char[]} key - Output buffer to receive the 16-byte key
+ *
+ * @returns {sinteger} NAV_AES_SUCCESS on success, or an error code on failure
+ *
+ * @example
+ * stack_var char password[50]
+ * stack_var char salt[16]
+ * stack_var char key[16]
+ * stack_var sinteger result
+ *
+ * password = 'SecurePassword123'
+ * salt = NAVPbkdf2GetRandomSalt(16)
+ * result = NAVAes128DeriveKey(password, salt, NAV_KDF_DEFAULT_ITERATIONS, key)
+ *
+ * @note Higher iteration counts improve security but slow down derivation
+ * @note Always use a unique salt for each encryption operation
+ * @note Salt should be stored alongside the ciphertext for later decryption
+ * @see NAVPbkdf2GetRandomSalt
+ */
+define_function sinteger NAVAes128DeriveKey(char password[], char salt[], integer iterations, char key[]) {
     stack_var sinteger result
 
     // Validate parameters
