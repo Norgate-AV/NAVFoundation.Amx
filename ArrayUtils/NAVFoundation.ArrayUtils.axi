@@ -40,6 +40,20 @@ SOFTWARE.
 #include 'NAVFoundation.Math.axi'
 
 
+/**
+ * @function NAVSetArrayChar
+ * @public
+ * @description Sets all elements of a char array to the specified value.
+ *
+ * @param {char[]} array - Array to be modified
+ * @param {char} value - Value to set for all elements
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var char buffer[10]
+ * NAVSetArrayChar(buffer, $FF) // Sets all 10 elements to $FF
+ */
 define_function NAVSetArrayChar(char array[], char value) {
     stack_var integer x
     stack_var integer length
@@ -52,6 +66,20 @@ define_function NAVSetArrayChar(char array[], char value) {
 }
 
 
+/**
+ * @function NAVSetArrayInteger
+ * @public
+ * @description Sets all elements of an integer array to the specified value.
+ *
+ * @param {integer[]} array - Array to be modified
+ * @param {integer} value - Value to set for all elements
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var integer values[5]
+ * NAVSetArrayInteger(values, 42) // Sets all 5 elements to 42
+ */
 define_function NAVSetArrayInteger(integer array[], integer value) {
     stack_var integer x
     stack_var integer length
@@ -64,6 +92,20 @@ define_function NAVSetArrayInteger(integer array[], integer value) {
 }
 
 
+/**
+ * @function NAVSetArraySignedInteger
+ * @public
+ * @description Sets all elements of a signed integer array to the specified value.
+ *
+ * @param {sinteger[]} array - Array to be modified
+ * @param {sinteger} value - Value to set for all elements
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var sinteger values[5]
+ * NAVSetArraySignedInteger(values, -10) // Sets all 5 elements to -10
+ */
 define_function NAVSetArraySignedInteger(sinteger array[], sinteger value) {
     stack_var integer x
     stack_var integer length
@@ -76,6 +118,20 @@ define_function NAVSetArraySignedInteger(sinteger array[], sinteger value) {
 }
 
 
+/**
+ * @function NAVSetArrayLong
+ * @public
+ * @description Sets all elements of a long array to the specified value.
+ *
+ * @param {long[]} array - Array to be modified
+ * @param {long} value - Value to set for all elements
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var long values[5]
+ * NAVSetArrayLong(values, $FFFFFFFF) // Sets all 5 elements to $FFFFFFFF
+ */
 define_function NAVSetArrayLong(long array[], long value) {
     stack_var integer x
     stack_var integer length
@@ -88,6 +144,20 @@ define_function NAVSetArrayLong(long array[], long value) {
 }
 
 
+/**
+ * @function NAVSetArraySignedLong
+ * @public
+ * @description Sets all elements of a signed long array to the specified value.
+ *
+ * @param {slong[]} array - Array to be modified
+ * @param {slong} value - Value to set for all elements
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var slong values[5]
+ * NAVSetArraySignedLong(values, -100000) // Sets all 5 elements to -100000
+ */
 define_function NAVSetArraySignedLong(slong array[], slong value) {
     stack_var integer x
     stack_var integer length
@@ -100,6 +170,20 @@ define_function NAVSetArraySignedLong(slong array[], slong value) {
 }
 
 
+/**
+ * @function NAVSetArrayFloat
+ * @public
+ * @description Sets all elements of a float array to the specified value.
+ *
+ * @param {float[]} array - Array to be modified
+ * @param {float} value - Value to set for all elements
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var float values[5]
+ * NAVSetArrayFloat(values, 3.14159) // Sets all 5 elements to 3.14159
+ */
 define_function NAVSetArrayFloat(float array[], float value) {
     stack_var integer x
     stack_var integer length
@@ -112,6 +196,20 @@ define_function NAVSetArrayFloat(float array[], float value) {
 }
 
 
+/**
+ * @function NAVSetArrayDouble
+ * @public
+ * @description Sets all elements of a double array to the specified value.
+ *
+ * @param {double[]} array - Array to be modified
+ * @param {double} value - Value to set for all elements
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var double values[5]
+ * NAVSetArrayDouble(values, 3.14159265359) // Sets all 5 elements to 3.14159265359
+ */
 define_function NAVSetArrayDouble(double array[], double value) {
     stack_var integer x
     stack_var integer length
@@ -124,6 +222,20 @@ define_function NAVSetArrayDouble(double array[], double value) {
 }
 
 
+/**
+ * @function NAVSetArrayString
+ * @public
+ * @description Sets all elements of a string array to the specified value.
+ *
+ * @param {char[][]} array - Array to be modified
+ * @param {char[]} value - Value to set for all elements
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var char names[5][20]
+ * NAVSetArrayString(names, 'Default') // Sets all 5 elements to "Default"
+ */
 define_function NAVSetArrayString(char array[][], char value[]) {
     stack_var integer x
     stack_var integer length
@@ -136,6 +248,22 @@ define_function NAVSetArrayString(char array[][], char value[]) {
 }
 
 
+/**
+ * @function NAVFindInArrayINTEGER
+ * @public
+ * @description Searches for a value in an integer array and returns its index.
+ *
+ * @param {integer[]} array - Array to search in
+ * @param {integer} value - Value to find
+ *
+ * @returns {integer} Index of the first occurrence (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var integer values[3] = {10, 20, 30}
+ * stack_var integer index
+ *
+ * index = NAVFindInArrayINTEGER(values, 20) // Returns 2
+ */
 define_function integer NAVFindInArrayINTEGER(integer array[], integer value) {
     stack_var integer x
 
@@ -149,6 +277,22 @@ define_function integer NAVFindInArrayINTEGER(integer array[], integer value) {
 }
 
 
+/**
+ * @function NAVFindInArraySINTEGER
+ * @public
+ * @description Searches for a value in a signed integer array and returns its index.
+ *
+ * @param {sinteger[]} array - Array to search in
+ * @param {sinteger} value - Value to find
+ *
+ * @returns {integer} Index of the first occurrence (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var sinteger values[3] = {-10, 0, 10}
+ * stack_var integer index
+ *
+ * index = NAVFindInArraySINTEGER(values, 0) // Returns 2
+ */
 define_function integer NAVFindInArraySINTEGER(sinteger array[], sinteger value) {
     stack_var integer x
 
@@ -162,6 +306,22 @@ define_function integer NAVFindInArraySINTEGER(sinteger array[], sinteger value)
 }
 
 
+/**
+ * @function NAVFindInArrayLONG
+ * @public
+ * @description Searches for a value in a long array and returns its index.
+ *
+ * @param {long[]} array - Array to search in
+ * @param {long} value - Value to find
+ *
+ * @returns {integer} Index of the first occurrence (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var long values[3] = {$01000000, $02000000, $03000000}
+ * stack_var integer index
+ *
+ * index = NAVFindInArrayLONG(values, $02000000) // Returns 2
+ */
 define_function integer NAVFindInArrayLONG(long array[], long value) {
     stack_var integer x
 
@@ -175,6 +335,22 @@ define_function integer NAVFindInArrayLONG(long array[], long value) {
 }
 
 
+/**
+ * @function NAVFindInArraySLONG
+ * @public
+ * @description Searches for a value in a signed long array and returns its index.
+ *
+ * @param {slong[]} array - Array to search in
+ * @param {slong} value - Value to find
+ *
+ * @returns {integer} Index of the first occurrence (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var slong values[3] = {-1000000, 0, 1000000}
+ * stack_var integer index
+ *
+ * index = NAVFindInArraySLONG(values, -1000000) // Returns 1
+ */
 define_function integer NAVFindInArraySLONG(slong array[], slong value) {
     stack_var integer x
 
@@ -188,6 +364,16 @@ define_function integer NAVFindInArraySLONG(slong array[], slong value) {
 }
 
 
+/**
+ * @function NAVFindInArrayWIDECHAR
+ * @public
+ * @description Searches for a value in a widechar array and returns its index.
+ *
+ * @param {widechar[]} array - Array to search in
+ * @param {widechar} value - Value to find
+ *
+ * @returns {integer} Index of the first occurrence (1-based), or 0 if not found
+ */
 define_function integer NAVFindInArrayWIDECHAR(widechar array[], widechar value) {
     stack_var integer x
 
@@ -201,6 +387,22 @@ define_function integer NAVFindInArrayWIDECHAR(widechar array[], widechar value)
 }
 
 
+/**
+ * @function NAVFindInArrayFLOAT
+ * @public
+ * @description Searches for a value in a float array and returns its index.
+ *
+ * @param {float[]} array - Array to search in
+ * @param {float} value - Value to find
+ *
+ * @returns {integer} Index of the first occurrence (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var float values[3] = {1.1, 2.2, 3.3}
+ * stack_var integer index
+ *
+ * index = NAVFindInArrayFLOAT(values, 2.2) // Returns 2
+ */
 define_function integer NAVFindInArrayFLOAT(float array[], float value) {
     stack_var integer x
 
@@ -214,6 +416,22 @@ define_function integer NAVFindInArrayFLOAT(float array[], float value) {
 }
 
 
+/**
+ * @function NAVFindInArrayDOUBLE
+ * @public
+ * @description Searches for a value in a double array and returns its index.
+ *
+ * @param {double[]} array - Array to search in
+ * @param {double} value - Value to find
+ *
+ * @returns {integer} Index of the first occurrence (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var double values[3] = {1.111, 2.222, 3.333}
+ * stack_var integer index
+ *
+ * index = NAVFindInArrayDOUBLE(values, 2.222) // Returns 2
+ */
 define_function integer NAVFindInArrayDOUBLE(double array[], double value) {
     stack_var integer x
 
@@ -227,6 +445,22 @@ define_function integer NAVFindInArrayDOUBLE(double array[], double value) {
 }
 
 
+/**
+ * @function NAVFindInArrayCHAR
+ * @public
+ * @description Searches for a value in a char array and returns its index.
+ *
+ * @param {char[]} array - Array to search in
+ * @param {char} value - Value to find
+ *
+ * @returns {integer} Index of the first occurrence (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var char values[5] = {'A', 'B', 'C', 'D', 'E'}
+ * stack_var integer index
+ *
+ * index = NAVFindInArrayCHAR(values, 'C') // Returns 3
+ */
 define_function integer NAVFindInArrayCHAR(char array[], char value) {
     stack_var integer x
 
@@ -240,6 +474,22 @@ define_function integer NAVFindInArrayCHAR(char array[], char value) {
 }
 
 
+/**
+ * @function NAVFindInArrayDEV
+ * @public
+ * @description Searches for a device in a device array and returns its index.
+ *
+ * @param {dev[]} array - Array to search in
+ * @param {dev} value - Device to find
+ *
+ * @returns {integer} Index of the first occurrence (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var dev devices[3] = {dvTP, dvMaster, dvMatrix}
+ * stack_var integer index
+ *
+ * index = NAVFindInArrayDEV(devices, dvTP) // Returns 1
+ */
 define_function integer NAVFindInArrayDEV(dev array[], dev value) {
     stack_var integer x
 
@@ -253,6 +503,18 @@ define_function integer NAVFindInArrayDEV(dev array[], dev value) {
 }
 
 
+/**
+ * @function NAVFindInArrayDEVICE
+ * @public
+ * @description Alias for NAVFindInArrayDEV - searches for a device in a device array.
+ *
+ * @param {dev[]} array - Array to search in
+ * @param {dev} value - Device to find
+ *
+ * @returns {integer} Index of the first occurrence (1-based), or 0 if not found
+ *
+ * @see NAVFindInArrayDEV
+ */
 define_function integer NAVFindInArrayDEVICE(dev array[], dev value) {
     stack_var integer x
 
@@ -266,6 +528,22 @@ define_function integer NAVFindInArrayDEVICE(dev array[], dev value) {
 }
 
 
+/**
+ * @function NAVFindInArraySTRING
+ * @public
+ * @description Searches for a string in a string array and returns its index.
+ *
+ * @param {char[][]} array - Array to search in
+ * @param {char[]} value - String to find
+ *
+ * @returns {integer} Index of the first occurrence (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
+ * stack_var integer index
+ *
+ * index = NAVFindInArraySTRING(names, 'Bob') // Returns 2
+ */
 define_function integer NAVFindInArraySTRING(char array[][], char value[]) {
     stack_var integer x
 
@@ -279,6 +557,21 @@ define_function integer NAVFindInArraySTRING(char array[][], char value[]) {
 }
 
 
+/**
+ * @function NAVFormatArrayString
+ * @public
+ * @description Formats a string array as a readable string representation.
+ *
+ * @param {char[][]} array - Array to format
+ *
+ * @returns {char[]} Formatted string representation of the array
+ *
+ * @example
+ * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
+ * stack_var char output[200]
+ *
+ * output = NAVFormatArrayString(names) // Returns "[ 'Alice', 'Bob', 'Charlie' ]"
+ */
 define_function char[NAV_MAX_BUFFER] NAVFormatArrayString(char array[][]) {
     stack_var integer x
     stack_var integer length
@@ -302,6 +595,21 @@ define_function char[NAV_MAX_BUFFER] NAVFormatArrayString(char array[][]) {
 }
 
 
+/**
+ * @function NAVFormatArrayInteger
+ * @public
+ * @description Formats an integer array as a readable string representation.
+ *
+ * @param {integer[]} array - Array to format
+ *
+ * @returns {char[]} Formatted string representation of the array
+ *
+ * @example
+ * stack_var integer values[3] = {10, 20, 30}
+ * stack_var char output[200]
+ *
+ * output = NAVFormatArrayInteger(values) // Returns "[ 10, 20, 30 ]"
+ */
 define_function char[NAV_MAX_BUFFER] NAVFormatArrayInteger(integer array[]) {
     stack_var integer x
     stack_var integer length
@@ -325,6 +633,21 @@ define_function char[NAV_MAX_BUFFER] NAVFormatArrayInteger(integer array[]) {
 }
 
 
+/**
+ * @function NAVPrintArrayInteger
+ * @public
+ * @description Logs an integer array to the debug log.
+ *
+ * @param {integer[]} array - Array to print
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var integer values[3] = {10, 20, 30}
+ * NAVPrintArrayInteger(values) // Logs "[ 10, 20, 30 ]" to the debug log
+ *
+ * @see NAVFormatArrayInteger
+ */
 define_function NAVPrintArrayInteger(integer array[]) {
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
                                 __NAV_FOUNDATION_ARRAYUTILS__,
@@ -333,6 +656,21 @@ define_function NAVPrintArrayInteger(integer array[]) {
 }
 
 
+/**
+ * @function NAVPrintArrayString
+ * @public
+ * @description Logs a string array to the debug log.
+ *
+ * @param {char[][]} array - Array to print
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
+ * NAVPrintArrayString(names) // Logs "[ 'Alice', 'Bob', 'Charlie' ]" to the debug log
+ *
+ * @see NAVFormatArrayString
+ */
 define_function NAVPrintArrayString(char array[][]) {
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
                                 __NAV_FOUNDATION_ARRAYUTILS__,
@@ -341,6 +679,21 @@ define_function NAVPrintArrayString(char array[][]) {
 }
 
 
+/**
+ * @function NAVArraySwapInteger
+ * @public
+ * @description Swaps two elements in an integer array.
+ *
+ * @param {integer[]} array - Array containing elements to swap
+ * @param {integer} index1 - Index of first element
+ * @param {integer} index2 - Index of second element
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var integer values[3] = {10, 20, 30}
+ * NAVArraySwapInteger(values, 1, 3) // values becomes {30, 20, 10}
+ */
 define_function NAVArraySwapInteger(integer array[], integer index1, integer index2) {
     stack_var integer temp
 
@@ -350,6 +703,21 @@ define_function NAVArraySwapInteger(integer array[], integer index1, integer ind
 }
 
 
+/**
+ * @function NAVArraySwapString
+ * @public
+ * @description Swaps two elements in a string array.
+ *
+ * @param {char[][]} array - Array containing elements to swap
+ * @param {integer} index1 - Index of first element
+ * @param {integer} index2 - Index of second element
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
+ * NAVArraySwapString(names, 1, 3) // names becomes {'Charlie', 'Bob', 'Alice'}
+ */
 define_function NAVArraySwapString(char array[][], integer index1, integer index2) {
     stack_var char temp[NAV_MAX_BUFFER]
 
@@ -359,6 +727,19 @@ define_function NAVArraySwapString(char array[][], integer index1, integer index
 }
 
 
+/**
+ * @function NAVArrayPartitionInteger
+ * @internal
+ * @description Partitions an integer array for quicksort algorithm.
+ *
+ * @param {integer[]} array - Array to partition
+ * @param {integer} startIndex - Start index of the partition
+ * @param {integer} endIndex - End index of the partition
+ *
+ * @returns {integer} Boundary index of the partition
+ *
+ * @see NAVArrayQuickSortInteger
+ */
 define_function integer NAVArrayPartitionInteger(integer array[], integer startIndex, integer endIndex) {
     stack_var integer pivot
     stack_var integer boundary
@@ -378,6 +759,18 @@ define_function integer NAVArrayPartitionInteger(integer array[], integer startI
 }
 
 
+/**
+ * @function NAVArrayGetMinIndexInteger
+ * @internal
+ * @description Finds the index of the minimum value in a portion of an integer array.
+ *
+ * @param {integer[]} array - Array to search
+ * @param {integer} index - Starting index for the search
+ *
+ * @returns {integer} Index of the minimum value
+ *
+ * @see NAVArraySelectionSortInteger
+ */
 define_function integer NAVArrayGetMinIndexInteger(integer array[], integer index) {
     stack_var integer x
     stack_var integer minIndex
@@ -394,6 +787,18 @@ define_function integer NAVArrayGetMinIndexInteger(integer array[], integer inde
 }
 
 
+/**
+ * @function NAVArrayGetMinIndexString
+ * @internal
+ * @description Finds the index of the lexicographically smallest string in a portion of a string array.
+ *
+ * @param {char[][]} array - Array to search
+ * @param {integer} index - Starting index for the search
+ *
+ * @returns {integer} Index of the minimum value
+ *
+ * @see NAVArraySelectionSortString
+ */
 define_function integer NAVArrayGetMinIndexString(char array[][], integer index) {
     stack_var integer x
     stack_var integer minIndex
@@ -410,6 +815,21 @@ define_function integer NAVArrayGetMinIndexString(char array[][], integer index)
 }
 
 
+/**
+ * @function NAVArrayBubbleSortInteger
+ * @public
+ * @description Sorts an integer array using the bubble sort algorithm.
+ *
+ * @param {integer[]} array - Array to sort
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var integer values[5] = {5, 3, 1, 4, 2}
+ * NAVArrayBubbleSortInteger(values) // values becomes {1, 2, 3, 4, 5}
+ *
+ * @note Bubble sort has O(n²) time complexity, suitable only for small arrays
+ */
 define_function NAVArrayBubbleSortInteger(integer array[]) {
     stack_var integer x
     stack_var integer j
@@ -435,6 +855,21 @@ define_function NAVArrayBubbleSortInteger(integer array[]) {
 }
 
 
+/**
+ * @function NAVArraySelectionSortInteger
+ * @public
+ * @description Sorts an integer array using the selection sort algorithm.
+ *
+ * @param {integer[]} array - Array to sort
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var integer values[5] = {5, 3, 1, 4, 2}
+ * NAVArraySelectionSortInteger(values) // values becomes {1, 2, 3, 4, 5}
+ *
+ * @note Selection sort has O(n²) time complexity, suitable only for small arrays
+ */
 define_function NAVArraySelectionSortInteger(integer array[]) {
     stack_var integer x
     stack_var integer arrayLength
@@ -454,6 +889,21 @@ define_function NAVArraySelectionSortInteger(integer array[]) {
 }
 
 
+/**
+ * @function NAVArraySelectionSortString
+ * @public
+ * @description Sorts a string array using the selection sort algorithm.
+ *
+ * @param {char[][]} array - Array to sort
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var char names[3][20] = {'Charlie', 'Alice', 'Bob'}
+ * NAVArraySelectionSortString(names) // names becomes {'Alice', 'Bob', 'Charlie'}
+ *
+ * @note Selection sort has O(n²) time complexity, suitable only for small arrays
+ */
 define_function NAVArraySelectionSortString(char array[][]) {
     stack_var integer x
     stack_var integer arrayLength
@@ -473,6 +923,21 @@ define_function NAVArraySelectionSortString(char array[][]) {
 }
 
 
+/**
+ * @function NAVArrayInsertionSortInteger
+ * @public
+ * @description Sorts an integer array using the insertion sort algorithm.
+ *
+ * @param {integer[]} array - Array to sort
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var integer values[5] = {5, 3, 1, 4, 2}
+ * NAVArrayInsertionSortInteger(values) // values becomes {1, 2, 3, 4, 5}
+ *
+ * @note Insertion sort has O(n²) time complexity in worst case, but performs well on small or nearly sorted arrays
+ */
 define_function NAVArrayInsertionSortInteger(integer array[]) {
     stack_var integer x
     stack_var integer j
@@ -492,6 +957,19 @@ define_function NAVArrayInsertionSortInteger(integer array[]) {
 }
 
 
+/**
+ * @function NAVArrayQuickSortRangeInteger
+ * @internal
+ * @description Helper function for quick sort that recursively sorts a range within an integer array.
+ *
+ * @param {integer[]} array - Array to sort
+ * @param {integer} startIndex - Start index of the range to sort
+ * @param {integer} endIndex - End index of the range to sort
+ *
+ * @returns {void}
+ *
+ * @see NAVArrayQuickSortInteger
+ */
 define_function NAVArrayQuickSortRangeInteger(integer array[], integer startIndex, integer endIndex) {
     stack_var integer boundary
 
@@ -506,11 +984,39 @@ define_function NAVArrayQuickSortRangeInteger(integer array[], integer startInde
 }
 
 
+/**
+ * @function NAVArrayQuickSortInteger
+ * @public
+ * @description Sorts an integer array using the quick sort algorithm.
+ *
+ * @param {integer[]} array - Array to sort
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var integer values[5] = {5, 3, 1, 4, 2}
+ * NAVArrayQuickSortInteger(values) // values becomes {1, 2, 3, 4, 5}
+ *
+ * @note Quick sort has O(n log n) average time complexity, making it efficient for larger arrays
+ */
 define_function NAVArrayQuickSortInteger(integer array[]) {
     NAVArrayQuickSortRangeInteger(array, 1, length_array(array))
 }
 
 
+/**
+ * @function NAVArrayMergeSortMergeInteger
+ * @internal
+ * @description Merges two sorted integer arrays as part of the merge sort algorithm.
+ *
+ * @param {integer[]} left - First sorted array
+ * @param {integer[]} right - Second sorted array
+ * @param {integer[]} result - Result array where merged values are stored
+ *
+ * @returns {void}
+ *
+ * @see NAVArrayMergeSortInteger
+ */
 define_function NAVArrayMergeSortMergeInteger(integer left[], integer right[], integer result[]) {
     stack_var integer x
     stack_var integer j
@@ -552,6 +1058,21 @@ define_function NAVArrayMergeSortMergeInteger(integer left[], integer right[], i
 }
 
 
+/**
+ * @function NAVArrayMergeSortInteger
+ * @public
+ * @description Sorts an integer array using the merge sort algorithm.
+ *
+ * @param {integer[]} array - Array to sort
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var integer values[5] = {5, 3, 1, 4, 2}
+ * NAVArrayMergeSortInteger(values) // values becomes {1, 2, 3, 4, 5}
+ *
+ * @note Merge sort has O(n log n) time complexity and is stable, but requires extra space
+ */
 define_function NAVArrayMergeSortInteger(integer array[]) {
     stack_var integer middle
     stack_var integer arrayLength
@@ -584,6 +1105,23 @@ define_function NAVArrayMergeSortInteger(integer array[]) {
 }
 
 
+/**
+ * @function NAVArrayCountingSortInteger
+ * @public
+ * @description Sorts an integer array using the counting sort algorithm.
+ * Only suitable for arrays with small integers (values must be less than or equal to maxValue).
+ *
+ * @param {integer[]} array - Array to sort
+ * @param {integer} maxValue - Maximum possible value in the array
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var integer values[5] = {5, 3, 1, 4, 2}
+ * NAVArrayCountingSortInteger(values, 10) // values becomes {1, 2, 3, 4, 5}
+ *
+ * @note Counting sort has O(n+k) time complexity where k is the range of values
+ */
 define_function NAVArrayCountingSortInteger(integer array[], integer maxValue) {
     stack_var integer counts[1]
     stack_var integer x
@@ -609,6 +1147,20 @@ define_function NAVArrayCountingSortInteger(integer array[], integer maxValue) {
 }
 
 
+/**
+ * @function NAVArrayBinarySearchRangeIntegerRecursive
+ * @internal
+ * @description Helper function for binary search that recursively searches a range within a sorted integer array.
+ *
+ * @param {integer[]} array - Sorted array to search
+ * @param {integer} target - Value to find
+ * @param {integer} left - Start index of the range to search
+ * @param {integer} right - End index of the range to search
+ *
+ * @returns {integer} Index of the target value (1-based), or 0 if not found
+ *
+ * @see NAVArrayBinarySearchIntegerRecursive
+ */
 define_function integer NAVArrayBinarySearchRangeIntegerRecursive(integer array[], integer target, integer left, integer right) {
     stack_var integer middle
 
@@ -630,11 +1182,49 @@ define_function integer NAVArrayBinarySearchRangeIntegerRecursive(integer array[
 }
 
 
+/**
+ * @function NAVArrayBinarySearchIntegerRecursive
+ * @public
+ * @description Searches for a value in a sorted integer array using recursive binary search.
+ *
+ * @param {integer[]} array - Sorted array to search
+ * @param {integer} target - Value to find
+ *
+ * @returns {integer} Index of the target value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var integer values[5] = {10, 20, 30, 40, 50}
+ * stack_var integer index
+ *
+ * index = NAVArrayBinarySearchIntegerRecursive(values, 30) // Returns 3
+ *
+ * @note Array must be sorted in ascending order
+ * @see NAVArrayBinarySearchIntegerIterative
+ */
 define_function integer NAVArrayBinarySearchIntegerRecursive(integer array[], integer target) {
     return NAVArrayBinarySearchRangeIntegerRecursive(array, target, 1, length_array(array))
 }
 
 
+/**
+ * @function NAVArrayBinarySearchIntegerIterative
+ * @public
+ * @description Searches for a value in a sorted integer array using iterative binary search.
+ *
+ * @param {integer[]} array - Sorted array to search
+ * @param {integer} target - Value to find
+ *
+ * @returns {integer} Index of the target value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var integer values[5] = {10, 20, 30, 40, 50}
+ * stack_var integer index
+ *
+ * index = NAVArrayBinarySearchIntegerIterative(values, 30) // Returns 3
+ *
+ * @note Array must be sorted in ascending order
+ * @see NAVArrayBinarySearchIntegerRecursive
+ */
 define_function integer NAVArrayBinarySearchIntegerIterative(integer array[], integer target) {
     stack_var integer left
     stack_var integer right
@@ -662,6 +1252,20 @@ define_function integer NAVArrayBinarySearchIntegerIterative(integer array[], in
 }
 
 
+/**
+ * @function NAVArrayTernarySearchRangeInteger
+ * @internal
+ * @description Helper function for ternary search that recursively searches a range within a sorted integer array.
+ *
+ * @param {integer[]} array - Sorted array to search
+ * @param {integer} target - Value to find
+ * @param {integer} left - Start index of the range to search
+ * @param {integer} right - End index of the range to search
+ *
+ * @returns {integer} Index of the target value (1-based), or 0 if not found
+ *
+ * @see NAVArrayTernarySearchInteger
+ */
 define_function integer NAVArrayTernarySearchRangeInteger(integer array[], integer target, integer left, integer right) {
     stack_var integer partitionSize
     stack_var integer middle1
@@ -695,11 +1299,48 @@ define_function integer NAVArrayTernarySearchRangeInteger(integer array[], integ
 }
 
 
+/**
+ * @function NAVArrayTernarySearchInteger
+ * @public
+ * @description Searches for a value in a sorted integer array using ternary search.
+ *
+ * @param {integer[]} array - Sorted array to search
+ * @param {integer} target - Value to find
+ *
+ * @returns {integer} Index of the target value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var integer values[5] = {10, 20, 30, 40, 50}
+ * stack_var integer index
+ *
+ * index = NAVArrayTernarySearchInteger(values, 30) // Returns 3
+ *
+ * @note Array must be sorted in ascending order
+ * @see NAVArrayTernarySearchRangeInteger
+ */
 define_function integer NAVArrayTernarySearchInteger(integer array[], integer target) {
     return NAVArrayTernarySearchRangeInteger(array, target, 1, length_array(array))
 }
 
 
+/**
+ * @function NAVArrayJumpSearchInteger
+ * @public
+ * @description Searches for a value in a sorted integer array using jump search.
+ *
+ * @param {integer[]} array - Sorted array to search
+ * @param {integer} target - Value to find
+ *
+ * @returns {integer} Index of the target value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var integer values[5] = {10, 20, 30, 40, 50}
+ * stack_var integer index
+ *
+ * index = NAVArrayJumpSearchInteger(values, 30) // Returns 3
+ *
+ * @note Array must be sorted in ascending order
+ */
 define_function integer NAVArrayJumpSearchInteger(integer array[], integer target) {
     stack_var integer blockSize
     stack_var integer start
@@ -731,6 +1372,24 @@ define_function integer NAVArrayJumpSearchInteger(integer array[], integer targe
 }
 
 
+/**
+ * @function NAVArrayExponentialSearchInteger
+ * @public
+ * @description Searches for a value in a sorted integer array using exponential search.
+ *
+ * @param {integer[]} array - Sorted array to search
+ * @param {integer} target - Value to find
+ *
+ * @returns {integer} Index of the target value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var integer values[5] = {10, 20, 30, 40, 50}
+ * stack_var integer index
+ *
+ * index = NAVArrayExponentialSearchInteger(values, 30) // Returns 3
+ *
+ * @note Array must be sorted in ascending order
+ */
 define_function integer NAVArrayExponentialSearchInteger(integer array[], integer target) {
     stack_var integer bound
     stack_var integer left
@@ -751,6 +1410,19 @@ define_function integer NAVArrayExponentialSearchInteger(integer array[], intege
 }
 
 
+/**
+ * @function NAVArrayReverseString
+ * @public
+ * @description Reverses the order of elements in a string array.
+ *
+ * @param {char[][]} array - Array to reverse
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
+ * NAVArrayReverseString(names) // names becomes {'Charlie', 'Bob', 'Alice'}
+ */
 define_function NAVArrayReverseString(char array[][]) {
     stack_var _NAVStackString stack
     stack_var integer x
@@ -770,6 +1442,21 @@ define_function NAVArrayReverseString(char array[][]) {
 }
 
 
+/**
+ * @function NAVArrayCopyString
+ * @public
+ * @description Copies elements from one string array to another.
+ *
+ * @param {char[][]} source - Source array
+ * @param {char[][]} destination - Destination array
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var char source[3][20] = {'Alice', 'Bob', 'Charlie'}
+ * stack_var char destination[3][20]
+ * NAVArrayCopyString(source, destination) // destination becomes {'Alice', 'Bob', 'Charlie'}
+ */
 define_function NAVArrayCopyString(char source[][], char destination[][]) {
     stack_var integer x
     stack_var integer length
@@ -788,6 +1475,19 @@ define_function NAVArrayCopyString(char source[][], char destination[][]) {
 }
 
 
+/**
+ * @function NAVArrayReverseInteger
+ * @public
+ * @description Reverses the order of elements in an integer array.
+ *
+ * @param {integer[]} array - Array to reverse
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var integer values[5] = {1, 2, 3, 4, 5}
+ * NAVArrayReverseInteger(values) // values becomes {5, 4, 3, 2, 1}
+ */
 define_function NAVArrayReverseInteger(integer array[]) {
     stack_var _NAVStackInteger stack
     stack_var integer x
@@ -807,6 +1507,21 @@ define_function NAVArrayReverseInteger(integer array[]) {
 }
 
 
+/**
+ * @function NAVArrayCopyInteger
+ * @public
+ * @description Copies elements from one integer array to another.
+ *
+ * @param {integer[]} source - Source array
+ * @param {integer[]} destination - Destination array
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var integer source[3] = {10, 20, 30}
+ * stack_var integer destination[3]
+ * NAVArrayCopyInteger(source, destination) // destination becomes {10, 20, 30}
+ */
 define_function NAVArrayCopyInteger(integer source[], integer destination[]) {
     stack_var integer x
     stack_var integer length
@@ -825,16 +1540,61 @@ define_function NAVArrayCopyInteger(integer source[], integer destination[]) {
 }
 
 
+/**
+ * @function NAVArrayIsSortedString
+ * @public
+ * @description Checks if a string array is sorted in ascending order.
+ *
+ * @param {char[][]} array - Array to check
+ *
+ * @returns {char} True if sorted, false otherwise
+ *
+ * @example
+ * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
+ * stack_var char isSorted
+ *
+ * isSorted = NAVArrayIsSortedString(names) // Returns true
+ */
 define_function char NAVArrayIsSortedString(char array[][]) {
     return NAVArrayIsSortedAscendingString(array)
 }
 
 
+/**
+ * @function NAVArrayIsSortedInteger
+ * @public
+ * @description Checks if an integer array is sorted in ascending order.
+ *
+ * @param {integer[]} array - Array to check
+ *
+ * @returns {char} True if sorted, false otherwise
+ *
+ * @example
+ * stack_var integer values[5] = {1, 2, 3, 4, 5}
+ * stack_var char isSorted
+ *
+ * isSorted = NAVArrayIsSortedInteger(values) // Returns true
+ */
 define_function char NAVArrayIsSortedInteger(integer array[]) {
     return NAVArrayIsSortedAscendingInteger(array)
 }
 
 
+/**
+ * @function NAVArrayIsSortedAscendingString
+ * @public
+ * @description Checks if a string array is sorted in ascending order.
+ *
+ * @param {char[][]} array - Array to check
+ *
+ * @returns {char} True if sorted, false otherwise
+ *
+ * @example
+ * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
+ * stack_var char isSorted
+ *
+ * isSorted = NAVArrayIsSortedAscendingString(names) // Returns true
+ */
 define_function char NAVArrayIsSortedAscendingString(char array[][]) {
     stack_var integer x
     stack_var integer length
@@ -851,6 +1611,21 @@ define_function char NAVArrayIsSortedAscendingString(char array[][]) {
 }
 
 
+/**
+ * @function NAVArrayIsSortedAscendingInteger
+ * @public
+ * @description Checks if an integer array is sorted in ascending order.
+ *
+ * @param {integer[]} array - Array to check
+ *
+ * @returns {char} True if sorted, false otherwise
+ *
+ * @example
+ * stack_var integer values[5] = {1, 2, 3, 4, 5}
+ * stack_var char isSorted
+ *
+ * isSorted = NAVArrayIsSortedAscendingInteger(values) // Returns true
+ */
 define_function char NAVArrayIsSortedAscendingInteger(integer array[]) {
     stack_var integer x
     stack_var integer length
@@ -867,6 +1642,21 @@ define_function char NAVArrayIsSortedAscendingInteger(integer array[]) {
 }
 
 
+/**
+ * @function NAVArrayIsSortedDescendingString
+ * @public
+ * @description Checks if a string array is sorted in descending order.
+ *
+ * @param {char[][]} array - Array to check
+ *
+ * @returns {char} True if sorted, false otherwise
+ *
+ * @example
+ * stack_var char names[3][20] = {'Charlie', 'Bob', 'Alice'}
+ * stack_var char isSorted
+ *
+ * isSorted = NAVArrayIsSortedDescendingString(names) // Returns true
+ */
 define_function char NAVArrayIsSortedDescendingString(char array[][]) {
     stack_var integer x
     stack_var integer length
@@ -883,6 +1673,21 @@ define_function char NAVArrayIsSortedDescendingString(char array[][]) {
 }
 
 
+/**
+ * @function NAVArrayIsSortedDescendingInteger
+ * @public
+ * @description Checks if an integer array is sorted in descending order.
+ *
+ * @param {integer[]} array - Array to check
+ *
+ * @returns {char} True if sorted, false otherwise
+ *
+ * @example
+ * stack_var integer values[5] = {5, 4, 3, 2, 1}
+ * stack_var char isSorted
+ *
+ * isSorted = NAVArrayIsSortedDescendingInteger(values) // Returns true
+ */
 define_function char NAVArrayIsSortedDescendingInteger(integer array[]) {
     stack_var integer x
     stack_var integer length
@@ -899,6 +1704,19 @@ define_function char NAVArrayIsSortedDescendingInteger(integer array[]) {
 }
 
 
+/**
+ * @function NAVArrayToLowerString
+ * @public
+ * @description Converts all strings in a string array to lowercase.
+ *
+ * @param {char[][]} array - Array to modify
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
+ * NAVArrayToLowerString(names) // names becomes {'alice', 'bob', 'charlie'}
+ */
 define_function NAVArrayToLowerString(char array[][]) {
     stack_var integer x
     stack_var integer length
@@ -911,6 +1729,19 @@ define_function NAVArrayToLowerString(char array[][]) {
 }
 
 
+/**
+ * @function NAVArrayToUpperString
+ * @public
+ * @description Converts all strings in a string array to uppercase.
+ *
+ * @param {char[][]} array - Array to modify
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
+ * NAVArrayToUpperString(names) // names becomes {'ALICE', 'BOB', 'CHARLIE'}
+ */
 define_function NAVArrayToUpperString(char array[][]) {
     stack_var integer x
     stack_var integer length
@@ -923,6 +1754,19 @@ define_function NAVArrayToUpperString(char array[][]) {
 }
 
 
+/**
+ * @function NAVArrayTrimString
+ * @public
+ * @description Trims whitespace from all strings in a string array.
+ *
+ * @param {char[][]} array - Array to modify
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var char names[3][20] = {' Alice ', ' Bob ', ' Charlie '}
+ * NAVArrayTrimString(names) // names becomes {'Alice', 'Bob', 'Charlie'}
+ */
 define_function NAVArrayTrimString(char array[][]) {
     stack_var integer x
     stack_var integer length
@@ -935,6 +1779,21 @@ define_function NAVArrayTrimString(char array[][]) {
 }
 
 
+/**
+ * @function NAVArraySumInteger
+ * @public
+ * @description Calculates the sum of all elements in an integer array.
+ *
+ * @param {integer[]} array - Array to sum
+ *
+ * @returns {double} Sum of all elements
+ *
+ * @example
+ * stack_var integer values[5] = {1, 2, 3, 4, 5}
+ * stack_var double sum
+ *
+ * sum = NAVArraySumInteger(values) // Returns 15.0
+ */
 define_function double NAVArraySumInteger(integer array[]) {
     stack_var integer x
     stack_var integer length
@@ -950,6 +1809,21 @@ define_function double NAVArraySumInteger(integer array[]) {
 }
 
 
+/**
+ * @function NAVArraySumSignedInteger
+ * @public
+ * @description Calculates the sum of all elements in a signed integer array.
+ *
+ * @param {sinteger[]} array - Array to sum
+ *
+ * @returns {double} Sum of all elements
+ *
+ * @example
+ * stack_var sinteger values[5] = {-1, -2, -3, -4, -5}
+ * stack_var double sum
+ *
+ * sum = NAVArraySumSignedInteger(values) // Returns -15.0
+ */
 define_function double NAVArraySumSignedInteger(sinteger array[]) {
     stack_var integer x
     stack_var integer length
@@ -965,6 +1839,21 @@ define_function double NAVArraySumSignedInteger(sinteger array[]) {
 }
 
 
+/**
+ * @function NAVArraySumLong
+ * @public
+ * @description Calculates the sum of all elements in a long array.
+ *
+ * @param {long[]} array - Array to sum
+ *
+ * @returns {double} Sum of all elements
+ *
+ * @example
+ * stack_var long values[5] = {1, 2, 3, 4, 5}
+ * stack_var double sum
+ *
+ * sum = NAVArraySumLong(values) // Returns 15.0
+ */
 define_function double NAVArraySumLong(long array[]) {
     stack_var integer x
     stack_var integer length
@@ -980,6 +1869,21 @@ define_function double NAVArraySumLong(long array[]) {
 }
 
 
+/**
+ * @function NAVArraySumSignedLong
+ * @public
+ * @description Calculates the sum of all elements in a signed long array.
+ *
+ * @param {slong[]} array - Array to sum
+ *
+ * @returns {double} Sum of all elements
+ *
+ * @example
+ * stack_var slong values[5] = {-1, -2, -3, -4, -5}
+ * stack_var double sum
+ *
+ * sum = NAVArraySumSignedLong(values) // Returns -15.0
+ */
 define_function double NAVArraySumSignedLong(slong array[]) {
     stack_var integer x
     stack_var integer length
@@ -995,6 +1899,21 @@ define_function double NAVArraySumSignedLong(slong array[]) {
 }
 
 
+/**
+ * @function NAVArraySumFloat
+ * @public
+ * @description Calculates the sum of all elements in a float array.
+ *
+ * @param {float[]} array - Array to sum
+ *
+ * @returns {double} Sum of all elements
+ *
+ * @example
+ * stack_var float values[5] = {1.1, 2.2, 3.3, 4.4, 5.5}
+ * stack_var double sum
+ *
+ * sum = NAVArraySumFloat(values) // Returns 16.5
+ */
 define_function double NAVArraySumFloat(float array[]) {
     stack_var integer x
     stack_var integer length
@@ -1010,6 +1929,21 @@ define_function double NAVArraySumFloat(float array[]) {
 }
 
 
+/**
+ * @function NAVArraySumDouble
+ * @public
+ * @description Calculates the sum of all elements in a double array.
+ *
+ * @param {double[]} array - Array to sum
+ *
+ * @returns {double} Sum of all elements
+ *
+ * @example
+ * stack_var double values[5] = {1.1, 2.2, 3.3, 4.4, 5.5}
+ * stack_var double sum
+ *
+ * sum = NAVArraySumDouble(values) // Returns 16.5
+ */
 define_function double NAVArraySumDouble(double array[]) {
     stack_var integer x
     stack_var integer length
@@ -1025,6 +1959,21 @@ define_function double NAVArraySumDouble(double array[]) {
 }
 
 
+/**
+ * @function NAVArrayAverageInteger
+ * @public
+ * @description Calculates the average of all elements in an integer array.
+ *
+ * @param {integer[]} array - Array to average
+ *
+ * @returns {double} Average of all elements
+ *
+ * @example
+ * stack_var integer values[5] = {1, 2, 3, 4, 5}
+ * stack_var double average
+ *
+ * average = NAVArrayAverageInteger(values) // Returns 3.0
+ */
 define_function double NAVArrayAverageInteger(integer array[]) {
     stack_var integer x
     stack_var integer length
@@ -1040,6 +1989,21 @@ define_function double NAVArrayAverageInteger(integer array[]) {
 }
 
 
+/**
+ * @function NAVArrayAverageSignedInteger
+ * @public
+ * @description Calculates the average of all elements in a signed integer array.
+ *
+ * @param {sinteger[]} array - Array to average
+ *
+ * @returns {double} Average of all elements
+ *
+ * @example
+ * stack_var sinteger values[5] = {-1, -2, -3, -4, -5}
+ * stack_var double average
+ *
+ * average = NAVArrayAverageSignedInteger(values) // Returns -3.0
+ */
 define_function double NAVArrayAverageSignedInteger(sinteger array[]) {
     stack_var integer x
     stack_var integer length
@@ -1055,6 +2019,21 @@ define_function double NAVArrayAverageSignedInteger(sinteger array[]) {
 }
 
 
+/**
+ * @function NAVArrayAverageLong
+ * @public
+ * @description Calculates the average of all elements in a long array.
+ *
+ * @param {long[]} array - Array to average
+ *
+ * @returns {double} Average of all elements
+ *
+ * @example
+ * stack_var long values[5] = {1, 2, 3, 4, 5}
+ * stack_var double average
+ *
+ * average = NAVArrayAverageLong(values) // Returns 3.0
+ */
 define_function double NAVArrayAverageLong(long array[]) {
     stack_var integer x
     stack_var integer length
@@ -1070,6 +2049,21 @@ define_function double NAVArrayAverageLong(long array[]) {
 }
 
 
+/**
+ * @function NAVArrayAverageSignedLong
+ * @public
+ * @description Calculates the average of all elements in a signed long array.
+ *
+ * @param {slong[]} array - Array to average
+ *
+ * @returns {double} Average of all elements
+ *
+ * @example
+ * stack_var slong values[5] = {-1, -2, -3, -4, -5}
+ * stack_var double average
+ *
+ * average = NAVArrayAverageSignedLong(values) // Returns -3.0
+ */
 define_function double NAVArrayAverageSignedLong(slong array[]) {
     stack_var integer x
     stack_var integer length
@@ -1085,6 +2079,21 @@ define_function double NAVArrayAverageSignedLong(slong array[]) {
 }
 
 
+/**
+ * @function NAVArrayAverageFloat
+ * @public
+ * @description Calculates the average of all elements in a float array.
+ *
+ * @param {float[]} array - Array to average
+ *
+ * @returns {double} Average of all elements
+ *
+ * @example
+ * stack_var float values[5] = {1.1, 2.2, 3.3, 4.4, 5.5}
+ * stack_var double average
+ *
+ * average = NAVArrayAverageFloat(values) // Returns 3.3
+ */
 define_function double NAVArrayAverageFloat(float array[]) {
     stack_var integer x
     stack_var integer length
@@ -1100,6 +2109,21 @@ define_function double NAVArrayAverageFloat(float array[]) {
 }
 
 
+/**
+ * @function NAVArrayAverageDouble
+ * @public
+ * @description Calculates the average of all elements in a double array.
+ *
+ * @param {double[]} array - Array to average
+ *
+ * @returns {double} Average of all elements
+ *
+ * @example
+ * stack_var double values[5] = {1.1, 2.2, 3.3, 4.4, 5.5}
+ * stack_var double average
+ *
+ * average = NAVArrayAverageDouble(values) // Returns 3.3
+ */
 define_function double NAVArrayAverageDouble(double array[]) {
     stack_var integer x
     stack_var integer length
@@ -1115,6 +2139,25 @@ define_function double NAVArrayAverageDouble(double array[]) {
 }
 
 
+/**
+ * @function NAVArraySliceString
+ * @public
+ * @description Extracts a portion of a string array into a new array.
+ *
+ * @param {char[][]} array - Array to slice
+ * @param {integer} start - Start index of the slice (1-based)
+ * @param {integer} end - End index of the slice (1-based)
+ * @param {char[][]} slice - Resulting slice array
+ *
+ * @returns {integer} Length of the resulting slice
+ *
+ * @example
+ * stack_var char names[5][20] = {'Alice', 'Bob', 'Charlie', 'David', 'Eve'}
+ * stack_var char slice[3][20]
+ * stack_var integer sliceLength
+ *
+ * sliceLength = NAVArraySliceString(names, 2, 4, slice) // slice becomes {'Bob', 'Charlie', 'David'}
+ */
 define_function integer NAVArraySliceString(char array[][], integer start, integer end, char slice[][]) {
     stack_var integer x
     stack_var integer length
@@ -1142,6 +2185,25 @@ define_function integer NAVArraySliceString(char array[][], integer start, integ
 }
 
 
+/**
+ * @function NAVArraySliceInteger
+ * @public
+ * @description Extracts a portion of an integer array into a new array.
+ *
+ * @param {integer[]} array - Array to slice
+ * @param {integer} start - Start index of the slice (1-based)
+ * @param {integer} end - End index of the slice (1-based)
+ * @param {integer[]} slice - Resulting slice array
+ *
+ * @returns {integer} Length of the resulting slice
+ *
+ * @example
+ * stack_var integer values[5] = {1, 2, 3, 4, 5}
+ * stack_var integer slice[3]
+ * stack_var integer sliceLength
+ *
+ * sliceLength = NAVArraySliceInteger(values, 2, 4, slice) // slice becomes {2, 3, 4}
+ */
 define_function integer NAVArraySliceInteger(integer array[], integer start, integer end, integer slice[]) {
     stack_var integer x
     stack_var integer length
@@ -1169,6 +2231,20 @@ define_function integer NAVArraySliceInteger(integer array[], integer start, int
 }
 
 
+/**
+ * @function NAVArrayCharSetInit
+ * @public
+ * @description Initializes a char set with a specified capacity.
+ *
+ * @param {_NAVArrayCharSet} set - Set to initialize
+ * @param {integer} capacity - Capacity of the set
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVArrayCharSet set
+ * NAVArrayCharSetInit(set, 10) // Initializes set with capacity 10
+ */
 define_function NAVArrayCharSetInit(_NAVArrayCharSet set, integer capacity) {
     set.size = 0
     set.capacity = capacity
@@ -1181,6 +2257,21 @@ define_function NAVArrayCharSetInit(_NAVArrayCharSet set, integer capacity) {
 }
 
 
+/**
+ * @function NAVArrayCharSetAdd
+ * @public
+ * @description Adds a value to a char set.
+ *
+ * @param {_NAVArrayCharSet} set - Set to add value to
+ * @param {char} value - Value to add
+ *
+ * @returns {char} True if value was added, false if already in the set or set is full
+ *
+ * @example
+ * stack_var _NAVArrayCharSet set
+ * NAVArrayCharSetInit(set, 10)
+ * NAVArrayCharSetAdd(set, 'A') // Adds 'A' to the set
+ */
 define_function char NAVArrayCharSetAdd(_NAVArrayCharSet set, char value) {
     stack_var integer index
 
@@ -1214,6 +2305,22 @@ define_function char NAVArrayCharSetAdd(_NAVArrayCharSet set, char value) {
 }
 
 
+/**
+ * @function NAVArrayCharSetRemove
+ * @public
+ * @description Removes a value from a char set.
+ *
+ * @param {_NAVArrayCharSet} set - Set to remove value from
+ * @param {char} value - Value to remove
+ *
+ * @returns {char} True if value was removed, false if not in the set
+ *
+ * @example
+ * stack_var _NAVArrayCharSet set
+ * NAVArrayCharSetInit(set, 10)
+ * NAVArrayCharSetAdd(set, 'A')
+ * NAVArrayCharSetRemove(set, 'A') // Removes 'A' from the set
+ */
 define_function char NAVArrayCharSetRemove(_NAVArrayCharSet set, char value) {
     stack_var integer index
 
@@ -1233,6 +2340,22 @@ define_function char NAVArrayCharSetRemove(_NAVArrayCharSet set, char value) {
 }
 
 
+/**
+ * @function NAVArrayCharSetFrom
+ * @public
+ * @description Initializes a char set from an array.
+ *
+ * @param {_NAVArrayCharSet} set - Set to initialize
+ * @param {char[]} array - Array to initialize set from
+ *
+ * @returns {char} True if set was initialized, false if array is larger than set capacity
+ *
+ * @example
+ * stack_var _NAVArrayCharSet set
+ * stack_var char values[5] = {'A', 'B', 'C', 'D', 'E'}
+ * NAVArrayCharSetInit(set, 10)
+ * NAVArrayCharSetFrom(set, values) // Initializes set with values from array
+ */
 define_function char NAVArrayCharSetFrom(_NAVArrayCharSet set, char array[]) {
     stack_var integer x
     stack_var integer length
@@ -1253,6 +2376,23 @@ define_function char NAVArrayCharSetFrom(_NAVArrayCharSet set, char array[]) {
 }
 
 
+/**
+ * @function NAVArrayCharSetFind
+ * @public
+ * @description Finds the index of a value in a char set.
+ *
+ * @param {_NAVArrayCharSet} set - Set to search in
+ * @param {char} value - Value to find
+ *
+ * @returns {integer} Index of the value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var _NAVArrayCharSet set
+ * NAVArrayCharSetInit(set, 10)
+ * NAVArrayCharSetAdd(set, 'A')
+ * stack_var integer index
+ * index = NAVArrayCharSetFind(set, 'A') // Returns 1
+ */
 define_function integer NAVArrayCharSetFind(_NAVArrayCharSet set, char value) {
     stack_var integer x
 
@@ -1270,11 +2410,42 @@ define_function integer NAVArrayCharSetFind(_NAVArrayCharSet set, char value) {
 }
 
 
+/**
+ * @function NAVArrayCharSetContains
+ * @public
+ * @description Checks if a char set contains a value.
+ *
+ * @param {_NAVArrayCharSet} set - Set to check
+ * @param {char} value - Value to check for
+ *
+ * @returns {char} True if set contains the value, false otherwise
+ *
+ * @example
+ * stack_var _NAVArrayCharSet set
+ * NAVArrayCharSetInit(set, 10)
+ * NAVArrayCharSetAdd(set, 'A')
+ * stack_var char contains
+ * contains = NAVArrayCharSetContains(set, 'A') // Returns true
+ */
 define_function char NAVArrayCharSetContains(_NAVArrayCharSet set, char value) {
     return NAVArrayCharSetFind(set, value) > 0
 }
 
 
+/**
+ * @function NAVArrayIntegerSetInit
+ * @public
+ * @description Initializes an integer set with a specified capacity.
+ *
+ * @param {_NAVArrayIntegerSet} set - Set to initialize
+ * @param {integer} capacity - Capacity of the set
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVArrayIntegerSet set
+ * NAVArrayIntegerSetInit(set, 10) // Initializes set with capacity 10
+ */
 define_function NAVArrayIntegerSetInit(_NAVArrayIntegerSet set, integer capacity) {
     set.size = 0
     set.capacity = capacity
@@ -1287,6 +2458,21 @@ define_function NAVArrayIntegerSetInit(_NAVArrayIntegerSet set, integer capacity
 }
 
 
+/**
+ * @function NAVArrayIntegerSetAdd
+ * @public
+ * @description Adds a value to an integer set.
+ *
+ * @param {_NAVArrayIntegerSet} set - Set to add value to
+ * @param {integer} value - Value to add
+ *
+ * @returns {char} True if value was added, false if already in the set or set is full
+ *
+ * @example
+ * stack_var _NAVArrayIntegerSet set
+ * NAVArrayIntegerSetInit(set, 10)
+ * NAVArrayIntegerSetAdd(set, 42) // Adds 42 to the set
+ */
 define_function char NAVArrayIntegerSetAdd(_NAVArrayIntegerSet set, integer value) {
     stack_var integer index
 
@@ -1320,6 +2506,22 @@ define_function char NAVArrayIntegerSetAdd(_NAVArrayIntegerSet set, integer valu
 }
 
 
+/**
+ * @function NAVArrayIntegerSetRemove
+ * @public
+ * @description Removes a value from an integer set.
+ *
+ * @param {_NAVArrayIntegerSet} set - Set to remove value from
+ * @param {integer} value - Value to remove
+ *
+ * @returns {char} True if value was removed, false if not in the set
+ *
+ * @example
+ * stack_var _NAVArrayIntegerSet set
+ * NAVArrayIntegerSetInit(set, 10)
+ * NAVArrayIntegerSetAdd(set, 42)
+ * NAVArrayIntegerSetRemove(set, 42) // Removes 42 from the set
+ */
 define_function char NAVArrayIntegerSetRemove(_NAVArrayIntegerSet set, integer value) {
     stack_var integer index
 
@@ -1339,6 +2541,22 @@ define_function char NAVArrayIntegerSetRemove(_NAVArrayIntegerSet set, integer v
 }
 
 
+/**
+ * @function NAVArrayIntegerSetFrom
+ * @public
+ * @description Initializes an integer set from an array.
+ *
+ * @param {_NAVArrayIntegerSet} set - Set to initialize
+ * @param {integer[]} array - Array to initialize set from
+ *
+ * @returns {char} True if set was initialized, false if array is larger than set capacity
+ *
+ * @example
+ * stack_var _NAVArrayIntegerSet set
+ * stack_var integer values[5] = {1, 2, 3, 4, 5}
+ * NAVArrayIntegerSetInit(set, 10)
+ * NAVArrayIntegerSetFrom(set, values) // Initializes set with values from array
+ */
 define_function char NAVArrayIntegerSetFrom(_NAVArrayIntegerSet set, integer array[]) {
     stack_var integer x
     stack_var integer length
@@ -1359,6 +2577,23 @@ define_function char NAVArrayIntegerSetFrom(_NAVArrayIntegerSet set, integer arr
 }
 
 
+/**
+ * @function NAVArrayIntegerSetFind
+ * @public
+ * @description Finds the index of a value in an integer set.
+ *
+ * @param {_NAVArrayIntegerSet} set - Set to search in
+ * @param {integer} value - Value to find
+ *
+ * @returns {integer} Index of the value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var _NAVArrayIntegerSet set
+ * NAVArrayIntegerSetInit(set, 10)
+ * NAVArrayIntegerSetAdd(set, 42)
+ * stack_var integer index
+ * index = NAVArrayIntegerSetFind(set, 42) // Returns 1
+ */
 define_function integer NAVArrayIntegerSetFind(_NAVArrayIntegerSet set, integer value) {
     stack_var integer x
 
@@ -1376,11 +2611,42 @@ define_function integer NAVArrayIntegerSetFind(_NAVArrayIntegerSet set, integer 
 }
 
 
+/**
+ * @function NAVArrayIntegerSetContains
+ * @public
+ * @description Checks if an integer set contains a value.
+ *
+ * @param {_NAVArrayIntegerSet} set - Set to check
+ * @param {integer} value - Value to check for
+ *
+ * @returns {char} True if set contains the value, false otherwise
+ *
+ * @example
+ * stack_var _NAVArrayIntegerSet set
+ * NAVArrayIntegerSetInit(set, 10)
+ * NAVArrayIntegerSetAdd(set, 42)
+ * stack_var char contains
+ * contains = NAVArrayIntegerSetContains(set, 42) // Returns true
+ */
 define_function char NAVArrayIntegerSetContains(_NAVArrayIntegerSet set, integer value) {
     return NAVArrayIntegerSetFind(set, value) > 0
 }
 
 
+/**
+ * @function NAVArraySignedIntegerSetInit
+ * @public
+ * @description Initializes a signed integer set with a specified capacity.
+ *
+ * @param {_NAVArraySignedIntegerSet} set - Set to initialize
+ * @param {integer} capacity - Capacity of the set
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVArraySignedIntegerSet set
+ * NAVArraySignedIntegerSetInit(set, 10) // Initializes set with capacity 10
+ */
 define_function NAVArraySignedIntegerSetInit(_NAVArraySignedIntegerSet set, integer capacity) {
     set.size = 0
     set.capacity = capacity
@@ -1393,6 +2659,21 @@ define_function NAVArraySignedIntegerSetInit(_NAVArraySignedIntegerSet set, inte
 }
 
 
+/**
+ * @function NAVArraySignedIntegerSetAdd
+ * @public
+ * @description Adds a value to a signed integer set.
+ *
+ * @param {_NAVArraySignedIntegerSet} set - Set to add value to
+ * @param {sinteger} value - Value to add
+ *
+ * @returns {char} True if value was added, false if already in the set or set is full
+ *
+ * @example
+ * stack_var _NAVArraySignedIntegerSet set
+ * NAVArraySignedIntegerSetInit(set, 10)
+ * NAVArraySignedIntegerSetAdd(set, -42) // Adds -42 to the set
+ */
 define_function char NAVArraySignedIntegerSetAdd(_NAVArraySignedIntegerSet set, sinteger value) {
     stack_var integer index
 
@@ -1426,6 +2707,22 @@ define_function char NAVArraySignedIntegerSetAdd(_NAVArraySignedIntegerSet set, 
 }
 
 
+/**
+ * @function NAVArraySignedIntegerSetRemove
+ * @public
+ * @description Removes a value from a signed integer set.
+ *
+ * @param {_NAVArraySignedIntegerSet} set - Set to remove value from
+ * @param {sinteger} value - Value to remove
+ *
+ * @returns {char} True if value was removed, false if not in the set
+ *
+ * @example
+ * stack_var _NAVArraySignedIntegerSet set
+ * NAVArraySignedIntegerSetInit(set, 10)
+ * NAVArraySignedIntegerSetAdd(set, -42)
+ * NAVArraySignedIntegerSetRemove(set, -42) // Removes -42 from the set
+ */
 define_function char NAVArraySignedIntegerSetRemove(_NAVArraySignedIntegerSet set, sinteger value) {
     stack_var integer index
 
@@ -1445,6 +2742,22 @@ define_function char NAVArraySignedIntegerSetRemove(_NAVArraySignedIntegerSet se
 }
 
 
+/**
+ * @function NAVArraySignedIntegerSetFrom
+ * @public
+ * @description Initializes a signed integer set from an array.
+ *
+ * @param {_NAVArraySignedIntegerSet} set - Set to initialize
+ * @param {sinteger[]} array - Array to initialize set from
+ *
+ * @returns {char} True if set was initialized, false if array is larger than set capacity
+ *
+ * @example
+ * stack_var _NAVArraySignedIntegerSet set
+ * stack_var sinteger values[5] = {-1, -2, -3, -4, -5}
+ * NAVArraySignedIntegerSetInit(set, 10)
+ * NAVArraySignedIntegerSetFrom(set, values) // Initializes set with values from array
+ */
 define_function char NAVArraySignedIntegerSetFrom(_NAVArraySignedIntegerSet set, sinteger array[]) {
     stack_var integer x
     stack_var integer length
@@ -1465,6 +2778,23 @@ define_function char NAVArraySignedIntegerSetFrom(_NAVArraySignedIntegerSet set,
 }
 
 
+/**
+ * @function NAVArraySignedIntegerSetFind
+ * @public
+ * @description Finds the index of a value in a signed integer set.
+ *
+ * @param {_NAVArraySignedIntegerSet} set - Set to search in
+ * @param {sinteger} value - Value to find
+ *
+ * @returns {integer} Index of the value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var _NAVArraySignedIntegerSet set
+ * NAVArraySignedIntegerSetInit(set, 10)
+ * NAVArraySignedIntegerSetAdd(set, -42)
+ * stack_var integer index
+ * index = NAVArraySignedIntegerSetFind(set, -42) // Returns 1
+ */
 define_function integer NAVArraySignedIntegerSetFind(_NAVArraySignedIntegerSet set, sinteger value) {
     stack_var integer x
 
@@ -1482,11 +2812,42 @@ define_function integer NAVArraySignedIntegerSetFind(_NAVArraySignedIntegerSet s
 }
 
 
+/**
+ * @function NAVArraySignedIntegerSetContains
+ * @public
+ * @description Checks if a signed integer set contains a value.
+ *
+ * @param {_NAVArraySignedIntegerSet} set - Set to check
+ * @param {sinteger} value - Value to check for
+ *
+ * @returns {char} True if set contains the value, false otherwise
+ *
+ * @example
+ * stack_var _NAVArraySignedIntegerSet set
+ * NAVArraySignedIntegerSetInit(set, 10)
+ * NAVArraySignedIntegerSetAdd(set, -42)
+ * stack_var char contains
+ * contains = NAVArraySignedIntegerSetContains(set, -42) // Returns true
+ */
 define_function char NAVArraySignedIntegerSetContains(_NAVArraySignedIntegerSet set, sinteger value) {
     return NAVArraySignedIntegerSetFind(set, value) > 0
 }
 
 
+/**
+ * @function NAVArrayLongSetInit
+ * @public
+ * @description Initializes a long set with a specified capacity.
+ *
+ * @param {_NAVArrayLongSet} set - Set to initialize
+ * @param {integer} capacity - Capacity of the set
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVArrayLongSet set
+ * NAVArrayLongSetInit(set, 10) // Initializes set with capacity 10
+ */
 define_function NAVArrayLongSetInit(_NAVArrayLongSet set, integer capacity) {
     set.size = 0
     set.capacity = capacity
@@ -1499,6 +2860,21 @@ define_function NAVArrayLongSetInit(_NAVArrayLongSet set, integer capacity) {
 }
 
 
+/**
+ * @function NAVArrayLongSetAdd
+ * @public
+ * @description Adds a value to a long set.
+ *
+ * @param {_NAVArrayLongSet} set - Set to add value to
+ * @param {long} value - Value to add
+ *
+ * @returns {char} True if value was added, false if already in the set or set is full
+ *
+ * @example
+ * stack_var _NAVArrayLongSet set
+ * NAVArrayLongSetInit(set, 10)
+ * NAVArrayLongSetAdd(set, $FFFFFFFF) // Adds $FFFFFFFF to the set
+ */
 define_function char NAVArrayLongSetAdd(_NAVArrayLongSet set, long value) {
     stack_var integer index
 
@@ -1532,6 +2908,22 @@ define_function char NAVArrayLongSetAdd(_NAVArrayLongSet set, long value) {
 }
 
 
+/**
+ * @function NAVArrayLongSetRemove
+ * @public
+ * @description Removes a value from a long set.
+ *
+ * @param {_NAVArrayLongSet} set - Set to remove value from
+ * @param {long} value - Value to remove
+ *
+ * @returns {char} True if value was removed, false if not in the set
+ *
+ * @example
+ * stack_var _NAVArrayLongSet set
+ * NAVArrayLongSetInit(set, 10)
+ * NAVArrayLongSetAdd(set, $FFFFFFFF)
+ * NAVArrayLongSetRemove(set, $FFFFFFFF) // Removes $FFFFFFFF from the set
+ */
 define_function char NAVArrayLongSetRemove(_NAVArrayLongSet set, long value) {
     stack_var integer index
 
@@ -1551,6 +2943,22 @@ define_function char NAVArrayLongSetRemove(_NAVArrayLongSet set, long value) {
 }
 
 
+/**
+ * @function NAVArrayLongSetFrom
+ * @public
+ * @description Initializes a long set from an array.
+ *
+ * @param {_NAVArrayLongSet} set - Set to initialize
+ * @param {long[]} array - Array to initialize set from
+ *
+ * @returns {char} True if set was initialized, false if array is larger than set capacity
+ *
+ * @example
+ * stack_var _NAVArrayLongSet set
+ * stack_var long values[5] = {1, 2, 3, 4, 5}
+ * NAVArrayLongSetInit(set, 10)
+ * NAVArrayLongSetFrom(set, values) // Initializes set with values from array
+ */
 define_function char NAVArrayLongSetFrom(_NAVArrayLongSet set, long array[]) {
     stack_var integer x
     stack_var integer length
@@ -1571,6 +2979,23 @@ define_function char NAVArrayLongSetFrom(_NAVArrayLongSet set, long array[]) {
 }
 
 
+/**
+ * @function NAVArrayLongSetFind
+ * @public
+ * @description Finds the index of a value in a long set.
+ *
+ * @param {_NAVArrayLongSet} set - Set to search in
+ * @param {long} value - Value to find
+ *
+ * @returns {integer} Index of the value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var _NAVArrayLongSet set
+ * NAVArrayLongSetInit(set, 10)
+ * NAVArrayLongSetAdd(set, $FFFFFFFF)
+ * stack_var integer index
+ * index = NAVArrayLongSetFind(set, $FFFFFFFF) // Returns 1
+ */
 define_function integer NAVArrayLongSetFind(_NAVArrayLongSet set, long value) {
     stack_var integer x
 
@@ -1588,11 +3013,42 @@ define_function integer NAVArrayLongSetFind(_NAVArrayLongSet set, long value) {
 }
 
 
+/**
+ * @function NAVArrayLongSetContains
+ * @public
+ * @description Checks if a long set contains a value.
+ *
+ * @param {_NAVArrayLongSet} set - Set to check
+ * @param {long} value - Value to check for
+ *
+ * @returns {char} True if set contains the value, false otherwise
+ *
+ * @example
+ * stack_var _NAVArrayLongSet set
+ * NAVArrayLongSetInit(set, 10)
+ * NAVArrayLongSetAdd(set, $FFFFFFFF)
+ * stack_var char contains
+ * contains = NAVArrayLongSetContains(set, $FFFFFFFF) // Returns true
+ */
 define_function char NAVArrayLongSetContains(_NAVArrayLongSet set, long value) {
     return NAVArrayLongSetFind(set, value) > 0
 }
 
 
+/**
+ * @function NAVArraySignedLongSetInit
+ * @public
+ * @description Initializes a signed long set with a specified capacity.
+ *
+ * @param {_NAVArraySignedLongSet} set - Set to initialize
+ * @param {integer} capacity - Capacity of the set
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVArraySignedLongSet set
+ * NAVArraySignedLongSetInit(set, 10) // Initializes set with capacity 10
+ */
 define_function NAVArraySignedLongSetInit(_NAVArraySignedLongSet set, integer capacity) {
     set.size = 0
     set.capacity = capacity
@@ -1605,6 +3061,21 @@ define_function NAVArraySignedLongSetInit(_NAVArraySignedLongSet set, integer ca
 }
 
 
+/**
+ * @function NAVArraySignedLongSetAdd
+ * @public
+ * @description Adds a value to a signed long set.
+ *
+ * @param {_NAVArraySignedLongSet} set - Set to add value to
+ * @param {slong} value - Value to add
+ *
+ * @returns {char} True if value was added, false if already in the set or set is full
+ *
+ * @example
+ * stack_var _NAVArraySignedLongSet set
+ * NAVArraySignedLongSetInit(set, 10)
+ * NAVArraySignedLongSetAdd(set, -100000) // Adds -100000 to the set
+ */
 define_function char NAVArraySignedLongSetAdd(_NAVArraySignedLongSet set, slong value) {
     stack_var integer index
 
@@ -1638,6 +3109,22 @@ define_function char NAVArraySignedLongSetAdd(_NAVArraySignedLongSet set, slong 
 }
 
 
+/**
+ * @function NAVArraySignedLongSetRemove
+ * @public
+ * @description Removes a value from a signed long set.
+ *
+ * @param {_NAVArraySignedLongSet} set - Set to remove value from
+ * @param {slong} value - Value to remove
+ *
+ * @returns {char} True if value was removed, false if not in the set
+ *
+ * @example
+ * stack_var _NAVArraySignedLongSet set
+ * NAVArraySignedLongSetInit(set, 10)
+ * NAVArraySignedLongSetAdd(set, -100000)
+ * NAVArraySignedLongSetRemove(set, -100000) // Removes -100000 from the set
+ */
 define_function char NAVArraySignedLongSetRemove(_NAVArraySignedLongSet set, slong value) {
     stack_var integer index
 
@@ -1657,6 +3144,22 @@ define_function char NAVArraySignedLongSetRemove(_NAVArraySignedLongSet set, slo
 }
 
 
+/**
+ * @function NAVArraySignedLongSetFrom
+ * @public
+ * @description Initializes a signed long set from an array.
+ *
+ * @param {_NAVArraySignedLongSet} set - Set to initialize
+ * @param {slong[]} array - Array to initialize set from
+ *
+ * @returns {char} True if set was initialized, false if array is larger than set capacity
+ *
+ * @example
+ * stack_var _NAVArraySignedLongSet set
+ * stack_var slong values[5] = {-1, -2, -3, -4, -5}
+ * NAVArraySignedLongSetInit(set, 10)
+ * NAVArraySignedLongSetFrom(set, values) // Initializes set with values from array
+ */
 define_function char NAVArraySignedLongSetFrom(_NAVArraySignedLongSet set, slong array[]) {
     stack_var integer x
     stack_var integer length
@@ -1677,6 +3180,23 @@ define_function char NAVArraySignedLongSetFrom(_NAVArraySignedLongSet set, slong
 }
 
 
+/**
+ * @function NAVArraySignedLongSetFind
+ * @public
+ * @description Finds the index of a value in a signed long set.
+ *
+ * @param {_NAVArraySignedLongSet} set - Set to search in
+ * @param {slong} value - Value to find
+ *
+ * @returns {integer} Index of the value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var _NAVArraySignedLongSet set
+ * NAVArraySignedLongSetInit(set, 10)
+ * NAVArraySignedLongSetAdd(set, -100000)
+ * stack_var integer index
+ * index = NAVArraySignedLongSetFind(set, -100000) // Returns 1
+ */
 define_function integer NAVArraySignedLongSetFind(_NAVArraySignedLongSet set, slong value) {
     stack_var integer x
 
@@ -1694,11 +3214,42 @@ define_function integer NAVArraySignedLongSetFind(_NAVArraySignedLongSet set, sl
 }
 
 
+/**
+ * @function NAVArraySignedLongSetContains
+ * @public
+ * @description Checks if a signed long set contains a value.
+ *
+ * @param {_NAVArraySignedLongSet} set - Set to check
+ * @param {slong} value - Value to check for
+ *
+ * @returns {char} True if set contains the value, false otherwise
+ *
+ * @example
+ * stack_var _NAVArraySignedLongSet set
+ * NAVArraySignedLongSetInit(set, 10)
+ * NAVArraySignedLongSetAdd(set, -100000)
+ * stack_var char contains
+ * contains = NAVArraySignedLongSetContains(set, -100000) // Returns true
+ */
 define_function char NAVArraySignedLongSetContains(_NAVArraySignedLongSet set, slong value) {
     return NAVArraySignedLongSetFind(set, value) > 0
 }
 
 
+/**
+ * @function NAVArrayFloatSetInit
+ * @public
+ * @description Initializes a float set with a specified capacity.
+ *
+ * @param {_NAVArrayFloatSet} set - Set to initialize
+ * @param {integer} capacity - Capacity of the set
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVArrayFloatSet set
+ * NAVArrayFloatSetInit(set, 10) // Initializes set with capacity 10
+ */
 define_function NAVArrayFloatSetInit(_NAVArrayFloatSet set, integer capacity) {
     set.size = 0
     set.capacity = capacity
@@ -1711,6 +3262,21 @@ define_function NAVArrayFloatSetInit(_NAVArrayFloatSet set, integer capacity) {
 }
 
 
+/**
+ * @function NAVArrayFloatSetAdd
+ * @public
+ * @description Adds a value to a float set.
+ *
+ * @param {_NAVArrayFloatSet} set - Set to add value to
+ * @param {float} value - Value to add
+ *
+ * @returns {char} True if value was added, false if already in the set or set is full
+ *
+ * @example
+ * stack_var _NAVArrayFloatSet set
+ * NAVArrayFloatSetInit(set, 10)
+ * NAVArrayFloatSetAdd(set, 3.14) // Adds 3.14 to the set
+ */
 define_function char NAVArrayFloatSetAdd(_NAVArrayFloatSet set, float value) {
     stack_var integer index
 
@@ -1744,6 +3310,22 @@ define_function char NAVArrayFloatSetAdd(_NAVArrayFloatSet set, float value) {
 }
 
 
+/**
+ * @function NAVArrayFloatSetRemove
+ * @public
+ * @description Removes a value from a float set.
+ *
+ * @param {_NAVArrayFloatSet} set - Set to remove value from
+ * @param {float} value - Value to remove
+ *
+ * @returns {char} True if value was removed, false if not in the set
+ *
+ * @example
+ * stack_var _NAVArrayFloatSet set
+ * NAVArrayFloatSetInit(set, 10)
+ * NAVArrayFloatSetAdd(set, 3.14)
+ * NAVArrayFloatSetRemove(set, 3.14) // Removes 3.14 from the set
+ */
 define_function char NAVArrayFloatSetRemove(_NAVArrayFloatSet set, float value) {
     stack_var integer index
 
@@ -1763,6 +3345,22 @@ define_function char NAVArrayFloatSetRemove(_NAVArrayFloatSet set, float value) 
 }
 
 
+/**
+ * @function NAVArrayFloatSetFrom
+ * @public
+ * @description Initializes a float set from an array.
+ *
+ * @param {_NAVArrayFloatSet} set - Set to initialize
+ * @param {float[]} array - Array to initialize set from
+ *
+ * @returns {char} True if set was initialized, false if array is larger than set capacity
+ *
+ * @example
+ * stack_var _NAVArrayFloatSet set
+ * stack_var float values[5] = {1.1, 2.2, 3.3, 4.4, 5.5}
+ * NAVArrayFloatSetInit(set, 10)
+ * NAVArrayFloatSetFrom(set, values) // Initializes set with values from array
+ */
 define_function char NAVArrayFloatSetFrom(_NAVArrayFloatSet set, float array[]) {
     stack_var integer x
     stack_var integer length
@@ -1783,6 +3381,23 @@ define_function char NAVArrayFloatSetFrom(_NAVArrayFloatSet set, float array[]) 
 }
 
 
+/**
+ * @function NAVArrayFloatSetFind
+ * @public
+ * @description Finds the index of a value in a float set.
+ *
+ * @param {_NAVArrayFloatSet} set - Set to search in
+ * @param {float} value - Value to find
+ *
+ * @returns {integer} Index of the value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var _NAVArrayFloatSet set
+ * NAVArrayFloatSetInit(set, 10)
+ * NAVArrayFloatSetAdd(set, 3.14)
+ * stack_var integer index
+ * index = NAVArrayFloatSetFind(set, 3.14) // Returns 1
+ */
 define_function integer NAVArrayFloatSetFind(_NAVArrayFloatSet set, float value) {
     stack_var integer x
 
@@ -1800,11 +3415,42 @@ define_function integer NAVArrayFloatSetFind(_NAVArrayFloatSet set, float value)
 }
 
 
+/**
+ * @function NAVArrayFloatSetContains
+ * @public
+ * @description Checks if a float set contains a value.
+ *
+ * @param {_NAVArrayFloatSet} set - Set to check
+ * @param {float} value - Value to check for
+ *
+ * @returns {char} True if set contains the value, false otherwise
+ *
+ * @example
+ * stack_var _NAVArrayFloatSet set
+ * NAVArrayFloatSetInit(set, 10)
+ * NAVArrayFloatSetAdd(set, 3.14)
+ * stack_var char contains
+ * contains = NAVArrayFloatSetContains(set, 3.14) // Returns true
+ */
 define_function char NAVArrayFloatSetContains(_NAVArrayFloatSet set, float value) {
     return NAVArrayFloatSetFind(set, value) > 0
 }
 
 
+/**
+ * @function NAVArrayDoubleSetInit
+ * @public
+ * @description Initializes a double set with a specified capacity.
+ *
+ * @param {_NAVArrayDoubleSet} set - Set to initialize
+ * @param {integer} capacity - Capacity of the set
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVArrayDoubleSet set
+ * NAVArrayDoubleSetInit(set, 10) // Initializes set with capacity 10
+ */
 define_function NAVArrayDoubleSetInit(_NAVArrayDoubleSet set, integer capacity) {
     set.size = 0
     set.capacity = capacity
@@ -1817,6 +3463,21 @@ define_function NAVArrayDoubleSetInit(_NAVArrayDoubleSet set, integer capacity) 
 }
 
 
+/**
+ * @function NAVArrayDoubleSetAdd
+ * @public
+ * @description Adds a value to a double set.
+ *
+ * @param {_NAVArrayDoubleSet} set - Set to add value to
+ * @param {double} value - Value to add
+ *
+ * @returns {char} True if value was added, false if already in the set or set is full
+ *
+ * @example
+ * stack_var _NAVArrayDoubleSet set
+ * NAVArrayDoubleSetInit(set, 10)
+ * NAVArrayDoubleSetAdd(set, 3.14159) // Adds 3.14159 to the set
+ */
 define_function char NAVArrayDoubleSetAdd(_NAVArrayDoubleSet set, double value) {
     stack_var integer index
 
@@ -1850,6 +3511,22 @@ define_function char NAVArrayDoubleSetAdd(_NAVArrayDoubleSet set, double value) 
 }
 
 
+/**
+ * @function NAVArrayDoubleSetRemove
+ * @public
+ * @description Removes a value from a double set.
+ *
+ * @param {_NAVArrayDoubleSet} set - Set to remove value from
+ * @param {double} value - Value to remove
+ *
+ * @returns {char} True if value was removed, false if not in the set
+ *
+ * @example
+ * stack_var _NAVArrayDoubleSet set
+ * NAVArrayDoubleSetInit(set, 10)
+ * NAVArrayDoubleSetAdd(set, 3.14159)
+ * NAVArrayDoubleSetRemove(set, 3.14159) // Removes 3.14159 from the set
+ */
 define_function char NAVArrayDoubleSetRemove(_NAVArrayDoubleSet set, double value) {
     stack_var integer index
 
@@ -1869,6 +3546,22 @@ define_function char NAVArrayDoubleSetRemove(_NAVArrayDoubleSet set, double valu
 }
 
 
+/**
+ * @function NAVArrayDoubleSetFrom
+ * @public
+ * @description Initializes a double set from an array.
+ *
+ * @param {_NAVArrayDoubleSet} set - Set to initialize
+ * @param {double[]} array - Array to initialize set from
+ *
+ * @returns {char} True if set was initialized, false if array is larger than set capacity
+ *
+ * @example
+ * stack_var _NAVArrayDoubleSet set
+ * stack_var double values[5] = {1.1, 2.2, 3.3, 4.4, 5.5}
+ * NAVArrayDoubleSetInit(set, 10)
+ * NAVArrayDoubleSetFrom(set, values) // Initializes set with values from array
+ */
 define_function char NAVArrayDoubleSetFrom(_NAVArrayDoubleSet set, double array[]) {
     stack_var integer x
     stack_var integer length
@@ -1889,6 +3582,23 @@ define_function char NAVArrayDoubleSetFrom(_NAVArrayDoubleSet set, double array[
 }
 
 
+/**
+ * @function NAVArrayDoubleSetFind
+ * @public
+ * @description Finds the index of a value in a double set.
+ *
+ * @param {_NAVArrayDoubleSet} set - Set to search in
+ * @param {double} value - Value to find
+ *
+ * @returns {integer} Index of the value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var _NAVArrayDoubleSet set
+ * NAVArrayDoubleSetInit(set, 10)
+ * NAVArrayDoubleSetAdd(set, 3.14159)
+ * stack_var integer index
+ * index = NAVArrayDoubleSetFind(set, 3.14159) // Returns 1
+ */
 define_function integer NAVArrayDoubleSetFind(_NAVArrayDoubleSet set, double value) {
     stack_var integer x
 
@@ -1906,11 +3616,42 @@ define_function integer NAVArrayDoubleSetFind(_NAVArrayDoubleSet set, double val
 }
 
 
+/**
+ * @function NAVArrayDoubleSetContains
+ * @public
+ * @description Checks if a double set contains a value.
+ *
+ * @param {_NAVArrayDoubleSet} set - Set to check
+ * @param {double} value - Value to check for
+ *
+ * @returns {char} True if set contains the value, false otherwise
+ *
+ * @example
+ * stack_var _NAVArrayDoubleSet set
+ * NAVArrayDoubleSetInit(set, 10)
+ * NAVArrayDoubleSetAdd(set, 3.14159)
+ * stack_var char contains
+ * contains = NAVArrayDoubleSetContains(set, 3.14159) // Returns true
+ */
 define_function char NAVArrayDoubleSetContains(_NAVArrayDoubleSet set, double value) {
     return NAVArrayDoubleSetFind(set, value) > 0
 }
 
 
+/**
+ * @function NAVArrayStringSetInit
+ * @public
+ * @description Initializes a string set with a specified capacity.
+ *
+ * @param {_NAVArrayStringSet} set - Set to initialize
+ * @param {integer} capacity - Capacity of the set
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVArrayStringSet set
+ * NAVArrayStringSetInit(set, 10) // Initializes set with capacity 10
+ */
 define_function NAVArrayStringSetInit(_NAVArrayStringSet set, integer capacity) {
     set.size = 0
     set.capacity = capacity
@@ -1923,6 +3664,21 @@ define_function NAVArrayStringSetInit(_NAVArrayStringSet set, integer capacity) 
 }
 
 
+/**
+ * @function NAVArrayStringSetAdd
+ * @public
+ * @description Adds a value to a string set.
+ *
+ * @param {_NAVArrayStringSet} set - Set to add value to
+ * @param {char[]} value - Value to add
+ *
+ * @returns {char} True if value was added, false if already in the set or set is full
+ *
+ * @example
+ * stack_var _NAVArrayStringSet set
+ * NAVArrayStringSetInit(set, 10)
+ * NAVArrayStringSetAdd(set, 'Hello') // Adds 'Hello' to the set
+ */
 define_function char NAVArrayStringSetAdd(_NAVArrayStringSet set, char value[]) {
     stack_var integer index
 
@@ -1956,6 +3712,22 @@ define_function char NAVArrayStringSetAdd(_NAVArrayStringSet set, char value[]) 
 }
 
 
+/**
+ * @function NAVArrayStringSetRemove
+ * @public
+ * @description Removes a value from a string set.
+ *
+ * @param {_NAVArrayStringSet} set - Set to remove value from
+ * @param {char[]} value - Value to remove
+ *
+ * @returns {char} True if value was removed, false if not in the set
+ *
+ * @example
+ * stack_var _NAVArrayStringSet set
+ * NAVArrayStringSetInit(set, 10)
+ * NAVArrayStringSetAdd(set, 'Hello')
+ * NAVArrayStringSetRemove(set, 'Hello') // Removes 'Hello' from the set
+ */
 define_function char NAVArrayStringSetRemove(_NAVArrayStringSet set, char value[]) {
     stack_var integer index
 
@@ -1975,6 +3747,22 @@ define_function char NAVArrayStringSetRemove(_NAVArrayStringSet set, char value[
 }
 
 
+/**
+ * @function NAVArrayStringSetFrom
+ * @public
+ * @description Initializes a string set from an array.
+ *
+ * @param {_NAVArrayStringSet} set - Set to initialize
+ * @param {char[][]} array - Array to initialize set from
+ *
+ * @returns {char} True if set was initialized, false if array is larger than set capacity
+ *
+ * @example
+ * stack_var _NAVArrayStringSet set
+ * stack_var char values[5][20] = {'Alice', 'Bob', 'Charlie', 'David', 'Eve'}
+ * NAVArrayStringSetInit(set, 10)
+ * NAVArrayStringSetFrom(set, values) // Initializes set with values from array
+ */
 define_function char NAVArrayStringSetFrom(_NAVArrayStringSet set, char array[][]) {
     stack_var integer x
     stack_var integer length
@@ -1995,6 +3783,23 @@ define_function char NAVArrayStringSetFrom(_NAVArrayStringSet set, char array[][
 }
 
 
+/**
+ * @function NAVArrayStringSetFind
+ * @public
+ * @description Finds the index of a value in a string set.
+ *
+ * @param {_NAVArrayStringSet} set - Set to search in
+ * @param {char[]} value - Value to find
+ *
+ * @returns {integer} Index of the value (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var _NAVArrayStringSet set
+ * NAVArrayStringSetInit(set, 10)
+ * NAVArrayStringSetAdd(set, 'Hello')
+ * stack_var integer index
+ * index = NAVArrayStringSetFind(set, 'Hello') // Returns 1
+ */
 define_function integer NAVArrayStringSetFind(_NAVArrayStringSet set, char value[]) {
     stack_var integer x
 
@@ -2012,6 +3817,23 @@ define_function integer NAVArrayStringSetFind(_NAVArrayStringSet set, char value
 }
 
 
+/**
+ * @function NAVArrayStringSetContains
+ * @public
+ * @description Checks if a string set contains a value.
+ *
+ * @param {_NAVArrayStringSet} set - Set to check
+ * @param {char[]} value - Value to check for
+ *
+ * @returns {char} True if set contains the value, false otherwise
+ *
+ * @example
+ * stack_var _NAVArrayStringSet set
+ * NAVArrayStringSetInit(set, 10)
+ * NAVArrayStringSetAdd(set, 'Hello')
+ * stack_var char contains
+ * contains = NAVArrayStringSetContains(set, 'Hello') // Returns true
+ */
 define_function char NAVArrayStringSetContains(_NAVArrayStringSet set, char value[]) {
     return NAVArrayStringSetFind(set, value) > 0
 }

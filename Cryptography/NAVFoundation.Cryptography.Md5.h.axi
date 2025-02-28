@@ -31,6 +31,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+/**
+ * @file NAVFoundation.Cryptography.Md5.h.axi
+ * @brief Header file for MD5 cryptographic hash function implementation.
+ *
+ * This header defines constants and data structures required for the MD5
+ * hash implementation based on RFC1321. MD5 produces a 128-bit (16-byte)
+ * hash value, typically rendered as a 32-character hexadecimal number.
+ *
+ * @see https://www.rfc-editor.org/rfc/rfc1321
+ *
+ * @note While MD5 is no longer considered secure for cryptographic
+ * purposes, it remains useful for checksums and legacy applications.
+ */
+
 #IF_NOT_DEFINED __NAV_FOUNDATION_CRYPTOGRAPHY_MD5_H__
 #DEFINE __NAV_FOUNDATION_CRYPTOGRAPHY_MD5_H__ 'NAVFoundation.Cryptography.Md5.h'
 
@@ -38,9 +52,10 @@ SOFTWARE.
 DEFINE_CONSTANT
 
 /**
- * Constants for MD5Transform routine.
-**/
-
+ * @constant S11-S44
+ * @description Shift constants for MD5Transform routine.
+ * These values define the per-round shift amounts used in the MD5 algorithm.
+ */
 constant long S11 = 7
 constant long S12 = 12
 constant long S13 = 17
@@ -61,6 +76,11 @@ constant long S42 = 10
 constant long S43 = 15
 constant long S44 = 21
 
+/**
+ * @constant S
+ * @description Combined shift amounts array for all rounds.
+ * This provides indexed access to shift values for the algorithm.
+ */
 constant long S[64] = {
     07, 12, 17, 22, 07, 12, 17, 22, 07, 12, 17, 22, 07, 12, 17, 22,
     05, 09, 14, 20, 05, 09, 14, 20, 05, 09, 14, 20, 05, 09, 14, 20,
@@ -68,6 +88,11 @@ constant long S[64] = {
     06, 10, 15, 21, 06, 10, 15, 21, 06, 10, 15, 21, 06, 10, 15, 21
 }
 
+/**
+ * @constant K
+ * @description Precomputed constants used in each round of the MD5 algorithm.
+ * These are derived from the sine function and provide non-linearity.
+ */
 constant long K[64] = {
     $d76aa478, $e8c7b756, $242070db, $c1bdceee,
     $f57c0faf, $4787c62a, $a8304613, $fd469501,
@@ -90,6 +115,11 @@ constant long K[64] = {
     $f7537e82, $bd3af235, $2ad7d2bb, $eb86d391
 }
 
+/**
+ * @constant PADDING
+ * @description Standard padding bytes used to extend messages to the required length.
+ * The first byte is 0x80, followed by zeros, as per MD5 specification.
+ */
 constant char PADDING[64] = {
     $80, $00, $00, $00, $00, $00, $00, $00,
     $00, $00, $00, $00, $00, $00, $00, $00,
@@ -108,8 +138,17 @@ constant char PADDING[64] = {
 DEFINE_TYPE
 
 /**
- * MD5 context.
-**/
+ * @struct _NAVMd5Context
+ * @description Context structure for MD5 hash operations.
+ *
+ * This structure holds state information for the MD5 hashing operation,
+ * including intermediate hash values, message length tracking, and buffer.
+ *
+ * @property {long[4]} state - Contains the A,B,C,D hash state variables
+ * @property {long[2]} count - Message length in bits (64-bit value)
+ * @property {char[64]} buffer - 512-bit message block buffer
+ * @property {char[16]} digest - Final 16-byte MD5 hash output
+ */
 struct _NAVMd5Context {
     // state (ABCD)
     long state[4]

@@ -37,13 +37,45 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
+/**
+ * @constant NAV_CASE_INSENSITIVE
+ * @description Flag indicating case-insensitive string comparison.
+ * Used in string functions that support case sensitivity options.
+ *
+ * @example
+ * result = NAVStringCount(text, 'hello', NAV_CASE_INSENSITIVE) // Match any case
+ */
 constant integer NAV_CASE_INSENSITIVE =   0
+
+/**
+ * @constant NAV_CASE_SENSITIVE
+ * @description Flag indicating case-sensitive string comparison.
+ * Used in string functions that support case sensitivity options.
+ *
+ * @example
+ * result = NAVStringCount(text, 'hello', NAV_CASE_SENSITIVE) // Match exact case only
+ */
 constant integer NAV_CASE_SENSITIVE =     1
 
 
 DEFINE_TYPE
 
-
+/**
+ * @struct _NAVStringGatherResult
+ * @description Result structure used in string gathering operations.
+ * Passed to the callback function when a string is gathered from a stream.
+ *
+ * @property {char[]} Data - The gathered string data
+ * @property {char[]} Delimiter - The delimiter that was used to split the string
+ *
+ * @example
+ * define_function NAVStringGatherCallback(_NAVStringGatherResult result) {
+ *     // Process the gathered string data
+ *     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Gathered data: ', result.Data")
+ * }
+ *
+ * @see NAVStringGather
+ */
 struct _NAVStringGatherResult {
     char Data[NAV_MAX_BUFFER]
     char Delimiter[NAV_MAX_CHARS]

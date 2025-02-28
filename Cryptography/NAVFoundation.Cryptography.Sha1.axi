@@ -31,10 +31,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Based on RFC3174
-https://www.rfc-editor.org/rfc/rfc3174
-*/
+/**
+ * @file NAVFoundation.Cryptography.Sha1.axi
+ * @brief Implementation of the SHA-1 cryptographic hash function.
+ *
+ * This module provides functions to compute SHA-1 hashes of data.
+ * SHA-1 produces a 160-bit (20-byte) hash value, typically rendered
+ * as a 40-character hexadecimal number.
+ *
+ * Implementation based on RFC3174: https://www.rfc-editor.org/rfc/rfc3174
+ *
+ * @note While SHA-1 is no longer considered secure for many cryptographic
+ * purposes, it remains useful for integrity checking and legacy applications.
+ */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_CRYPTOGRAPHY_SHA1__
 #DEFINE __NAV_FOUNDATION_CRYPTOGRAPHY_SHA1__ 'NAVFoundation.Cryptography.Sha1'
@@ -45,10 +54,26 @@ https://www.rfc-editor.org/rfc/rfc3174
 
 
 /**
- * Digests a string and returns the result as a
- * 20-byte digest.
-**/
-define_function char[40] NAVSha1GetHash(char value[]) {
+ * @function NAVSha1GetHash
+ * @public
+ * @description Digests a string and returns the result as a 20-byte digest.
+ * This is the main public API function for the SHA-1 module.
+ *
+ * @param {char[]} value - The input string to be hashed
+ *
+ * @returns {char[20]} 20-byte SHA-1 hash value, or empty string on error
+ *
+ * @example
+ * stack_var char message[100]
+ * stack_var char digest[20]
+ *
+ * message = 'Hello, World!'
+ * digest = NAVSha1GetHash(message)
+ *
+ * @note The digest can be converted to a hex string for display purposes
+ *       using NAVByteArrayToHexString from Encoding module
+ */
+define_function char[20] NAVSha1GetHash(char value[]) {
     stack_var integer error
     stack_var _NAVSha1Context context
     stack_var char digest[SHA1_HASH_SIZE]
@@ -79,20 +104,16 @@ define_function char[40] NAVSha1GetHash(char value[]) {
 
 
 /**
- *  SHA1Reset
+ * @function NAVSha1Reset
+ * @internal
+ * @description Initializes the SHA1Context in preparation for computing a new SHA1 message digest.
  *
- *  Description:
- *      This function will initialize the SHA1Context in preparation
- *      for computing a new SHA1 message digest.
+ * @param {_NAVSha1Context} context - The context to reset
  *
- *  Parameters:
- *      context: [in/out]
- *          The context to reset.
+ * @returns {integer} SHA_SUCCESS on success, or an error code
  *
- *  Returns:
- *      sha Error Code.
- *
-**/
+ * @see NAVSha1GetHash
+ */
 define_function integer NAVSha1Reset(_NAVSha1Context context) {
     context.LengthLow           = 0
     context.LengthHigh          = 0
@@ -114,24 +135,20 @@ define_function integer NAVSha1Reset(_NAVSha1Context context) {
 
 
 /**
- *  SHA1Result
+ * @function NAVSha1Result
+ * @internal
+ * @description Returns the 160-bit message digest into the Message_Digest array.
  *
- *  Description:
- *      This function will return the 160-bit message digest into the
- *      Message_Digest array  provided by the caller.
- *      NOTE: The first octet of hash is stored in the 0th element,
- *            the last octet of hash in the 19th element.
+ * @param {_NAVSha1Context} context - The context to use to calculate the SHA-1 hash
+ * @param {char[SHA1_HASH_SIZE]} digest - Where the digest is returned
  *
- *  Parameters:
- *      context: [in/out]
- *          The context to use to calculate the SHA-1 hash.
- *      Message_Digest: [out]
- *          Where the digest is returned.
+ * @returns {integer} SHA_SUCCESS on success, or an error code
  *
- *  Returns:
- *      sha Error Code.
+ * @note The first octet of hash is stored in the 0th element,
+ *       the last octet of hash in the 19th element.
  *
-**/
+ * @see NAVSha1GetHash
+ */
 define_function integer NAVSha1Result(_NAVSha1Context context, char digest[SHA1_HASH_SIZE]) {
     if (context.Corrupted) {
         return context.Corrupted
@@ -160,25 +177,18 @@ define_function integer NAVSha1Result(_NAVSha1Context context, char digest[SHA1_
 
 
 /**
- *  SHA1Input
+ * @function NAVSha1Input
+ * @internal
+ * @description Accepts an array of octets as the next portion of the message.
  *
- *  Description:
- *      This function accepts an array of octets as the next portion
- *      of the message.
+ * @param {_NAVSha1Context} context - The SHA context to update
+ * @param {char[]} message - An array of characters representing the next portion of the message
+ * @param {integer} length - The length of the message in message_array
  *
- *  Parameters:
- *      context: [in/out]
- *          The SHA context to update
- *      message_array: [in]
- *          An array of characters representing the next portion of
- *          the message.
- *      length: [in]
- *          The length of the message in message_array
+ * @returns {integer} SHA_SUCCESS on success, or an error code
  *
- *  Returns:
- *      sha Error Code.
- *
-**/
+ * @see NAVSha1GetHash
+ */
 define_function integer NAVSha1Input(_NAVSha1Context context, char message[], integer length) {
     stack_var integer messageIndex
 
@@ -225,25 +235,18 @@ define_function integer NAVSha1Input(_NAVSha1Context context, char message[], in
 
 
 /**
- *  SHA1ProcessMessageBlock
+ * @function NAVSha1ProcessMessageBlock
+ * @internal
+ * @description Processes the next 512 bits of the message stored in the Message_Block array.
  *
- *  Description:
- *      This function will process the next 512 bits of the message
- *      stored in the Message_Block array.
+ * @param {_NAVSha1Context} context - The SHA context containing the block to process
  *
- *  Parameters:
- *      None.
+ * @returns {void}
  *
- *  Returns:
- *      Nothing.
- *
- *  Comments:
- *      Many of the variable names in this code, especially the
- *      single character names, were used because those were the
- *      names used in the publication.
- *
- *
-**/
+ * @note Many of the variable names in this code, especially the
+ *       single character names, were used because those were the
+ *       names used in the RFC publication.
+ */
 define_function NAVSha1ProcessMessageBlock(_NAVSha1Context context) {
     stack_var long a
     stack_var long b
@@ -330,27 +333,20 @@ define_function NAVSha1ProcessMessageBlock(_NAVSha1Context context) {
 
 
 /**
- *  SHA1PadMessage
+ * @function NAVSha1PadMessage
+ * @internal
+ * @description Pads the message according to SHA-1 standard requirements.
  *
- *  Description:
- *      According to the standard, the message must be padded to an even
- *      512 bits.  The first padding bit must be a '1'.  The last 64
- *      bits represent the length of the original message.  All bits in
- *      between should be 0.  This function will pad the message
- *      according to those rules by filling the Message_Block array
- *      accordingly.  It will also call the ProcessMessageBlock function
- *      provided appropriately.  When it returns, it can be assumed that
- *      the message digest has been computed.
+ * The message must be padded to an even 512 bits. The first padding bit must be a '1'.
+ * The last 64 bits represent the length of the original message in bits.
+ * All bits in between should be 0.
  *
- *  Parameters:
- *      context: [in/out]
- *          The context to pad
- *      ProcessMessageBlock: [in]
- *          The appropriate SHA*ProcessMessageBlock function
- *  Returns:
- *      Nothing.
+ * @param {_NAVSha1Context} context - The context to pad
  *
-**/
+ * @returns {void}
+ *
+ * @note When this function returns, the message digest computation is complete
+ */
 define_function NAVSha1PadMessage(_NAVSha1Context context) {
     /**
      *  Check to see if the current message block is too small to hold

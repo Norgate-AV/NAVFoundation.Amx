@@ -31,6 +31,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+/**
+ * @file NAVFoundation.Cryptography.Sha1.h.axi
+ * @brief Header file for SHA-1 cryptographic hash function implementation.
+ *
+ * This header defines constants and data structures required for the SHA-1
+ * hash implementation based on RFC3174. SHA-1 produces a 160-bit (20-byte)
+ * hash value, typically rendered as a 40-character hexadecimal number.
+ *
+ * @note While SHA-1 is no longer considered secure for many cryptographic
+ * purposes, it remains useful for integrity checking and legacy applications.
+ *
+ * @see https://www.rfc-editor.org/rfc/rfc3174
+ */
+
 #IF_NOT_DEFINED __NAV_FOUNDATION_CRYPTOGRAPHY_SHA1_H__
 #DEFINE __NAV_FOUNDATION_CRYPTOGRAPHY_SHA1_H__ 'NAVFoundation.Cryptography.Sha1.h'
 
@@ -38,31 +52,69 @@ SOFTWARE.
 DEFINE_CONSTANT
 
 /**
- * Constants defined in SHA-1
-**/
+ * @constant K
+ * @description Constants defined in SHA-1 algorithm for each round.
+ *
+ * These values are used in the SHA-1 hash calculation process during the
+ * four rounds (20 steps each) of processing.
+ */
 constant long K[] = {
-    $5a827999,
-    $6ed9eba1,
-    $8f1bbcdc,
-    $ca62c1d6
+    $5a827999,  // Round 1: 0-19 steps
+    $6ed9eba1,  // Round 2: 20-39 steps
+    $8f1bbcdc,  // Round 3: 40-59 steps
+    $ca62c1d6   // Round 4: 60-79 steps
 }
 
+/**
+ * @constant SHA_SUCCESS
+ * @description Hash operation successful
+ */
 constant integer SHA_SUCCESS            = 0
-constant integer SHA_NULL               = 1     // Null pointer parameter
-constant integer SHA_INPUT_TOO_LONG     = 2     // input data too long
-constant integer SHA_STATE_ERROR        = 3     // called Input after Result
 
+/**
+ * @constant SHA_NULL
+ * @description Null pointer parameter
+ */
+constant integer SHA_NULL               = 1
+
+/**
+ * @constant SHA_INPUT_TOO_LONG
+ * @description Input data too long
+ */
+constant integer SHA_INPUT_TOO_LONG     = 2
+
+/**
+ * @constant SHA_STATE_ERROR
+ * @description Called Input after Result
+ */
+constant integer SHA_STATE_ERROR        = 3
+
+/**
+ * @constant SHA1_HASH_SIZE
+ * @description Size of SHA-1 hash in bytes (160 bits)
+ */
 constant long SHA1_HASH_SIZE            = 20
 
 
 DEFINE_TYPE
 
 /**
- * This structure will hold context information for the SHA-1
- * hashing operation
-**/
+ * @struct _NAVSha1Context
+ * @description Context structure for SHA-1 hash operations.
+ *
+ * This structure holds context information for the SHA-1 hashing operation,
+ * including intermediate hash values, message length tracking, and status flags.
+ *
+ * @property {long[SHA1_HASH_SIZE/4]} IntermediateHash - Message Digest (5 32-bit words)
+ * @property {long} LengthLow - Lower 32 bits of message length in bits
+ * @property {long} LengthHigh - Upper 32 bits of message length in bits
+ * @property {integer} MessageBlockIndex - Index into message block array
+ * @property {char[64]} MessageBlock - 512-bit message blocks
+ * @property {integer} Computed - Flag indicating if digest is computed
+ * @property {integer} Corrupted - Flag indicating if message digest is corrupted
+ */
 struct _NAVSha1Context {
-    // Message Digest
+    // Message Digest (5 32-bit words)
     long IntermediateHash[SHA1_HASH_SIZE / 4]
 
     // Message length in bits

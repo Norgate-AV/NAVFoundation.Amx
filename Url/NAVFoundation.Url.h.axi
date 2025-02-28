@@ -31,12 +31,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+/**
+ * @file NAVFoundation.Url.h.axi
+ * @brief Header file for URL manipulation and parsing.
+ *
+ * This header defines constants and data structures for working with URLs,
+ * including schemes, tokens, and the URL structure used for parsing and building.
+ * URLs can include scheme, host, port, path, query parameters, and fragments.
+ */
+
 #IF_NOT_DEFINED __NAV_FOUNDATION_URL_H__
 #DEFINE __NAV_FOUNDATION_URL_H__ 'NAVFoundation.Url.h'
 
 
 DEFINE_CONSTANT
 
+/**
+ * @constant NAV_URL_SCHEME_*
+ * @description Standard URL schemes for various protocols.
+ */
 constant char NAV_URL_SCHEME_HTTP[]      = 'http'
 constant char NAV_URL_SCHEME_HTTPS[]     = 'https'
 constant char NAV_URL_SCHEME_FTP[]       = 'ftp'
@@ -49,17 +62,43 @@ constant char NAV_URL_SCHEME_WS[]        = 'ws'
 constant char NAV_URL_SCHEME_WSS[]       = 'wss'
 constant char NAV_URL_SCHEME_S3[]        = 's3'
 
+/**
+ * @constant NAV_URL_*_TOKEN
+ * @description Delimiter tokens for URL components.
+ */
 constant char NAV_URL_SCHEME_TOKEN[]     = '://'
 constant char NAV_URL_PORT_TOKEN[]       = ':'
 constant char NAV_URL_PATH_TOKEN[]       = '/'
 constant char NAV_URL_QUERY_TOKEN[]      = '?'
 constant char NAV_URL_FRAGMENT_TOKEN[]   = '#'
 
+/**
+ * @constant NAV_URL_MAX_QUERIES
+ * @description Maximum number of query parameters supported in a URL.
+ */
 constant integer NAV_URL_MAX_QUERIES      = 30
 
 
 DEFINE_TYPE
 
+/**
+ * @struct _NAVUrl
+ * @description Structure for holding parsed URL components.
+ *
+ * This structure stores all parts of a parsed URL, including scheme, host, port,
+ * path, query parameters, and fragment.
+ *
+ * @property {char[16]} Scheme - The URL scheme (http, https, etc.)
+ * @property {char[512]} Host - The hostname or IP address
+ * @property {integer} Port - The port number, or 0 if not specified
+ * @property {char[256]} Path - The URL path without query or fragment
+ * @property {char[1024]} FullPath - The complete path including query and fragment
+ * @property {_NAVKeyStringValuePair[]} Queries - Array of query parameters
+ * @property {char[256]} Fragment - The fragment identifier (after #)
+ *
+ * @see NAVParseUrl
+ * @see NAVBuildUrl
+ */
 struct _NAVUrl {
     char Scheme[16];
     char Host[512];

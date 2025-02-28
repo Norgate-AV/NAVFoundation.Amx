@@ -31,6 +31,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+/**
+ * @file NAVFoundation.HttpUtils.h.axi
+ * @brief Header file for HTTP protocol utilities.
+ *
+ * This header defines constants and data structures for working with HTTP protocol,
+ * including request and response handling, headers, status codes, content types,
+ * and other HTTP-related operations.
+ *
+ * These utilities support standard HTTP operations in compliance with HTTP/1.0 and HTTP/1.1
+ * specifications and can be used for building HTTP clients and simple servers.
+ */
+
 #IF_NOT_DEFINED __NAV_FOUNDATION_HTTPUTILS_H__
 #DEFINE __NAV_FOUNDATION_HTTPUTILS_H__ 'NAVFoundation.HttpUtils.h'
 
@@ -52,23 +64,43 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
+/**
+ * @constant NAV_HTTP_HOST_DEFAULT
+ * @description Default hostname used when none is specified
+ */
 constant char NAV_HTTP_HOST_DEFAULT[]       = 'localhost'
 
+/**
+ * @constant NAV_HTTP_PATH_DEFAULT
+ * @description Default path used when none is specified
+ */
 constant char NAV_HTTP_PATH_DEFAULT[]      = '/'
 
-
-
-// constant char NAV_HTTP_SCHEME_DEFAULT[]   = "NAV_URL_SCHEME_HTTP"
-
+/**
+ * @constant NAV_HTTP_SCHEMES
+ * @description Supported HTTP URL schemes
+ */
 constant char NAV_HTTP_SCHEMES[][20]  =   {
                                             'http',
                                             'https'
                                         }
 
-
+/**
+ * @constant NAV_HTTP_MAX_REQUEST_LENGTH
+ * @description Maximum allowed length for HTTP request
+ */
 constant integer NAV_HTTP_MAX_REQUEST_LENGTH    = 4096
+
+/**
+ * @constant NAV_HTTP_MAX_RESPONSE_LENGTH
+ * @description Maximum allowed length for HTTP response
+ */
 constant integer NAV_HTTP_MAX_RESPONSE_LENGTH   = 16384
 
+/**
+ * @constant NAV_HTTP_METHOD_*
+ * @description Standard HTTP request methods
+ */
 NAV_HTTP_METHOD_CONNECT  = 'CONNECT'
 NAV_HTTP_METHOD_DELETE   = 'DELETE'
 NAV_HTTP_METHOD_GET      = 'GET'
@@ -79,8 +111,10 @@ NAV_HTTP_METHOD_POST     = 'POST'
 NAV_HTTP_METHOD_PUT      = 'PUT'
 NAV_HTTP_METHOD_TRACE    = 'TRACE'
 
-// constant char NAV_HTTP_METHOD_DEFAULT[] = "NAV_HTTP_METHOD_GET"
-
+/**
+ * @constant NAV_HTTP_METHODS
+ * @description Array of all supported HTTP methods
+ */
 constant char NAV_HTTP_METHODS[][20]=  {
                                             'CONNECT',
                                             'DELETE',
@@ -93,13 +127,18 @@ constant char NAV_HTTP_METHODS[][20]=  {
                                             'TRACE'
                                         }
 
-
+/**
+ * @constant NAV_HTTP_VERSION_*
+ * @description HTTP protocol versions
+ */
 constant char NAV_HTTP_VERSION_1_0[]    = 'HTTP/1.0'
 constant char NAV_HTTP_VERSION_1_1[]    = 'HTTP/1.1'
 constant char NAV_HTTP_VERSION_2_0[]    = 'HTTP/2.0'
 
-// constant char NAV_HTTP_VERSION_DEFAULT[] = "NAV_HTTP_VERSION_1_1"
-
+/**
+ * @constant NAV_HTTP_VERSIONS
+ * @description Array of supported HTTP versions
+ */
 constant char NAV_HTTP_VERSIONS[][20]   =   {
                                                 'HTTP/1.0',
                                                 'HTTP/1.1',
@@ -781,18 +820,49 @@ constant char NAV_HTTP_WEBSOCKET_PROTOCOL[]         = 'websocket'
 
 DEFINE_TYPE
 
+/**
+ * @struct _NAVHttpStatus
+ * @description Structure representing an HTTP status code and message.
+ *
+ * @property {integer} Code - The 3-digit HTTP status code
+ * @property {char[256]} Message - The human-readable status message
+ *
+ * @see NAVHttpGetStatusMessage
+ */
 struct _NAVHttpStatus {
     integer Code;
     char Message[256];
 }
 
-
+/**
+ * @struct _NAVHttpHeader
+ * @description Structure for storing HTTP headers as key-value pairs.
+ *
+ * @property {integer} Count - Number of headers
+ * @property {_NAVKeyStringValuePair[10]} Headers - Array of header key-value pairs
+ *
+ * @see NAVHttpRequestAddHeader
+ * @see NAVHttpResponseAddHeader
+ */
 struct _NAVHttpHeader {
     integer Count;
     _NAVKeyStringValuePair Headers[10];
 }
 
-
+/**
+ * @struct _NAVHttpRequest
+ * @description Structure representing an HTTP request.
+ *
+ * @property {char[7]} Method - HTTP method (GET, POST, PUT, etc.)
+ * @property {char[256]} Path - Request path including query string
+ * @property {char[8]} Version - HTTP version
+ * @property {char[256]} Host - Target host
+ * @property {integer} Port - Target port
+ * @property {char[2048]} Body - Request body content
+ * @property {_NAVHttpHeader} Headers - Request headers
+ *
+ * @see NAVHttpRequestInit
+ */
 struct _NAVHttpRequest {
     char Method[7];
     char Path[256];
@@ -804,7 +874,15 @@ struct _NAVHttpRequest {
     _NAVHttpHeader Headers;
 }
 
-
+/**
+ * @struct _NAVHttpRequestObject
+ * @description Extended request structure with tracking ID.
+ *
+ * @property {long} Id - Unique request identifier
+ * @property {char[256]} Host - Target host
+ * @property {integer} Port - Target port
+ * @property {_NAVHttpRequest} Request - The HTTP request details
+ */
 struct _NAVHttpRequestObject {
     long Id
     char Host[256];
@@ -812,7 +890,18 @@ struct _NAVHttpRequestObject {
     _NAVHttpRequest Request
 }
 
-
+/**
+ * @struct _NAVHttpResponse
+ * @description Structure representing an HTTP response.
+ *
+ * @property {_NAVHttpStatus} Status - Response status code and message
+ * @property {_NAVHttpHeader} Headers - Response headers
+ * @property {char[16384]} Body - Response body content
+ * @property {char[256]} ContentType - Content-Type of the response
+ * @property {long} ContentLength - Length of response body in bytes
+ *
+ * @see NAVHttpResponseInit
+ */
 struct _NAVHttpResponse {
     _NAVHttpStatus Status;
     _NAVHttpHeader Headers;
@@ -821,7 +910,19 @@ struct _NAVHttpResponse {
     long ContentLength;
 }
 
-
+/**
+ * @struct _NAVHttpRequestConfig
+ * @description Configuration options for HTTP requests.
+ *
+ * @property {integer} Timeout - Request timeout in seconds
+ * @property {char[32]} AuthScheme - Authentication scheme (Basic, Bearer, etc.)
+ * @property {char[1024]} AuthToken - Authentication token or credentials
+ * @property {char[256]} CacheControl - Cache control directives
+ * @property {integer} MaxRedirects - Maximum number of redirects to follow
+ * @property {integer} ValidateCertificates - Whether to validate SSL certificates
+ * @property {integer} FollowRedirects - Whether to automatically follow redirects
+ * @property {integer} UseCompression - Whether to request compressed responses
+ */
 struct _NAVHttpRequestConfig {
     integer Timeout;
     char AuthScheme[32];

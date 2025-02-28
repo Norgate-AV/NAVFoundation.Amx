@@ -31,10 +31,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Based on RFC1321
-https://www.rfc-editor.org/rfc/rfc1321
-*/
+/**
+ * @file NAVFoundation.Cryptography.Md5.axi
+ * @brief Implementation of the MD5 cryptographic hash function.
+ *
+ * This module provides functions to compute MD5 hashes of data.
+ * MD5 produces a 128-bit (16-byte) hash value, typically rendered
+ * as a 32-character hexadecimal string.
+ *
+ * Implementation based on RFC1321: https://www.rfc-editor.org/rfc/rfc1321
+ *
+ * @note While MD5 is no longer considered secure for cryptographic
+ * purposes, it remains useful for checksums and legacy applications.
+ */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_CRYPTOGRAPHY_MD5__
 #DEFINE __NAV_FOUNDATION_CRYPTOGRAPHY_MD5__ 'NAVFoundation.Cryptography.Md5'
@@ -44,9 +53,23 @@ https://www.rfc-editor.org/rfc/rfc1321
 
 
 /**
- * Digests a string and returns the result as a
- * 32-byte hexadecimal string
-**/
+ * @function NAVMd5GetHash
+ * @public
+ * @description Digests a string and returns the result as a 32-character hexadecimal string.
+ * This is the main public API function for the MD5 module.
+ *
+ * @param {char[]} value - The input string to be hashed
+ *
+ * @returns {char[32]} 32-character hexadecimal string representing the MD5 hash value
+ *
+ * @example
+ * stack_var char message[100]
+ * stack_var char hash[32]
+ *
+ * message = 'Hello, World!'
+ * hash = NAVMd5GetHash(message)
+ * // hash now contains '65a8e27d8879283831b664bd8b7f0ad4'
+ */
 define_function char[32] NAVMd5GetHash(char value[]) {
     stack_var integer x
     stack_var _NAVMd5Context context
@@ -65,8 +88,19 @@ define_function char[32] NAVMd5GetHash(char value[]) {
 
 
 /**
- * MD5 initialization. Begins an MD5 operation, writing a new context.
-**/
+ * @function NAVMd5Init
+ * @internal
+ * @description Initializes an MD5 context for a new hash computation.
+ *
+ * This function sets up the context structure with initial values
+ * as defined in the MD5 specification.
+ *
+ * @param {_NAVMd5Context} context - The MD5 context structure to initialize
+ *
+ * @returns {void}
+ *
+ * @see NAVMd5GetHash
+ */
 define_function NAVMd5Init(_NAVMd5Context context) {
     context.count[1] = 0
     context.count[2] = 0
@@ -80,16 +114,29 @@ define_function NAVMd5Init(_NAVMd5Context context) {
 
 
 /**
- * Helper to get the current number of bytes.
-**/
+ * @function NAVMd5GetCurrentByteCount
+ * @internal
+ * @description Retrieves the current number of bytes processed in the current block.
+ *
+ * @param {_NAVMd5Context} context - The MD5 context to query
+ *
+ * @returns {integer} The number of bytes processed (0-63)
+ */
 define_function integer NAVMd5GetCurrentByteCount(_NAVMd5Context context) {
     return type_cast((context.count[1] >> 3) & $3F)
 }
 
 
 /**
- * Helper to update the current number of bits.
-**/
+ * @function NAVMd5UpdateBitCount
+ * @internal
+ * @description Updates the bit counter in the MD5 context.
+ *
+ * @param {_NAVMd5Context} context - The MD5 context to update
+ * @param {integer} length - The number of bytes being added
+ *
+ * @returns {void}
+ */
 define_function NAVMd5UpdateBitCount(_NAVMd5Context context, integer length) {
     stack_var long bits
 
@@ -105,8 +152,15 @@ define_function NAVMd5UpdateBitCount(_NAVMd5Context context, integer length) {
 
 
 /**
- * Helper to get the chunk size.
-**/
+ * @function NAVMd5GetChunkSize
+ * @internal
+ * @description Determines the size of the next data chunk to process.
+ *
+ * @param {integer} byteCount - The current byte count in the buffer
+ * @param {integer} length - The total length of data being processed
+ *
+ * @returns {integer} The number of bytes to process in this chunk
+ */
 define_function integer NAVMd5GetChunkSize(integer byteCount, integer length) {
     if ((byteCount + length) > 64) {
         return (64 - byteCount)
@@ -117,10 +171,21 @@ define_function integer NAVMd5GetChunkSize(integer byteCount, integer length) {
 
 
 /**
- * MD5 block update operation. Continues an MD5 message-digest
- * operation, processing another message block, and updating the
- * context.
-**/
+ * @function NAVMd5Update
+ * @internal
+ * @description Processes the next portion of a message for MD5 hashing.
+ *
+ * This function updates the MD5 context with more input data, processing
+ * complete blocks as they become available.
+ *
+ * @param {_NAVMd5Context} context - The MD5 context to update
+ * @param {char[]} data - The input data to process
+ * @param {integer} length - The length of the input data
+ *
+ * @returns {void}
+ *
+ * @see NAVMd5GetHash
+ */
 define_function NAVMd5Update(_NAVMd5Context context, char data[], integer length) {
     stack_var integer byteCount
     stack_var integer chunkSize
@@ -170,8 +235,16 @@ define_function NAVMd5Update(_NAVMd5Context context, char data[], integer length
 
 
 /**
- * MD5 basic transformation. Transforms state based on block.
-**/
+ * @function NAVMd5Transform
+ * @internal
+ * @description Performs the core MD5 transformation algorithm on a 64-byte block.
+ * This implements the main computation of the MD5 algorithm.
+ *
+ * @param {long[]} state - The MD5 state array (A,B,C,D values)
+ * @param {char[]} block - The 64-byte block to process
+ *
+ * @returns {void}
+ */
 define_function NAVMd5Transform(long state[], char block[]) {
     stack_var long a
     stack_var long b
@@ -267,8 +340,14 @@ define_function NAVMd5Transform(long state[], char block[]) {
 
 
 /**
- * Helper to calculate the padding length used in finalization.
-**/
+ * @function NAVMd5GetPaddingLength
+ * @internal
+ * @description Calculates the padding length required for MD5 finalization.
+ *
+ * @param {_NAVMd5Context} context - The MD5 context to analyze
+ *
+ * @returns {integer} The number of padding bytes required
+ */
 define_function integer NAVMd5GetPaddingLength(_NAVMd5Context context) {
     stack_var integer count
 
@@ -283,9 +362,18 @@ define_function integer NAVMd5GetPaddingLength(_NAVMd5Context context) {
 
 
 /**
- * Decodes input (char) into output (long). Assumes length is
- * a multiple of 4.
-**/
+ * @function NAVMd5Decode
+ * @internal
+ * @description Converts a byte array to an array of 32-bit words.
+ *
+ * @param {long[]} output - The 32-bit word array destination
+ * @param {char[]} input - The byte array source
+ * @param {integer} length - The number of bytes to convert
+ *
+ * @returns {void}
+ *
+ * @note Assumes length is a multiple of 4
+ */
 define_function NAVMd5Decode(long output[], char input[], integer length) {
     stack_var integer i
     stack_var integer j
@@ -302,9 +390,18 @@ define_function NAVMd5Decode(long output[], char input[], integer length) {
 
 
 /**
- * Encodes input (long) into output (char). Assumes length is
- * a multiple of 4.
-**/
+ * @function NAVMd5Encode
+ * @internal
+ * @description Converts an array of 32-bit words to a byte array.
+ *
+ * @param {char[]} output - The byte array destination
+ * @param {long[]} input - The 32-bit word array source
+ * @param {integer} length - The number of bytes to convert
+ *
+ * @returns {void}
+ *
+ * @note Assumes length is a multiple of 4
+ */
 define_function NAVMd5Encode(char output[], long input[], integer length) {
     stack_var integer i
     stack_var integer j
@@ -321,9 +418,19 @@ define_function NAVMd5Encode(char output[], long input[], integer length) {
 
 
 /**
- * MD5 finalization. Ends an MD5 message-digest operation, writing the
- * the message digest.
-**/
+ * @function NAVMd5Final
+ * @internal
+ * @description Finalizes the MD5 hash computation and produces the final digest.
+ *
+ * This function completes the MD5 hash computation by adding padding and
+ * length information, then producing the final hash value.
+ *
+ * @param {_NAVMd5Context} context - The MD5 context to finalize
+ *
+ * @returns {void}
+ *
+ * @see NAVMd5GetHash
+ */
 define_function NAVMd5Final(_NAVMd5Context context){
     stack_var char bits[8]
 
@@ -342,18 +449,79 @@ define_function NAVMd5Final(_NAVMd5Context context){
 
 
 /**
- * F, G, H, and I are basic MD5 functions
-**/
+ * @function F
+ * @internal
+ * @description Basic MD5 function F.
+ *
+ * @param {long} x - Input value
+ * @param {long} y - Input value
+ * @param {long} z - Input value
+ *
+ * @returns {long} Result of the F function
+ */
 define_function long F(long x, long y, long z) { return ((x & y) | (~x & z)) }
+
+
+/**
+ * @function G
+ * @internal
+ * @description Basic MD5 function G.
+ *
+ * @param {long} x - Input value
+ * @param {long} y - Input value
+ * @param {long} z - Input value
+ *
+ * @returns {long} Result of the G function
+ */
 define_function long G(long x, long y, long z) { return ((x & z) | (y & ~z)) }
+
+
+/**
+ * @function H
+ * @internal
+ * @description Basic MD5 function H.
+ *
+ * @param {long} x - Input value
+ * @param {long} y - Input value
+ * @param {long} z - Input value
+ *
+ * @returns {long} Result of the H function
+ */
 define_function long H(long x, long y, long z) { return (x ^ y ^ z)          }
+
+
+/**
+ * @function I
+ * @internal
+ * @description Basic MD5 function I.
+ *
+ * @param {long} x - Input value
+ * @param {long} y - Input value
+ * @param {long} z - Input value
+ *
+ * @returns {long} Result of the I function
+ */
 define_function long I(long x, long y, long z) { return (y ^ (x | ~z))       }
 
 
 /**
- * FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
- * Rotation is separate from addition to prevent recomputation.
-**/
+ * @function FF
+ * @internal
+ * @description MD5 transformation function for round 1.
+ *
+ * @param {long} a - Input value
+ * @param {long} b - Input value
+ * @param {long} c - Input value
+ * @param {long} d - Input value
+ * @param {long} x - Input value
+ * @param {long} s - Shift amount
+ * @param {long} ac - Constant value
+ * @param {long} t - Temporary value
+ * @param {long[]} xx - Array of input values
+ * @param {long} k - Index into the array
+ *
+ * @returns {void}
+ */
 define_function FF(long a, long b, long c, long d, long x, long s, long ac, long t, long xx[], long k) {
     k++
     // a = a + F(b, c, d) + x + ac
@@ -364,6 +532,24 @@ define_function FF(long a, long b, long c, long d, long x, long s, long ac, long
 }
 
 
+/**
+ * @function GG
+ * @internal
+ * @description MD5 transformation function for round 2.
+ *
+ * @param {long} a - Input value
+ * @param {long} b - Input value
+ * @param {long} c - Input value
+ * @param {long} d - Input value
+ * @param {long} x - Input value
+ * @param {long} s - Shift amount
+ * @param {long} ac - Constant value
+ * @param {long} t - Temporary value
+ * @param {long[]} xx - Array of input values
+ * @param {long} k - Index into the array
+ *
+ * @returns {void}
+ */
 define_function GG(long a, long b, long c, long d, long x, long s, long ac, long t, long xx[], long k) {
     k++
     // a = a + G(b, c, d) + x + ac
@@ -374,6 +560,24 @@ define_function GG(long a, long b, long c, long d, long x, long s, long ac, long
 }
 
 
+/**
+ * @function HH
+ * @internal
+ * @description MD5 transformation function for round 3.
+ *
+ * @param {long} a - Input value
+ * @param {long} b - Input value
+ * @param {long} c - Input value
+ * @param {long} d - Input value
+ * @param {long} x - Input value
+ * @param {long} s - Shift amount
+ * @param {long} ac - Constant value
+ * @param {long} t - Temporary value
+ * @param {long[]} xx - Array of input values
+ * @param {long} k - Index into the array
+ *
+ * @returns {void}
+ */
 define_function HH(long a, long b, long c, long d, long x, long s, long ac, long t, long xx[], long k) {
     k++
     // a = a + H(b, c, d) + x + ac
@@ -384,6 +588,24 @@ define_function HH(long a, long b, long c, long d, long x, long s, long ac, long
 }
 
 
+/**
+ * @function II
+ * @internal
+ * @description MD5 transformation function for round 4.
+ *
+ * @param {long} a - Input value
+ * @param {long} b - Input value
+ * @param {long} c - Input value
+ * @param {long} d - Input value
+ * @param {long} x - Input value
+ * @param {long} s - Shift amount
+ * @param {long} ac - Constant value
+ * @param {long} t - Temporary value
+ * @param {long[]} xx - Array of input values
+ * @param {long} k - Index into the array
+ *
+ * @returns {void}
+ */
 define_function II(long a, long b, long c, long d, long x, long s, long ac, long t, long xx[], long k) {
     k++
     // a = a + I(b, c, d) + x + ac

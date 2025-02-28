@@ -31,6 +31,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+/**
+ * @file NAVFoundation.PathUtils.axi
+ * @brief Utility functions for file path manipulation.
+ *
+ * This module provides a comprehensive set of functions for manipulating file paths,
+ * including extracting components, normalizing paths, resolving paths, and determining path relationships.
+ * The implementation is inspired by Node.js path module and provides similar functionality.
+ */
+
 #IF_NOT_DEFINED __NAV_FOUNDATION_PATHUTILS__
 #DEFINE __NAV_FOUNDATION_PATHUTILS__ 'NAVFoundation.PathUtils'
 
@@ -39,14 +48,55 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
+/**
+ * @constant NAV_CHAR_DOT
+ * @description ASCII value of a dot character (.)
+ */
 constant char NAV_CHAR_DOT              = 46
+
+/**
+ * @constant NAV_CHAR_FORWARD_SLASH
+ * @description ASCII value of a forward slash character (/)
+ */
 constant char NAV_CHAR_FORWARD_SLASH    = 47
+
+/**
+ * @constant NAV_CHAR_BACKWARD_SLASH
+ * @description ASCII value of a backward slash character (\)
+ */
 constant char NAV_CHAR_BACKWARD_SLASH   = 92
 
+/**
+ * @constant NAV_PATH_RESOLVE_MAX_ARGS
+ * @description Maximum number of arguments for path resolve functions
+ */
 constant integer NAV_PATH_RESOLVE_MAX_ARGS  = 4
+
+/**
+ * @constant NAV_PATH_JOIN_MAX_ARGS
+ * @description Maximum number of arguments for path join functions
+ */
 constant integer NAV_PATH_JOIN_MAX_ARGS     = 4
 
 
+/**
+ * @function NAVPathIsDirectory
+ * @public
+ * @description Determines if a path refers to a directory.
+ *
+ * This function checks if the path begins with a forward slash,
+ * which is a simple heuristic for identifying directories.
+ *
+ * @param {char[]} entity - The path to check
+ *
+ * @returns {char} TRUE if the path appears to be a directory, FALSE otherwise
+ *
+ * @example
+ * stack_var char isDir
+ *
+ * isDir = NAVPathIsDirectory('/home/user')  // Returns TRUE
+ * isDir = NAVPathIsDirectory('file.txt')    // Returns FALSE
+ */
 define_function char NAVPathIsDirectory(char entity[]) {
     if (NAVStartsWith(entity, '/')) {
         return true
@@ -56,6 +106,27 @@ define_function char NAVPathIsDirectory(char entity[]) {
 }
 
 
+/**
+ * @function NAVPathBaseName
+ * @public
+ * @description Extracts the last portion of a path.
+ *
+ * Returns the last part of a path, similar to the Unix basename command.
+ *
+ * @param {char[]} path - The path to process
+ *
+ * @returns {char[NAV_MAX_BUFFER]} The last portion of the path (filename or directory name)
+ *
+ * @example
+ * stack_var char result[NAV_MAX_BUFFER]
+ *
+ * result = NAVPathBaseName('/home/user/file.txt')  // Returns 'file.txt'
+ * result = NAVPathBaseName('/home/user/')          // Returns '' (empty string)
+ * result = NAVPathBaseName('file.txt')             // Returns 'file.txt'
+ *
+ * @see NAVPathDirName
+ * @see NAVPathName
+ */
 define_function char[NAV_MAX_BUFFER] NAVPathBaseName(char path[]) {
     stack_var char node[255][255]
     stack_var integer count
@@ -78,6 +149,27 @@ define_function char[NAV_MAX_BUFFER] NAVPathBaseName(char path[]) {
 }
 
 
+/**
+ * @function NAVPathExtName
+ * @public
+ * @description Returns the extension of a path.
+ *
+ * Extracts the file extension including the dot (.) character.
+ *
+ * @param {char[]} path - The path to process
+ *
+ * @returns {char[NAV_MAX_BUFFER]} The file extension (including the dot), or empty string if none
+ *
+ * @example
+ * stack_var char result[NAV_MAX_BUFFER]
+ *
+ * result = NAVPathExtName('/home/user/file.txt')  // Returns '.txt'
+ * result = NAVPathExtName('index.html')           // Returns '.html'
+ * result = NAVPathExtName('file')                 // Returns ''
+ *
+ * @see NAVPathBaseName
+ * @see NAVPathName
+ */
 define_function char[NAV_MAX_BUFFER] NAVPathExtName(char path[]) {
     stack_var char basename[255]
     stack_var integer index
@@ -105,6 +197,26 @@ define_function char[NAV_MAX_BUFFER] NAVPathExtName(char path[]) {
 }
 
 
+/**
+ * @function NAVPathDirName
+ * @public
+ * @description Returns the directory portion of a path.
+ *
+ * Returns the directory name of a path, similar to the Unix dirname command.
+ *
+ * @param {char[]} path - The path to process
+ *
+ * @returns {char[NAV_MAX_BUFFER]} The directory portion of the path
+ *
+ * @example
+ * stack_var char result[NAV_MAX_BUFFER]
+ *
+ * result = NAVPathDirName('/home/user/file.txt')  // Returns '/home/user'
+ * result = NAVPathDirName('/home/user/')          // Returns '/home'
+ * result = NAVPathDirName('file.txt')             // Returns '.'
+ *
+ * @see NAVPathBaseName
+ */
 define_function char[NAV_MAX_BUFFER] NAVPathDirName(char path[]) {
     stack_var integer x
     stack_var char hasRoot
@@ -148,6 +260,27 @@ define_function char[NAV_MAX_BUFFER] NAVPathDirName(char path[]) {
 }
 
 
+/**
+ * @function NAVPathName
+ * @public
+ * @description Returns the filename without extension.
+ *
+ * Extracts the filename portion of a path without its extension.
+ *
+ * @param {char[]} path - The path to process
+ *
+ * @returns {char[NAV_MAX_BUFFER]} The filename without extension
+ *
+ * @example
+ * stack_var char result[NAV_MAX_BUFFER]
+ *
+ * result = NAVPathName('/home/user/file.txt')  // Returns 'file'
+ * result = NAVPathName('index.html')           // Returns 'index'
+ * result = NAVPathName('file')                 // Returns 'file'
+ *
+ * @see NAVPathBaseName
+ * @see NAVPathExtName
+ */
 define_function char[NAV_MAX_BUFFER] NAVPathName(char path[]) {
     stack_var char basename[255]
 
@@ -169,12 +302,36 @@ define_function char[NAV_MAX_BUFFER] NAVPathName(char path[]) {
 }
 
 
-// NetLinx does not support variadic functions, so we need to limit it in some way.
-// We could pass in an array of strings, but that would be a bit cumbersome.
-// Instead, we will limit the number of arguments to 4.
-// An empty string should be used to indicate the argument is not used.
-// Eg. NAVPathJoinPath('a', 'b', 'c', '')
-// If you only want to join 2 paths, then use NAVPathJoinPath('a', 'b', '', '')
+/**
+ * @function NAVPathJoinPath
+ * @public
+ * @description Joins path segments into a single path.
+ *
+ * Combines multiple path segments into a single normalized path.
+ * NetLinx does not support variadic functions, so this function is limited
+ * to combining up to 4 path segments.
+ *
+ * @param {char[]} arg1 - First path segment
+ * @param {char[]} arg2 - Second path segment (optional)
+ * @param {char[]} arg3 - Third path segment (optional)
+ * @param {char[]} arg4 - Fourth path segment (optional)
+ *
+ * @returns {char[NAV_MAX_BUFFER]} The combined normalized path
+ *
+ * @example
+ * stack_var char result[NAV_MAX_BUFFER]
+ *
+ * result = NAVPathJoinPath('/home', 'user', 'docs', '')
+ * // Returns '/home/user/docs'
+ *
+ * result = NAVPathJoinPath('base', '../sibling', '', '')
+ * // Returns 'sibling' (with normalization)
+ *
+ * @note Empty string arguments are ignored. Use empty strings for unused arguments.
+ * @note To join more than 4 segments, use multiple calls to this function.
+ *
+ * @see NAVPathNormalize
+ */
 define_function char[NAV_MAX_BUFFER] NAVPathJoinPath(char arg1[], char arg2[], char arg3[], char arg4[]) {
     stack_var char result[NAV_MAX_BUFFER]
     stack_var char path[255]
@@ -259,6 +416,29 @@ define_function char[NAV_MAX_BUFFER] NAVPathJoinPath(char arg1[], char arg2[], c
 }
 
 
+/**
+ * @function NAVPathSplitPath
+ * @public
+ * @description Splits a path into its component parts.
+ *
+ * Splits a path string into an array of path segments using either
+ * forward or backward slashes as separators.
+ *
+ * @param {char[]} path - The path to split
+ * @param {char[][]} elements - Output array to store the path segments
+ *
+ * @returns {integer} Number of path segments found
+ *
+ * @example
+ * stack_var char segments[10][255]
+ * stack_var integer count
+ *
+ * count = NAVPathSplitPath('/home/user/docs', segments)
+ * // count = 3, segments = ['home', 'user', 'docs']
+ *
+ * @note If the path contains no separators, the count will be 0
+ * @note This function works with either forward (/) or backward (\) slashes
+ */
 define_function integer NAVPathSplitPath(char path[], char elements[][]) {
     stack_var integer count
 
@@ -278,11 +458,45 @@ define_function integer NAVPathSplitPath(char path[], char elements[][]) {
 }
 
 
+/**
+ * @function NAVPathIsAbsolute
+ * @public
+ * @description Determines if a path is absolute.
+ *
+ * Checks if the path starts with a forward slash, indicating
+ * it is an absolute path.
+ *
+ * @param {char[]} path - The path to check
+ *
+ * @returns {char} TRUE if the path is absolute, FALSE otherwise
+ *
+ * @example
+ * stack_var char result
+ *
+ * result = NAVPathIsAbsolute('/home/user')  // Returns TRUE
+ * result = NAVPathIsAbsolute('user/docs')   // Returns FALSE
+ */
 define_function char NAVPathIsAbsolute(char path[]) {
     return NAVStartsWith(path, '/')
 }
 
 
+/**
+ * @function __NAVPathNormalizeString
+ * @internal
+ * @description Internal helper function for path normalization.
+ *
+ * Processes a path string to resolve '.', '..' segments and
+ * normalize path separators.
+ *
+ * @param {char[]} path - The path to normalize
+ * @param {char} allowAboveRoot - Whether to allow '..' to resolve above the root
+ * @param {char[]} separator - The path separator to use
+ *
+ * @returns {char[NAV_MAX_BUFFER]} The normalized path
+ *
+ * @note This is an internal helper function used by NAVPathNormalize
+ */
 define_function char[NAV_MAX_BUFFER] __NAVPathNormalizeString(char path[], char allowAboveRoot, char separator[]) {
     stack_var integer x
     stack_var char result[NAV_MAX_BUFFER]
@@ -395,6 +609,30 @@ define_function char[NAV_MAX_BUFFER] __NAVPathNormalizeString(char path[], char 
 }
 
 
+/**
+ * @function NAVPathNormalize
+ * @public
+ * @description Normalizes a file path.
+ *
+ * Resolves '.', '..' segments, removes duplicate slashes,
+ * and standardizes path separators.
+ *
+ * @param {char[]} path - The path to normalize
+ *
+ * @returns {char[NAV_MAX_BUFFER]} The normalized path
+ *
+ * @example
+ * stack_var char result[NAV_MAX_BUFFER]
+ *
+ * result = NAVPathNormalize('/home/user/../lib/')
+ * // Returns '/home/lib/'
+ *
+ * result = NAVPathNormalize('user/./docs/../files')
+ * // Returns 'user/files'
+ *
+ * @see NAVPathJoinPath
+ * @see NAVPathResolve
+ */
 define_function char[NAV_MAX_BUFFER] NAVPathNormalize(char path[]) {
     stack_var char isAbsolute
     stack_var char trailingSlash
@@ -435,12 +673,33 @@ define_function char[NAV_MAX_BUFFER] NAVPathNormalize(char path[]) {
 }
 
 
-// NetLinx does not support variadic functions, so we need to limit it in some way.
-// We could pass in an array of strings, but that would be a bit cumbersome.
-// Instead, we will limit the number of arguments to 4.
-// An empty string should be used to indicate the argument is not used.
-// Eg. NAVPathResolve('a', 'b', 'c', '')
-// If you only want to resolve 2 paths, then use NAVPathResolve('a', 'b', '', '')
+/**
+ * @function NAVPathResolve
+ * @public
+ * @description Resolves a sequence of paths to an absolute path.
+ *
+ * Resolves a sequence of paths or path segments into an absolute path.
+ * The resulting path is normalized with duplicated slashes removed.
+ *
+ * @param {char[]} arg1 - First path segment
+ * @param {char[]} arg2 - Second path segment (optional)
+ * @param {char[]} arg3 - Third path segment (optional)
+ * @param {char[]} arg4 - Fourth path segment (optional)
+ *
+ * @returns {char[NAV_MAX_BUFFER]} The resolved absolute path
+ *
+ * @example
+ * stack_var char result[NAV_MAX_BUFFER]
+ *
+ * result = NAVPathResolve('/home', 'user/docs', '../files', '')
+ * // Returns '/home/user/files'
+ *
+ * @note Empty string arguments are ignored. Use empty strings for unused arguments.
+ * @note If no path segments are provided, the root path '/' is returned.
+ *
+ * @see NAVPathNormalize
+ * @see NAVPathJoinPath
+ */
 define_function char[NAV_MAX_BUFFER] NAVPathResolve(char arg1[], char arg2[], char arg3[], char arg4[]) {
     stack_var char resolved[NAV_MAX_BUFFER]
     stack_var char isAbsolute
@@ -576,6 +835,30 @@ define_function char[NAV_MAX_BUFFER] NAVPathResolve(char arg1[], char arg2[], ch
 }
 
 
+/**
+ * @function NAVPathRelative
+ * @public
+ * @description Computes the relative path from one path to another.
+ *
+ * Calculates the relative path from the 'from' path to the 'to' path.
+ *
+ * @param {char[]} pathFrom - Source path
+ * @param {char[]} pathTo - Target path
+ *
+ * @returns {char[NAV_MAX_BUFFER]} The relative path from source to target
+ *
+ * @example
+ * stack_var char result[NAV_MAX_BUFFER]
+ *
+ * result = NAVPathRelative('/home/user/docs', '/home/user/files')
+ * // Returns '../files'
+ *
+ * result = NAVPathRelative('/home/user', '/home/other/docs')
+ * // Returns '../other/docs'
+ *
+ * @note If the paths are identical, an empty string is returned
+ * @see NAVPathResolve
+ */
 define_function char[NAV_MAX_BUFFER] NAVPathRelative(char pathFrom[], char pathTo[]) {
     stack_var char resolvedPathFrom[255]
     stack_var char resolvedPathTo[255]
@@ -699,6 +982,24 @@ define_function char[NAV_MAX_BUFFER] NAVPathRelative(char pathFrom[], char pathT
 }
 
 
+/**
+ * @function NAVPathGetCwd
+ * @public
+ * @description Gets the current working directory.
+ *
+ * Retrieves the current working directory of the file system.
+ *
+ * @returns {char[NAV_MAX_BUFFER]} The current working directory
+ *
+ * @example
+ * stack_var char cwd[NAV_MAX_BUFFER]
+ *
+ * cwd = NAVPathGetCwd()
+ * // Returns the current working directory path
+ *
+ * @note If the current working directory cannot be determined, an empty string is returned
+ * @see NAVPathSetCwd
+ */
 define_function char[NAV_MAX_BUFFER] NAVPathGetCwd() {
     stack_var slong result
     stack_var char cwd[NAV_MAX_BUFFER]
@@ -718,6 +1019,26 @@ define_function char[NAV_MAX_BUFFER] NAVPathGetCwd() {
 }
 
 
+/**
+ * @function NAVPathSetCwd
+ * @public
+ * @description Sets the current working directory.
+ *
+ * Changes the current working directory to the specified path.
+ *
+ * @param {char[]} path - The path to set as the current working directory
+ *
+ * @returns {slong} Result code (0 for success, negative for error)
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVPathSetCwd('/home/user')
+ * // Sets the current working directory to '/home/user'
+ *
+ * @note If the path cannot be set, an error code is returned
+ * @see NAVPathGetCwd
+ */
 define_function slong NAVPathSetCwd(char path[]) {
     stack_var slong result
 
@@ -734,21 +1055,90 @@ define_function slong NAVPathSetCwd(char path[]) {
 }
 
 
+/**
+ * @function NAVPathIsPathSeparator
+ * @public
+ * @description Determines if a character is a path separator.
+ *
+ * Checks if the character is either a forward slash or a backward slash.
+ *
+ * @param {char} c - The character to check
+ *
+ * @returns {char} TRUE if the character is a path separator, FALSE otherwise
+ *
+ * @example
+ * stack_var char result
+ *
+ * result = NAVPathIsPathSeparator('/')  // Returns TRUE
+ * result = NAVPathIsPathSeparator('\\') // Returns TRUE
+ * result = NAVPathIsPathSeparator('a')  // Returns FALSE
+ */
 define_function char NAVPathIsPathSeparator(char c) {
     return c == NAV_CHAR_FORWARD_SLASH || c == NAV_CHAR_BACKWARD_SLASH
 }
 
 
+/**
+ * @function NAVPathIsPosixPathSeparator
+ * @public
+ * @description Determines if a character is a POSIX path separator.
+ *
+ * Checks if the character is a forward slash.
+ *
+ * @param {char} c - The character to check
+ *
+ * @returns {char} TRUE if the character is a POSIX path separator, FALSE otherwise
+ *
+ * @example
+ * stack_var char result
+ *
+ * result = NAVPathIsPosixPathSeparator('/')  // Returns TRUE
+ * result = NAVPathIsPosixPathSeparator('\\') // Returns FALSE
+ */
 define_function char NAVPathIsPosixPathSeparator(char c) {
     return c == NAV_CHAR_FORWARD_SLASH
 }
 
 
+/**
+ * @function NAVPathIsWindowsPathSeparator
+ * @public
+ * @description Determines if a character is a Windows path separator.
+ *
+ * Checks if the character is a backward slash.
+ *
+ * @param {char} c - The character to check
+ *
+ * @returns {char} TRUE if the character is a Windows path separator, FALSE otherwise
+ *
+ * @example
+ * stack_var char result
+ *
+ * result = NAVPathIsWindowsPathSeparator('\\')  // Returns TRUE
+ * result = NAVPathIsWindowsPathSeparator('/')  // Returns FALSE
+ */
 define_function char NAVPathIsWindowsPathSeparator(char c) {
     return c == NAV_CHAR_BACKWARD_SLASH
 }
 
 
+/**
+ * @function NAVPathRemoveEscapedBackslashes
+ * @public
+ * @description Removes escaped backslashes from a path.
+ *
+ * Replaces escaped backslashes in a path with forward slashes.
+ *
+ * @param {char[]} path - The path to process
+ *
+ * @returns {char[NAV_MAX_BUFFER]} The path with escaped backslashes removed
+ *
+ * @example
+ * stack_var char result[NAV_MAX_BUFFER]
+ *
+ * result = NAVPathRemoveEscapedBackslashes('C:\\\\path\\\\to\\\\file')
+ * // Returns 'C:/path/to/file'
+ */
 define_function char[NAV_MAX_BUFFER] NAVPathRemoveEscapedBackslashes(char path[]) {
     return NAVFindAndReplace(path, '\\', '\')
 }
