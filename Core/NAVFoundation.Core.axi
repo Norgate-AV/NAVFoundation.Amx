@@ -670,9 +670,17 @@ volatile integer NAVBlinker = false
 (* EXAMPLE: DEFINE_FUNCTION <RETURN_TYPE> <NAME> (<PARAMETERS>) *)
 (* EXAMPLE: DEFINE_CALL '<NAME>' (<PARAMETERS>) *)
 
-/////////////////////////////////////////////////////////////
-// NAVGetTimeStamp
-/////////////////////////////////////////////////////////////
+/**
+ * @function NAVGetTimeStamp
+ * @public
+ * @description Gets a formatted timestamp string of the current date and time.
+ *
+ * @returns {char[]} Formatted timestamp string in "YYYY-MM-DD (HH:MM:SS)" format
+ *
+ * @example
+ * stack_var char timestamp[NAV_MAX_CHARS]
+ * timestamp = NAVGetTimeStamp()  // Returns something like "2023-11-23 (14:35:42)"
+ */
 define_function char[NAV_MAX_CHARS] NAVGetTimeStamp() {
     stack_var char thisYear[4]
     stack_var char thisMonth[2]
@@ -694,9 +702,22 @@ define_function char[NAV_MAX_CHARS] NAVGetTimeStamp() {
 }
 
 
-/////////////////////////////////////////////////////////////
-// NAVLog
-/////////////////////////////////////////////////////////////
+/**
+ * @function NAVLog
+ * @public
+ * @description Logs a message to the master device and debug console (if enabled).
+ * Automatically chunks large messages to ensure reliable transmission.
+ *
+ * @param {char[]} log - The message to log
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVLog('System initialization complete')
+ *
+ * @note If log is empty, sends a carriage return
+ * @note Messages longer than NAV_LOG_CHUNK_SIZE will be split into chunks
+ */
 define_function NAVLog(char log[]) {
     stack_var char buffer[NAV_MAX_BUFFER]
 
@@ -720,16 +741,58 @@ define_function NAVLog(char log[]) {
 }
 
 
+/**
+ * @function NAVConvertDPSToAscii
+ * @public
+ * @description Converts a device specification to a human-readable string surrounded by brackets.
+ *
+ * @param {dev} device - The device to convert
+ *
+ * @returns {char[]} Device string in format "[D:P:S]"
+ *
+ * @example
+ * stack_var char deviceStr[NAV_MAX_BUFFER]
+ * deviceStr = NAVConvertDPSToAscii(dvTP)  // Returns something like "[10001:1:0]"
+ */
 define_function char[NAV_MAX_BUFFER] NAVConvertDPSToAscii(dev device) {
     return NAVStringSurroundWith(NAVDeviceToString(device), '[', ']')
 }
 
 
+/**
+ * @function NAVDeviceToString
+ * @public
+ * @description Converts a device specification to a string in D:P:S format.
+ *
+ * @param {dev} device - The device to convert
+ *
+ * @returns {char[]} Device string in format "D:P:S"
+ *
+ * @example
+ * stack_var char deviceStr[NAV_MAX_BUFFER]
+ * deviceStr = NAVDeviceToString(dvTP)  // Returns something like "10001:1:0"
+ */
 define_function char[NAV_MAX_BUFFER] NAVDeviceToString(dev device) {
     return "itoa(device.number), ':', itoa(device.port), ':', itoa(device.system)"
 }
 
 
+/**
+ * @function NAVStringToDevice
+ * @public
+ * @description Parses a device string and populates a device structure.
+ *
+ * @param {char[]} value - String in D:P:S format to parse
+ * @param {dev} device - Device variable to populate (modified in-place)
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var dev newDevice
+ * NAVStringToDevice('10001:1:0', newDevice)  // newDevice will be set to 10001:1:0
+ *
+ * @note If the string doesn't contain colons, only the device number will be set
+ */
 define_function NAVStringToDevice(char value[], dev device) {
     stack_var char valueCopy[NAV_MAX_CHARS]
 
@@ -749,6 +812,24 @@ define_function NAVStringToDevice(char value[], dev device) {
 }
 
 
+/**
+ * @function NAVStringToBoolean
+ * @public
+ * @description Converts a string to a boolean value.
+ *
+ * @param {char[]} value - String to convert ("true", "1", "on" = true, anything else = false)
+ *
+ * @returns {char} Boolean result (true or false)
+ *
+ * @example
+ * stack_var char result
+ * result = NAVStringToBoolean('true')  // Returns true
+ * result = NAVStringToBoolean('on')    // Returns true
+ * result = NAVStringToBoolean('1')     // Returns true
+ * result = NAVStringToBoolean('false') // Returns false
+ *
+ * @note Case-insensitive comparison
+ */
 define_function char NAVStringToBoolean(char value[]) {
     stack_var char valueCopy[NAV_MAX_CHARS]
 
@@ -762,6 +843,20 @@ define_function char NAVStringToBoolean(char value[]) {
 }
 
 
+/**
+ * @function NAVBooleanToString
+ * @public
+ * @description Converts a boolean value to string representation ("true" or "false").
+ *
+ * @param {char} value - Boolean value to convert
+ *
+ * @returns {char[]} "true" if value is non-zero, "false" otherwise
+ *
+ * @example
+ * stack_var char boolStr[NAV_MAX_CHARS]
+ * boolStr = NAVBooleanToString(true)   // Returns "true"
+ * boolStr = NAVBooleanToString(false)  // Returns "false"
+ */
 define_function char[NAV_MAX_CHARS] NAVBooleanToString(char value) {
     if (value) {
         return 'true'
@@ -771,6 +866,20 @@ define_function char[NAV_MAX_CHARS] NAVBooleanToString(char value) {
 }
 
 
+/**
+ * @function NAVBooleanToOnOffString
+ * @public
+ * @description Converts a boolean value to "on" or "off" string.
+ *
+ * @param {char} value - Boolean value to convert
+ *
+ * @returns {char[]} "on" if value is non-zero, "off" otherwise
+ *
+ * @example
+ * stack_var char state[NAV_MAX_CHARS]
+ * state = NAVBooleanToOnOffString(true)   // Returns "on"
+ * state = NAVBooleanToOnOffString(false)  // Returns "off"
+ */
 define_function char[NAV_MAX_CHARS] NAVBooleanToOnOffString(char value) {
     if (value) {
         return 'on'
@@ -780,7 +889,21 @@ define_function char[NAV_MAX_CHARS] NAVBooleanToOnOffString(char value) {
 }
 
 
-// Deprecated
+/**
+ * @function NAVSITOA
+ * @deprecated
+ * @description Converts a signed integer to a string. Deprecated in favor of NAVSignedIntegerToAscii.
+ *
+ * @param {sinteger} value - Signed integer to convert
+ *
+ * @returns {char[]} String representation of the signed integer
+ *
+ * @example
+ * stack_var char result[NAV_MAX_CHARS]
+ * result = NAVSITOA(-123)  // Returns "-123"
+ *
+ * @note Use NAVSignedIntegerToAscii instead
+ */
 define_function char[NAV_MAX_CHARS] NAVSITOA(sinteger value) {
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
                                 __NAV_FOUNDATION_CORE__,
@@ -796,12 +919,39 @@ define_function char[NAV_MAX_CHARS] NAVSITOA(sinteger value) {
 }
 
 
+/**
+ * @function NAVSignedIntegerToAscii
+ * @public
+ * @description Converts a signed integer to a string.
+ *
+ * @param {sinteger} value - Signed integer to convert
+ *
+ * @returns {char[]} String representation of the signed integer
+ *
+ * @example
+ * stack_var char result[NAV_MAX_CHARS]
+ * result = NAVSignedIntegerToAscii(-123)  // Returns "-123"
+ */
 define_function char[NAV_MAX_CHARS] NAVSignedIntegerToAscii(sinteger value) {
     return "itoa(value)"
 }
 
 
-// Deprecated
+/**
+ * @function NAVLTOA
+ * @deprecated
+ * @description Converts a long to a string. Deprecated in favor of NAVLongToAscii.
+ *
+ * @param {long} value - Long value to convert
+ *
+ * @returns {char[]} String representation of the long value
+ *
+ * @example
+ * stack_var char result[NAV_MAX_CHARS]
+ * result = NAVLTOA(123456)  // Returns "123456"
+ *
+ * @note Use NAVLongToAscii instead
+ */
 define_function char[NAV_MAX_CHARS] NAVLTOA(long value) {
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
                                 __NAV_FOUNDATION_CORE__,
@@ -817,12 +967,39 @@ define_function char[NAV_MAX_CHARS] NAVLTOA(long value) {
 }
 
 
+/**
+ * @function NAVLongToAscii
+ * @public
+ * @description Converts a long value to a string.
+ *
+ * @param {long} value - Long value to convert
+ *
+ * @returns {char[]} String representation of the long value
+ *
+ * @example
+ * stack_var char result[NAV_MAX_CHARS]
+ * result = NAVLongToAscii(123456)  // Returns "123456"
+ */
 define_function char[NAV_MAX_CHARS] NAVLongToAscii(long value) {
     return "itoa(value)"
 }
 
 
-// Deprecated
+/**
+ * @function NAVDTOA
+ * @deprecated
+ * @description Converts a double to a string. Deprecated in favor of NAVDoubleToAscii.
+ *
+ * @param {double} value - Double value to convert
+ *
+ * @returns {char[]} String representation of the double value
+ *
+ * @example
+ * stack_var char result[NAV_MAX_CHARS]
+ * result = NAVDTOA(123.456)  // Returns "123.456"
+ *
+ * @note Use NAVDoubleToAscii instead
+ */
 define_function char[NAV_MAX_CHARS] NAVDTOA(double value) {
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
                                 __NAV_FOUNDATION_CORE__,
@@ -838,16 +1015,63 @@ define_function char[NAV_MAX_CHARS] NAVDTOA(double value) {
 }
 
 
+/**
+ * @function NAVDoubleToAscii
+ * @public
+ * @description Converts a double value to a string.
+ *
+ * @param {double} value - Double value to convert
+ *
+ * @returns {char[]} String representation of the double value
+ *
+ * @example
+ * stack_var char result[NAV_MAX_CHARS]
+ * result = NAVDoubleToAscii(123.456)  // Returns "123.456"
+ */
 define_function char[NAV_MAX_CHARS] NAVDoubleToAscii(double value) {
     return "itoa(value)"
 }
 
 
+/**
+ * @function NAVGetUniqueId
+ * @public
+ * @description Gets the unique ID string from a controller structure.
+ *
+ * @param {_NAVController} controller - Controller structure
+ *
+ * @returns {char[]} Unique ID string
+ *
+ * @example
+ * stack_var _NAVController controller
+ * stack_var char uid[NAV_MAX_CHARS]
+ *
+ * NAVGetControllerInformation(controller)
+ * uid = NAVGetUniqueId(controller)
+ */
 define_function char[NAV_MAX_CHARS] NAVGetUniqueId(_NAVController controller) {
     return controller.UniqueId
 }
 
 
+/**
+ * @function NAVGetMacAddressFromUniqueId
+ * @public
+ * @description Converts a controller unique ID to a MAC address string.
+ *
+ * @param {char[]} uniqueId - Unique ID byte array
+ *
+ * @returns {char[]} MAC address in XX:XX:XX:XX:XX:XX format (uppercase)
+ *
+ * @example
+ * stack_var char uid[6]
+ * stack_var char mac[NAV_MAX_CHARS]
+ *
+ * // Assuming uid contains a valid unique ID
+ * mac = NAVGetMacAddressFromUniqueId(uid)  // Returns something like "00:60:9F:A0:12:34"
+ *
+ * @note Returns empty string if uniqueId is empty
+ */
 define_function char[NAV_MAX_CHARS] NAVGetMacAddressFromUniqueId(char uniqueId[]) {
     stack_var integer x
     stack_var char macAddress[6][2]
@@ -871,11 +1095,40 @@ define_function char[NAV_MAX_CHARS] NAVGetMacAddressFromUniqueId(char uniqueId[]
 }
 
 
+/**
+ * @function NAVGetMacAddress
+ * @public
+ * @description Gets the MAC address string from a controller structure.
+ *
+ * @param {_NAVController} controller - Controller structure
+ *
+ * @returns {char[]} MAC address string
+ *
+ * @example
+ * stack_var _NAVController controller
+ * stack_var char mac[NAV_MAX_CHARS]
+ *
+ * NAVGetControllerInformation(controller)
+ * mac = NAVGetMacAddress(controller)
+ */
 define_function char[NAV_MAX_CHARS] NAVGetMacAddress(_NAVController controller) {
     return controller.MacAddress
 }
 
 
+/**
+ * @function NAVGetDeviceSerialNumber
+ * @public
+ * @description Gets the serial number of an AMX device.
+ *
+ * @param {dev} device - Target device
+ *
+ * @returns {char[]} Serial number string, or empty string on error
+ *
+ * @example
+ * stack_var char serial[NAV_MAX_CHARS]
+ * serial = NAVGetDeviceSerialNumber(dvMaster)
+ */
 define_function char[NAV_MAX_CHARS] NAVGetDeviceSerialNumber(dev device) {
     stack_var char serialNumber[NAV_MAX_CHARS]
     stack_var slong result
@@ -891,6 +1144,21 @@ define_function char[NAV_MAX_CHARS] NAVGetDeviceSerialNumber(dev device) {
 }
 
 
+/**
+ * @function NAVGetDeviceIPAddressInformation
+ * @public
+ * @description Gets IP address information for a device and stores it in the provided structure.
+ *
+ * @param {dev} device - Target device
+ * @param {ip_address_struct} ip - Output structure to store IP information (modified in-place)
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var ip_address_struct ipInfo
+ * NAVGetDeviceIPAddressInformation(dvMaster, ipInfo)
+ * // Now ipInfo contains IP address, subnet mask, gateway, etc.
+ */
 define_function NAVGetDeviceIPAddressInformation(dev device, ip_address_struct ip) {
     stack_var slong result
 
@@ -902,6 +1170,20 @@ define_function NAVGetDeviceIPAddressInformation(dev device, ip_address_struct i
 }
 
 
+/**
+ * @function NAVPrintProgramInformation
+ * @public
+ * @description Logs program information to the console.
+ *
+ * @param {_NAVProgram} program - Program information structure
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVProgram progInfo
+ * NAVGetControllerProgramInformation(progInfo)
+ * NAVPrintProgramInformation(progInfo)
+ */
 define_function NAVPrintProgramInformation(_NAVProgram program) {
     NAVLog("'**********************************************************'")
     NAVLog("'Program Info'")
@@ -913,6 +1195,23 @@ define_function NAVPrintProgramInformation(_NAVProgram program) {
 }
 
 
+/**
+ * @function NAVFeedback
+ * @public
+ * @description Updates channel feedback on a device where only one channel should be on at a time.
+ * Turns on the selected channel and turns off all others in the array.
+ *
+ * @param {dev} device - Target device
+ * @param {integer[]} channels - Array of channel codes
+ * @param {integer} value - Selected channel index (1-based)
+ *
+ * @returns {void}
+ *
+ * @example
+ * // Turn on channel 2 in a group of 4 radio button channels
+ * stack_var integer channels[4] = {1, 2, 3, 4}
+ * NAVFeedback(dvTP, channels, 2)  // Channel 2 on, others off
+ */
 define_function NAVFeedback(dev device, integer channels[], integer value) {
     stack_var integer x
 
@@ -922,6 +1221,24 @@ define_function NAVFeedback(dev device, integer channels[], integer value) {
 }
 
 
+/**
+ * @function NAVFeedbackWithDevArray
+ * @public
+ * @description Updates channel feedback across multiple devices where only one channel should be on.
+ * Similar to NAVFeedback but works with an array of devices.
+ *
+ * @param {dev[]} device - Array of target devices
+ * @param {integer[]} channels - Array of channel codes
+ * @param {integer} value - Selected channel index (1-based)
+ *
+ * @returns {void}
+ *
+ * @example
+ * // Turn on channel 3 across multiple touch panels
+ * stack_var dev panels[2] = {dvTP1, dvTP2}
+ * stack_var integer channels[5] = {11, 12, 13, 14, 15}
+ * NAVFeedbackWithDevArray(panels, channels, 3)  // Channel 13 on, others off
+ */
 define_function NAVFeedbackWithDevArray(dev device[], integer channels[], integer value) {
     stack_var integer x
 
@@ -931,6 +1248,23 @@ define_function NAVFeedbackWithDevArray(dev device[], integer channels[], intege
 }
 
 
+/**
+ * @function NAVFeedbackWithValueArray
+ * @public
+ * @description Sets multiple channel states according to a value array.
+ * Each channel is set to the corresponding value in the value array.
+ *
+ * @param {dev} device - Target device
+ * @param {integer[]} channels - Array of channel codes
+ * @param {integer[]} value - Array of boolean states (0=off, non-zero=on)
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var integer channels[3] = {11, 12, 13}
+ * stack_var integer values[3] = {1, 0, 1}  // On, Off, On
+ * NAVFeedbackWithValueArray(dvTP, channels, values)
+ */
 define_function NAVFeedbackWithValueArray(dev device, integer channels[], integer value[]) {
     stack_var integer x
 
@@ -940,21 +1274,77 @@ define_function NAVFeedbackWithValueArray(dev device, integer channels[], intege
 }
 
 
+/**
+ * @function NAVCommand
+ * @public
+ * @description Sends a command to a device.
+ *
+ * @param {dev} device - Target device
+ * @param {char[]} value - Command string to send
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVCommand(dvTP, 'PAGE-Main')
+ */
 define_function NAVCommand(dev device, char value[]) {
     send_command device, value
 }
 
 
+/**
+ * @function NAVCommandArray
+ * @public
+ * @description Sends the same command to multiple devices.
+ *
+ * @param {dev[]} device - Array of target devices
+ * @param {char[]} value - Command string to send
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var dev panels[2] = {dvTP1, dvTP2}
+ * NAVCommandArray(panels, 'PAGE-Main')
+ */
 define_function NAVCommandArray(dev device[], char value[]) {
     send_command device, value
 }
 
 
+/**
+ * @function NAVSendLevel
+ * @public
+ * @description Sends a level value to a device.
+ *
+ * @param {dev} device - Target device
+ * @param {integer} level - Level code
+ * @param {integer} value - Level value to send
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVSendLevel(dvTP, 1, 50)  // Set level 1 to value 50
+ */
 define_function NAVSendLevel(dev device, integer level, integer value) {
     send_level device, level, value
 }
 
 
+/**
+ * @function NAVSendLevelArray
+ * @public
+ * @description Sends the same level value to multiple devices.
+ *
+ * @param {dev[]} device - Array of target devices
+ * @param {integer} level - Level code
+ * @param {integer} value - Level value to send
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var dev panels[2] = {dvTP1, dvTP2}
+ * NAVSendLevelArray(panels, 1, 75)  // Set level 1 to value 75 on all panels
+ */
 define_function NAVSendLevelArray(dev device[], integer level, integer value) {
     stack_var integer x
 
@@ -964,6 +1354,20 @@ define_function NAVSendLevelArray(dev device[], integer level, integer value) {
 }
 
 
+/**
+ * @function NAVGetControllerProgramInformation
+ * @public
+ * @description Populates a program information structure with compiler constants.
+ *
+ * @param {_NAVProgram} program - Program structure to populate (modified in-place)
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVProgram progInfo
+ * NAVGetControllerProgramInformation(progInfo)
+ * // Now progInfo contains program name, file, compile date, etc.
+ */
 define_function NAVGetControllerProgramInformation(_NAVProgram program) {
     program.Name = __NAME__
     program.File = __FILE__
@@ -972,6 +1376,20 @@ define_function NAVGetControllerProgramInformation(_NAVProgram program) {
 }
 
 
+/**
+ * @function NAVGetControllerInformation
+ * @public
+ * @description Populates a controller structure with device and network information.
+ *
+ * @param {_NAVController} controller - Controller structure to populate (modified in-place)
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVController controller
+ * NAVGetControllerInformation(controller)
+ * // Now controller contains IP address, MAC, serial number, etc.
+ */
 define_function NAVGetControllerInformation(_NAVController controller) {
     device_info(0:1:0, controller.Information)
     device_info(5001:1:0, controller.Device)
@@ -987,11 +1405,43 @@ define_function NAVGetControllerInformation(_NAVController controller) {
 }
 
 
+/**
+ * @function NAVByteIsHumanReadable
+ * @public
+ * @description Determines if a byte represents a human-readable ASCII character.
+ *
+ * @param {char} byte - Byte to check
+ *
+ * @returns {char} true if the byte is a printable ASCII character, false otherwise
+ *
+ * @example
+ * stack_var char result
+ * result = NAVByteIsHumanReadable($41)  // 'A', Returns true
+ * result = NAVByteIsHumanReadable($0D)  // CR, Returns false
+ *
+ * @note Human-readable bytes are in the range 32-126 (0x20-0x7E)
+ */
 define_function char NAVByteIsHumanReadable(char byte) {
     return (byte > $1F && byte < $7F);
 }
 
 
+/**
+ * @function NAVFormatHex
+ * @public
+ * @description Formats a byte array as a readable string, showing hexadecimal for non-printable characters.
+ *
+ * @param {char[]} value - Byte array to format
+ *
+ * @returns {char[]} Formatted string with readable characters as-is and hex for non-printable characters
+ *
+ * @example
+ * stack_var char data[5] = "ABC$0D$0A"
+ * stack_var char formatted[NAV_MAX_BUFFER]
+ * formatted = NAVFormatHex(data)  // Returns "ABC$0D$0A"
+ *
+ * @note Non-printable bytes are shown as "$XX" where XX is the hex value
+ */
 define_function char[NAV_MAX_BUFFER] NAVFormatHex(char value[]) {
     integer x
     char result[NAV_MAX_BUFFER]
@@ -1021,6 +1471,19 @@ define_function char[NAV_MAX_BUFFER] NAVFormatHex(char value[]) {
 }
 
 
+/**
+ * @function NAVGetNewGuid
+ * @public
+ * @description Generates a new random GUID in standard UUID format.
+ *
+ * @returns {char[]} Generated GUID string in the format "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+ *
+ * @example
+ * stack_var char guid[NAV_MAX_CHARS]
+ * guid = NAVGetNewGuid()  // Returns something like "b4e12e58-c720-4b9d-a7f3-21a8a6490c14"
+ *
+ * @note Follows UUID v4 format with fixed version (4) and variant (8-B)
+ */
 define_function char[NAV_MAX_CHARS] NAVGetNewGuid() {
     stack_var integer x
     stack_var integer length
@@ -1047,11 +1510,34 @@ define_function char[NAV_MAX_CHARS] NAVGetNewGuid() {
 }
 
 
+/**
+ * @function NAVZeroBase
+ * @public
+ * @description Converts a 1-based index to a 0-based index.
+ *
+ * @param {integer} value - 1-based index value
+ *
+ * @returns {integer} Equivalent 0-based index (value-1)
+ *
+ * @example
+ * stack_var integer zeroBasedIndex
+ * zeroBasedIndex = NAVZeroBase(1)  // Returns 0
+ */
 define_function integer NAVZeroBase(integer value) {
     return value - 1
 }
 
 
+/**
+ * @function NAVGetNAVBanner
+ * @public
+ * @description Gets the Norgate AV Foundation ASCII art banner with license information.
+ *
+ * @returns {char[]} Formatted banner string
+ *
+ * @example
+ * send_string 0, NAVGetNAVBanner()  // Outputs banner to console
+ */
 define_function char[NAV_MAX_BUFFER] NAVGetNAVBanner() {
     return "
         ' _   _                       _          ___     __', NAV_CR, NAV_LF,
@@ -1071,6 +1557,20 @@ define_function char[NAV_MAX_BUFFER] NAVGetNAVBanner() {
 }
 
 
+/**
+ * @function NAVPrintBanner
+ * @public
+ * @description Logs a formatted banner with controller and program information.
+ *
+ * @param {_NAVController} controller - Controller structure containing system information
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVController controller
+ * NAVGetControllerInformation(controller)
+ * NAVPrintBanner(controller)  // Outputs detailed information banner
+ */
 define_function NAVPrintBanner(_NAVController controller) {
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "' _   _                       _          ___     __'")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'| \ | | ___  _ __ __ _  __ _| |_ ___   / \ \   / /'")
@@ -1140,6 +1640,22 @@ define_function NAVPrintBanner(_NAVController controller) {
 }
 
 
+/**
+ * @function NAVGetVariableToXmlError
+ * @public
+ * @description Gets a human-readable error message for variable-to-XML conversion errors.
+ *
+ * @param {sinteger} error - Error code from variable_to_xml function
+ *
+ * @returns {char[]} Human-readable error description
+ *
+ * @example
+ * stack_var sinteger result
+ * stack_var char errorMsg[NAV_MAX_BUFFER]
+ *
+ * // Assume result contains an error code
+ * errorMsg = NAVGetVariableToXmlError(result)
+ */
 define_function char[NAV_MAX_BUFFER] NAVGetVariableToXmlError(sinteger error) {
     switch (error) {
         case NAV_VAR_TO_XML_ERROR_XML_DECODE_DATA_TYPE_MISMATCH: {
@@ -1167,6 +1683,22 @@ define_function char[NAV_MAX_BUFFER] NAVGetVariableToXmlError(sinteger error) {
 }
 
 
+/**
+ * @function NAVGetVariableToStringError
+ * @public
+ * @description Gets a human-readable error message for variable-to-string conversion errors.
+ *
+ * @param {sinteger} error - Error code from variable_to_string function
+ *
+ * @returns {char[]} Human-readable error description
+ *
+ * @example
+ * stack_var sinteger result
+ * stack_var char errorMsg[NAV_MAX_BUFFER]
+ *
+ * // Assume result contains an error code
+ * errorMsg = NAVGetVariableToStringError(result)
+ */
 define_function char[NAV_MAX_BUFFER] NAVGetVariableToStringError(sinteger error) {
     switch (error) {
         case NAV_VAR_TO_STRING_UNRECOGNIZED_TYPE: {
@@ -1182,6 +1714,22 @@ define_function char[NAV_MAX_BUFFER] NAVGetVariableToStringError(sinteger error)
 }
 
 
+/**
+ * @function NAVGetStringToVariableError
+ * @public
+ * @description Gets a human-readable error message for string-to-variable conversion errors.
+ *
+ * @param {sinteger} error - Error code from string_to_variable function
+ *
+ * @returns {char[]} Human-readable error description
+ *
+ * @example
+ * stack_var sinteger result
+ * stack_var char errorMsg[NAV_MAX_BUFFER]
+ *
+ * // Assume result contains an error code
+ * errorMsg = NAVGetStringToVariableError(result)
+ */
 define_function char[NAV_MAX_BUFFER] NAVGetStringToVariableError(sinteger error) {
     switch (error) {
         case NAV_STRING_TO_VAR_ERROR_DECODE_DATA_TOO_SMALL_1: {
@@ -1203,6 +1751,19 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringToVariableError(sinteger error)
 }
 
 
+/**
+ * @function NAVDeviceIsOnline
+ * @public
+ * @description Checks if a device is currently online.
+ *
+ * @param {dev} device - Device to check
+ *
+ * @returns {char} true if device is online, false otherwise
+ *
+ * @example
+ * stack_var char isOnline
+ * isOnline = NAVDeviceIsOnline(dvTP)  // Returns true if touch panel is connected
+ */
 define_function char NAVDeviceIsOnline(dev device) {
     return device_id(device) != 0
 }
