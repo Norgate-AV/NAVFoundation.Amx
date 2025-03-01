@@ -24,52 +24,16 @@ It's feature rich and written in pure NetLinx.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Libraries :books:](#libraries-books)
 - [Key Features :sparkles:](#key-features-sparkles)
-- [Installation :package:](#installation-package)
-- [Quick Start :rocket:](#quick-start-rocket)
+- [Installation :zap:](#installation-zap)
 - [Documentation :page_facing_up:](#documentation-page_facing_up)
+- [Libraries :books:](#libraries-books)
 - [Support :question:](#support-question)
 - [Team :soccer:](#team-soccer)
 - [Contributors :sparkles:](#contributors-sparkles)
 - [LICENSE :balance_scale:](#license-balance_scale)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-## Libraries :books:
-
-- [Core](./Core)
-- [ArrayUtils](./ArrayUtils)
-- [BinaryUtils](./BinaryUtils)
-- [Console](./Console)
-- [Cryptography](./Cryptography)
-- [DateTimeUtils](./DateTimeUtils)
-- [Encoding](./Encoding)
-- [Enova](./Enova)
-- [ErrorLogUtils](./ErrorLogUtils)
-- [FileUtils](./FileUtils)
-- [HashTable](./HashTable)
-- [HttpUtils](./HttpUtils)
-- [InterModuleApi](./InterModuleApi)
-- [Jsmn](./Jsmn)
-- [LogicEngine](./LogicEngine)
-- [Math](./Math)
-- [McpBase](./McpBase)
-- [ModuleBase](./ModuleBase)
-- [NtpClient](./NtpClient)
-- [PathUtils](./PathUtils)
-- [Queue](./Queue)
-- [Redis](./Redis)
-- [RmsBase](./RmsBase)
-- [SnapiHelpers](./SnapiHelpers)
-- [SocketUtils](./SocketUtils)
-- [Stack](./Stack)
-- [Stopwatch](./Stopwatch)
-- [StringUtils](./StringUtils)
-- [TimelineUtils](./TimelineUtils)
-- [Tui](./Tui)
-- [UIUtils](./UIUtils)
-- [Url](./Url)
 
 ## Key Features :sparkles:
 
@@ -80,40 +44,78 @@ It's feature rich and written in pure NetLinx.
 - Full compatibility with AMX NetLinx Studio
 - Extensive error handling and logging capabilities
 
-## Installation :package:
+## Installation :zap:
 
 This library can be installed using [Scoop](https://scoop.sh/).
 
 ```powershell
-scoop bucket add norgate-av-amx
-scoop install navfoundation-amx
-```
+# If you don't have sudo installed - Required to create symlinks in the AMX directory
+scoop install sudo
 
-## Quick Start :rocket:
+# Add the Norgate-AV AMX bucket
+scoop bucket add norgateav-amx https://github.com/Norgate-AV/scoop-norgateav-amx
 
-Here are some basic usage examples:
-
-```netlinx
-// Example 1: Using the Core library
-#include 'NAVFoundation.Core.axi'
-
-DEFINE_START
-{
-    // Your code here
-}
-
-// Example 2: Using the HttpUtils library
-#include 'NAVFoundation.HttpUtils.axi'
-
-DEFINE_START
-{
-    // Your code here
-}
+# Install NAVFoundation.Amx
+sudo scoop install navfoundation-amx
 ```
 
 ## Documentation :page_facing_up:
 
-For more detailed guides and documentation, please refer to the [official documentation](https://github.com/Norgate-AV/NAVFoundation.Amx/wiki).
+For more detailed guides and documentation, please refer the `README.md` files in each library folder.
+
+## Libraries :books:
+
+- [Core](./Core)
+    - Provides a set of core constants, types, and functions for AMX programming.
+- [ArrayUtils](./ArrayUtils)
+    - Provides utility functions for working with arrays in AMX.
+- [BinaryUtils](./BinaryUtils)
+    - Provides functions for binary data manipulation and conversion.
+- [Console](./Console)
+- [Cryptography](./Cryptography)
+    - Provides cryptographic functions and utilities for secure data handling.
+- [DateTimeUtils](./DateTimeUtils)
+    - Provides utility functions for date and time manipulation.
+- [Encoding](./Encoding)
+    - Provides functions for encoding and decoding data in various formats.
+- [Enova](./Enova)
+    - Provides functions for interacting with Enova switchers.
+- [ErrorLogUtils](./ErrorLogUtils)
+    - Provides functions for error logging and handling.
+- [FileUtils](./FileUtils)
+    - Provides utility functions for file operations and management.
+- [HashTable](./HashTable)
+- [HttpUtils](./HttpUtils)
+    - Provides functions for HTTP requests and responses.
+- [InterModuleApi](./InterModuleApi)
+- [Jsmn](./Jsmn)
+    - Provides a JSON parser for AMX.
+- [LogicEngine](./LogicEngine)
+- [Math](./Math)
+    - Provides mathematical functions and utilities.
+- [McpBase](./McpBase)
+- [ModuleBase](./ModuleBase)
+- [NtpClient](./NtpClient)
+- [PathUtils](./PathUtils)
+    - Provides utility functions for file path manipulation.
+- [Queue](./Queue)
+- [Redis](./Redis)
+- [RmsBase](./RmsBase)
+- [SnapiHelpers](./SnapiHelpers)
+    - Provides helper functions for SNAPI communication.
+- [SocketUtils](./SocketUtils)
+    - Provides functions for socket communication.
+- [Stack](./Stack)
+- [Stopwatch](./Stopwatch)
+    - Provides a stopwatch utility for timing operations.
+- [StringUtils](./StringUtils)
+    - Provides utility functions for string manipulation.
+- [TimelineUtils](./TimelineUtils)
+    - Provides functions for working with timelines.
+- [Tui](./Tui)
+- [UIUtils](./UIUtils)
+- [Url](./Url)
+    - Provides functions for URL manipulation and encoding.
 
 ## Support :question:
 

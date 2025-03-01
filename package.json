@@ -29,7 +29,7 @@
         "commit": "git-cz",
         "prepare": "husky && dropnode",
         "pretty:fix": "prettier --write .",
-        "doctoc": "doctoc --title '## Contents 📖' README.md",
+        "doctoc": "doctoc README.md",
         "contrib:add": "all-contributors add",
         "contrib:generate": "all-contributors generate",
         "contrib:check": "all-contributors check"
