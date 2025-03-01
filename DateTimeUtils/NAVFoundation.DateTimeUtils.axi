@@ -36,12 +36,44 @@ SOFTWARE.
 
 #include 'NAVFoundation.DateTimeUtils.h.axi'
 
-
+/**
+ * @function NAVDateTimeGetTimespecNow
+ * @public
+ * @description Gets the current date and time and fills a timespec structure.
+ *
+ * @param {_NAVTimespec} timespec - Structure to fill with current date and time information
+ *
+ * @returns {char} True if successful, false otherwise
+ *
+ * @example
+ * stack_var _NAVTimespec now
+ * if (NAVDateTimeGetTimespecNow(now)) {
+ *     // Use the current time values in the now structure
+ *     NAVDateTimeTimespecLog('Current Time', now)
+ * }
+ */
 define_function char NAVDateTimeGetTimespecNow(_NAVTimespec timespec) {
     return NAVDateTimeGetTimespec(timespec, ldate, time)
 }
 
 
+/**
+ * @function NAVDateTimeGetTimespec
+ * @public
+ * @description Fills a timespec structure with date and time from the provided strings.
+ *
+ * @param {_NAVTimespec} timespec - Structure to fill with date and time information
+ * @param {char[]} date - Date string in MM/DD/YYYY format
+ * @param {char[]} time - Time string in HH:MM:SS format
+ *
+ * @returns {char} True if successful, false otherwise
+ *
+ * @example
+ * stack_var _NAVTimespec customTime
+ * if (NAVDateTimeGetTimespec(customTime, '11/23/2023', '14:30:00')) {
+ *     // Use the values in the customTime structure
+ * }
+ */
 define_function char NAVDateTimeGetTimespec(_NAVTimespec timespec, char date[], char time[]) {
     stack_var sinteger hours
     stack_var sinteger minutes
@@ -139,22 +171,81 @@ define_function char NAVDateTimeGetTimespec(_NAVTimespec timespec, char date[], 
 
 DEFINE_CONSTANT
 
+/**
+ * @constant NAV_DATETIME_DST_START_MONTH
+ * @description Month when Daylight Saving Time starts (March)
+ */
 constant integer NAV_DATETIME_DST_START_MONTH = 3
+
+/**
+ * @constant NAV_DATETIME_DST_START_DAY
+ * @description Day when Daylight Saving Time starts (0 = last Sunday)
+ */
 constant integer NAV_DATETIME_DST_START_DAY = 0
+
+/**
+ * @constant NAV_DATETIME_DST_START_HOUR
+ * @description Hour when Daylight Saving Time starts (2:00 AM)
+ */
 constant integer NAV_DATETIME_DST_START_HOUR = 2
+
+/**
+ * @constant NAV_DATETIME_DST_START_MINUTE
+ * @description Minute when Daylight Saving Time starts
+ */
 constant integer NAV_DATETIME_DST_START_MINUTE = 0
 
+/**
+ * @constant NAV_DATETIME_DST_END_MONTH
+ * @description Month when Daylight Saving Time ends (November)
+ */
 constant integer NAV_DATETIME_DST_END_MONTH = 11
+
+/**
+ * @constant NAV_DATETIME_DST_END_DAY
+ * @description Day when Daylight Saving Time ends (0 = last Sunday)
+ */
 constant integer NAV_DATETIME_DST_END_DAY = 0
+
+/**
+ * @constant NAV_DATETIME_DST_END_HOUR
+ * @description Hour when Daylight Saving Time ends (2:00 AM)
+ */
 constant integer NAV_DATETIME_DST_END_HOUR = 2
+
+/**
+ * @constant NAV_DATETIME_DST_END_MINUTE
+ * @description Minute when Daylight Saving Time ends
+ */
 constant integer NAV_DATETIME_DST_END_MINUTE = 0
 
 
+/**
+ * @function NAVDateTimeGetGmtOffset
+ * @public
+ * @description Gets the current GMT offset based on timezone configuration.
+ *
+ * @returns {integer} GMT offset in minutes, or 0 if not available
+ */
 define_function integer NAVDateTimeGetGmtOffset() {
 
 }
 
 
+/**
+ * @function NAVDateTimeGetLastSundayInMonth
+ * @public
+ * @description Calculates the date of the last Sunday in a given month and year.
+ *
+ * @param {integer} year - Year for the calculation
+ * @param {integer} month - Month for the calculation (1-12)
+ *
+ * @returns {integer} Day of the month of the last Sunday (1-31)
+ *
+ * @example
+ * stack_var integer lastSunday
+ * lastSunday = NAVDateTimeGetLastSundayInMonth(2023, 11)  // Returns the day of last Sunday in November 2023
+ */
 define_function integer NAVDateTimeGetLastSundayInMonth(integer year, integer month) {
     stack_var integer x
     stack_var integer day
@@ -173,6 +264,22 @@ define_function integer NAVDateTimeGetLastSundayInMonth(integer year, integer mo
 }
 
 
+/**
+ * @function NAVDateTimeIsDst
+ * @public
+ * @description Determines if the specified time is in Daylight Saving Time.
+ *
+ * @param {_NAVTimespec} timespec - Timespec structure containing date and time information
+ *
+ * @returns {char} True if time is in DST, false otherwise
+ *
+ * @example
+ * stack_var _NAVTimespec now
+ * stack_var char isDst
+ *
+ * NAVDateTimeGetTimespecNow(now)
+ * isDst = NAVDateTimeIsDst(now)
+ */
 define_function char NAVDateTimeIsDst(_NAVTimespec timespec) {
     stack_var integer year
     stack_var integer month
@@ -238,6 +345,22 @@ define_function char NAVDateTimeIsDst(_NAVTimespec timespec) {
 }
 
 
+/**
+ * @function NAVDateTimeGetYearDay
+ * @public
+ * @description Calculates the day of the year (1-366) for a given timespec.
+ *
+ * @param {_NAVTimespec} timespec - Timespec structure containing date and time information
+ *
+ * @returns {integer} Day of the year (1-366)
+ *
+ * @example
+ * stack_var _NAVTimespec now
+ * stack_var integer dayOfYear
+ *
+ * NAVDateTimeGetTimespecNow(now)
+ * dayOfYear = NAVDateTimeGetYearDay(now)
+ */
 define_function integer NAVDateTimeGetYearDay(_NAVTimespec timespec) {
     stack_var integer x
     stack_var integer result
@@ -256,11 +379,37 @@ define_function integer NAVDateTimeGetYearDay(_NAVTimespec timespec) {
 }
 
 
+/**
+ * @function NAVDateTimeIsLeapYear
+ * @public
+ * @description Determines if the specified year is a leap year.
+ *
+ * @param {integer} year - Year to check
+ *
+ * @returns {char} True if leap year, false otherwise
+ *
+ * @example
+ * stack_var char isLeap
+ * isLeap = NAVDateTimeIsLeapYear(2024)  // Returns true
+ */
 define_function char NAVDateTimeIsLeapYear(integer year) {
     return (year % 400 == 0) || (year % 100 == 0) || (year % 4 == 0)
 }
 
 
+/**
+ * @function NAVGetNextDate
+ * @public
+ * @description Returns the next date after the current date.
+ *
+ * @returns {char[]} String representation of the next date in MM/DD/YYYY format
+ *
+ * @example
+ * stack_var char nextDay[20]
+ * nextDay = NAVGetNextDate()  // If today is 12/31/2023, returns "01/01/2024"
+ *
+ * @note Handles month and year transitions, including leap years
+ */
 define_function char[NAV_MAX_BUFFER] NAVGetNextDate() {
     stack_var integer x
     stack_var integer daysInMonth[12]
@@ -302,6 +451,22 @@ define_function char[NAV_MAX_BUFFER] NAVGetNextDate() {
 }
 
 
+/**
+ * @function NAVDateTimeTimespecPast
+ * @public
+ * @description Checks if the specified timespec is in the past relative to the current time.
+ *
+ * @param {_NAVTimespec} timespec - Timespec to check
+ *
+ * @returns {char} True if the time is in the past, false otherwise
+ *
+ * @example
+ * stack_var _NAVTimespec oldTime
+ * stack_var char isPast
+ *
+ * // Populate oldTime with a past date
+ * isPast = NAVDateTimeTimespecPast(oldTime)  // Returns true
+ */
 define_function char NAVDateTimeTimespecPast(_NAVTimespec timespec) {
     stack_var _NAVTimespec now
 
@@ -311,6 +476,23 @@ define_function char NAVDateTimeTimespecPast(_NAVTimespec timespec) {
 }
 
 
+/**
+ * @function NAVDateTimeEpochToTimespec
+ * @public
+ * @description Converts a Unix epoch timestamp to a timespec structure.
+ *
+ * @param {long} epoch - Unix timestamp in seconds since Jan 1, 1970
+ * @param {_NAVTimespec} timespec - Timespec structure to populate (modified in-place)
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVTimespec time
+ * stack_var long epochTime
+ *
+ * epochTime = 1672531200  // Jan 1, 2023 00:00:00 UTC
+ * NAVDateTimeEpochToTimespec(epochTime, time)
+ */
 define_function NAVDateTimeEpochToTimespec(long epoch, _NAVTimespec timespec) {
     timespec.Year = type_cast((epoch / NAV_DATETIME_SECONDS_IN_1_YEAR_AVG) + 1970)
     timespec.Month = type_cast(((epoch % NAV_DATETIME_SECONDS_IN_1_YEAR_AVG) / NAV_DATETIME_SECONDS_IN_1_MONTH_AVG)) + 1
@@ -323,6 +505,17 @@ define_function NAVDateTimeEpochToTimespec(long epoch, _NAVTimespec timespec) {
 }
 
 
+/**
+ * @function NAVDateTimeGetEpochNow
+ * @public
+ * @description Gets the current Unix epoch timestamp.
+ *
+ * @returns {long} Current Unix timestamp in seconds since Jan 1, 1970
+ *
+ * @example
+ * stack_var long currentEpoch
+ * currentEpoch = NAVDateTimeGetEpochNow()
+ */
 define_function long NAVDateTimeGetEpochNow() {
     stack_var _NAVTimespec timespec
 
@@ -332,6 +525,22 @@ define_function long NAVDateTimeGetEpochNow() {
 }
 
 
+/**
+ * @function NAVDateTimeGetEpoch
+ * @public
+ * @description Converts a timespec structure to a Unix epoch timestamp.
+ *
+ * @param {_NAVTimespec} timespec - Timespec structure to convert
+ *
+ * @returns {long} Unix timestamp in seconds since Jan 1, 1970
+ *
+ * @example
+ * stack_var _NAVTimespec time
+ * stack_var long epochTime
+ *
+ * NAVDateTimeGetTimespecNow(time)
+ * epochTime = NAVDateTimeGetEpoch(time)
+ */
 define_function long NAVDateTimeGetEpoch(_NAVTimespec timespec) {
     stack_var long result
 
@@ -348,6 +557,21 @@ define_function long NAVDateTimeGetEpoch(_NAVTimespec timespec) {
 }
 
 
+/**
+ * @function NAVDateTimeTimespecLog
+ * @public
+ * @description Logs all fields of a timespec structure to the debug log.
+ *
+ * @param {char[]} sender - Name of the calling component/function for log attribution
+ * @param {_NAVTimespec} timespec - Timespec structure to log
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVTimespec now
+ * NAVDateTimeGetTimespecNow(now)
+ * NAVDateTimeTimespecLog('MyFunction', now)
+ */
 define_function NAVDateTimeTimespecLog(char sender[], _NAVTimespec timespec) {
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Year: ', NAVStringSurround(itoa(timespec.Year), '[', ']')")
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Month: ', NAVStringSurround(itoa(timespec.Month), '[', ']'), '-', NAVStringSurround(NAVDateTimeGetMonthString(timespec.Month), '[', ']')")
@@ -360,31 +584,111 @@ define_function NAVDateTimeTimespecLog(char sender[], _NAVTimespec timespec) {
 }
 
 
+/**
+ * @function NAVDateTimeGetMonthString
+ * @public
+ * @description Gets the full name of a month.
+ *
+ * @param {integer} month - Month number (1-12)
+ *
+ * @returns {char[]} Full month name (e.g., "January")
+ *
+ * @example
+ * stack_var char monthName[20]
+ * monthName = NAVDateTimeGetMonthString(3)  // Returns "March"
+ */
 define_function char[NAV_MAX_CHARS] NAVDateTimeGetMonthString(integer month) {
     return NAV_DATETIME_MONTH[month]
 }
 
 
+/**
+ * @function NAVDateTimeGetShortMonthString
+ * @public
+ * @description Gets the abbreviated name of a month (first 3 characters).
+ *
+ * @param {integer} month - Month number (1-12)
+ *
+ * @returns {char[]} Abbreviated month name (e.g., "Jan")
+ *
+ * @example
+ * stack_var char shortMonth[4]
+ * shortMonth = NAVDateTimeGetShortMonthString(3)  // Returns "Mar"
+ */
 define_function char[NAV_MAX_CHARS] NAVDateTimeGetShortMonthString(integer month) {
     return left_string(NAVDateTimeGetMonthString(month), 3)
 }
 
 
+/**
+ * @function NAVDateTimeGetDayString
+ * @public
+ * @description Gets the full name of a day of the week.
+ *
+ * @param {integer} day - Day number (1-7, where 1 is Sunday)
+ *
+ * @returns {char[]} Full day name (e.g., "Monday")
+ *
+ * @example
+ * stack_var char dayName[20]
+ * dayName = NAVDateTimeGetDayString(2)  // Returns "Monday"
+ */
 define_function char[NAV_MAX_CHARS] NAVDateTimeGetDayString(integer day) {
     return NAV_DATETIME_DAY[day]
 }
 
 
+/**
+ * @function NAVDateTimeGetShortDayString
+ * @public
+ * @description Gets the abbreviated name of a day of the week (first 3 characters).
+ *
+ * @param {integer} day - Day number (1-7, where 1 is Sunday)
+ *
+ * @returns {char[]} Abbreviated day name (e.g., "Mon")
+ *
+ * @example
+ * stack_var char shortDay[4]
+ * shortDay = NAVDateTimeGetShortDayString(2)  // Returns "Mon"
+ */
 define_function char[NAV_MAX_CHARS] NAVDateTimeGetShortDayString(integer day) {
     return left_string(NAVDateTimeGetDayString(day), 3)
 }
 
 
+/**
+ * @function NAVDateTimeGetDaysInMonth
+ * @public
+ * @description Gets the number of days in the specified month.
+ *
+ * @param {integer} month - Month number (1-12)
+ *
+ * @returns {integer} Number of days in the month (28-31)
+ *
+ * @example
+ * stack_var integer days
+ * days = NAVDateTimeGetDaysInMonth(2)  // Returns 28 (or 29 in leap years)
+ *
+ * @note Does not automatically adjust for leap years, use in conjunction with NAVDateTimeIsLeapYear
+ */
 define_function integer NAVDateTimeGetDaysInMonth(integer month) {
     return NAV_DAYS_IN_MONTH[month]
 }
 
 
+/**
+ * @function NAVDateTimeGetTimestampNow
+ * @public
+ * @description Gets a timestamp string for the current date and time using the default format.
+ *
+ * @returns {char[]} Formatted timestamp string
+ *
+ * @example
+ * stack_var char timestamp[50]
+ * timestamp = NAVDateTimeGetTimestampNow()  // Returns timestamp in default format
+ *
+ * @see NAVDateTimeGetTimestamp
+ */
 define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampNow() {
     stack_var _NAVTimespec timespec
 
@@ -394,6 +698,21 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampNow() {
 }
 
 
+/**
+ * @function NAVDateTimeGetTimestampNowFormat
+ * @public
+ * @description Gets a timestamp string for the current date and time using the specified format.
+ *
+ * @param {integer} timestampFormat - Format constant (e.g., NAV_DATETIME_TIMESTAMP_FORMAT_ISO8601)
+ *
+ * @returns {char[]} Formatted timestamp string
+ *
+ * @example
+ * stack_var char timestamp[50]
+ * timestamp = NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC3339)
+ *
+ * @see NAVDateTimeGetTimestampFormat
+ */
 define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampNowFormat(integer timestampFormat) {
     stack_var _NAVTimespec timespec
 
@@ -403,6 +722,19 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampNowFormat(integer ti
 }
 
 
+/**
+ * @function NAVDateTimeGetTimestampFromEpoch
+ * @public
+ * @description Converts a Unix epoch timestamp to a formatted timestamp string using the default format.
+ *
+ * @param {long} epoch - Unix timestamp in seconds since Jan 1, 1970
+ *
+ * @returns {char[]} Formatted timestamp string
+ *
+ * @example
+ * stack_var char timestamp[50]
+ * timestamp = NAVDateTimeGetTimestampFromEpoch(1672531200)  // Jan 1, 2023 00:00:00 UTC
+ */
 define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFromEpoch(long epoch) {
     stack_var _NAVTimespec timespec
 
@@ -412,11 +744,46 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFromEpoch(long epoch
 }
 
 
+/**
+ * @function NAVDateTimeGetTimestamp
+ * @public
+ * @description Gets a formatted timestamp string for the specified timespec using the default format.
+ *
+ * @param {_NAVTimespec} timespec - Timespec structure with date and time information
+ *
+ * @returns {char[]} Formatted timestamp string
+ *
+ * @example
+ * stack_var _NAVTimespec time
+ * stack_var char timestamp[50]
+ *
+ * NAVDateTimeGetTimespecNow(time)
+ * timestamp = NAVDateTimeGetTimestamp(time)
+ *
+ * @see NAVDateTimeGetTimestampFormat
+ */
 define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestamp(_NAVTimespec timespec) {
     return NAVDateTimeGetTimestampFormat(timespec, NAV_DATETIME_TIMESTAMP_FORMAT_DEFAULT)
 }
 
 
+/**
+ * @function NAVDateTimeGetTimestampFormat
+ * @public
+ * @description Gets a formatted timestamp string for the specified timespec using the specified format.
+ *
+ * @param {_NAVTimespec} timespec - Timespec structure with date and time information
+ * @param {integer} timestampFormat - Format constant (e.g., NAV_DATETIME_TIMESTAMP_FORMAT_ISO8601)
+ *
+ * @returns {char[]} Formatted timestamp string
+ *
+ * @example
+ * stack_var _NAVTimespec time
+ * stack_var char timestamp[50]
+ *
+ * NAVDateTimeGetTimespecNow(time)
+ * timestamp = NAVDateTimeGetTimestampFormat(time, NAV_DATETIME_TIMESTAMP_FORMAT_RFC3339)
+ */
 define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec timespec, integer timestampFormat) {
     switch (timestampFormat) {
         case NAV_DATETIME_TIMESTAMP_FORMAT_UTC: {
@@ -664,6 +1031,22 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
 }
 
 
+/**
+ * @function NAVDateTimeGetAmPm
+ * @public
+ * @description Gets the AM/PM indicator for the specified time.
+ *
+ * @param {_NAVTimespec} timespec - Timespec structure with time information
+ *
+ * @returns {char[2]} "am" or "pm" string
+ *
+ * @example
+ * stack_var _NAVTimespec time
+ * stack_var char ampm[2]
+ *
+ * NAVDateTimeGetTimespecNow(time)
+ * ampm = NAVDateTimeGetAmPm(time)
+ */
 define_function char[2] NAVDateTimeGetAmPm(_NAVTimespec timespec) {
     if (timespec.Hour < 12) {
         return 'am'
@@ -673,11 +1056,44 @@ define_function char[2] NAVDateTimeGetAmPm(_NAVTimespec timespec) {
 }
 
 
+/**
+ * @function NAVDateTimeSetClock
+ * @public
+ * @description Sets the system clock to the specified date and time.
+ *
+ * @param {char[]} date - Date string in MM/DD/YYYY format
+ * @param {char[]} time - Time string in HH:MM:SS format
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVDateTimeSetClock('01/01/2023', '12:00:00')
+ *
+ * @note Requires master control rights
+ */
 define_function NAVDateTimeSetClock(char date[], char time[]) {
     NAVCommand(dvNAVMaster, "'CLOCK ', date, ' ', time")
 }
 
 
+/**
+ * @function NAVDateTimeSetClockFromTimespec
+ * @public
+ * @description Sets the system clock using a timespec structure.
+ *
+ * @param {_NAVTimespec} timespec - Timespec structure with date and time information
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVTimespec time
+ *
+ * // Populate time with desired date and time
+ * NAVDateTimeSetClockFromTimespec(time)
+ *
+ * @note Requires master control rights
+ * @see NAVDateTimeSetClock
+ */
 define_function NAVDateTimeSetClockFromTimespec(_NAVTimespec timespec) {
     stack_var char date[NAV_MAX_CHARS]
     stack_var char time[NAV_MAX_CHARS]
@@ -689,6 +1105,21 @@ define_function NAVDateTimeSetClockFromTimespec(_NAVTimespec timespec) {
 }
 
 
+/**
+ * @function NAVDateTimeSetClockFromEpoch
+ * @public
+ * @description Sets the system clock using a Unix epoch timestamp.
+ *
+ * @param {long} epoch - Unix timestamp in seconds since Jan 1, 1970
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVDateTimeSetClockFromEpoch(1672531200)  // Sets to Jan 1, 2023 00:00:00 UTC
+ *
+ * @note Requires master control rights
+ * @see NAVDateTimeSetClock
+ */
 define_function NAVDateTimeSetClockFromEpoch(long epoch) {
     stack_var _NAVTimespec timespec
 
@@ -697,6 +1128,28 @@ define_function NAVDateTimeSetClockFromEpoch(long epoch) {
 }
 
 
+/**
+ * @function NAVDateTimeGetDifference
+ * @public
+ * @description Calculates the time difference between two timespec structures.
+ *
+ * @param {_NAVTimespec} timespec1 - First timespec
+ * @param {_NAVTimespec} timespec2 - Second timespec
+ * @param {_NAVTimespec} timespecResult - Result timespec (modified in-place)
+ *
+ * @returns {long} Time difference in seconds
+ *
+ * @example
+ * stack_var _NAVTimespec time1
+ * stack_var _NAVTimespec time2
+ * stack_var _NAVTimespec diff
+ * stack_var long seconds
+ *
+ * // Populate time1 and time2
+ * seconds = NAVDateTimeGetDifference(time1, time2, diff)
+ *
+ * @note The result is timespec1 - timespec2
+ */
 define_function long NAVDateTimeGetDifference(_NAVTimespec timespec1, _NAVTimespec timespec2, _NAVTimespec timespecResult) {
     stack_var long epoch1
     stack_var long epoch2
@@ -711,17 +1164,47 @@ define_function long NAVDateTimeGetDifference(_NAVTimespec timespec1, _NAVTimesp
 }
 
 
+/**
+ * @function NAVDateTimeTimezonePrint
+ * @public
+ * @description Logs the current system timezone information to the debug log.
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVDateTimeTimezonePrint()
+ */
 define_function NAVDateTimeTimezonePrint() {
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timezone => ', clkmgr_get_timezone()")
 }
 
 
+/**
+ * @function NAVDateTimeClockSourcePrint
+ * @public
+ * @description Logs the current system clock source information to the debug log.
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVDateTimeClockSourcePrint()
+ */
 define_function NAVDateTimeClockSourcePrint() {
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Is Network Sourced => ', itoa(clkmgr_is_network_sourced())")
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Clock Resync Period => ', itoa(clkmgr_get_resync_period())")
 }
 
 
+/**
+ * @function NAVDateTimeDaylightSavingsInfoPrint
+ * @public
+ * @description Logs the current system DST settings to the debug log.
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVDateTimeDaylightSavingsInfoPrint()
+ */
 define_function NAVDateTimeDaylightSavingsInfoPrint() {
     stack_var clkmgr_timeoffset_struct offset
     stack_var slong result
@@ -744,6 +1227,16 @@ define_function NAVDateTimeDaylightSavingsInfoPrint() {
 }
 
 
+/**
+ * @function NAVDateTimeActiveTimeServerPrint
+ * @public
+ * @description Logs information about the active time server to the debug log.
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVDateTimeActiveTimeServerPrint()
+ */
 define_function NAVDateTimeActiveTimeServerPrint() {
     stack_var clkmgr_timeserver_struct server
     stack_var slong result
@@ -763,6 +1256,16 @@ define_function NAVDateTimeActiveTimeServerPrint() {
 }
 
 
+/**
+ * @function NAVDateTimeTimeServersPrint
+ * @public
+ * @description Logs information about all available time servers to the debug log.
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVDateTimeTimeServersPrint()
+ */
 define_function NAVDateTimeTimeServersPrint() {
     stack_var clkmgr_timeserver_struct servers[20]
     stack_var slong result
@@ -789,6 +1292,16 @@ define_function NAVDateTimeTimeServersPrint() {
 }
 
 
+/**
+ * @function NAVDateTimeTimestampsPrint
+ * @public
+ * @description Logs the current time in all supported timestamp formats to the debug log.
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVDateTimeTimestampsPrint()
+ */
 define_function NAVDateTimeTimestampsPrint() {
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp UTC => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_UTC)")
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp Atom => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_ATOM)")
@@ -807,6 +1320,19 @@ define_function NAVDateTimeTimestampsPrint() {
 }
 
 
+/**
+ * @function NAVSetupNetworkTime
+ * @public
+ * @description Configures the system to use network time with predefined settings.
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVSetupNetworkTime()
+ *
+ * @note Sets up NTP synchronization, timezone, DST rules, and uses the default timeserver
+ * @note Requires master control rights
+ */
 define_function NAVSetupNetworkTime() {
     clkmgr_timeoffset_struct offset
 
