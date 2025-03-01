@@ -39,6 +39,14 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
+/**
+ * @constant NAV_BASE64_MAP
+ * @description Standard Base64 encoding character set.
+ * Contains the 64 characters used in Base64 encoding (A-Z, a-z, 0-9, +, /)
+ * plus the '=' character used for padding.
+ *
+ * @note The index in this array (1-based) corresponds to the 6-bit value being encoded
+ */
 constant char NAV_BASE64_MAP[]  =   {
                                         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
                                         'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',

@@ -36,7 +36,25 @@ SOFTWARE.
 
 #include 'NAVFoundation.Encoding.Base64.h.axi'
 
-
+/**
+ * @function NAVBase64Encode
+ * @public
+ * @description Encodes binary data using standard Base64 encoding.
+ *
+ * @param {char[]} value - Binary data to encode
+ *
+ * @returns {char[]} Base64 encoded string
+ *
+ * @example
+ * stack_var char binary[10]
+ * stack_var char encoded[NAV_MAX_BUFFER]
+ *
+ * // Fill binary with some data
+ * binary = "$01, $02, $03, $04, $05, $FF, $FE, $FD, $FC, $FB"
+ * encoded = NAVBase64Encode(binary)  // Returns Base64 string
+ *
+ * @note Base64 encoding increases size by approximately 33% (4 output bytes for every 3 input bytes)
+ */
 define_function char[NAV_MAX_BUFFER] NAVBase64Encode(char value[]) {
     stack_var integer count
     stack_var char buffer[3]
@@ -96,6 +114,24 @@ define_function char[NAV_MAX_BUFFER] NAVBase64Encode(char value[]) {
 }
 
 
+/**
+ * @function NAVBase64Decode
+ * @public
+ * @description Decodes a Base64 encoded string back to binary data.
+ *
+ * @param {char[]} value - Base64 encoded string
+ *
+ * @returns {char[]} Decoded binary data
+ *
+ * @example
+ * stack_var char encoded[20]
+ * stack_var char decoded[NAV_MAX_BUFFER]
+ *
+ * encoded = 'SGVsbG8gV29ybGQ='  // Base64 for "Hello World"
+ * decoded = NAVBase64Decode(encoded)
+ *
+ * @note This function handles padding ('=') characters at the end of the input
+ */
 define_function char[NAV_MAX_BUFFER] NAVBase64Decode(char value[]) {
     stack_var integer count
     stack_var char buffer[4]
