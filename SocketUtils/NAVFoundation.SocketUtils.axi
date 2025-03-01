@@ -39,25 +39,133 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
+/**
+ * @section Socket Error Constants
+ * @description Error codes returned by socket operations
+ */
+
+/**
+ * @constant NAV_SOCKET_ERROR_INVALID_SERVER_PORT
+ * @description Error: Invalid server port specified
+ */
 constant slong NAV_SOCKET_ERROR_INVALID_SERVER_PORT             = -1
+
+/**
+ * @constant NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE
+ * @description Error: Invalid protocol value specified
+ */
 constant slong NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE          = -2
+
+/**
+ * @constant NAV_SOCKET_ERROR_UNABLE_TO_OPEN_PORT
+ * @description Error: Unable to open communication port
+ */
 constant slong NAV_SOCKET_ERROR_UNABLE_TO_OPEN_PORT             = -3
+
+/**
+ * @constant NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS
+ * @description Error: Invalid host address provided
+ */
 constant slong NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS            = -10
+
+/**
+ * @constant NAV_SOCKET_ERROR_INVALID_PORT
+ * @description Error: Invalid port number specified
+ */
 constant slong NAV_SOCKET_ERROR_INVALID_PORT                    = -11
+
+/**
+ * @constant NAV_SOCKET_ERROR_GENERAL_FAILURE
+ * @description Error: General failure (usually out of memory)
+ */
 constant slong NAV_SOCKET_ERROR_GENERAL_FAILURE                 = 2
+
+/**
+ * @constant NAV_SOCKET_ERROR_UNKNOWN_HOST
+ * @description Error: Unknown host (DNS resolution failed)
+ */
 constant slong NAV_SOCKET_ERROR_UNKNOWN_HOST                    = 4
+
+/**
+ * @constant NAV_SOCKET_ERROR_CONNECTION_REFUSED
+ * @description Error: Connection refused by remote host
+ */
 constant slong NAV_SOCKET_ERROR_CONNECTION_REFUSED              = 6
+
+/**
+ * @constant NAV_SOCKET_ERROR_CONNECTION_TIMED_OUT
+ * @description Error: Connection attempt timed out
+ */
 constant slong NAV_SOCKET_ERROR_CONNECTION_TIMED_OUT            = 7
+
+/**
+ * @constant NAV_SOCKET_ERROR_UNKNOWN_CONNECTION_ERROR
+ * @description Error: Unknown connection error
+ */
 constant slong NAV_SOCKET_ERROR_UNKNOWN_CONNECTION_ERROR        = 8
+
+/**
+ * @constant NAV_SOCKET_ERROR_ALREADY_CLOSED
+ * @description Error: Socket is already closed
+ */
 constant slong NAV_SOCKET_ERROR_ALREADY_CLOSED                  = 9
+
+/**
+ * @constant NAV_SOCKET_ERROR_BINDING_ERROR
+ * @description Error: Unable to bind socket to address/port
+ */
 constant slong NAV_SOCKET_ERROR_BINDING_ERROR                   = 10
+
+/**
+ * @constant NAV_SOCKET_ERROR_LISTENING_ERROR
+ * @description Error: Unable to start listening on socket
+ */
 constant slong NAV_SOCKET_ERROR_LISTENING_ERROR                 = 11
+
+/**
+ * @constant NAV_SOCKET_ERROR_LOCAL_PORT_ALREADY_USED
+ * @description Error: The specified local port is already in use
+ */
 constant slong NAV_SOCKET_ERROR_LOCAL_PORT_ALREADY_USED         = 14
+
+/**
+ * @constant NAV_SOCKET_ERROR_UDP_SOCKET_ALREADY_LISTENING
+ * @description Error: UDP socket is already listening
+ */
 constant slong NAV_SOCKET_ERROR_UDP_SOCKET_ALREADY_LISTENING    = 15
+
+/**
+ * @constant NAV_SOCKET_ERROR_TOO_MANY_OPEN_SOCKETS
+ * @description Error: Too many open sockets (system limit reached)
+ */
 constant slong NAV_SOCKET_ERROR_TOO_MANY_OPEN_SOCKETS           = 16
+
+/**
+ * @constant NAV_SOCKET_ERROR_LOCAL_PORT_NOT_OPEN
+ * @description Error: The specified local port is not open
+ */
 constant slong NAV_SOCKET_ERROR_LOCAL_PORT_NOT_OPEN             = 17
 
 
+/**
+ * @function NAVGetSocketError
+ * @public
+ * @description Converts a socket error code to a human-readable error message.
+ *
+ * @param {slong} error - Error code returned by a socket operation
+ *
+ * @returns {char[]} Human-readable error description
+ *
+ * @example
+ * stack_var slong result
+ * stack_var char errorMessage[NAV_MAX_BUFFER]
+ *
+ * result = NAVClientSocketOpen(dvTCPClient.PORT, '192.168.1.100', 23, IP_TCP)
+ * if (result < 0) {
+ *     errorMessage = NAVGetSocketError(result)
+ *     NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Socket error: ', errorMessage")
+ * }
+ */
 define_function char[NAV_MAX_BUFFER] NAVGetSocketError(slong error) {
     switch (error) {
         case NAV_SOCKET_ERROR_INVALID_SERVER_PORT:          { return 'Invalid server port' }
@@ -82,6 +190,22 @@ define_function char[NAV_MAX_BUFFER] NAVGetSocketError(slong error) {
 }
 
 
+/**
+ * @function NAVGetSocketProtocol
+ * @public
+ * @description Converts a protocol constant to a human-readable protocol name.
+ *
+ * @param {integer} protocol - Protocol value (IP_TCP, IP_UDP, or IP_UDP_2WAY)
+ *
+ * @returns {char[]} Human-readable protocol name
+ *
+ * @example
+ * stack_var integer protocol
+ * stack_var char protocolName[NAV_MAX_BUFFER]
+ *
+ * protocol = IP_TCP
+ * protocolName = NAVGetSocketProtocol(protocol)  // Returns 'TCP'
+ */
 define_function char[NAV_MAX_BUFFER] NAVGetSocketProtocol(integer protocol) {
     switch (protocol) {
         case IP_TCP:        { return 'TCP' }
@@ -92,6 +216,29 @@ define_function char[NAV_MAX_BUFFER] NAVGetSocketProtocol(integer protocol) {
 }
 
 
+/**
+ * @function NAVServerSocketOpen
+ * @public
+ * @description Opens a server socket that listens for incoming connections.
+ *
+ * @param {integer} socket - Socket ID to use
+ * @param {integer} port - Port number to listen on
+ * @param {integer} protocol - Protocol type (IP_TCP, IP_UDP, or IP_UDP_2WAY)
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * // Open TCP server on port 8080
+ * result = NAVServerSocketOpen(dvServerSocket.PORT, 8080, IP_TCP)
+ * if (result < 0) {
+ *     // Handle error
+ * }
+ *
+ * @note For UDP sockets, connections will come in on the same socket ID
+ * @note For TCP sockets, new client connections will be received with different socket IDs
+ */
 define_function slong NAVServerSocketOpen(integer socket, integer port, integer protocol) {
     stack_var slong result
 
@@ -108,11 +255,52 @@ define_function slong NAVServerSocketOpen(integer socket, integer port, integer 
 }
 
 
+/**
+ * @function NAVServerSocketClose
+ * @public
+ * @description Closes a server socket and stops listening for connections.
+ *
+ * @param {integer} socket - Socket ID to close
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVServerSocketClose(dvServerSocket.PORT)
+ * if (result < 0) {
+ *     // Handle error
+ * }
+ */
 define_function slong NAVServerSocketClose(integer socket) {
     return ip_server_close(socket)
 }
 
 
+/**
+ * @function NAVClientSocketOpen
+ * @public
+ * @description Opens a client socket connection to a remote server.
+ *
+ * @param {integer} socket - Socket ID to use
+ * @param {char[]} address - IP address or hostname of remote server
+ * @param {integer} port - Port number to connect to
+ * @param {integer} protocol - Protocol type (IP_TCP, IP_UDP, or IP_UDP_2WAY)
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * // Connect to a device at 192.168.1.100 on port 23 (Telnet)
+ * result = NAVClientSocketOpen(dvTCPClient.PORT, '192.168.1.100', 23, IP_TCP)
+ * if (result < 0) {
+ *     // Handle error
+ * }
+ *
+ * @note IP_UDP client sockets can send datagrams without establishing a connection
+ * @note For hostname resolution, ensure DNS is properly configured on the master
+ */
 define_function slong NAVClientSocketOpen(integer socket, char address[], integer port, integer protocol) {
     stack_var slong result
 
@@ -151,6 +339,23 @@ define_function slong NAVClientSocketOpen(integer socket, char address[], intege
 }
 
 
+/**
+ * @function NAVClientSocketClose
+ * @public
+ * @description Closes a client socket connection.
+ *
+ * @param {integer} socket - Socket ID to close
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVClientSocketClose(dvTCPClient.PORT)
+ * if (result < 0) {
+ *     // Handle error
+ * }
+ */
 define_function slong NAVClientSocketClose(integer socket) {
     stack_var slong result
 
@@ -167,6 +372,33 @@ define_function slong NAVClientSocketClose(integer socket) {
 }
 
 
+/**
+ * @function NAVClientSecureSocketOpen
+ * @public
+ * @description Opens a secure (SSH) client socket connection.
+ *
+ * @param {integer} socket - Socket ID to use
+ * @param {char[]} address - IP address or hostname of remote server
+ * @param {integer} port - Port number to connect to (defaults to 22 if ≤ 0)
+ * @param {char[]} username - SSH username for authentication
+ * @param {char[]} password - SSH password for authentication (can be empty if using privateKey)
+ * @param {char[]} privateKey - Path to SSH private key file (can be empty if using password)
+ * @param {char[]} privateKeyPassphrase - Passphrase for private key (if required)
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * // Connect using username/password
+ * result = NAVClientSecureSocketOpen(dvSSHClient.PORT, '10.0.0.1', 22, 'admin', 'password', '', '')
+ *
+ * // Connect using private key
+ * result = NAVClientSecureSocketOpen(dvSSHClient.PORT, '10.0.0.1', 22, 'admin', '', '/amx/keys/id_rsa', '')
+ *
+ * @note Either password or privateKey must be provided
+ * @note If port is ≤ 0, defaults to standard SSH port (22)
+ */
 define_function slong NAVClientSecureSocketOpen(integer socket,
                                                 char address[],
                                                 integer port,
@@ -209,6 +441,23 @@ define_function slong NAVClientSecureSocketOpen(integer socket,
 }
 
 
+/**
+ * @function NAVClientSecureSocketClose
+ * @public
+ * @description Closes a secure (SSH) client socket connection.
+ *
+ * @param {integer} socket - Socket ID to close
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVClientSecureSocketClose(dvSSHClient.PORT)
+ * if (result < 0) {
+ *     // Handle error
+ * }
+ */
 define_function slong NAVClientSecureSocketClose(integer socket) {
     return ssh_client_close(socket)
 }

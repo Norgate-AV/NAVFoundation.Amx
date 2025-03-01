@@ -37,7 +37,18 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
+/**
+ * @constant TL_STOPWATCH
+ * @description Timeline ID for the stopwatch functionality.
+ * This timeline is used to track elapsed time with millisecond precision.
+ */
 constant long TL_STOPWATCH = 1000
+
+/**
+ * @constant TL_STOPWATCH_INTERVAL
+ * @description Interval for the stopwatch timeline in milliseconds.
+ * Set to 1ms for precise time measurement.
+ */
 constant long TL_STOPWATCH_INTERVAL[] = { 1 }   // 1ms
 
 

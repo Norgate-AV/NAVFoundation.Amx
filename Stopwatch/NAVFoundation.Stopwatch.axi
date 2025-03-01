@@ -39,6 +39,23 @@ SOFTWARE.
 #include 'NAVFoundation.Stopwatch.h.axi'
 
 
+/**
+ * @function NAVStopwatchStart
+ * @public
+ * @description Starts the stopwatch timer by initializing and starting a timeline.
+ * If the stopwatch is already running, it will be reset and restarted.
+ *
+ * @returns {long} Always returns 0
+ *
+ * @example
+ * NAVStopwatchStart()
+ * // Perform operations to be timed
+ * elapsed = NAVStopwatchStop()
+ *
+ * @note The stopwatch uses a 1ms precision timeline
+ * @see NAVStopwatchStop
+ * @see NAVStopwatchIsRunning
+ */
 define_function long NAVStopwatchStart() {
     NAVTimelineStart(
         TL_STOPWATCH,
@@ -49,6 +66,22 @@ define_function long NAVStopwatchStart() {
 }
 
 
+/**
+ * @function NAVStopwatchStop
+ * @public
+ * @description Stops the stopwatch and returns the elapsed time in milliseconds.
+ * If the stopwatch is not running, returns 0.
+ *
+ * @returns {long} Elapsed time in milliseconds since the stopwatch was started
+ *
+ * @example
+ * NAVStopwatchStart()
+ * // Perform operations to be timed
+ * elapsed = NAVStopwatchStop()
+ * NAVLog("'Operation took ', itoa(elapsed), ' ms to complete'")
+ *
+ * @see NAVStopwatchStart
+ */
 define_function long NAVStopwatchStop() {
     stack_var long elapsed
 
@@ -59,6 +92,25 @@ define_function long NAVStopwatchStop() {
 }
 
 
+/**
+ * @function NAVStopwatchIsRunning
+ * @public
+ * @description Checks if the stopwatch is currently running.
+ *
+ * @returns {char} True if the stopwatch is running, false otherwise
+ *
+ * @example
+ * if (NAVStopwatchIsRunning()) {
+ *     // Stopwatch is running
+ *     elapsed = NAVStopwatchStop()
+ * } else {
+ *     // Stopwatch is not running
+ *     NAVStopwatchStart()
+ * }
+ *
+ * @see NAVStopwatchStart
+ * @see NAVStopwatchStop
+ */
 define_function char NAVStopwatchIsRunning() {
     return timeline_active(TL_STOPWATCH) > 0
 }
