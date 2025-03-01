@@ -38,6 +38,25 @@ SOFTWARE.
 #include 'NAVFoundation.PathUtils.axi'
 
 
+/**
+ * @function NAVGetFileError
+ * @public
+ * @description Converts a file operation error code to a human-readable error message.
+ *
+ * @param {slong} error - Error code returned by a file operation function
+ *
+ * @returns {char[]} Human-readable error description
+ *
+ * @example
+ * stack_var slong result
+ * stack_var char errorMessage[NAV_MAX_BUFFER]
+ *
+ * result = NAVFileOpen('/test.txt', 'r')
+ * if (result < 0) {
+ *     errorMessage = NAVGetFileError(result)
+ *     // Display or log the error message
+ * }
+ */
 define_function char[NAV_MAX_BUFFER] NAVGetFileError(slong error) {
     if (error >= 0) {
         return ""
@@ -67,6 +86,30 @@ define_function char[NAV_MAX_BUFFER] NAVGetFileError(slong error) {
 }
 
 
+/**
+ * @function NAVFileOpen
+ * @public
+ * @description Opens a file with specified access mode.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[]} mode - Access mode ('r' for read-only, 'rw' for read-write, 'rwa' for read-write-append)
+ *
+ * @returns {slong} File handle on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileHandle
+ *
+ * // Open file for reading
+ * fileHandle = NAVFileOpen('/config.txt', 'r')
+ * if (fileHandle < 0) {
+ *     // Handle error
+ * } else {
+ *     // Use the file handle
+ * }
+ *
+ * @note Always close the file handle with NAVFileClose when done
+ * @see NAVFileClose
+ */
 define_function slong NAVFileOpen(char path[], char mode[]) {
     stack_var slong result
     stack_var long flag
@@ -113,6 +156,27 @@ define_function slong NAVFileOpen(char path[], char mode[]) {
 }
 
 
+/**
+ * @function NAVFileClose
+ * @public
+ * @description Closes an open file.
+ *
+ * @param {long} handle - File handle previously obtained from NAVFileOpen
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileHandle
+ * stack_var slong result
+ *
+ * fileHandle = NAVFileOpen('/config.txt', 'r')
+ * if (fileHandle >= 0) {
+ *     // Use the file...
+ *     result = NAVFileClose(fileHandle)
+ * }
+ *
+ * @see NAVFileOpen
+ */
 define_function slong NAVFileClose(long handle) {
     stack_var slong result
 
@@ -129,6 +193,28 @@ define_function slong NAVFileClose(long handle) {
 }
 
 
+/**
+ * @function NAVFileRead
+ * @public
+ * @description Reads the entire content of a file into a buffer.
+ * Opens the file, reads its content, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[]} data - Output buffer to store file content (modified in-place)
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char fileContent[NAV_MAX_BUFFER]
+ * stack_var slong result
+ *
+ * result = NAVFileRead('/config.txt', fileContent)
+ * if (result >= 0) {
+ *     // Use the file content
+ * }
+ *
+ * @note The size of the output buffer limits how much data can be read
+ */
 define_function slong NAVFileRead(char path[], char data[]) {
     stack_var slong result
     stack_var long handle
@@ -163,6 +249,36 @@ define_function slong NAVFileRead(char path[], char data[]) {
 }
 
 
+/**
+ * @function NAVFileReadLine
+ * @public
+ * @description Reads a single line from an open file.
+ *
+ * @param {long} handle - File handle previously obtained from NAVFileOpen
+ * @param {char[]} data - Output buffer to store the line (modified in-place)
+ *
+ * @returns {slong} Number of bytes read on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileHandle
+ * stack_var char line[NAV_MAX_BUFFER]
+ * stack_var slong result
+ *
+ * fileHandle = NAVFileOpen('/config.txt', 'r')
+ * if (fileHandle >= 0) {
+ *     // Read file line by line
+ *     while (1) {
+ *         result = NAVFileReadLine(fileHandle, line)
+ *         if (result < 0) break;  // End of file or error
+ *         // Process the line
+ *     }
+ *     NAVFileClose(fileHandle)
+ * }
+ *
+ * @note Returns NAV_FILE_ERROR_EOF_END_OF_FILE_REACHED when end of file is reached
+ * @see NAVFileOpen
+ * @see NAVFileClose
+ */
 define_function slong NAVFileReadLine(long handle, char data[]) {
     stack_var slong result
 
@@ -186,6 +302,29 @@ define_function slong NAVFileReadLine(long handle, char data[]) {
 }
 
 
+/**
+ * @function NAVFileWrite
+ * @public
+ * @description Writes data to a file, overwriting any existing content.
+ * Opens the file, writes the data, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[]} data - Data to write to the file
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char content[100]
+ * stack_var slong result
+ *
+ * content = 'New file content'
+ * result = NAVFileWrite('/config.txt', content)
+ * if (result < 0) {
+ *     // Handle error
+ * }
+ *
+ * @note Creates a new file if it doesn't exist, otherwise overwrites existing file
+ */
 define_function slong NAVFileWrite(char path[], char data[]) {
     stack_var slong result
     stack_var long handle
@@ -220,11 +359,52 @@ define_function slong NAVFileWrite(char path[], char data[]) {
 }
 
 
+/**
+ * @function NAVFileWriteLine
+ * @public
+ * @description Writes a line to a file, adding a carriage return and line feed.
+ * Opens the file, writes the line with CRLF, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[]} buffer - Line text to write
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char line[100]
+ * stack_var slong result
+ *
+ * line = 'Config setting = value'
+ * result = NAVFileWriteLine('/config.txt', line)
+ *
+ * @note Creates a new file if it doesn't exist, otherwise overwrites existing file
+ * @see NAVFileWrite
+ */
 define_function slong NAVFileWriteLine(char path[], char buffer[]) {
     return NAVFileWrite(path, "buffer, NAV_CR, NAV_LF")
 }
 
 
+/**
+ * @function NAVFileAppend
+ * @public
+ * @description Appends data to the end of a file.
+ * Opens the file in append mode, writes the data, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[]} data - Data to append to the file
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char content[100]
+ * stack_var slong result
+ *
+ * content = 'Additional content'
+ * result = NAVFileAppend('/log.txt', content)
+ *
+ * @note Creates a new file if it doesn't exist
+ */
 define_function slong NAVFileAppend(char path[], char data[]) {
     stack_var slong result
     stack_var long handle
@@ -259,11 +439,61 @@ define_function slong NAVFileAppend(char path[], char data[]) {
 }
 
 
+/**
+ * @function NAVFileAppendLine
+ * @public
+ * @description Appends a line to the end of a file, adding a carriage return and line feed.
+ * Opens the file in append mode, writes the line with CRLF, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[]} buffer - Line text to append
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char logEntry[100]
+ * stack_var slong result
+ *
+ * logEntry = "NAVGetTimeStamp(), ': System started'"
+ * result = NAVFileAppendLine('/log.txt', logEntry)
+ *
+ * @note Creates a new file if it doesn't exist
+ * @see NAVFileAppend
+ */
 define_function slong NAVFileAppendLine(char path[], char buffer[]) {
     return NAVFileAppend(path, "buffer, NAV_CR, NAV_LF")
 }
 
 
+/**
+ * @function NAVReadDirectory
+ * @public
+ * @description Reads the contents of a directory and returns details about each file and subdirectory.
+ *
+ * @param {char[]} path - Directory path to read
+ * @param {_NAVFileEntity[]} entities - Output array to store file/directory information (modified in-place)
+ *
+ * @returns {slong} Number of entries found on success, or negative error code on failure
+ *
+ * @example
+ * stack_var _NAVFileEntity dirEntities[100]
+ * stack_var slong count
+ * stack_var integer i
+ *
+ * count = NAVReadDirectory('/user', dirEntities)
+ * if (count > 0) {
+ *     for (i = 1; i <= count; i++) {
+ *         // Process each file entity
+ *         if (dirEntities[i].IsDirectory) {
+ *             // Handle directory
+ *         } else {
+ *             // Handle file
+ *         }
+ *     }
+ * }
+ *
+ * @note The path should start with a '/' or one will be added automatically
+ */
 define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
     stack_var char entity[NAV_MAX_BUFFER]
     stack_var slong result
@@ -327,6 +557,31 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
 }
 
 
+/**
+ * @function NAVWalkDirectory
+ * @public
+ * @description Recursively walks a directory structure and returns all files found.
+ *
+ * @param {char[]} path - Starting directory path
+ * @param {char[][]} files - Output array to store file paths (modified in-place)
+ *
+ * @returns {slong} Number of files found on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char allFiles[1000][NAV_MAX_BUFFER]
+ * stack_var slong count
+ * stack_var integer i
+ *
+ * count = NAVWalkDirectory('/user', allFiles)
+ * if (count > 0) {
+ *     for (i = 1; i <= count; i++) {
+ *         // Process each file
+ *     }
+ * }
+ *
+ * @note If path is empty, it defaults to the root directory '/'
+ * @note This function will recursively scan all subdirectories
+ */
 define_function slong NAVWalkDirectory(char path[], char files[][]) {
     stack_var _NAVFileEntity entities[1000]
     stack_var slong count
@@ -367,6 +622,26 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
 }
 
 
+/**
+ * @function NAVFileExists
+ * @public
+ * @description Checks if a file exists in the specified directory.
+ *
+ * @param {char[]} path - Directory path to check
+ * @param {char[]} fileName - Name of the file to look for
+ *
+ * @returns {integer} true if the file exists, false otherwise
+ *
+ * @example
+ * stack_var integer exists
+ *
+ * exists = NAVFileExists('/user', 'config.txt')
+ * if (exists) {
+ *     // File exists, proceed
+ * }
+ *
+ * @note If path is empty, it defaults to the root directory '/'
+ */
 define_function integer NAVFileExists(char path[], char fileName[]) {
     stack_var _NAVFileEntity entities[255]
     stack_var integer x
@@ -397,6 +672,26 @@ define_function integer NAVFileExists(char path[], char fileName[]) {
 }
 
 
+/**
+ * @function NAVDirectoryExists
+ * @public
+ * @description Checks if a directory exists.
+ *
+ * @param {char[]} path - Directory path to check
+ *
+ * @returns {integer} true if the directory exists, false otherwise
+ *
+ * @example
+ * stack_var integer exists
+ *
+ * exists = NAVDirectoryExists('/user/data')
+ * if (!exists) {
+ *     // Directory doesn't exist, create it
+ *     NAVDirectoryCreate('/user/data')
+ * }
+ *
+ * @note If path is empty, it defaults to the root directory '/'
+ */
 define_function integer NAVDirectoryExists(char path[]) {
     stack_var _NAVFileEntity entities[255]
     stack_var integer x
@@ -423,6 +718,25 @@ define_function integer NAVDirectoryExists(char path[]) {
 }
 
 
+/**
+ * @function NAVDirectoryCreate
+ * @public
+ * @description Creates a new directory.
+ *
+ * @param {char[]} path - Path of the directory to create
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVDirectoryCreate('/user/logs')
+ * if (result < 0) {
+ *     // Handle directory creation error
+ * }
+ *
+ * @note Parent directories must exist
+ */
 define_function slong NAVDirectoryCreate(char path[]) {
     stack_var slong result
 
@@ -448,6 +762,25 @@ define_function slong NAVDirectoryCreate(char path[]) {
 }
 
 
+/**
+ * @function NAVDirectoryDelete
+ * @public
+ * @description Deletes a directory.
+ *
+ * @param {char[]} path - Path of the directory to delete
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVDirectoryDelete('/user/temp')
+ * if (result < 0) {
+ *     // Handle directory deletion error
+ * }
+ *
+ * @note Directory must be empty to be deleted
+ */
 define_function slong NAVDirectoryDelete(char path[]) {
     stack_var slong result
 
@@ -473,6 +806,23 @@ define_function slong NAVDirectoryDelete(char path[]) {
 }
 
 
+/**
+ * @function NAVFileGetSize
+ * @public
+ * @description Gets the size of a file in bytes.
+ *
+ * @param {char[]} path - Path to the file
+ *
+ * @returns {slong} File size in bytes on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileSize
+ *
+ * fileSize = NAVFileGetSize('/user/data.bin')
+ * if (fileSize >= 0) {
+ *     // Use file size
+ * }
+ */
 define_function slong NAVFileGetSize(char path[]) {
     stack_var slong result
     stack_var long handle
@@ -530,6 +880,25 @@ define_function slong NAVFileGetSize(char path[]) {
 }
 
 
+/**
+ * @function NAVFileRename
+ * @public
+ * @description Renames a file or moves it to a new location.
+ *
+ * @param {char[]} source - Current path of the file
+ * @param {char[]} destination - New path for the file
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * // Rename a file
+ * result = NAVFileRename('/user/old.txt', '/user/new.txt')
+ *
+ * // Move a file
+ * result = NAVFileRename('/user/file.txt', '/archive/file.txt')
+ */
 define_function slong NAVFileRename(char source[], char destination[]) {
     stack_var slong result
 
@@ -564,6 +933,23 @@ define_function slong NAVFileRename(char source[], char destination[]) {
 }
 
 
+/**
+ * @function NAVFileDelete
+ * @public
+ * @description Deletes a file.
+ *
+ * @param {char[]} path - Path of the file to delete
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVFileDelete('/user/temp.txt')
+ * if (result < 0) {
+ *     // Handle file deletion error
+ * }
+ */
 define_function slong NAVFileDelete(char path[]) {
     stack_var slong result
 
@@ -589,6 +975,26 @@ define_function slong NAVFileDelete(char path[]) {
 }
 
 
+/**
+ * @function NAVFileCopy
+ * @public
+ * @description Copies a file from one location to another.
+ *
+ * @param {char[]} source - Path of the source file
+ * @param {char[]} destination - Path of the destination file
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVFileCopy('/user/original.txt', '/backup/original.txt')
+ * if (result < 0) {
+ *     // Handle file copy error
+ * }
+ *
+ * @note If the destination file already exists, it will be overwritten
+ */
 define_function slong NAVFileCopy(char source[], char destination[]) {
     stack_var slong result
 
