@@ -66,17 +66,12 @@ define_function integer NAVQueueEnqueue(_NAVQueue queue, char item[]) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
                                     __NAV_FOUNDATION_QUEUE__,
                                     'NAVQueueEnqueue',
-                                    "'Queue is full. Cannot enqueue item: ', item")
+                                    "'Queue is full. Cannot enqueue item'")
         return false
     }
 
-    queue.Tail = (queue.Tail + 1) % queue.Capacity
-    if (queue.Tail == 0) {
-        queue.Tail = queue.Capacity
-    }
-
+    queue.Tail = (queue.Tail % queue.Capacity) + 1
     queue.Count++
-
     queue.Items[queue.Tail] = item
 
     return true
@@ -90,14 +85,11 @@ define_function char[NAV_MAX_BUFFER] NAVQueueDequeue(_NAVQueue queue) {
         return "NAV_NULL"
     }
 
-    queue.Head = (queue.Head + 1) % queue.Capacity
-    if (queue.Head == 0) {
-        queue.Head = queue.Capacity
-    }
-
+    queue.Head = (queue.Head % queue.Capacity) + 1
     queue.Count--
 
     item = queue.Items[queue.Head]
+    queue.Items[queue.Head] = "NAV_NULL"  // Clear the item after dequeuing
 
     return item
 }
@@ -136,5 +128,62 @@ define_function char[NAV_MAX_BUFFER] NAVQueuePeek(_NAVQueue queue) {
     return queue.Items[(queue.Head + 1) % queue.Capacity]
 }
 
+
+define_function NAVQueueClear(_NAVQueue queue) {
+    stack_var integer x
+
+    for (x = 1; x <= queue.Capacity; x++) {
+        queue.Items[x] = "NAV_NULL"
+    }
+
+    queue.Head = 0
+    queue.Tail = queue.Capacity
+    queue.Count = 0
+}
+
+define_function integer NAVQueueContains(_NAVQueue queue, char item[]) {
+    stack_var integer i
+    stack_var integer index
+
+    if (NAVQueueIsEmpty(queue)) {
+        return false
+    }
+
+    for (i = 1; i <= queue.Count; i++) {
+        index = (queue.Head + i) % queue.Capacity
+        if (index == 0) { index = queue.Capacity }
+
+        if (queue.Items[index] == item) {
+            return true
+        }
+    }
+
+    return false
+}
+
+define_function char[NAV_MAX_BUFFER] NAVQueueToString(_NAVQueue queue) {
+    stack_var char result[NAV_MAX_BUFFER]
+    stack_var integer i
+    stack_var integer index
+
+    result = "'Queue [', itoa(queue.Count), '/', itoa(queue.Capacity), ']: '"
+
+    if (NAVQueueIsEmpty(queue)) {
+        result = "result, 'empty'"
+        return result
+    }
+
+    for (i = 1; i <= queue.Count; i++) {
+        index = (queue.Head + i) % queue.Capacity
+        if (index == 0) { index = queue.Capacity }
+
+        result = "result, queue.Items[index]"
+        if (i < queue.Count) {
+            result = "result, ', '"
+        }
+    }
+
+    return result
+}
 
 #END_IF // __NAV_FOUNDATION_QUEUE__
