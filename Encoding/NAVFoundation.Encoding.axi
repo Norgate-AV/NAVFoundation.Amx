@@ -349,6 +349,27 @@ define_function char[NAV_MAX_BUFFER] NAVByteArrayToHexString(char array[]) {
 
 
 /**
+ * @function NAVHexToString
+ * @public
+ * @description Converts a byte array to a hexadecimal string without any prefix or separator.
+ *
+ * @param {char[]} array - Byte array to convert
+ *
+ * @returns {char[]} Hexadecimal string representation
+ *
+ * @example
+ * stack_var char bytes[3]
+ * stack_var char hexString[NAV_MAX_BUFFER]
+ *
+ * bytes = "$01, $23, $45"
+ * hexString = NAVHexToString(bytes)  // Returns "012345"
+ */
+define_function char[NAV_MAX_BUFFER] NAVHexToString(char array[]) {
+    return NAVByteArrayToHexString(array)
+}
+
+
+/**
  * @function NAVByteArrayToNetLinxHexString
  * @public
  * @description Converts a byte array to a hexadecimal string with NetLinx-style '$' prefix.
