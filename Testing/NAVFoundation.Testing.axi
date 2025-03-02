@@ -281,5 +281,12 @@ define_function char NAVAssertFloatLessThanOrEqual(float expected, float result)
     return expected <= result
 }
 
+// define_function NAVTestAssertContains(char message[], char actual[], char expected[]) {
+//     if (find_string(actual, expected, 1)) {
+//         NAVTestPass(message)
+//     } else {
+//         NAVTestFail("format('%s: '%s' does not contain '%s'', message, actual, expected)")
+//     }
+// }
 
 #END_IF // __NAV_FOUNDATION_TESTING__
