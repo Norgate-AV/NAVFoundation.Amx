@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.32.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.31.0...v1.32.0) (2025-03-05)
+
+### 🌟 Features
+
+- **cryptography:** add initial sha256 implementation ([75ab001](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/75ab001145d6aa63fed5cd308a7c3440a29e1c31))
+- **encoding:** add NAVHexToString alias function ([4f53b43](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/4f53b43cf8d08ae33814bb17a936c44775378de1))
+
+### 🐛 Bug Fixes
+
+- **intermodule-api:** remove unnecessary logging ([997d228](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/997d228bc5782e4f579390de39d01f3502a011c3))
+
 ## [1.31.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.30.0...v1.31.0) (2025-02-28)
 
 ### 🌟 Features
