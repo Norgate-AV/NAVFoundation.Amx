@@ -1786,13 +1786,15 @@ DEFINE_START {
     #IF_DEFINED __MAIN__
     stack_var _NAVController controller
 
-    set_log_level(NAV_LOG_LEVEL_DEBUG)
+    set_log_level(NAV_LOG_LEVEL_INFO)
 
     NAVGetControllerInformation(controller)
     NAVPrintBanner(controller)
 
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "__FILE__, ' : ', 'Program Started'")
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'============================================================='")
+
+    set_log_level(NAV_LOG_LEVEL_WARNING)
     #END_IF
 
     NAVTimelineStart(TL_NAV_BLINKER, TL_NAV_BLINKER_INTERVAL, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
