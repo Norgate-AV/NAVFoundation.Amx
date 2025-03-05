@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.33.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.32.0...v1.33.0) (2025-03-05)
+
+### 🌟 Features
+
+- **core:** use log level INFO only to show banner ([3869fd0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3869fd04bf6a50ffcfb1e7f9eba34116b4888426))
+
 ## [1.32.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.31.0...v1.32.0) (2025-03-05)
 
 ### 🌟 Features
