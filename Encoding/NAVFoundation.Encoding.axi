@@ -452,4 +452,28 @@ define_function char[NAV_MAX_BUFFER] NAVByteArrayToHexStringWithOptions(char arr
 }
 
 
+/**
+ * @function NAVByteToHexString
+ * @description Converts a single byte to its hexadecimal string representation
+ *
+ * @param {char} byte - The byte value to convert
+ *
+ * @return {char[2]} Two-character hexadecimal string
+ */
+define_function char[2] NAVByteToHexString(char byte) {
+    stack_var char hexDigits[16]
+    stack_var char result[2]
+
+    hexDigits = '0123456789abcdef'
+
+    // Extract high nibble (4 bits)
+    result[1] = hexDigits[(byte >> 4) + 1]
+
+    // Extract low nibble (4 bits)
+    result[2] = hexDigits[(byte & $0F) + 1]
+
+    return result
+}
+
+
 #END_IF // __NAV_FOUNDATION_ENCODING__
