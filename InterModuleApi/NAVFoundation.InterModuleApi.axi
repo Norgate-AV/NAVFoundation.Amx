@@ -148,11 +148,6 @@ define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetObjectTagList(_ModuleOb
 
 
 define_function NAVInterModuleApiSendObjectMessage(dev device, char payload[]) {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_TO,
-                                            device,
-                                            payload))
-
     NAVCommand(device, "payload")
 }
 

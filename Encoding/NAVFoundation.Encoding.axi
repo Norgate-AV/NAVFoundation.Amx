@@ -349,6 +349,27 @@ define_function char[NAV_MAX_BUFFER] NAVByteArrayToHexString(char array[]) {
 
 
 /**
+ * @function NAVHexToString
+ * @public
+ * @description Converts a byte array to a hexadecimal string without any prefix or separator.
+ *
+ * @param {char[]} array - Byte array to convert
+ *
+ * @returns {char[]} Hexadecimal string representation
+ *
+ * @example
+ * stack_var char bytes[3]
+ * stack_var char hexString[NAV_MAX_BUFFER]
+ *
+ * bytes = "$01, $23, $45"
+ * hexString = NAVHexToString(bytes)  // Returns "012345"
+ */
+define_function char[NAV_MAX_BUFFER] NAVHexToString(char array[]) {
+    return NAVByteArrayToHexString(array)
+}
+
+
+/**
  * @function NAVByteArrayToNetLinxHexString
  * @public
  * @description Converts a byte array to a hexadecimal string with NetLinx-style '$' prefix.
@@ -426,6 +447,30 @@ define_function char[NAV_MAX_BUFFER] NAVByteArrayToHexStringWithOptions(char arr
 
         result = "result, format("prefix, '%02x'", array[x])"
     }
+
+    return result
+}
+
+
+/**
+ * @function NAVByteToHexString
+ * @description Converts a single byte to its hexadecimal string representation
+ *
+ * @param {char} byte - The byte value to convert
+ *
+ * @return {char[2]} Two-character hexadecimal string
+ */
+define_function char[2] NAVByteToHexString(char byte) {
+    stack_var char hexDigits[16]
+    stack_var char result[2]
+
+    hexDigits = '0123456789abcdef'
+
+    // Extract high nibble (4 bits)
+    result[1] = hexDigits[(byte >> 4) + 1]
+
+    // Extract low nibble (4 bits)
+    result[2] = hexDigits[(byte & $0F) + 1]
 
     return result
 }

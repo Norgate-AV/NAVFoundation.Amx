@@ -69,6 +69,7 @@ For more detailed guides and documentation, please refer the `README.md` files i
     - Provides a set of core constants, types, and functions for AMX programming.
 - [ArrayUtils](./ArrayUtils)
     - Provides utility functions for working with arrays in AMX.
+- [Assert](./Assert)
 - [BinaryUtils](./BinaryUtils)
     - Provides functions for binary data manipulation and conversion.
 - [Console](./Console)
@@ -87,6 +88,7 @@ For more detailed guides and documentation, please refer the `README.md` files i
 - [HashTable](./HashTable)
 - [HttpUtils](./HttpUtils)
     - Provides functions for HTTP requests and responses.
+- [Int64](./Int64)
 - [InterModuleApi](./InterModuleApi)
 - [Jsmn](./Jsmn)
     - Provides a JSON parser for AMX.
