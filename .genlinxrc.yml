@@ -45,6 +45,7 @@ build:
       - ./__tests__/include/pbkdf2
       - ./__tests__/include/int64
       - ./__tests__/include/assert
+      - ./__tests__/include/sha512
       - ./include
     modulePath:
       - ./module

@@ -365,7 +365,7 @@
                 <Comments></Comments>
             </File>
         </System>
-        <System IsActive="true" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
             <Identifier>Sha256</Identifier>
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
@@ -384,6 +384,28 @@
             <File CompileType="Netlinx" Type="MasterSrc">
                 <Identifier>sha256</Identifier>
                 <FilePathName>src\sha256.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>Sha512</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.83|1319|1|DVX-2250||</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>sha512</Identifier>
+                <FilePathName>src\sha512.axs</FilePathName>
                 <Comments></Comments>
             </File>
         </System>
