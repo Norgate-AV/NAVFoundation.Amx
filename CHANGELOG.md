@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.34.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.33.0...v1.34.0) (2025-03-07)
+
+### 🌟 Features
+
+- add Assert library ([0bda330](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/0bda330deb17bdb8e96472d4a4a635f793e1d6ee))
+- add initial sha512 implementation ([cf06b42](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/cf06b42ab8fcda8b3e998e38c32887a3600f169b))
+- add Int64 library ([a64a190](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a64a190a21f0d795b7bd043629696d79204c8016))
+- **encoding:** add NAVByteToHexString function ([0910cb4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/0910cb43f355d0c2bc29ed105367d29f33498166))
+
 ## [1.33.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.32.0...v1.33.0) (2025-03-05)
 
 ### 🌟 Features
