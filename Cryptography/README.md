@@ -8,7 +8,7 @@ The NAVFoundation.Cryptography collection provides essential cryptographic utili
 
 This collection addresses security requirements in AV control systems by providing cryptographic implementations optimized for the AMX NetLinx environment. The libraries handle important cryptographic tasks such as:
 
-- Secure hashing of data (MD5, SHA1)
+- Secure hashing of data (MD5, SHA1, SHA256, SHA512)
 - Encryption and decryption of sensitive information (AES128)
 - Password-based key derivation (PBKDF2)
 
@@ -20,6 +20,8 @@ The NAVFoundation.Cryptography collection includes the following libraries:
 - [Md5](./NAVFoundation.Cryptography.Md5.md) - MD5 message-digest algorithm for cryptographic hashing
 - [Pbkdf2](./NAVFoundation.Cryptography.Pbkdf2.md) - Password-Based Key Derivation Function 2 for secure key generation
 - [Sha1](./NAVFoundation.Cryptography.Sha1.md) - Secure Hash Algorithm 1 for cryptographic hashing
+- [Sha256](./NAVFoundation.Cryptography.Sha256.md) - Secure Hash Algorithm 256 for stronger cryptographic hashing
+- [Sha512](./NAVFoundation.Cryptography.Sha512.md) - Secure Hash Algorithm 512 for maximum-strength cryptographic hashing
 
 ## Getting Started
 
