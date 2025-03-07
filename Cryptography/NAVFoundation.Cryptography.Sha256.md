@@ -19,7 +19,7 @@ Key features of SHA-256 include:
 
 #### NAVSha256GetHash
 
-```
+```netlinx
 define_function char[32] NAVSha256GetHash(char value[])
 ```
 
@@ -34,89 +34,73 @@ define_function char[32] NAVSha256GetHash(char value[])
 - 32-byte binary SHA-256 hash on success
 - Empty string on error
 
-**Error Handling:**
-Errors are logged through the NAVErrorLog system at NAV_LOG_LEVEL_ERROR.
-
 ## Usage Examples
 
 ### Basic Usage
 
 ```netlinx
-// Import the SHA-256 module
+// Include the SHA-256 library
 #include 'NAVFoundation.Cryptography.Sha256.axi'
 #include 'NAVFoundation.Encoding.axi'  // For hex conversion
 
-// Define variables
-define_variable
-{
-    char inputMessage[100]
-    char binaryDigest[32]
-    char hexDigest[64]
-}
-
 // Example function
-define_function ComputeSha256Example()
-{
+define_function ComputeSha256Example() {
+    stack_var char message[100]
+    stack_var char digest[32]
+    stack_var char hash[64]
+
     // Input message to hash
-    inputMessage = 'The quick brown fox jumps over the lazy dog'
+    message = 'The quick brown fox jumps over the lazy dog'
 
     // Compute SHA-256 hash (returns binary format)
-    binaryDigest = NAVSha256GetHash(inputMessage)
+    digest = NAVSha256GetHash(message)
+
+    // Check for errors
+    if (!length_array(digest)) {
+        send_string 0, "'Error: Hash computation failed'"
+        return
+    }
 
     // Convert to hexadecimal string for display/use
-    hexDigest = NAVByteArrayToHexString(binaryDigest)
+    hash = NAVHexToString(digest)
 
     // Output the result
     // Should be: d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592
-    send_string 0, "'SHA-256 hash: ', hexDigest"
+    send_string 0, "'SHA-256 hash: ', hash"
 }
 ```
 
 ### Verifying File Integrity
 
 ```netlinx
-// Import required modules
+// Include required libraries
 #include 'NAVFoundation.Cryptography.Sha256.axi'
 #include 'NAVFoundation.Encoding.axi'
-#include 'NAVFoundation.IO.axi'  // Assume this exists for file operations
-
-// Define variables
-define_variable
-{
-    char fileData[10000]
-    char expectedHash[64]
-    char actualHash[64]
-}
+#include 'NAVFoundation.FileUtils.axi'
 
 // Example function to verify file integrity
-define_function VerifyFileIntegrity(char filename[], char expectedHashHex[])
-{
-    stack_var char binaryDigest[32]
+define_function VerifyFileIntegrity(char path[], char expectedHash[]) {
+    stack_var char digest[32]
+    stack_var char data[1024]  // Adjust size as needed
+    stack_var char actualHash[64]
 
-    // Read file content (implementation depends on your file I/O module)
-    fileData = NAVReadFile(filename)
-
-    if (length_array(fileData) == 0)
-    {
+    if (NAVFileRead(path, data) < 0) {
         send_string 0, "'Error: Could not read file'"
         return
     }
 
     // Compute SHA-256 hash
-    binaryDigest = NAVSha256GetHash(fileData)
+    digest = NAVSha256GetHash(data)
 
     // Convert to hex for comparison
-    actualHash = NAVByteArrayToHexString(binaryDigest)
+    actualHash = NAVHexToString(digest)
 
     // Compare with expected hash
-    if (actualHash == expectedHashHex)
-    {
+    if (actualHash == expectedHash) {
         send_string 0, "'File integrity verified successfully'"
-    }
-    else
-    {
+    } else {
         send_string 0, "'File integrity check failed'"
-        send_string 0, "'Expected: ', expectedHashHex"
+        send_string 0, "'Expected: ', expectedHash"
         send_string 0, "'Actual  : ', actualHash"
     }
 }
@@ -125,50 +109,44 @@ define_function VerifyFileIntegrity(char filename[], char expectedHashHex[])
 ### Secure Password Storage Example
 
 ```netlinx
-// Import required modules
+// Include required libraries
 #include 'NAVFoundation.Cryptography.Sha256.axi'
 #include 'NAVFoundation.Encoding.axi'
 
 // Define variables
-define_variable
-{
-    char storedPasswordHash[64]
-}
+DEFINE_VARIABLE
+
+volatile char passwordHash[64]
 
 // Function to store a hashed password
-define_function StorePassword(char password[])
-{
-    stack_var char binaryHash[32]
+define_function StorePassword(char password[]) {
+    stack_var char digest[32]
 
     // Hash the password
-    binaryHash = NAVSha256GetHash(password)
+    digest = NAVSha256GetHash(password)
 
     // Convert to hex for storage
-    storedPasswordHash = NAVByteArrayToHexString(binaryHash)
+    passwordHash = NAVHexToString(digest)
 
     send_string 0, "'Password stored securely'"
 }
 
 // Function to verify a password
-define_function integer VerifyPassword(char password[])
-{
-    stack_var char binaryHash[32]
-    stack_var char passwordHash[64]
+define_function char VerifyPassword(char password[]) {
+    stack_var char digest[32]
+    stack_var char hash[64]
 
     // Hash the input password
-    binaryHash = NAVSha256GetHash(password)
+    digest = NAVSha256GetHash(password)
 
     // Convert to hex for comparison
-    passwordHash = NAVByteArrayToHexString(binaryHash)
+    hash = NAVHexToString(digest)
 
     // Compare with stored hash
-    if (passwordHash == storedPasswordHash)
-    {
+    if (hash == passwordHash) {
         send_string 0, "'Password verified successfully'"
         return true
-    }
-    else
-    {
+    } else {
         send_string 0, "'Invalid password'"
         return false
     }
@@ -178,48 +156,43 @@ define_function integer VerifyPassword(char password[])
 ### HMAC-like Authentication Example
 
 ```netlinx
-// Import required modules
+// Include required libraries
 #include 'NAVFoundation.Cryptography.Sha256.axi'
 #include 'NAVFoundation.Encoding.axi'
 
-// Define variables
-define_variable
-{
-    char sharedSecret[100]
-}
+// Define constants
+DEFINE_CONSTANT
+
+constant char SECRET[] = 'sharedSecret123'
+
 
 // Function to generate an authentication token
-define_function char[64] GenerateAuthToken(char message[])
-{
-    stack_var char combinedData[200]
-    stack_var char binaryHash[32]
+define_function char[64] GenerateAuthToken(char message[]) {
+    stack_var char data[200]
+    stack_var char digest[32]
 
     // Combine the message with a shared secret
-    combinedData = "sharedSecret, ':', message"
+    data = "SECRET, ':', message"
 
     // Compute the hash
-    binaryHash = NAVSha256GetHash(combinedData)
+    digest = NAVSha256GetHash(data)
 
     // Return the hex representation
-    return NAVByteArrayToHexString(binaryHash)
+    return NAVHexToString(digest)
 }
 
 // Function to verify an authentication token
-define_function integer VerifyAuthToken(char message[], char token[])
-{
+define_function char VerifyAuthToken(char message[], char token[]) {
     stack_var char expectedToken[64]
 
     // Generate the expected token
     expectedToken = GenerateAuthToken(message)
 
     // Compare with the provided token
-    if (expectedToken == token)
-    {
+    if (expectedToken == token) {
         send_string 0, "'Token verified successfully'"
         return true
-    }
-    else
-    {
+    } else {
         send_string 0, "'Invalid token'"
         return false
     }
