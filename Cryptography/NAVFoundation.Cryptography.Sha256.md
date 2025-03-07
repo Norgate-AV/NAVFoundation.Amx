@@ -203,12 +203,12 @@ define_function char VerifyAuthToken(char message[], char token[]) {
 
 For testing purposes, here are some test vectors for SHA-256:
 
-| Input                                         | Expected SHA-256 Hash                                            |
-| --------------------------------------------- | ---------------------------------------------------------------- |
-| "" (empty string)                             | e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 |
-| "abc"                                         | ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad |
-| "abcdbcdecdefdefgefghfghighijhijkijkljklm"    | 41c0dba2a9d6240849100376a8235e2c82e1b9998a999e21db32dd97496d3376 |
-| "The quick brown fox jumps over the lazy dog" | d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592 |
+| Input                                         | Expected SHA-256 Hash                                              |
+| --------------------------------------------- | ------------------------------------------------------------------ |
+| `` (empty string)                             | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `abc`                                         | `ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad` |
+| `abcdbcdecdefdefgefghfghighijhijkijkljklm`    | `41c0dba2a9d6240849100376a8235e2c82e1b9998a999e21db32dd97496d3376` |
+| `The quick brown fox jumps over the lazy dog` | `d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592` |
 
 ## Implementation Notes
 
