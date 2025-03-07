@@ -35,6 +35,7 @@ It's feature rich and written in pure NetLinx.
 
 - [Core](./Core)
 - [ArrayUtils](./ArrayUtils)
+- [Assert](./Assert)
 - [BinaryUtils](./BinaryUtils)
 - [Console](./Console)
 - [Cryptography](./Cryptography)
