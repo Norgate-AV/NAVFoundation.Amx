@@ -16,6 +16,7 @@ build:
       - ./HttpUtils
       - ./IniParser
       - ./Int64
+      - ./InterModuleApi
       - ./Jsmn
       - ./Json
       - ./Lexer
