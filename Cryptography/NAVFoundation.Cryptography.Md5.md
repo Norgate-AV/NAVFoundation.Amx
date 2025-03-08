@@ -215,6 +215,14 @@ This module requires:
 
 - `NAVFoundation.BinaryUtils.axi` - For bit manipulation operations
 
+## See Also
+
+This module uses and can be used with:
+
+- [NAVFoundation.BinaryUtils.axi](../Utils/NAVFoundation.BinaryUtils.md) - Required for bit manipulation operations
+- [NAVFoundation.FileUtils.axi](../FileUtils/NAVFoundation.FileUtils.md) - For file operations when doing checksum validation
+- [NAVFoundation.Encoding.axi](../Encoding/NAVFoundation.Encoding.md) - For additional encoding functions
+
 ## License
 
 This module is part of the NAVFoundation library and is licensed under the MIT License.

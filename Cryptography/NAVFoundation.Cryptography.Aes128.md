@@ -14,7 +14,7 @@ NAVFoundation.Cryptography.Aes128 is a pure NetLinx implementation of the Advanc
 
 ## Including the Library
 
-```c
+```netlinx
 #include 'NAVFoundation.Cryptography.Aes128.axi'
 ```
 
@@ -106,7 +106,7 @@ Decrypts the given ciphertext using the provided AES context.
 
 ### Basic Encryption/Decryption
 
-```netlinx-source
+```netlinx
 define_function SimpleEncryptionExample() {
     stack_var _NAVAesContext context
     stack_var char key[16]
@@ -125,10 +125,12 @@ define_function SimpleEncryptionExample() {
     plaintext = 'This is my secret message'
 
     // Encrypt
-    NAVAes128ECBEncrypt(context, plaintext, ciphertext) // Produces {}
+    NAVAes128ECBEncrypt(context, plaintext, ciphertext)
 
     // Decrypt
-    NAVAes128ECBDecrypt(context, ciphertext, decrypted) // Produces 'This is my secret message'
+    NAVAes128ECBDecrypt(context, ciphertext, decrypted)
+
+    send_string 0, "'Decrypted message: ', decrypted"
 }
 ```
 
@@ -694,3 +696,18 @@ Base64 is often used to represent binary data as ASCII text.
 | -130 | NAV_AES_ERROR_INVALID_PADDING       | Invalid padding format                            |
 | -131 | NAV_AES_ERROR_PADDING_VERIFICATION  | Padding verification failed during decryption     |
 | -140 | NAV_AES_ERROR_INVALID_IV_LENGTH     | IV length is not 16 bytes (for CBC mode)          |
+
+## See Also
+
+The examples in this document reference these additional NAVFoundation modules:
+
+- [NAVFoundation.Logging.axi](../Logging/NAVFoundation.Logging.md) - Provides logging utilities including:
+
+    - `NAVErrorLog()` - Log errors and other messages
+    - `NAVDebugLog()` - Log debug information
+
+- [NAVFoundation.Cryptography.Pbkdf2.axi](NAVFoundation.Cryptography.Pbkdf2.md) - For password-based key derivation:
+    - `NAVPbkdf2Sha1()` - Derives encryption keys from passwords
+    - `NAVPbkdf2GetRandomSalt()` - Generates random salts for key derivation
+
+These modules are required dependencies when using the advanced examples provided in this document.

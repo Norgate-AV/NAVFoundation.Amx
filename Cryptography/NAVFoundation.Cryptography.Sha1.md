@@ -43,81 +43,69 @@ Errors are logged through the NAVErrorLog system at NAV_LOG_LEVEL_ERROR.
 ### Basic Usage
 
 ```netlinx
-// Import the SHA-1 module
+// Include the SHA-1 library
 #include 'NAVFoundation.Cryptography.Sha1.axi'
 #include 'NAVFoundation.Encoding.axi'  // For hex conversion
 
-// Define variables
-define_variable
-{
-    char inputMessage[100]
-    char binaryDigest[20]
-    char hexDigest[40]
-}
-
 // Example function
-define_function ComputeSha1Example()
-{
+define_function ComputeSha1Example() {
+    stack_var char message[100]
+    stack_var char digest[20]
+    stack_var char hash[40]
+
     // Input message to hash
-    inputMessage = 'The quick brown fox jumps over the lazy dog'
+    message = 'The quick brown fox jumps over the lazy dog'
 
     // Compute SHA-1 hash (returns binary format)
-    binaryDigest = NAVSha1GetHash(inputMessage)
+    digest = NAVSha1GetHash(message)
+
+    // Check for errors
+    if (!length_array(digest)) {
+        send_string 0, "'Error: Hash computation failed'"
+        return
+    }
 
     // Convert to hexadecimal string for display/use
-    hexDigest = NAVByteArrayToHexString(binaryDigest)
+    hash = NAVHexToString(digest)
 
     // Output the result
     // Should be: 2fd4e1c67a2d28fced849ee1bb76e7391b93eb12
-    send_string 0, "'SHA-1 hash: ', hexDigest"
+    send_string 0, "'SHA-1 hash: ', hash"
 }
 ```
 
 ### Verifying File Integrity
 
 ```netlinx
-// Import required modules
+// Include required libraries
 #include 'NAVFoundation.Cryptography.Sha1.axi'
 #include 'NAVFoundation.Encoding.axi'
-#include 'NAVFoundation.IO.axi'  // Assume this exists for file operations
-
-// Define variables
-define_variable
-{
-    char fileData[10000]
-    char expectedHash[40]
-    char actualHash[40]
-}
+#include 'NAVFoundation.FileUtils.axi'
 
 // Example function to verify file integrity
-define_function VerifyFileIntegrity(char filename[], char expectedHashHex[])
-{
-    stack_var char binaryDigest[20]
+define_function VerifyFileIntegrityWithSha1(char path[], char expectedHash[]) {
+    stack_var char digest[20]
+    stack_var char data[10000]  // Adjust size as needed
+    stack_var char actualHash[40]
 
-    // Read file content (implementation depends on your file I/O module)
-    fileData = NAVReadFile(filename)
-
-    if (length_array(fileData) == 0)
-    {
+    // Read file content
+    if (NAVFileRead(path, data) < 0) {
         send_string 0, "'Error: Could not read file'"
         return
     }
 
     // Compute SHA-1 hash
-    binaryDigest = NAVSha1GetHash(fileData)
+    digest = NAVSha1GetHash(data)
 
     // Convert to hex for comparison
-    actualHash = NAVByteArrayToHexString(binaryDigest)
+    actualHash = NAVHexToString(digest)
 
     // Compare with expected hash
-    if (actualHash == expectedHashHex)
-    {
+    if (actualHash == expectedHash) {
         send_string 0, "'File integrity verified successfully'"
-    }
-    else
-    {
+    } else {
         send_string 0, "'File integrity check failed'"
-        send_string 0, "'Expected: ', expectedHashHex"
+        send_string 0, "'Expected: ', expectedHash"
         send_string 0, "'Actual  : ', actualHash"
     }
 }
@@ -126,50 +114,44 @@ define_function VerifyFileIntegrity(char filename[], char expectedHashHex[])
 ### Password Storage Example
 
 ```netlinx
-// Import required modules
+// Include required libraries
 #include 'NAVFoundation.Cryptography.Sha1.axi'
 #include 'NAVFoundation.Encoding.axi'
 
 // Define variables
-define_variable
-{
-    char storedPasswordHash[40]
-}
+DEFINE_VARIABLE
+
+volatile char storedPasswordHash[40]
 
 // Function to store a hashed password
-define_function StorePassword(char password[])
-{
-    stack_var char binaryHash[20]
+define_function StorePasswordWithSha1(char password[]) {
+    stack_var char digest[20]
 
     // Hash the password
-    binaryHash = NAVSha1GetHash(password)
+    digest = NAVSha1GetHash(password)
 
     // Convert to hex for storage
-    storedPasswordHash = NAVByteArrayToHexString(binaryHash)
+    storedPasswordHash = NAVHexToString(digest)
 
     send_string 0, "'Password stored securely'"
 }
 
 // Function to verify a password
-define_function integer VerifyPassword(char password[])
-{
-    stack_var char binaryHash[20]
-    stack_var char passwordHash[40]
+define_function char VerifyPasswordWithSha1(char password[]) {
+    stack_var char digest[20]
+    stack_var char hash[40]
 
     // Hash the input password
-    binaryHash = NAVSha1GetHash(password)
+    digest = NAVSha1GetHash(password)
 
     // Convert to hex for comparison
-    passwordHash = NAVByteArrayToHexString(binaryHash)
+    hash = NAVHexToString(digest)
 
     // Compare with stored hash
-    if (passwordHash == storedPasswordHash)
-    {
+    if (hash == storedPasswordHash) {
         send_string 0, "'Password verified successfully'"
         return true
-    }
-    else
-    {
+    } else {
         send_string 0, "'Invalid password'"
         return false
     }
@@ -199,3 +181,21 @@ For testing purposes, here are some test vectors:
 
 - This implementation is fully compatible with the SHA-1 specification in RFC3174
 - Output matches standard SHA-1 implementations on other platforms
+- Widely supported across programming languages and platforms for interoperability
+
+## See Also
+
+The examples in this document reference these additional NAVFoundation modules:
+
+- [NAVFoundation.Encoding.axi](../Encoding/NAVFoundation.Encoding.md) - Provides conversion utilities including:
+
+    - `NAVHexToString()` - Converts binary data to hexadecimal string representation
+    - `NAVByteArrayToHexString()` - Alternative function for hex string conversion
+
+- [NAVFoundation.FileUtils.axi](../FileUtils/NAVFoundation.FileUtils.md) - Provides file operations including:
+
+    - `NAVFileRead()` - Reads data from a file into a buffer
+
+- [NAVFoundation.Cryptography.Sha256.axi](NAVFoundation.Cryptography.Sha256.md) - Recommended alternative to SHA-1 for security-critical applications
+
+These modules are required dependencies when using the code examples provided in this document.

@@ -92,7 +92,7 @@ define_function char[100] NAVPbkdf2GetError(sinteger error)
 This example demonstrates how to derive a 32-byte (256-bit) key from a password:
 
 ```netlinx
-define_function void DeriveKey() {
+define_function DeriveKeyExample() {
     stack_var char password[50]
     stack_var char salt[16]
     stack_var char derivedKey[32]
@@ -107,11 +107,10 @@ define_function void DeriveKey() {
 
     if (result == NAV_KDF_SUCCESS) {
         // Key derivation successful, derivedKey now contains the derived key
-        NAVDebugLog(NAV_LOG_LEVEL_INFO, "'Key derived successfully'")
-    }
-    else {
+        send_string 0, "'Key derived successfully'"
+    } else {
         // Handle error
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Key derivation failed: ', NAVPbkdf2GetError(result)")
+        send_string 0, "'Key derivation failed: ', NAVPbkdf2GetError(result)"
     }
 }
 ```
@@ -121,7 +120,7 @@ define_function void DeriveKey() {
 This example shows how to verify a password by deriving a key and comparing it to a stored key:
 
 ```netlinx
-define_function char VerifyPassword(char password[], char storedSalt[], char storedKey[]) {
+define_function char VerifyPasswordWithPbkdf2(char password[], char storedSalt[], char storedKey[]) {
     stack_var char derivedKey[32]
     stack_var sinteger result
     stack_var integer i
@@ -131,7 +130,7 @@ define_function char VerifyPassword(char password[], char storedSalt[], char sto
     result = NAVPbkdf2Sha1(password, storedSalt, 10000, derivedKey, 32)
 
     if (result != NAV_KDF_SUCCESS) {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Key derivation failed: ', NAVPbkdf2GetError(result)")
+        send_string 0, "'Key derivation failed: ', NAVPbkdf2GetError(result)"
         return false
     }
 
@@ -254,6 +253,14 @@ define_function void PasswordExample() {
 - Higher iteration counts provide better security but require more processing time.
 - On resource-constrained systems, balance security with acceptable performance.
 - Consider setting iteration counts based on the capabilities of your target hardware.
+
+## See Also
+
+The PBKDF2 module works with these additional NAVFoundation modules:
+
+- [NAVFoundation.Cryptography.Sha1.axi](NAVFoundation.Cryptography.Sha1.md) - Used internally for HMAC-SHA1 operations
+- [NAVFoundation.Cryptography.Aes128.axi](NAVFoundation.Cryptography.Aes128.md) - Can use PBKDF2 for key derivation
+- [NAVFoundation.Encoding.axi](../Encoding/NAVFoundation.Encoding.md) - For encoding derived keys as hex strings
 
 ## References
 

@@ -17,7 +17,7 @@ Key features of SHA-256 include:
 
 ### Main Functions
 
-#### NAVSha256GetHash
+#### `NAVSha256GetHash`
 
 ```netlinx
 define_function char[32] NAVSha256GetHash(char value[])
@@ -233,3 +233,17 @@ SHA-256 offers several security advantages over SHA-1:
 - This implementation is fully compatible with the SHA-256 specification in RFC6234
 - Output matches standard SHA-256 implementations on other platforms
 - Widely supported across programming languages and platforms for interoperability
+
+## See Also
+
+The examples in this document reference these additional NAVFoundation modules:
+
+- [NAVFoundation.Encoding.axi](../Encoding/NAVFoundation.Encoding.md) - Provides conversion utilities including:
+
+    - `NAVHexToString()` - Converts binary data to hexadecimal string representation
+    - `NAVByteArrayToHexString()` - Alternative function for hex string conversion
+
+- [NAVFoundation.FileUtils.axi](../FileUtils/NAVFoundation.FileUtils.md) - Provides file operations including:
+    - `NAVFileRead()` - Reads data from a file into a buffer
+
+These modules are required dependencies when using the code examples provided in this document.

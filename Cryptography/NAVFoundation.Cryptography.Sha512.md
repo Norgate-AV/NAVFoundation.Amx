@@ -18,9 +18,9 @@ Key features of SHA-512 include:
 
 ### Main Functions
 
-#### NAVSha512GetHash
+#### `NAVSha512GetHash`
 
-```
+```netlinx
 define_function char[64] NAVSha512GetHash(char value[])
 ```
 
@@ -35,120 +35,102 @@ define_function char[64] NAVSha512GetHash(char value[])
 - 64-byte binary SHA-512 hash on success
 - Empty string on error
 
-**Error Handling:**
-Errors are logged through the NAVErrorLog system at NAV_LOG_LEVEL_ERROR.
-
 ## Usage Examples
 
 ### Basic Usage
 
 ```netlinx
-// Import the SHA-512 module
+// Include the SHA-512 library
 #include 'NAVFoundation.Cryptography.Sha512.axi'
 #include 'NAVFoundation.Encoding.axi'  // For hex conversion
 
-// Define variables
-define_variable
-{
-    char inputMessage[100]
-    char binaryDigest[64]
-    char hexDigest[128]
-}
-
 // Example function
-define_function ComputeSha512Example()
-{
+define_function ComputeSha512Example() {
+    stack_var char message[100]
+    stack_var char digest[64]
+    stack_var char hash[128]
+
     // Input message to hash
-    inputMessage = 'The quick brown fox jumps over the lazy dog'
+    message = 'The quick brown fox jumps over the lazy dog'
 
     // Compute SHA-512 hash (returns binary format)
-    binaryDigest = NAVSha512GetHash(inputMessage)
+    digest = NAVSha512GetHash(message)
+
+    // Check for errors
+    if (!length_array(digest)) {
+        send_string 0, "'Error: Hash computation failed'"
+        return
+    }
 
     // Convert to hexadecimal string for display/use
-    hexDigest = NAVByteArrayToHexString(binaryDigest)
+    hash = NAVByteArrayToHexString(digest)
 
     // Output the result
     // Should be: 07e547d9586f6a73f73fbac0435ed76951218fb7d0c8d788a309d785436bbb642e93a252a954f23912547d1e8a3b5ed6e1bfd7097821233fa0538f3db854fee6
-    send_string 0, "'SHA-512 hash: ', hexDigest"
+    send_string 0, "'SHA-512 hash: ', hash"
 }
 ```
 
 ### Verifying File Integrity
 
 ```netlinx
-// Import required modules
+// Include required libraries
 #include 'NAVFoundation.Cryptography.Sha512.axi'
 #include 'NAVFoundation.Encoding.axi'
-#include 'NAVFoundation.IO.axi'  // Assume this exists for file operations
-
-// Define variables
-define_variable
-{
-    char fileData[10000]
-    char expectedHash[128]
-    char actualHash[128]
-}
+#include 'NAVFoundation.FileUtils.axi'  // For file operations
 
 // Example function to verify file integrity
-define_function VerifyFileIntegrity(char filename[], char expectedHashHex[])
-{
-    stack_var char binaryDigest[64]
+define_function VerifyFileIntegrity(char path[], char expectedHash[]) {
+    stack_var char digest[64]
+    stack_var char data[10000]  // Adjust size as needed
+    stack_var char actualHash[128]
 
-    // Read file content (implementation depends on your file I/O module)
-    fileData = NAVReadFile(filename)
-
-    if (length_array(fileData) == 0)
-    {
+    // Read file content
+    if (NAVFileRead(path, data) < 0) {
         send_string 0, "'Error: Could not read file'"
         return
     }
 
     // Compute SHA-512 hash
-    binaryDigest = NAVSha512GetHash(fileData)
+    digest = NAVSha512GetHash(data)
 
     // Convert to hex for comparison
-    actualHash = NAVByteArrayToHexString(binaryDigest)
+    actualHash = NAVHexToString(digest)
 
     // Compare with expected hash
-    if (actualHash == expectedHashHex)
-    {
+    if (actualHash == expectedHash) {
         send_string 0, "'File integrity verified successfully'"
-    }
-    else
-    {
+    } else {
         send_string 0, "'File integrity check failed'"
-        send_string 0, "'Expected: ', expectedHashHex"
+        send_string 0, "'Expected: ', expectedHash"
         send_string 0, "'Actual  : ', actualHash"
     }
 }
 ```
 
-### High-Security Password Storage
+### Secure Password Storage
 
 ```netlinx
-// Import required modules
+// Include required libraries
 #include 'NAVFoundation.Cryptography.Sha512.axi'
 #include 'NAVFoundation.Encoding.axi'
 
 // Define variables
-define_variable
-{
-    char storedPasswordHash[128]
-    char salt[16]  // Random salt for added security
-}
+DEFINE_VARIABLE
+
+volatile char storedPasswordHash[128]
+volatile char salt[16]  // Random salt for added security
 
 // Function to generate a salt (placeholder - use a proper random generator)
-define_function char[16] GenerateSalt()
-{
+define_function char[16] GenerateSalt() {
     // In a real implementation, this should be cryptographically random
     // This is just a placeholder
-    return "char[16]($01,$23,$45,$67,$89,$AB,$CD,$EF,$FE,$DC,$BA,$98,$76,$54,$32,$10)"
+    return "$01,$23,$45,$67,$89,$AB,$CD,$EF,$FE,$DC,$BA,$98,$76,$54,$32,$10"
 }
 
 // Function to store a hashed password with salt
-define_function StorePassword(char password[])
-{
-    stack_var char binaryHash[64]
+define_function StorePassword(char password[]) {
+    stack_var char digest[64]
     stack_var char salted_password[1000]
 
     // Generate a new salt
@@ -158,18 +140,17 @@ define_function StorePassword(char password[])
     salted_password = "salt, password"
 
     // Hash the salted password
-    binaryHash = NAVSha512GetHash(salted_password)
+    digest = NAVSha512GetHash(salted_password)
 
     // Convert to hex for storage
-    storedPasswordHash = NAVByteArrayToHexString(binaryHash)
+    storedPasswordHash = NAVHexToString(digest)
 
     send_string 0, "'Password stored securely with salt'"
 }
 
 // Function to verify a password
-define_function integer VerifyPassword(char password[])
-{
-    stack_var char binaryHash[64]
+define_function char VerifyPassword(char password[]) {
+    stack_var char digest[64]
     stack_var char passwordHash[128]
     stack_var char salted_password[1000]
 
@@ -177,29 +158,26 @@ define_function integer VerifyPassword(char password[])
     salted_password = "salt, password"
 
     // Hash the salted password
-    binaryHash = NAVSha512GetHash(salted_password)
+    digest = NAVSha512GetHash(salted_password)
 
     // Convert to hex for comparison
-    passwordHash = NAVByteArrayToHexString(binaryHash)
+    passwordHash = NAVHexToString(digest)
 
     // Compare with stored hash
-    if (passwordHash == storedPasswordHash)
-    {
+    if (passwordHash == storedPasswordHash) {
         send_string 0, "'Password verified successfully'"
         return true
-    }
-    else
-    {
+    } else {
         send_string 0, "'Invalid password'"
         return false
     }
 }
 ```
 
-### Digital Signature Verification Example
+<!-- ### Digital Signature Verification Example
 
 ```netlinx
-// Import required modules
+// Include required libraries
 #include 'NAVFoundation.Cryptography.Sha512.axi'
 #include 'NAVFoundation.Encoding.axi'
 
@@ -207,20 +185,18 @@ define_function integer VerifyPassword(char password[])
 // that would use the hash as input. The actual signature verification would involve
 // public key cryptography which is beyond the scope of this example.
 
-// Define variables
-define_variable
-{
-    char message[1000]
-    char receivedSignature[256]  // Placeholder for a received signature
-}
-
 // Function to verify a digitally signed message
-define_function integer VerifySignedMessage(char message[], char signature[])
-{
+define_function char VerifySignedMessage(char message[], char signature[]) {
     stack_var char messageHash[64]
 
     // Compute the hash of the message
     messageHash = NAVSha512GetHash(message)
+
+    // Check for errors
+    if (!length_array(messageHash)) {
+        send_string 0, "'Error: Hash computation failed'"
+        return false
+    }
 
     // In a real implementation, you would verify the signature against the hash
     // using a public key. This is just a placeholder to show where SHA-512 fits
@@ -230,7 +206,7 @@ define_function integer VerifySignedMessage(char message[], char signature[])
     // Placeholder for actual signature verification
     return NAVVerifySignature(messageHash, signature)  // Assume this function exists
 }
-```
+``` -->
 
 ## Reference Values
 
@@ -283,3 +259,17 @@ SHA-512 offers several security advantages:
 - Output matches standard SHA-512 implementations on other platforms
 - Widely supported across programming languages and platforms for interoperability
 - Some legacy systems may not support SHA-512; consider compatibility requirements when selecting
+
+## See Also
+
+The examples in this document reference these additional NAVFoundation modules:
+
+- [NAVFoundation.Encoding.axi](../Encoding/NAVFoundation.Encoding.md) - Provides conversion utilities including:
+
+    - `NAVByteArrayToHexString()` - Converts binary data to hexadecimal string representation
+    - `NAVHexToString()` - Alternative function for hex string conversion
+
+- [NAVFoundation.FileUtils.axi](../FileUtils/NAVFoundation.FileUtils.md) - Provides file operations including:
+    - `NAVFileRead()` - Reads data from a file into a buffer
+
+These modules are required dependencies when using the code examples provided in this document.
