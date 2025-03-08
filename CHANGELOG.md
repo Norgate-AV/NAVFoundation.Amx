@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.35.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.34.0...v1.35.0) (2025-03-08)
+
+### 🌟 Features
+
+- **encoding:** add initial implementation of base32 ([0f72585](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/0f72585dab7c39534ec9f47b60474d24fc81ef78))
+
 ## [1.34.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.33.0...v1.34.0) (2025-03-07)
 
 ### 🌟 Features
