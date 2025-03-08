@@ -41,11 +41,11 @@ DEFINE_CONSTANT
 
 /**
  * @constant NAV_BASE64_MAP
- * @description Standard Base64 encoding character set.
- * Contains the 64 characters used in Base64 encoding (A-Z, a-z, 0-9, +, /)
- * plus the '=' character used for padding.
+ * @description Standard Base64 encoding character set as defined in RFC 4648.
+ * Contains the 64 characters used in Base64 encoding (A-Z, a-z, 0-9, +, /).
  *
- * @note The index in this array (1-based) corresponds to the 6-bit value being encoded
+ * @note The index in this array (1-based) corresponds to the 6-bit value being encoded plus 1
+ * @note Array is 1-indexed to match NetLinx array indexing (first element at position 1)
  */
 constant char NAV_BASE64_MAP[]  =   {
                                         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
@@ -60,6 +60,22 @@ constant char NAV_BASE64_MAP[]  =   {
 
                                         '+', '/'
                                     }
+
+/**
+ * @constant NAV_BASE64_PADDING_CHAR
+ * @description The character used for padding in Base64 encoding ('=')
+ *
+ * @note Padding is used when the input length is not divisible by 3
+ */
+constant char NAV_BASE64_PADDING_CHAR = '='
+
+/**
+ * @constant NAV_BASE64_INVALID_VALUE
+ * @description Value indicating an invalid Base64 character
+ *
+ * @note Used as a return value from NAVBase64GetCharValue for error handling
+ */
+constant sinteger NAV_BASE64_INVALID_VALUE = -1
 
 
 #END_IF // __NAV_FOUNDATION_ENCODING_BASE64_H__
