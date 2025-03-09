@@ -36,7 +36,7 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_TUI__ 'NAVFoundation.Tui'
 
 #include 'NAVFoundation.Tui.h.axi'
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
 
 
 define_function char[NAV_MAX_CHARS] NAVGetColor(char color[]) {

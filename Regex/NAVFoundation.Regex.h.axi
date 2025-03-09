@@ -42,8 +42,6 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_REGEX_H__
 #DEFINE __NAV_FOUNDATION_REGEX_H__ 'NAVFoundation.Regex.h'
 
-#include 'NAVFoundation.Core.axi'
-
 
 DEFINE_CONSTANT
 

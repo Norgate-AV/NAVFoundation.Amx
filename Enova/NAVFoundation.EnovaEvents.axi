@@ -132,6 +132,8 @@ constant dev DVA_ENOVA[]    =   {
 
 
 #include 'NAVFoundation.Enova.axi'
+#include 'NAVFoundation.SnapiHelpers.axi'
+#include 'NAVFoundation.SocketUtils.axi'
 
 
 DEFINE_EVENT

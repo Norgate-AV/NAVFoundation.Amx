@@ -51,6 +51,7 @@ SOFTWARE.
 #include 'NAVFoundation.Cryptography.Sha1.h.axi'
 #include 'NAVFoundation.BinaryUtils.axi'
 #include 'NAVFoundation.Encoding.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 /**

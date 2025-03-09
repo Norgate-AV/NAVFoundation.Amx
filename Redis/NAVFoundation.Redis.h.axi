@@ -34,8 +34,6 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_REDIS_H__
 #DEFINE __NAV_FOUNDATION_REDIS_H__ 'NAVFoundation.Redis.h'
 
-#include 'NAVFoundation.Core.axi'
-
 
 DEFINE_CONSTANT
 

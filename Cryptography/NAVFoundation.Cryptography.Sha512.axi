@@ -54,6 +54,7 @@ SOFTWARE.
 
 #include 'NAVFoundation.Cryptography.Sha512.h.axi'
 #include 'NAVFoundation.Int64.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 // Only define SHA512_DEBUG if not already defined elsewhere
 #IF_NOT_DEFINED SHA512_DEBUG
@@ -63,9 +64,6 @@ SOFTWARE.
 // #DEFINE SHA512_DEBUG
 // #DEFINE SHA512_EXTENSIVE_DEBUG
 
-#IF_DEFINED SHA512_DEBUG
-#include 'NAVFoundation.ErrorLogUtils.axi'
-#END_IF
 
 /**
  * @function NAVSha512DebugLog

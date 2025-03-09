@@ -35,6 +35,7 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_MCPBASE__ 'NAVFoundation.McpBase'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 DEFINE_CONSTANT
@@ -74,24 +75,24 @@ DEFINE_EVENT
 
 data_event[5001:28:0] {
     online: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Online'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device [', NAVDeviceToString(data.device), '] Online'")
     }
     offline: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Offline'")
+        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'MCP Keypad Device [', NAVDeviceToString(data.device), '] Offline'")
     }
 }
 
 
 button_event[5001:28:0, 0] {
     push: {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(button.input.device), '[', ']'), ' Button ', itoa(button.input.channel), ': Push'")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'MCP Keypad Device [', NAVDeviceToString(button.input.device), '] Button ', itoa(button.input.channel), ': Push'")
 
         #IF_DEFINED USING_NAV_MCP_KEYPAD_BUTTON_PUSH_EVENT_CALLBACK
         NAVMcpKeypadButtonPushEventCallback(button)
         #END_IF
     }
     release: {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(button.input.device), '[', ']'), ' Button ', itoa(button.input.channel), ': Release'")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'MCP Keypad Device [', NAVDeviceToString(button.input.device), '] Button ', itoa(button.input.channel), ': Release'")
 
         #IF_DEFINED USING_NAV_MCP_KEYPAD_BUTTON_RELEASE_EVENT_CALLBACK
         NAVMcpKeypadButtonReleaseEventCallback(button)
@@ -101,7 +102,7 @@ button_event[5001:28:0, 0] {
 
 
 level_event[5001:28:0, 0] {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'MCP Keypad Device ', NAVStringSurroundWith(NAVDeviceToString(level.input.device), '[', ']'), ' Level ', itoa(level.input.level), ': ', itoa(level.value)")
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'MCP Keypad Device [', NAVDeviceToString(level.input.device), '] Level ', itoa(level.input.level), ': ', itoa(level.value)")
 
     #IF_DEFINED USING_NAV_MCP_KEYPAD_LEVEL_EVENT_CALLBACK
     NAVMcpKeypadLevelEventCallback(level)

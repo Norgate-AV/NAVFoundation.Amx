@@ -50,6 +50,8 @@ SOFTWARE.
 #include 'NAVFoundation.Cryptography.Sha256.h.axi'
 #include 'NAVFoundation.BinaryUtils.axi'
 #include 'NAVFoundation.Encoding.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
+
 
 /**
  * @function NAVSha256GetHash

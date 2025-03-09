@@ -34,7 +34,7 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_ENCODING__
 #DEFINE __NAV_FOUNDATION_ENCODING__ 'NAVFoundation.Encoding'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
 
 
 /**

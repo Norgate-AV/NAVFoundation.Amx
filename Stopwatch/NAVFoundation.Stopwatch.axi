@@ -34,7 +34,6 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATIONSTOPWATCH__
 #DEFINE __NAV_FOUNDATION_STOPWATCH__ 'NAVFoundation.Stopwatch'
 
-#include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.TimelineUtils.axi'
 #include 'NAVFoundation.Stopwatch.h.axi'
 

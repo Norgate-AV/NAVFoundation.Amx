@@ -36,11 +36,11 @@ SOFTWARE.
 
 // #DEFINE NAV_BASE64_DEBUG // Uncomment for debugging
 
+#include 'NAVFoundation.Core.h.axi'
 #include 'NAVFoundation.Encoding.Base64.h.axi'
-
-#IF_DEFINED NAV_BASE64_DEBUG
 #include 'NAVFoundation.ErrorLogUtils.axi'
 
+#IF_DEFINED NAV_BASE64_DEBUG
 /**
  * @function NAVBase64DebugLog
  * @private

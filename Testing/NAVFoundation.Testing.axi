@@ -203,12 +203,12 @@ define_function NAVUnitTestWithStringResultInit(_NAVUnitTestWithStringResult tes
 //     #END_IF
 
 define_function NAVLogTestPassed(integer test) {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(test), ' passed'")
+    NAVLog("'Test ', itoa(test), ' passed'")
 }
 
 
 define_function NAVLogTestFailed(integer test, char expected[], char result[]) {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(test), ' failed. Expected "', expected, '" but got "', result, '"'")
+    NAVLog("'Test ', itoa(test), ' failed. Expected "', expected, '" but got "', result, '"'")
 }
 
 

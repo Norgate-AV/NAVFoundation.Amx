@@ -34,9 +34,6 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE_H__
 #DEFINE __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE_H__
 
-#include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.Queue.h.axi'
-
 (***********************************************************)
 (*               CONSTANT DEFINITIONS GO BELOW             *)
 (***********************************************************)
