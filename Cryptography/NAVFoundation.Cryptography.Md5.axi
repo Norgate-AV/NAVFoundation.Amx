@@ -60,30 +60,24 @@ SOFTWARE.
  *
  * @param {char[]} value - The input string to be hashed
  *
- * @returns {char[32]} 32-character hexadecimal string representing the MD5 hash value
+ * @returns {char[16]} 16-character binary array representing the MD5 hash value
  *
  * @example
  * stack_var char message[100]
- * stack_var char hash[32]
+ * stack_var char hash[16]
  *
  * message = 'Hello, World!'
  * hash = NAVMd5GetHash(message)
- * // hash now contains '65a8e27d8879283831b664bd8b7f0ad4'
+ * // hash now contains "$65, $a8, $e2, $7d, $88, $79, $28, $38, $31, $b6, $64, $bd, $8b, $7f, $0a, $d4"
  */
-define_function char[32] NAVMd5GetHash(char value[]) {
-    stack_var integer x
+define_function char[16] NAVMd5GetHash(char value[]) {
     stack_var _NAVMd5Context context
-    stack_var char hash[32]
 
     NAVMd5Init(context)
     NAVMd5Update(context, value, length_array(value))
     NAVMd5Final(context)
 
-    for (x = 1; x <= 16; x++) {
-        hash = "hash, format('%02x', context.digest[x])"
-    }
-
-    return hash
+    return context.digest
 }
 
 
