@@ -396,5 +396,98 @@ define_function long NAVTimelineGetValue(long id) {
     return timeline_get(id)
 }
 
+/**
+ * @function NAVTimelineIsRunning
+ * @public
+ * @description Checks if a timeline is currently running.
+ * If the timeline is not active, returns 0.
+ *
+ * @param {long} id - Timeline ID to check
+ *
+ * @returns {integer} 1 if running, 0 if not active
+ *
+ * @example
+ * stack_var integer isRunning
+ *
+ * isRunning = NAVTimelineIsRunning(TL_BLINK)
+ * if (isRunning == 1) {
+ *     NAVLog("'Timeline is running'")
+ * } else {
+ *     NAVLog("'Timeline is not running'")
+ * }
+ */
+define_function char NAVTimelineIsRunning(long id) {
+    return timeline_active(id) > 0
+}
+
+
+/**
+ * @function NAVTimelineRestart
+ * @public
+ * @description Restarts a running timeline.
+ * If the timeline is not active, returns 0 without doing anything.
+ *
+ * @param {long} id - Timeline ID to restart
+ *
+ * @returns {integer} 0 on success, or error code on failure
+ *
+ * @example
+ * stack_var integer result
+ *
+ * result = NAVTimelineRestart(TL_BLINK)
+ * if (result != 0) {
+ *     NAVLog("'Failed to restart timeline: ', NAVGetTimelineRunError(result)")
+ * }
+ *
+ * @see NAVTimelineStart
+ */
+define_function integer NAVTimelineRestart(long id) {
+    stack_var integer result
+
+    result = timeline_active(id)
+
+    if (result == 0) {
+        return result
+    }
+
+    result = timeline_restart(id)
+
+    if (result != 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_TIMELINEUTILS__,
+                                    'NAVTimelineRestart',
+                                    "'Failed to restart Timeline with ID ', itoa(id), ' : ', NAVGetTimelineRunError(result)")
+
+        return result
+    }
+
+    return result
+}
+
+
+/**
+ * @function NAVTimelineReset
+ * @public
+ * @description Resets a timeline to its initial state.
+ * If the timeline is not active, returns 0 without doing anything.
+ *
+ * @param {long} id - Timeline ID to reset
+ *
+ * @returns {integer} 0 on success, or error code on failure
+ *
+ * @example
+ * stack_var integer result
+ *
+ * result = NAVTimelineReset(TL_BLINK)
+ * if (result != 0) {
+ *     NAVLog("'Failed to reset timeline: ', NAVGetTimelineRunError(result)")
+ * }
+ *
+ * @see NAVTimelineStart
+ */
+define_function integer NAVTimelineReset(long id) {
+    return NAVTimelineSetValue(id, 0)
+}
+
 
 #END_IF // __NAV_FOUNDATION_TIMELINEUTILS__
