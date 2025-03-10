@@ -2,6 +2,7 @@ PROGRAM_NAME='base64'
 
 #DEFINE __MAIN__
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Encoding.Base64.axi'
 
 

@@ -64,7 +64,7 @@ define_function TestNAVStringReplace() {
             result = NAVStringReplace(input, match, replacement)
         }
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('String Replace Test', expected, result)) {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Input: "', input, '" Replace: "', match, '" with: "', replacement, '"'")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected: "', expected, '"'")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Actual  : "', result, '"'")

@@ -2,6 +2,7 @@ PROGRAM_NAME='md5'
 
 #DEFINE __MAIN__
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Cryptography.Md5.axi'
 
 
@@ -35,15 +36,6 @@ constant char EXPECTED[][16] = {
     {$57, $ed, $f4, $a2, $2b, $e3, $c9, $55, $ac, $49, $da, $2e, $21, $07, $b6, $7a},
     {$9e, $10, $7d, $9d, $37, $2b, $b6, $82, $6b, $d8, $1d, $35, $42, $a4, $19, $d6},
     {$e4, $d9, $09, $c2, $90, $d0, $fb, $1c, $a0, $68, $ff, $ad, $df, $22, $cb, $d0}
-    // 'd41d8cd98f00b204e9800998ecf8427e',
-    // '0cc175b9c0f1b6a831c399e269772661',
-    // '900150983cd24fb0d6963f7d28e17f72',
-    // 'f96b697d7cb7938d525a2f31aaf161d0',
-    // 'c3fcd3d76192e4007dfb496cca67e13b',
-    // 'd174ab98d277d9f5a5611c2c9f419d9f',
-    // '57edf4a22be3c955ac49da2e2107b67a',
-    // '9e107d9d372bb6826bd81d3542a419d6',
-    // 'e4d909c290d0fb1ca068ffaddf22cbd0'
 }
 
 

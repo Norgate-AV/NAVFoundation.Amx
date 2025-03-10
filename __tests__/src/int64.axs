@@ -18,6 +18,7 @@ PROGRAM_NAME='int64'
 #DEFINE TESTING_NAVINT64SHA512OPERATIONS
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Encoding.axi'
 #include 'NAVFoundation.Int64.axi'
 #include 'NAVInt64Shared.axi'

@@ -8,6 +8,9 @@ PROGRAM_NAME='string-utils'
 #DEFINE TESTING_NAVSTRINGCASECONVERSION
 #DEFINE TESTING_NAVSTRINGREPLACE
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
+#include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.Assert.axi'
 #include 'NAVFoundation.Testing.axi'
 
 #IF_DEFINED TESTING_NAVGETSTRINGBETWEEN

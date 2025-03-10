@@ -24,6 +24,7 @@ PROGRAM_NAME='aes128'
 #DEFINE TESTING_NAVAES128ENDTOENDTESTS
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Encoding.axi'
 #include 'NAVFoundation.Cryptography.Aes128.axi'
 #include 'NAVAes128Shared.axi'

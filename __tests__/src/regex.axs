@@ -5,6 +5,7 @@ PROGRAM_NAME='regex'
 #DEFINE TESTING_REGEX_MATCH
 // #DEFINE TESTING_REGEX_MATCH_COMPILED
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Regex.axi'
 #include 'NAVFoundation.Testing.axi'
 

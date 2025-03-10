@@ -51,7 +51,7 @@ define_function TestNAVGetStringBetween() {
 
         result = NAVGetStringBetween(GET_STRING_BETWEEN_SUBJECT, token[1], token[2])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Get String Between Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }

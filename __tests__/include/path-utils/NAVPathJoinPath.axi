@@ -45,7 +45,7 @@ define_function TestNAVPathJoinPath(char paths[][]) {
 
         result = NAVPathJoinPath(paths[x], '', '', 'someotherpath')
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Path Join Path Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }

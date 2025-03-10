@@ -2,6 +2,7 @@ PROGRAM_NAME='sha1'
 
 #DEFINE __MAIN__
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Cryptography.Sha1.axi'
 
 

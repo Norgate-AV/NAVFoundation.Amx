@@ -2,6 +2,7 @@ PROGRAM_NAME='base32'
 
 #DEFINE __MAIN__
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Encoding.Base32.axi'
 
 

@@ -9,8 +9,10 @@ PROGRAM_NAME='path-utils'
 #DEFINE TESTING_NAVPATHJOINPATH
 #DEFINE TESTING_NAVPATHRELATIVE
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.PathUtils.axi'
 #include 'NAVFoundation.Testing.axi'
+#include 'NAVFoundation.Assert.axi'
 
 #IF_DEFINED TESTING_NAVPATHBASENAME
 #include 'NAVPathBaseName.axi'

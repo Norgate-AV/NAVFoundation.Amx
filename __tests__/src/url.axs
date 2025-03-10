@@ -2,6 +2,7 @@ PROGRAM_NAME='url'
 
 #DEFINE __MAIN__
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Url.axi'
 
 

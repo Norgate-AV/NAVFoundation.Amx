@@ -4,6 +4,7 @@ PROGRAM_NAME='sha512'
 
 // Include core libraries first
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Encoding.axi'
 
 // Define SHA512_DEBUG only if not already defined

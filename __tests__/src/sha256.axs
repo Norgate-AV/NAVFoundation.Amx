@@ -2,6 +2,7 @@ PROGRAM_NAME='sha256'
 
 #DEFINE __MAIN__
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Encoding.axi'
 #include 'NAVFoundation.Cryptography.Sha256.axi'
 

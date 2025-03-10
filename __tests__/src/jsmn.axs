@@ -2,6 +2,7 @@ PROGRAM_NAME='jsmn'
 
 #DEFINE __MAIN__
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Jsmn.axi'
 
 
