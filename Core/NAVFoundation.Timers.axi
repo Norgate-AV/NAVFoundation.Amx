@@ -44,7 +44,7 @@ DEFINE_VARIABLE
 volatile integer NAVBlinker = false
 
 
-define_function integer NAVStartGlobalFeedbackTimeline() {
+define_function integer NAVGlobalFeedbackTimelineStart() {
     return NAVTimelineStart(TL_NAV_FEEDBACK,
                             TL_NAV_FEEDBACK_INTERVAL,
                             TIMELINE_ABSOLUTE,
@@ -52,12 +52,22 @@ define_function integer NAVStartGlobalFeedbackTimeline() {
 }
 
 
-define_function integer NAVStopGlobalFeedbackTimeline() {
+define_function integer NAVGlobalFeedbackTimelineStop() {
     return NAVTimelineStop(TL_NAV_FEEDBACK)
 }
 
 
-define_function integer NAVStartGlobalBlinkerTimeline() {
+define_function integer NAVGlobalFeedbackTimelineReset() {
+    return NAVTimelineReset(TL_NAV_FEEDBACK)
+}
+
+
+define_function integer NAVGlobalFeedbackTimelineIsRunning() {
+    return NAVTimelineIsRunning(TL_NAV_FEEDBACK)
+}
+
+
+define_function integer NAVGlobalBlinkerTimelineStart() {
     return NAVTimelineStart(TL_NAV_BLINKER,
                             TL_NAV_BLINKER_INTERVAL,
                             TIMELINE_ABSOLUTE,
@@ -65,8 +75,18 @@ define_function integer NAVStartGlobalBlinkerTimeline() {
 }
 
 
-define_function integer NAVStopGlobalBlinkerTimeline() {
+define_function integer NAVGlobalBlinkerTimelineStop() {
     return NAVTimelineStop(TL_NAV_BLINKER)
+}
+
+
+define_function integer NAVGlobalBlinkerTimelineReset() {
+    return NAVTimelineReset(TL_NAV_BLINKER)
+}
+
+
+define_function integer NAVGlobalBlinkerTimelineIsRunning() {
+    return NAVTimelineIsRunning(TL_NAV_BLINKER)
 }
 
 
