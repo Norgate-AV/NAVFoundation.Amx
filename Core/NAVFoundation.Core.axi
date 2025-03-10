@@ -37,20 +37,6 @@ SOFTWARE.
 #include 'NAVFoundation.Core.h.axi'
 
 
-(***********************************************************)
-(*               VARIABLE DEFINITIONS GO BELOW             *)
-(***********************************************************)
-DEFINE_VARIABLE
-
-// volatile integer NAVBlinker = false
-
-
-(***********************************************************)
-(*        SUBROUTINE/FUNCTION DEFINITIONS GO BELOW         *)
-(***********************************************************)
-(* EXAMPLE: DEFINE_FUNCTION <RETURN_TYPE> <NAME> (<PARAMETERS>) *)
-(* EXAMPLE: DEFINE_CALL '<NAME>' (<PARAMETERS>) *)
-
 /**
  * @function NAVGetTimeStamp
  * @public
@@ -1076,19 +1062,6 @@ define_function char NAVDeviceIsOnline(dev device) {
 }
 
 
-// define_function NAVSendStringTtl(dev device, char buffer[], integer ttl) {
-//     if (ttl == 0) {
-//         send_string device, buffer
-//         return
-//     }
-
-//     wait 10 NAVSendStringTtl(device, buffer, ttl - 1)
-// }
-
-
-(***********************************************************)
-(*                STARTUP CODE GOES BELOW                  *)
-(***********************************************************)
 DEFINE_START {
     #IF_DEFINED __MAIN__
     stack_var _NAVController controller
@@ -1099,16 +1072,10 @@ DEFINE_START {
     NAVLog("__FILE__, ' : ', 'Program Started'")
     NAVLog("'============================================================='")
     #END_IF
-
-    // NAVTimelineStart(TL_NAV_BLINKER, TL_NAV_BLINKER_INTERVAL, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
-    // NAVTimelineStart(TL_NAV_FEEDBACK, TL_NAV_FEEDBACK_INTERVAL, TIMELINE_ABSOLUTE, TIMELINE_REPEAT)
 }
 
 
-(***********************************************************)
-(*                THE EVENTS GO BELOW                      *)
-(***********************************************************)
-DEFINE_EVENT
+// DEFINE_EVENT
 
 // #IF_DEFINED __MAIN__
 // data_event[0:1:0] {
@@ -1121,15 +1088,5 @@ DEFINE_EVENT
 // }
 // #END_IF
 
-
-// timeline_event[TL_NAV_BLINKER] {
-//     NAVBlinker = !NAVBlinker
-// }
-
-
-(***********************************************************)
-(*                     END OF PROGRAM                      *)
-(*        DO NOT PUT ANY CODE BELOW THIS COMMENT           *)
-(***********************************************************)
 
 #END_IF // __NAV_FOUNDATION_CORE__

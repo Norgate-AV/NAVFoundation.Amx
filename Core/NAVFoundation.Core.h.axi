@@ -37,9 +37,6 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
-/////////////////////////////////////////////////////////////
-// General Constants
-/////////////////////////////////////////////////////////////
 constant integer NAV_NULL               = 0
 constant integer NAV_SOH                = 1
 constant integer NAV_STX                = 2
@@ -197,16 +194,6 @@ constant integer NAV_LOG_CHUNK_SIZE             = 100
 
 
 /////////////////////////////////////////////////////////////
-// Timelines
-/////////////////////////////////////////////////////////////
-constant long TL_NAV_BLINKER	                = 255
-constant long TL_NAV_FEEDBACK	                = 256
-
-constant long TL_NAV_BLINKER_INTERVAL[]	    = { 500 }
-constant long TL_NAV_FEEDBACK_INTERVAL[]	= { 200 }
-
-
-/////////////////////////////////////////////////////////////
 // Events
 /////////////////////////////////////////////////////////////
 constant char NAV_EVENT_ONLINE[NAV_MAX_CHARS]       = 'online'
@@ -266,9 +253,6 @@ constant integer NAV_MUTE_STATE_OFF         = 2
 constant integer NAV_MUTE_STATE_UNKNOWN     = 3
 
 
-(***********************************************************)
-(*              DATA TYPE DEFINITIONS GO BELOW             *)
-(***********************************************************)
 DEFINE_TYPE
 
 /**
