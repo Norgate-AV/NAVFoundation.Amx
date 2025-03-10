@@ -1075,18 +1075,4 @@ DEFINE_START {
 }
 
 
-// DEFINE_EVENT
-
-// #IF_DEFINED __MAIN__
-// data_event[0:1:0] {
-//     online: {
-//         NAVLog("'Master Device [', NAVDeviceToString(data.device), '] Online'")
-//     }
-//     offline: {
-//         NAVLog("'Master Device [', NAVDeviceToString(data.device), '] Offline'")
-//     }
-// }
-// #END_IF
-
-
 #END_IF // __NAV_FOUNDATION_CORE__
