@@ -91,7 +91,8 @@ define_function NAVLog(char log[]) {
     buffer = log
 
     if (!length_array(buffer)) {
-        buffer = "NAV_CR"
+        send_string 0:1:0, ' '
+        return
     }
 
     while (length_array(buffer)) {
