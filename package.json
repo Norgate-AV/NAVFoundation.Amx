@@ -35,8 +35,8 @@
         "contrib:check": "all-contributors check"
     },
     "devDependencies": {
-        "@commitlint/cli": "^19.7.1",
-        "@commitlint/config-conventional": "^19.7.1",
+        "@commitlint/cli": "^19.8.0",
+        "@commitlint/config-conventional": "^19.8.0",
         "@norgate-av/dropnode": "^1.0.0",
         "@norgate-av/genlinx": "^2.6.1",
         "@semantic-release/changelog": "^6.0.3",
@@ -44,13 +44,14 @@
         "@semantic-release/git": "^10.0.1",
         "@types/conventional-changelog": "^6.0.0",
         "all-contributors-cli": "^6.26.1",
+        "commitizen": "^4.3.1",
         "conventional-changelog": "^6.0.0",
         "conventional-changelog-conventionalcommits": "^8.0.0",
         "cz-conventional-changelog": "3.3.0",
         "doctoc": "^2.2.1",
         "husky": "^9.1.7",
         "lint-staged": "^15.4.3",
-        "prettier": "^3.5.2",
+        "prettier": "^3.5.3",
         "semantic-release": "^24.2.3"
     }
 }
