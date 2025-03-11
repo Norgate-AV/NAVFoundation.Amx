@@ -26,29 +26,29 @@ DEFINE_CONSTANT
 constant integer SHA256_HASH_SIZE = 32
 
 /**
- * @constant SHA_SUCCESS
+ * @constant SHA256_SUCCESS
  * @description Return code indicating operation completed successfully
  */
-constant integer SHA_SUCCESS = 0
+constant integer SHA256_SUCCESS = 0
 
 /**
- * @constant SHA_STATE_ERROR
+ * @constant SHA256_STATE_ERROR
  * @description Return code indicating an error related to incorrect state
  */
-constant integer SHA_STATE_ERROR = 1
+constant integer SHA256_STATE_ERROR = 1
 
 /**
- * @constant SHA_FAILURE
+ * @constant SHA256_FAILURE
  * @description Return code indicating a general failure
  */
-constant integer SHA_FAILURE = 2
+constant integer SHA256_FAILURE = 2
 
 /**
- * @constant K
+ * @constant SHA256_K
  * @description SHA-256 constants - represent the first 32 bits of the fractional parts
  * of the cube roots of the first 64 primes (2 through 311)
  */
-constant long K[64] = {
+constant long SHA256_K[64] = {
     $428a2f98, $71374491, $b5c0fbcf, $e9b5dba5,
     $3956c25b, $59f111f1, $923f82a4, $ab1c5ed5,
     $d807aa98, $12835b01, $243185be, $550c7dc3,

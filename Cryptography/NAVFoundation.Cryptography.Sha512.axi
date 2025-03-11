@@ -265,7 +265,7 @@ define_function integer NAVSha512Reset(_NAVSha512Context context) {
     NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'Hash[8] = ', NAVInt64ToDebugString(context.IntermediateHash[8])")
     #END_IF
 
-    return SHA_SUCCESS
+    return SHA512_SUCCESS
 }
 
 /**
@@ -359,7 +359,7 @@ define_function integer NAVSha512Result(_NAVSha512Context context, char digest[S
     NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Final digest (first 16 bytes) = ', NAVHexToString(mid_string(digest, 1, 16)), '...'")
     #END_IF
 
-    return SHA_SUCCESS
+    return SHA512_SUCCESS
 }
 
 /**
@@ -380,12 +380,12 @@ define_function integer NAVSha512Input(_NAVSha512Context context, char message[]
     stack_var integer carry
 
     if (!length) {
-        return SHA_SUCCESS
+        return SHA512_SUCCESS
     }
 
     if (context.Computed) {
-        context.Corrupted = SHA_STATE_ERROR
-        return SHA_STATE_ERROR
+        context.Corrupted = SHA512_STATE_ERROR
+        return SHA512_STATE_ERROR
     }
 
     if (context.Corrupted) {
@@ -439,8 +439,8 @@ define_function integer NAVSha512Input(_NAVSha512Context context, char message[]
 
                     // Check for overflow - too long message
                     if (context.LengthHigh.Hi == 0) {
-                        context.Corrupted = SHA_INPUT_TOO_LONG
-                        return SHA_INPUT_TOO_LONG
+                        context.Corrupted = SHA512_INPUT_TOO_LONG
+                        return SHA512_INPUT_TOO_LONG
                     }
                 }
             }
@@ -457,7 +457,7 @@ define_function integer NAVSha512Input(_NAVSha512Context context, char message[]
         length = length - 1  // Use longhand form
     }
 
-    return SHA_SUCCESS
+    return SHA512_SUCCESS
 }
 
 /**
