@@ -4,7 +4,7 @@ PROGRAM_NAME='jsmn'
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Jsmn.axi'
-
+#include 'jsmn.axi'
 
 DEFINE_DEVICE
 
@@ -220,6 +220,7 @@ DEFINE_EVENT
 
 button_event[dvTP, 1] {
     push: {
-        RunTests()
+        set_log_level(NAV_LOG_LEVEL_DEBUG)
+        RunJsmnTests()
     }
 }

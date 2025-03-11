@@ -1,11 +1,7 @@
-PROGRAM_NAME='sha256'
-
-#DEFINE __MAIN__
-#include 'sha256.axi'
-
-DEFINE_DEVICE
-
-dvTP    =   10001:1:0
+#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
+#include 'NAVFoundation.Encoding.axi'
+#include 'NAVFoundation.Cryptography.Sha256.axi'
 
 DEFINE_CONSTANT
 
@@ -23,7 +19,6 @@ constant char TEST[][2048] = {
     'The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.',
     'This is a longer test case to check the SHA-256 implementation. It should handle longer strings correctly and produce the expected hash value.'
 }
-
 
 constant char EXPECTED[][32] = {
     {$e3,$b0,$c4,$42,$98,$fc,$1c,$14,$9a,$fb,$f4,$c8,$99,$6f,$b9,$24,$27,$ae,$41,$e4,$64,$9b,$93,$4c,$a4,$95,$99,$1b,$78,$52,$b8,$55},
@@ -45,8 +40,7 @@ constant char EXPECTED[][32] = {
     {$a3,$99,$48,$a1,$45,$ff,$a2,$04,$1e,$c7,$99,$e1,$91,$4e,$7f,$e2,$2d,$49,$bc,$50,$1e,$c0,$fd,$44,$bf,$43,$70,$57,$dd,$93,$83,$b2}
 }
 
-
-define_function RunTests() {
+define_function RunSha256Tests() {
     stack_var integer x
 
     for (x = 1; x <= length_array(TEST); x++) {
@@ -55,22 +49,12 @@ define_function RunTests() {
         result = NAVSha256GetHash(TEST[x])
 
         if (result != EXPECTED[x]) {
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected: "', NAVHexToString(EXPECTED[x]), '"')
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got     : "', NAVHexToString(result), '"')
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected: "', NAVHexToString(EXPECTED[x]), '"'")
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got     : "', NAVHexToString(result), '"'")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed.'")
             continue
         }
 
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' passed'")
-    }
-}
-
-
-DEFINE_EVENT
-
-button_event[dvTP, 1] {
-    push: {
-        set_log_level(NAV_LOG_LEVEL_DEBUG)
-        RunSha256Tests()
     }
 }
