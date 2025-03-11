@@ -35,9 +35,6 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_ARRAYUTILS_H__
 #DEFINE __NAV_FOUNDATION_ARRAYUTILS_H__ 'NAVFoundation.ArrayUtils.h'
 
-#include 'NAVFoundation.Core.axi'
-
-
 DEFINE_CONSTANT
 
 /**

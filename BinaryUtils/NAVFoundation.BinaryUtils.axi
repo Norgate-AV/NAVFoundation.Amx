@@ -34,7 +34,7 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_BINARYUTILS__
 #DEFINE __NAV_FOUNDATION_BINARYUTILS__ 'NAVFoundation.BinaryUtils'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
 
 
 /**

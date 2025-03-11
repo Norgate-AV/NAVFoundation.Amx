@@ -34,7 +34,9 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_STRINGUTILS__
 #DEFINE __NAV_FOUNDATION_STRINGUTILS__ 'NAVFoundation.StringUtils'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.StringUtils.h.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 // #DEFINE USING_NAV_STRING_GATHER_CALLBACK

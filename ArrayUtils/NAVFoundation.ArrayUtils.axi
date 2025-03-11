@@ -34,10 +34,11 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_ARRAYUTILS__
 #DEFINE __NAV_FOUNDATION_ARRAYUTILS__ 'NAVFoundation.ArrayUtils'
 
-#include 'NAVFoundation.ArrayUtils.h.axi'
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ArrayUtils.h.axi'
 #include 'NAVFoundation.Stack.axi'
 #include 'NAVFoundation.Math.axi'
+#include 'NAVFoundation.StringUtils.axi'
 
 
 /**
@@ -649,10 +650,7 @@ define_function char[NAV_MAX_BUFFER] NAVFormatArrayInteger(integer array[]) {
  * @see NAVFormatArrayInteger
  */
 define_function NAVPrintArrayInteger(integer array[]) {
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_ARRAYUTILS__,
-                                'NAVPrintArrayInteger',
-                                NAVFormatArrayInteger(array))
+    NAVLog(NAVFormatArrayInteger(array))
 }
 
 
@@ -672,10 +670,7 @@ define_function NAVPrintArrayInteger(integer array[]) {
  * @see NAVFormatArrayString
  */
 define_function NAVPrintArrayString(char array[][]) {
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_ARRAYUTILS__,
-                                'NAVPrintArrayString',
-                                NAVFormatArrayString(array))
+    NAVLog(NAVFormatArrayString(array))
 }
 
 

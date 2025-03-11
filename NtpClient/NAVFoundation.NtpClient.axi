@@ -34,7 +34,7 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_NTP_CLIENT__
 #DEFINE __NAV_FOUNDATION_NTP_CLIENT__ 'NAVFoundation.NtpClient'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.DateTimeUtils.axi'
 #include 'NAVFoundation.Encoding.axi'
 

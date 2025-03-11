@@ -35,8 +35,6 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_MODULEBASE_H__ 'NAVFoundation.ModuleBase.h'
 
 #DEFINE NAV_MODULE
-#include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.ArrayUtils.axi'
 
 
 DEFINE_CONSTANT

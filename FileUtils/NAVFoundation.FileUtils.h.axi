@@ -34,9 +34,6 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_FILEUTILS_H__
 #DEFINE __NAV_FOUNDATION_FILEUTILS_H__ 'NAVFoundation.FileUtils.h'
 
-#include 'NAVFoundation.Core.axi'
-
-
 DEFINE_CONSTANT
 
 /**

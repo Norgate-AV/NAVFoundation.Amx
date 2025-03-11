@@ -34,8 +34,9 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_LOGICENGINE__
 #DEFINE __NAV_FOUNDATION_LOGICENGINE__ 'NAVFoundation.LogicEngine'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
 #include 'NAVFoundation.ArrayUtils.axi'
+#include 'NAVFoundation.TimelineUtils.axi'
 
 
 DEFINE_CONSTANT

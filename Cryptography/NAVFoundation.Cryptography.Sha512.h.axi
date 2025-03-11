@@ -87,34 +87,34 @@ constant integer SHA512_HASH_SIZE = 64
 constant integer SHA512_BLOCK_SIZE = 128
 
 /**
- * @constant SHA_SUCCESS
+ * @constant SHA512_SUCCESS
  * @brief Status code indicating successful operation
  */
-constant integer SHA_SUCCESS = 0
+constant integer SHA512_SUCCESS = 0
 
 /**
- * @constant SHA_NULL
+ * @constant SHA512_NULL
  * @brief Error code indicating null pointer parameter
  */
-constant integer SHA_NULL = 1
+constant integer SHA512_NULL = 1
 
 /**
- * @constant SHA_INPUT_TOO_LONG
+ * @constant SHA512_INPUT_TOO_LONG
  * @brief Error code indicating input data too long
  */
-constant integer SHA_INPUT_TOO_LONG = 2
+constant integer SHA512_INPUT_TOO_LONG = 2
 
 /**
- * @constant SHA_STATE_ERROR
+ * @constant SHA512_STATE_ERROR
  * @brief Error code indicating state error (called Input after Result)
  */
-constant integer SHA_STATE_ERROR = 3
+constant integer SHA512_STATE_ERROR = 3
 
 /**
- * @constant SHA_UNKNOWN_ERROR
+ * @constant SHA512_UNKNOWN_ERROR
  * @brief Error code indicating unknown error
  */
-constant integer SHA_UNKNOWN_ERROR = 4
+constant integer SHA512_UNKNOWN_ERROR = 4
 
 /**
  * @constant SHA512_CONST_K_SIZE

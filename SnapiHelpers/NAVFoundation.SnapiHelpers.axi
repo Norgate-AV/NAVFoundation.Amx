@@ -35,6 +35,8 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_SNAPIHELPERS__ 'NAVFoundation.SnapiHelpers'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.SnapiHelpers.h.axi'
+#include 'NAVFoundation.StringUtils.axi'
 
 
 /**
@@ -177,30 +179,25 @@ define_function integer NAVGetVolumeMute(dev device) {
  * @see _NAVSnapiMessage
  * @see NAVSnapiMessageLog
  */
-define_function NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
+define_function integer NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
     stack_var char dataCopy[NAV_MAX_BUFFER]
     stack_var integer count
 
     if (!length_array(data)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_SNAPIHELPERS__,
-                                    'NAVParseSnapiMessage',
-                                    'Invalid argument. The provided argument "data" is an empty string')
-
-        return
+        return 1    // Invald argument
     }
 
     dataCopy = data
 
     if (!NAVContains(dataCopy, '-')) {
         message.Header = dataCopy
-        return
+        return 0
     }
 
     message.Header = NAVStripRight(remove_string(dataCopy, '-', 1), 1)
 
     if (!length_array(dataCopy)) {
-        return
+        return 0
     }
 
     count = 0
@@ -229,6 +226,7 @@ define_function NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
     }
 
     set_length_array(message.Parameter, count)
+    return 0
 }
 
 
@@ -312,29 +310,18 @@ define_function char[255] NAVParseEscapedSnapiMessageParameter(char data[]) {
 define_function NAVSnapiMessageLog(_NAVSnapiMessage message) {
     stack_var integer count
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_SNAPIHELPERS__,
-                                'NAVSnapiMessageLog',
-                                "'Parsed SNAPI Message:'")
+    NAVLog("'Parsed SNAPI Message:'")
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_SNAPIHELPERS__,
-                                'NAVSnapiMessageLog',
-                                "'  Header: ', message.Header")
+    NAVLog("'  Header: ', message.Header")
 
     count = length_array(message.Parameter)
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_SNAPIHELPERS__,
-                                'NAVSnapiMessageLog',
-                                "'  Parameter Count: ', itoa(count)")
+    NAVLog("'  Parameter Count: ', itoa(count)")
+
     if (count) {
         stack_var integer x
 
         for (x = 1; x <= count; x++) {
-            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                        __NAV_FOUNDATION_SNAPIHELPERS__,
-                                        'NAVSnapiMessageLog',
-                                        "'    Parameter ', itoa(x), ': ', message.Parameter[x]")
+            NAVLog("'    Parameter ', itoa(x), ': ', message.Parameter[x]")
         }
     }
 }

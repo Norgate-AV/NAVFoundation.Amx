@@ -34,9 +34,8 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_NTP_CLIENT_BASE__
 #DEFINE __NAV_FOUNDATION_NTP_CLIENT_BASE__ 'NAVFoundation.NtpClientBase'
 
-#include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.DateTimeUtils.axi'
 #include 'NAVFoundation.NtpClient.axi'
+#include 'NAVFoundation.SnapiHelpers.axi'
 
 
 DEFINE_DEVICE

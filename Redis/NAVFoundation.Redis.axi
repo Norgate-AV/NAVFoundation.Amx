@@ -34,6 +34,8 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_REDIS__
 #DEFINE __NAV_FOUNDATION_REDIS__ 'NAVFoundation.Redis'
 
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Redis.h.axi'
 
 

@@ -34,6 +34,7 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_DATETIMEUTILS__
 #DEFINE __NAV_FOUNDATION_DATETIMEUTILS__ 'NAVFoundation.DateTimeUtils'
 
+#include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.DateTimeUtils.h.axi'
 
 /**
@@ -86,71 +87,36 @@ define_function char NAVDateTimeGetTimespec(_NAVTimespec timespec, char date[], 
 
     seconds = time_to_second(time)
     if (seconds < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get seconds from time')
-
         return false
     }
 
     minutes = time_to_minute(time)
     if (minutes < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get minutes from time')
-
         return false
     }
 
     hours = time_to_hour(time)
     if (hours < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get hours from time')
-
         return false
     }
 
     day = date_to_day(date)
     if (day < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get day from date')
-
         return false
     }
 
     month = date_to_month(date)
     if (month < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get month from date')
-
         return false
     }
 
     year = date_to_year(date)
     if (year < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get year from date')
-
         return false
     }
 
     dayOfWeek = day_of_week(date)
     if (dayOfWeek < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get day of week from date')
-
         return false
     }
 
@@ -573,14 +539,14 @@ define_function long NAVDateTimeGetEpoch(_NAVTimespec timespec) {
  * NAVDateTimeTimespecLog('MyFunction', now)
  */
 define_function NAVDateTimeTimespecLog(char sender[], _NAVTimespec timespec) {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Year: ', NAVStringSurround(itoa(timespec.Year), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Month: ', NAVStringSurround(itoa(timespec.Month), '[', ']'), '-', NAVStringSurround(NAVDateTimeGetMonthString(timespec.Month), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Day: ', NAVStringSurround(itoa(timespec.MonthDay), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Day Of Week: ', NAVStringSurround(itoa(timespec.WeekDay), '[', ']'), '-', NAVStringSurround(NAVDateTimeGetDayString(timespec.WeekDay), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Day Of Year: ', NAVStringSurround(itoa(timespec.YearDay), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Hour: ', NAVStringSurround(itoa(timespec.Hour), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Minute: ', NAVStringSurround(itoa(timespec.Minute), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Second: ', NAVStringSurround(itoa(timespec.Seconds), '[', ']')")
+    NAVLog("sender, ' => Year: ', itoa(timespec.Year)")
+    NAVLog("sender, ' => Month: ', itoa(timespec.Month), '-', NAVDateTimeGetMonthString(timespec.Month)")
+    NAVLog("sender, ' => Day: ', itoa(timespec.MonthDay)")
+    NAVLog("sender, ' => Day Of Week: ', itoa(timespec.WeekDay), '-', NAVDateTimeGetDayString(timespec.WeekDay)")
+    NAVLog("sender, ' => Day Of Year: ', itoa(timespec.YearDay)")
+    NAVLog("sender, ' => Hour: ', itoa(timespec.Hour)")
+    NAVLog("sender, ' => Minute: ', itoa(timespec.Minute)")
+    NAVLog("sender, ' => Second: ', itoa(timespec.Seconds)")
 }
 
 
@@ -1072,7 +1038,7 @@ define_function char[2] NAVDateTimeGetAmPm(_NAVTimespec timespec) {
  * @note Requires master control rights
  */
 define_function NAVDateTimeSetClock(char date[], char time[]) {
-    NAVCommand(dvNAVMaster, "'CLOCK ', date, ' ', time")
+    NAVCommand(0:1:0, "'CLOCK ', date, ' ', time")
 }
 
 
@@ -1175,7 +1141,7 @@ define_function long NAVDateTimeGetDifference(_NAVTimespec timespec1, _NAVTimesp
  * NAVDateTimeTimezonePrint()
  */
 define_function NAVDateTimeTimezonePrint() {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timezone => ', clkmgr_get_timezone()")
+    NAVLog("'Timezone => ', clkmgr_get_timezone()")
 }
 
 
@@ -1190,8 +1156,8 @@ define_function NAVDateTimeTimezonePrint() {
  * NAVDateTimeClockSourcePrint()
  */
 define_function NAVDateTimeClockSourcePrint() {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Is Network Sourced => ', itoa(clkmgr_is_network_sourced())")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Clock Resync Period => ', itoa(clkmgr_get_resync_period())")
+    NAVLog("'Is Network Sourced => ', itoa(clkmgr_is_network_sourced())")
+    NAVLog("'Clock Resync Period => ', itoa(clkmgr_get_resync_period())")
 }
 
 
@@ -1212,18 +1178,18 @@ define_function NAVDateTimeDaylightSavingsInfoPrint() {
     result = clkmgr_get_daylightsavings_offset(offset)
 
     if (result < 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Daylight Savings Time Offset => Failed to get daylight savings time offset'")
+        NAVLog("'Daylight Savings Time Offset => Failed to get daylight savings time offset'")
         return
     }
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Daylight Savings Time Offset => Hours :: ', itoa(offset.hours)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Daylight Savings Time Offset => Minutes :: ', itoa(offset.minutes)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Daylight Savings Time Offset => Seconds :: ', itoa(offset.seconds)")
+    NAVLog("'Daylight Savings Time Offset => Hours :: ', itoa(offset.hours)")
+    NAVLog("'Daylight Savings Time Offset => Minutes :: ', itoa(offset.minutes)")
+    NAVLog("'Daylight Savings Time Offset => Seconds :: ', itoa(offset.seconds)")
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Daylight Savings Start Rule => ', clkmgr_get_start_daylightsavings_rule()")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Daylight Savings End Rule => ', clkmgr_get_end_daylightsavings_rule()")
+    NAVLog("'Daylight Savings Start Rule => ', clkmgr_get_start_daylightsavings_rule()")
+    NAVLog("'Daylight Savings End Rule => ', clkmgr_get_end_daylightsavings_rule()")
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Daylight Savings Is On => ', itoa(clkmgr_is_daylightsavings_on())")
+    NAVLog("'Daylight Savings Is On => ', itoa(clkmgr_is_daylightsavings_on())")
 }
 
 
@@ -1244,15 +1210,15 @@ define_function NAVDateTimeActiveTimeServerPrint() {
     result = clkmgr_get_active_timeserver(server)
 
     if (result < 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Active Time Server => Failed to get active time server'")
+        NAVLog("'Active Time Server => Failed to get active time server'")
         return
     }
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Active Time Server => Is Selected :: ', itoa(server.is_selected)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Active Time Server => Is User Defined :: ', itoa(server.is_user_defined)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Active Time Server => IP Address :: ', server.ip_address_string")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Active Time Server => URL :: ', server.url_string")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Active Time Server => Location :: ', server.location_string")
+    NAVLog("'Active Time Server => Is Selected :: ', itoa(server.is_selected)")
+    NAVLog("'Active Time Server => Is User Defined :: ', itoa(server.is_user_defined)")
+    NAVLog("'Active Time Server => IP Address :: ', server.ip_address_string")
+    NAVLog("'Active Time Server => URL :: ', server.url_string")
+    NAVLog("'Active Time Server => Location :: ', server.location_string")
 }
 
 
@@ -1275,19 +1241,19 @@ define_function NAVDateTimeTimeServersPrint() {
     result = clkmgr_get_timeservers(servers)
 
     if (result < 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Time Server => Failed to get time servers'")
+        NAVLog("'Time Server => Failed to get time servers'")
         return
     }
 
     count = type_cast(result)
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Time Server => Count :: ', itoa(count)")
+    NAVLog("'Time Server => Count :: ', itoa(count)")
 
     for (x = 1; x <= count; x++) {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Time Server => Is Selected :: ', itoa(servers[x].is_selected)")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Time Server => Is User Defined :: ', itoa(servers[x].is_user_defined)")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Time Server => IP Address :: ', servers[x].ip_address_string")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Time Server => URL :: ', servers[x].url_string")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Time Server => Location :: ', servers[x].location_string")
+        NAVLog("'Time Server => Is Selected :: ', itoa(servers[x].is_selected)")
+        NAVLog("'Time Server => Is User Defined :: ', itoa(servers[x].is_user_defined)")
+        NAVLog("'Time Server => IP Address :: ', servers[x].ip_address_string")
+        NAVLog("'Time Server => URL :: ', servers[x].url_string")
+        NAVLog("'Time Server => Location :: ', servers[x].location_string")
     }
 }
 
@@ -1303,20 +1269,20 @@ define_function NAVDateTimeTimeServersPrint() {
  * NAVDateTimeTimestampsPrint()
  */
 define_function NAVDateTimeTimestampsPrint() {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp UTC => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_UTC)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp Atom => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_ATOM)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp Cookie => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_COOKIE)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp ISO8601 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_ISO8601)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC822 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC822)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC850 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC850)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC1036 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC1036)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC1123 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC1123)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC7231 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC7231)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC2822 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC2822)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC3339 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC3339)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC3339EXT => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC3339EXT)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RSS => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RSS)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp W3C => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_W3C)")
+    NAVLog("'Timestamp UTC => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_UTC)")
+    NAVLog("'Timestamp Atom => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_ATOM)")
+    NAVLog("'Timestamp Cookie => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_COOKIE)")
+    NAVLog("'Timestamp ISO8601 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_ISO8601)")
+    NAVLog("'Timestamp RFC822 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC822)")
+    NAVLog("'Timestamp RFC850 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC850)")
+    NAVLog("'Timestamp RFC1036 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC1036)")
+    NAVLog("'Timestamp RFC1123 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC1123)")
+    NAVLog("'Timestamp RFC7231 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC7231)")
+    NAVLog("'Timestamp RFC2822 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC2822)")
+    NAVLog("'Timestamp RFC3339 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC3339)")
+    NAVLog("'Timestamp RFC3339EXT => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC3339EXT)")
+    NAVLog("'Timestamp RSS => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RSS)")
+    NAVLog("'Timestamp W3C => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_W3C)")
 }
 
 

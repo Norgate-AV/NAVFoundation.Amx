@@ -43,7 +43,9 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_REGEX__ 'NAVFoundation.Regex'
 
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Regex.h.axi'
 
 

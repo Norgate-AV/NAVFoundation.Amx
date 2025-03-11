@@ -34,8 +34,9 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_HASHTABLE__
 #DEFINE __NAV_FOUNDATION_HASHTABLE__ 'NAVFoundation.HashTable'
 
+#include 'NAVFoundation.Core.h.axi'
 #include 'NAVFoundation.HashTable.h.axi'
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 define_function integer NAVHashTableGetKeyHash(char key[]) {

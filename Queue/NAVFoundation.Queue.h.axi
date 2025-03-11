@@ -34,9 +34,6 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_QUEUE_H__
 #DEFINE __NAV_FOUNDATION_QUEUE_H__ 'NAVFoundation.Queue.h'
 
-#include 'NAVFoundation.Core.axi'
-
-
 (***********************************************************)
 (*               CONSTANT DEFINITIONS GO BELOW             *)
 (***********************************************************)

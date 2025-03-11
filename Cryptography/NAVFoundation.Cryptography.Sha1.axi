@@ -51,6 +51,7 @@ SOFTWARE.
 #include 'NAVFoundation.Cryptography.Sha1.h.axi'
 #include 'NAVFoundation.BinaryUtils.axi'
 #include 'NAVFoundation.Encoding.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 /**
@@ -130,7 +131,7 @@ define_function integer NAVSha1Reset(_NAVSha1Context context) {
 
     context.MessageBlock = ""
 
-    return SHA_SUCCESS
+    return SHA1_SUCCESS
 }
 
 
@@ -172,7 +173,7 @@ define_function integer NAVSha1Result(_NAVSha1Context context, char digest[SHA1_
         NAVLongToByteArrayBE(context.IntermediateHash[5])
     "
 
-    return SHA_SUCCESS
+    return SHA1_SUCCESS
 }
 
 
@@ -193,12 +194,12 @@ define_function integer NAVSha1Input(_NAVSha1Context context, char message[], in
     stack_var integer messageIndex
 
     if (!length) {
-        return SHA_SUCCESS
+        return SHA1_SUCCESS
     }
 
     if (context.Computed) {
-        context.Corrupted = SHA_STATE_ERROR
-        return SHA_STATE_ERROR
+        context.Corrupted = SHA1_STATE_ERROR
+        return SHA1_STATE_ERROR
     }
 
     if (context.Corrupted) {
@@ -230,7 +231,7 @@ define_function integer NAVSha1Input(_NAVSha1Context context, char message[], in
         length--
     }
 
-    return SHA_SUCCESS
+    return SHA1_SUCCESS
 }
 
 
@@ -278,7 +279,7 @@ define_function NAVSha1ProcessMessageBlock(_NAVSha1Context context) {
     e = context.IntermediateHash[5]
 
     for (i = 0; i < 20; i++) {
-        temp = NAVBitRotateLeft(a, 5) + ((b & c) | (~b & d)) + e + w[(i + 1)] + K[(0) + 1]
+        temp = NAVBitRotateLeft(a, 5) + ((b & c) | (~b & d)) + e + w[(i + 1)] + SHA1_K[(0) + 1]
 
         e = d
         d = c
@@ -289,7 +290,7 @@ define_function NAVSha1ProcessMessageBlock(_NAVSha1Context context) {
     }
 
     for (i = 20; i < 40; i++) {
-        temp = NAVBitRotateLeft(a, 5) + (b ^ c ^ d) + e + w[(i + 1)] + K[(1) + 1]
+        temp = NAVBitRotateLeft(a, 5) + (b ^ c ^ d) + e + w[(i + 1)] + SHA1_K[(1) + 1]
 
         e = d
         d = c
@@ -300,7 +301,7 @@ define_function NAVSha1ProcessMessageBlock(_NAVSha1Context context) {
     }
 
     for (i = 40; i < 60; i++) {
-        temp = NAVBitRotateLeft(a, 5) + ((b & c) | (b & d) | (c & d)) + e + w[(i + 1)] + K[(2) + 1]
+        temp = NAVBitRotateLeft(a, 5) + ((b & c) | (b & d) | (c & d)) + e + w[(i + 1)] + SHA1_K[(2) + 1]
 
         e = d
         d = c
@@ -311,7 +312,7 @@ define_function NAVSha1ProcessMessageBlock(_NAVSha1Context context) {
     }
 
     for (i = 60; i < 80; i++) {
-        temp = NAVBitRotateLeft(a, 5) + (b ^ c ^ d) + e + w[(i + 1)] + K[(3) + 1]
+        temp = NAVBitRotateLeft(a, 5) + (b ^ c ^ d) + e + w[(i + 1)] + SHA1_K[(3) + 1]
 
         e = d
         d = c

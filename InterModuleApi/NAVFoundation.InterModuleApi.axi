@@ -32,9 +32,10 @@ SOFTWARE.
 */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_INTERMODULE_API__
-#DEFINE __NAV_FOUNDATION_INTERMODULE_API__ 'NAVFoundation.InterModuleApi.h'
+#DEFINE __NAV_FOUNDATION_INTERMODULE_API__ 'NAVFoundation.InterModuleApi'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.StringUtils.axi'
 
 
 DEFINE_CONSTANT

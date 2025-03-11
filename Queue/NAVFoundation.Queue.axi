@@ -34,6 +34,8 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_QUEUE__
 #DEFINE __NAV_FOUNDATION_QUEUE__ 'NAVFoundation.Queue'
 
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Queue.h.axi'
 
 

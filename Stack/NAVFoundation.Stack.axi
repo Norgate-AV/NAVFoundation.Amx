@@ -34,8 +34,9 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_STACK__
 #DEFINE __NAV_FOUNDATION_STACK__ 'NAVFoundation.Stack'
 
+#include 'NAVFoundation.Core.h.axi'
 #include 'NAVFoundation.Stack.h.axi'
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 define_function NAVStackInitString(_NAVStackString stack, integer capacity) {

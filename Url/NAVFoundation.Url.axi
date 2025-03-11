@@ -44,7 +44,9 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_URL__
 #DEFINE __NAV_FOUNDATION_URL__ 'NAVFoundation.Url'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Url.h.axi'
 
 

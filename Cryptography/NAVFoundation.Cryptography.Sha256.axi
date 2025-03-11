@@ -50,6 +50,8 @@ SOFTWARE.
 #include 'NAVFoundation.Cryptography.Sha256.h.axi'
 #include 'NAVFoundation.BinaryUtils.axi'
 #include 'NAVFoundation.Encoding.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
+
 
 /**
  * @function NAVSha256GetHash
@@ -127,7 +129,7 @@ define_function integer NAVSha256Reset(_NAVSha256Context context) {
 
     context.MessageBlock = ""
 
-    return SHA_SUCCESS
+    return SHA256_SUCCESS
 }
 
 /**
@@ -168,7 +170,7 @@ define_function integer NAVSha256Result(_NAVSha256Context context, char digest[S
         NAVLongToByteArrayBE(context.IntermediateHash[8])
     "
 
-    return SHA_SUCCESS
+    return SHA256_SUCCESS
 }
 
 /**
@@ -188,12 +190,12 @@ define_function integer NAVSha256Input(_NAVSha256Context context, char message[]
     stack_var long oldLengthLow
 
     if (!length) {
-        return SHA_SUCCESS
+        return SHA256_SUCCESS
     }
 
     if (context.Computed) {
-        context.Corrupted = SHA_STATE_ERROR
-        return SHA_STATE_ERROR
+        context.Corrupted = SHA256_STATE_ERROR
+        return SHA256_STATE_ERROR
     }
 
     if (context.Corrupted) {
@@ -214,7 +216,7 @@ define_function integer NAVSha256Input(_NAVSha256Context context, char message[]
             context.LengthHigh++
             if (context.LengthHigh == 0) {
                 // Message is too long
-                context.Corrupted = SHA_FAILURE
+                context.Corrupted = SHA256_FAILURE
             }
         }
 
@@ -227,7 +229,7 @@ define_function integer NAVSha256Input(_NAVSha256Context context, char message[]
         length--
     }
 
-    return SHA_SUCCESS
+    return SHA256_SUCCESS
 }
 
 /**
@@ -366,7 +368,7 @@ define_function NAVSha256ProcessMessageBlock(_NAVSha256Context context) {
     // Computation loop (64 rounds)
     for (t = 0; t < 64; t++) {
         // Updated to use the new naming convention
-        temp1 = h + NAVSha256SIGMA1(e) + NAVSha256Ch(e, f, g) + K[(t + 1)] + w[(t + 1)]
+        temp1 = h + NAVSha256SIGMA1(e) + NAVSha256Ch(e, f, g) + SHA256_K[(t + 1)] + w[(t + 1)]
         temp2 = NAVSha256SIGMA0(a) + NAVSha256Maj(a, b, c)
 
         h = g

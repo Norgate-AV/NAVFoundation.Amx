@@ -34,8 +34,10 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__
 #DEFINE __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__ 'NAVFoundation.DevicePriorityQueue'
 
-#include 'NAVFoundation.DevicePriorityQueue.h.axi'
+#include 'NAVFoundation.Core.h.axi'
 #include 'NAVFoundation.Queue.axi'
+#include 'NAVFoundation.TimelineUtils.axi'
+#include 'NAVFoundation.DevicePriorityQueue.h.axi'
 
 
 // #DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK

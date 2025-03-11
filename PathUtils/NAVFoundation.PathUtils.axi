@@ -43,7 +43,9 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_PATHUTILS__
 #DEFINE __NAV_FOUNDATION_PATHUTILS__ 'NAVFoundation.PathUtils'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
+#include 'NAVFoundation.StringUtils.axi'
 
 
 DEFINE_CONSTANT
@@ -1007,11 +1009,6 @@ define_function char[NAV_MAX_BUFFER] NAVPathGetCwd() {
     result = file_getdir(cwd)
 
     if (result < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_PATHUTILS__,
-                                    'NAVPathGetCwd',
-                                    "'Failed to get the current working directory : ', NAVGetFileError(result)")
-
         return ''
     }
 
@@ -1040,18 +1037,7 @@ define_function char[NAV_MAX_BUFFER] NAVPathGetCwd() {
  * @see NAVPathGetCwd
  */
 define_function slong NAVPathSetCwd(char path[]) {
-    stack_var slong result
-
-    result = file_setdir(path)
-
-    if (result < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_PATHUTILS__,
-                                    'NAVPathSetCwd',
-                                    "'Failed to set the current working directory : ', NAVGetFileError(result)")
-    }
-
-    return result
+    return file_setdir(path)
 }
 
 

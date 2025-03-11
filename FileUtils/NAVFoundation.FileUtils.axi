@@ -34,7 +34,10 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_FILEUTILS__
 #DEFINE __NAV_FOUNDATION_FILEUTILS__ 'NAVFoundation.FileUtils'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.FileUtils.h.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
+#include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.PathUtils.axi'
 
 

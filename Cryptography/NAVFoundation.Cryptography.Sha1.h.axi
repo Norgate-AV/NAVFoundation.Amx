@@ -52,13 +52,13 @@ SOFTWARE.
 DEFINE_CONSTANT
 
 /**
- * @constant K
+ * @constant SHA1_K
  * @description Constants defined in SHA-1 algorithm for each round.
  *
  * These values are used in the SHA-1 hash calculation process during the
  * four rounds (20 steps each) of processing.
  */
-constant long K[] = {
+constant long SHA1_K[] = {
     $5a827999,  // Round 1: 0-19 steps
     $6ed9eba1,  // Round 2: 20-39 steps
     $8f1bbcdc,  // Round 3: 40-59 steps
@@ -66,28 +66,28 @@ constant long K[] = {
 }
 
 /**
- * @constant SHA_SUCCESS
+ * @constant SHA1_SUCCESS
  * @description Hash operation successful
  */
-constant integer SHA_SUCCESS            = 0
+constant integer SHA1_SUCCESS            = 0
 
 /**
- * @constant SHA_NULL
+ * @constant SHA1_NULL
  * @description Null pointer parameter
  */
-constant integer SHA_NULL               = 1
+constant integer SHA1_NULL               = 1
 
 /**
- * @constant SHA_INPUT_TOO_LONG
+ * @constant SHA1_INPUT_TOO_LONG
  * @description Input data too long
  */
-constant integer SHA_INPUT_TOO_LONG     = 2
+constant integer SHA1_INPUT_TOO_LONG     = 2
 
 /**
- * @constant SHA_STATE_ERROR
+ * @constant SHA1_STATE_ERROR
  * @description Called Input after Result
  */
-constant integer SHA_STATE_ERROR        = 3
+constant integer SHA1_STATE_ERROR        = 3
 
 /**
  * @constant SHA1_HASH_SIZE
