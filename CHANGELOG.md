@@ -1,5 +1,38 @@
 # Changelog
 
+## [2.0.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.35.0...v2.0.0) (2025-03-11)
+
+### ⚠ BREAKING CHANGES
+
+- **cryptography:** Any usages of the MD5 function will now output a raw 16 byte digest as per the RFC
+  spec. If you need the 32 byte string representation of the digest the output of the MD5 function
+  will now need to converted manually. The Encoding library provides such a function, called
+  NAVHexToString that can be used.
+- This update will inevitably causes some breakage but will make things more modular,
+  maintainable and efficient moving forward. Programs using Core alone may now be missing various
+  includes like StringUtils, TimelineUtils, ErrorLogUtils, etc. As these are not included
+  automatically by Core anymore, these will need to be included manually where required. As Core has
+  also now been split into header and implementation files, if you just need to use the constants or
+  types it provides, you can simply include just the header file now.
+- The automatic creation of the TL_NAV_FEEDBACK and
+  TL_NAV_BLINKER timelines has been removed from DEFINE_START in Core. The
+  creation of these timelines have been moved into some helper functions
+  in the NAVFoundation.Timers.axi file. If you need to run these timelines
+  you will need to start them manually using
+  NAVGlobalFeedbackTimelineStart, or NAVGlobalBlinkerTimelineStart. A call
+  to these functions can be placed in DEFINE_START in your program. The
+  Timers.axi also provides helper functions for stopping, pausing and
+  resetting these timelines.
+
+### 🌟 Features
+
+- split apart the Core library to remove circular dependencies and reduce overall size ([d745f51](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/d745f519fdc07354d9797a84e729c585273996c8))
+
+### 🐛 Bug Fixes
+
+- **stopewatch:** fix missing underscore in include guard directive ([02dc0aa](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/02dc0aaf14501f07a59405852b615c75bf378b5b))
+- **cryptography:** output raw 16 byte char array for MD5 ([191ead0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/191ead07466bc12a3ce876fe27998fe8550b904f))
+
 ## [1.35.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.34.0...v1.35.0) (2025-03-08)
 
 ### 🌟 Features
