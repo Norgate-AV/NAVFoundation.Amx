@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `NAVFoundation.Cryptography.Md5` module provides an implementation of the MD5 message-digest algorithm for NetLinx. MD5 is a widely-used cryptographic hash function that produces a 128-bit (16-byte) hash value, typically expressed as a 32-character hexadecimal number.
+The `NAVFoundation.Cryptography.Md5` module provides an implementation of the MD5 message-digest algorithm for NetLinx. MD5 is a widely-used cryptographic hash function that produces a 128-bit (16-byte) hash value.
 
 This implementation is based on [RFC 1321](https://www.rfc-editor.org/rfc/rfc1321).
 
@@ -20,28 +20,29 @@ Include the following files in your NetLinx project:
 
 ## API Reference
 
-### NAVMd5GetHash
+### `NAVMd5GetHash`
 
 ```netlinx
-define_function char[32] NAVMd5GetHash(char value[])
+define_function char[16] NAVMd5GetHash(char value[])
 ```
 
 **Description:**  
-Computes the MD5 hash of a string and returns the result as a 32-character hexadecimal string.
+Computes the MD5 hash of a string and returns the result as a 16-byte raw array.
 
 **Parameters:**
 
 - `value[]` - The input string to be hashed
 
 **Returns:**  
-A 32-character hexadecimal string representing the MD5 hash value.
+A 16-byte raw array representing the MD5 hash value.
 
 **Example:**
 
 ```netlinx
-stack_var char result[32]
+stack_var char result[16]
 result = NAVMd5GetHash('Hello, World!')
-// result will be '65a8e27d8879283831b664bd8b7f0ad4'
+// result will be a 16-byte array representing the MD5 hashash
+// Example: "$65, $a8, $e2, $7d, $88, $79, $28, $38, $31, $b6, $64, $bd, $8b, $7f, $0a, $d4"
 ```
 
 ### Internal Functions
@@ -61,27 +62,42 @@ These functions are not intended for direct use. Instead, use the main `NAVMd5Ge
 ### Basic Usage
 
 ```netlinx
-DEFINE_PROGRAM
+// Include the MD5 library
+#include 'NAVFoundation.Cryptography.Md5.axi'
+#include 'NAVFoundation.Encoding.axi'  // For hex conversion
 
-define_function fnTestMd5()
-{
+// Example function
+define_function ComputeMd5Example() {
     stack_var char message[100]
+    stack_var char digest[16]
     stack_var char hash[32]
 
     // Simple string hash
     message = 'Hello, World!'
-    hash = NAVMd5GetHash(message)
+
+    // Compute MD5 hash (returns binary format)
+    digest = NAVMd5GetHash(message)
+
+    // Check for errors
+    if (!length_array(digest)) {
+        send_string 0, "'Error: Hash computation failed'"
+        return
+    }
+
+    // Convert to hexadecimal string for display/use
+    hash = NAVHexToString(digest)
+
+    // Output the result
+    // Should be: 65a8e27d8879283831b664bd8b7f0ad4
     send_string 0, "'MD5(Hello, World!) = ', hash"
 
     // Empty string hash
     message = ''
-    hash = NAVMd5GetHash(message)
-    send_string 0, "'MD5(empty string) = ', hash"
-}
+    digest = NAVMd5GetHash(message)
+    hash = NAVHexToString(digest)
 
-DEFINE_START
-{
-    fnTestMd5()
+    // Should be: d41d8cd98f00b204e9800998ecf8427e
+    send_string 0, "'MD5(empty string) = ', hash"
 }
 ```
 
@@ -95,100 +111,119 @@ MD5(empty string) = d41d8cd98f00b204e9800998ecf8427e
 ### Password Verification Example
 
 ```netlinx
+// Include required libraries
+#include 'NAVFoundation.Cryptography.Md5.axi'
+#include 'NAVFoundation.Encoding.axi'
+
 DEFINE_DEVICE
 dvTP = 10001:1:0  // Touch panel
 
 DEFINE_VARIABLE
-char stored_password_hash[32] = 'e10adc3949ba59abbe56e057f20f883e'  // MD5 hash for '123456'
+// Store password hash in hex format for readability in code
+char stored_password_hex[32] = 'e10adc3949ba59abbe56e057f20f883e'  // MD5 hash for '123456'
+char stored_password_digest[16]
 
-DEFINE_PROGRAM
-
-// Check if password matches the stored hash
-define_function char IsPasswordValid(char entered_password[])
-{
-    stack_var char hash[32]
-
-    hash = NAVMd5GetHash(entered_password)
-
-    return (hash == stored_password_hash)
+// Initialize the stored password digest from hex
+define_function InitializePasswordSystem() {
+    // Convert hex string to binary digest for comparison
+    stored_password_digest = NAVHexStringToByteArray(stored_password_hex)
 }
 
-DEFINE_EVENT
+// Check if password matches the stored hash
+define_function char IsPasswordValid(char entered_password[]) {
+    stack_var char digest[16]
 
-// Example button press event to verify password
-button_event[dvTP, 1]
-{
-    push:
-    {
-        stack_var char password[50]
+    // Calculate hash of entered password
+    digest = NAVMd5GetHash(entered_password)
 
-        // Assume password is retrieved from a text input field
-        password = [dvTP, 1]  // Pseudo-code for getting text from a text field
-
-        if (IsPasswordValid(password))
-        {
-            send_command dvTP, 'SHOW-POPUP "AccessGranted"'
-        }
-        else
-        {
-            send_command dvTP, 'SHOW-POPUP "AccessDenied"'
-        }
+    // Check for errors
+    if (!length_array(digest)) {
+        send_string 0, "'Error: Hash computation failed'"
+        return false
     }
+
+    // Compare with stored hash
+    return (digest == stored_password_digest)
 }
 ```
 
-### File Checksum Validation
+<!-- ### File Checksum Validation
 
 ```netlinx
+// Include required libraries
+#include 'NAVFoundation.Cryptography.Md5.axi'
+#include 'NAVFoundation.Encoding.axi'
+#include 'NAVFoundation.FileUtils.axi'  // For file operations
+
 DEFINE_DEVICE
 dvDevice = 5001:1:0  // Device that can send file data
 
 DEFINE_VARIABLE
-char expected_file_hash[32] = '8b7588b30498654be2626aac62ef37a5'  // Example hash
+// Expected hash in hex format for readability
+char expected_file_hash_hex[32] = '8b7588b30498654be2626aac62ef37a5'  // Example hash
+char expected_file_digest[16]
 char received_file_buffer[10000]
-integer file_buffer_pos = 1
+
+// Initialize the checksum validation system
+define_function InitializeChecksumSystem() {
+    // Convert hex string to binary digest for comparison
+    expected_file_digest = NAVHexStringToByteArray(expected_file_hash_hex)
+
+    // Clear the buffer
+    clear_buffer received_file_buffer
+}
 
 DEFINE_EVENT
 
+// System initialization
+define_start {
+    InitializeChecksumSystem()
+}
+
 // Example event handler for receiving file data
-data_event[dvDevice]
-{
-    online:
-    {
-        file_buffer_pos = 1
+data_event[dvDevice] {
+    online: {
         clear_buffer received_file_buffer
     }
 
-    string:
-    {
+    string: {
         // Accumulate received data into buffer
         received_file_buffer = "received_file_buffer, data.text"
 
         // Check if we received complete file (this is just an example)
-        if (find_string(received_file_buffer, 'EOF', 1))
-        {
+        if (find_string(received_file_buffer, 'EOF', 1)) {
             stack_var char file_content[10000]
-            stack_var char file_hash[32]
+            stack_var char digest[16]
+            stack_var char actual_hash[32]
 
             // Extract file content without EOF marker
             file_content = remove_string(received_file_buffer, 'EOF', 1)
 
             // Calculate hash of received file
-            file_hash = NAVMd5GetHash(file_content)
+            digest = NAVMd5GetHash(file_content)
+
+            // Check for errors
+            if (!length_array(digest)) {
+                send_string 0, "'Error: Hash computation failed'"
+                return
+            }
+
+            // Convert digest to hex for display
+            actual_hash = NAVByteArrayToHexString(digest)
 
             // Validate file integrity
-            if (file_hash == expected_file_hash)
-            {
-                send_string 0, 'File integrity check passed!'
+            if (digest == expected_file_digest) {
+                send_string 0, "'File integrity check passed!'"
             }
-            else
-            {
-                send_string 0, "'File integrity check failed! Expected: ', expected_file_hash, ' Got: ', file_hash"
+            else {
+                send_string 0, "'File integrity check failed!'"
+                send_string 0, "'Expected: ', expected_file_hash_hex"
+                send_string 0, "'Actual  : ', actual_hash"
             }
         }
     }
 }
-```
+``` -->
 
 ## Performance Considerations
 
