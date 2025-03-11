@@ -45,7 +45,7 @@ define_function TestNAVPathExtName(char paths[][]) {
 
         result = NAVPathExtName(paths[x])
 
-        if (!NAVAssertStringEqual('Path Extension Name Test', expected, result)) {
+        if (!NAVAssertStringEqual(expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }
