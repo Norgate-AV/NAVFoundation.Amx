@@ -52,36 +52,36 @@ SOFTWARE.
 DEFINE_CONSTANT
 
 /**
- * @constant S11-S44
+ * @constant MD5_S11-S44
  * @description Shift constants for MD5Transform routine.
  * These values define the per-round shift amounts used in the MD5 algorithm.
  */
-constant long S11 = 7
-constant long S12 = 12
-constant long S13 = 17
-constant long S14 = 22
+constant long MD5_S11 = 7
+constant long MD5_S12 = 12
+constant long MD5_S13 = 17
+constant long MD5_S14 = 22
 
-constant long S21 = 5
-constant long S22 = 9
-constant long S23 = 14
-constant long S24 = 20
+constant long MD5_S21 = 5
+constant long MD5_S22 = 9
+constant long MD5_S23 = 14
+constant long MD5_S24 = 20
 
-constant long S31 = 4
-constant long S32 = 11
-constant long S33 = 16
-constant long S34 = 23
+constant long MD5_S31 = 4
+constant long MD5_S32 = 11
+constant long MD5_S33 = 16
+constant long MD5_S34 = 23
 
-constant long S41 = 6
-constant long S42 = 10
-constant long S43 = 15
-constant long S44 = 21
+constant long MD5_S41 = 6
+constant long MD5_S42 = 10
+constant long MD5_S43 = 15
+constant long MD5_S44 = 21
 
 /**
- * @constant S
+ * @constant MD5_S
  * @description Combined shift amounts array for all rounds.
  * This provides indexed access to shift values for the algorithm.
  */
-constant long S[64] = {
+constant long MD5_S[64] = {
     07, 12, 17, 22, 07, 12, 17, 22, 07, 12, 17, 22, 07, 12, 17, 22,
     05, 09, 14, 20, 05, 09, 14, 20, 05, 09, 14, 20, 05, 09, 14, 20,
     04, 11, 16, 23, 04, 11, 16, 23, 04, 11, 16, 23, 04, 11, 16, 23,
@@ -89,11 +89,11 @@ constant long S[64] = {
 }
 
 /**
- * @constant K
+ * @constant MD5_K
  * @description Precomputed constants used in each round of the MD5 algorithm.
  * These are derived from the sine function and provide non-linearity.
  */
-constant long K[64] = {
+constant long MD5_K[64] = {
     $d76aa478, $e8c7b756, $242070db, $c1bdceee,
     $f57c0faf, $4787c62a, $a8304613, $fd469501,
     $698098d8, $8b44f7af, $ffff5bb1, $895cd7be,
@@ -116,11 +116,11 @@ constant long K[64] = {
 }
 
 /**
- * @constant PADDING
+ * @constant MD5_PADDING
  * @description Standard padding bytes used to extend messages to the required length.
  * The first byte is 0x80, followed by zeros, as per MD5 specification.
  */
-constant char PADDING[64] = {
+constant char MD5_PADDING[64] = {
     $80, $00, $00, $00, $00, $00, $00, $00,
     $00, $00, $00, $00, $00, $00, $00, $00,
 
