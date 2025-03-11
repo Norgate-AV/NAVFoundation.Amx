@@ -4,9 +4,7 @@
 #DEFINE TESTING_NAVPBKDF2GETRANDOMSALT
 #DEFINE TESTING_NAVPBKDF2BENCHMARKS  // Uncomment to run benchmarks (takes longer)
 // #DEFINE NAV_KDF_PRODUCTION_BENCHMARKS
-
 #include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Cryptography.Pbkdf2.axi'
 
 // Include shared utilities for all PBKDF2 tests

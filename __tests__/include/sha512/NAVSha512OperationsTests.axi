@@ -372,27 +372,27 @@ define_function integer TestMultiBlockProcessing() {
 
     // Initialize the context
     status = NAVSha512Reset(context)
-    if (status != SHA_SUCCESS) {
+    if (status != SHA512_SUCCESS) {
         NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Multi-block test: Failed to reset context (', itoa(status), ')'")
         return 0
     }
 
     // Process the input in chunks to stress multi-block handling
     status = NAVSha512Input(context, mid_string(input, 1, 75), 75)
-    if (status != SHA_SUCCESS) {
+    if (status != SHA512_SUCCESS) {
         NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Multi-block test: Failed on first input chunk (', itoa(status), ')'")
         return 0
     }
 
     status = NAVSha512Input(context, mid_string(input, 76, 75), 75)
-    if (status != SHA_SUCCESS) {
+    if (status != SHA512_SUCCESS) {
         NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Multi-block test: Failed on second input chunk (', itoa(status), ')'")
         return 0
     }
 
     // Get the result
     status = NAVSha512Result(context, result)
-    if (status != SHA_SUCCESS) {
+    if (status != SHA512_SUCCESS) {
         NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Multi-block test: Failed to get result (', itoa(status), ')'")
         return 0
     }

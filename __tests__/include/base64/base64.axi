@@ -5,7 +5,7 @@
 DEFINE_CONSTANT
 
 // Standard test cases with input text and expected Base64 output
-constant char TEST_LABEL[][128] = {
+constant char BASE64_TEST_LABEL[][128] = {
     'Empty string',
     'Single character',
     'Three characters',
@@ -18,7 +18,7 @@ constant char TEST_LABEL[][128] = {
     'Binary data with high-ASCII'
 }
 
-constant char TEST[][2048] = {
+constant char BASE64_TEST[][2048] = {
     '',
     'a',
     'abc',
@@ -32,7 +32,7 @@ constant char TEST[][2048] = {
     {$7F, $80, $81, $90, $A0, $B0, $C0, $D0, $E0}
 }
 
-constant char EXPECTED[][2048] = {
+constant char BASE64_EXPECTED[][2048] = {
     '',
     'YQ==',
     'YWJj',
@@ -47,14 +47,14 @@ constant char EXPECTED[][2048] = {
 }
 
 // Whitespace test cases
-constant char WHITESPACE_LABEL[][128] = {
+constant char BASE64_WHITESPACE_LABEL[][128] = {
     'Base64 with spaces',
     'Base64 with line breaks (LF)',
     'Base64 with CRLF line breaks'
 }
 
 // Add additional test cases for whitespace handling and error cases
-constant char WHITESPACE_TESTS[][2048] = {
+constant char BASE64_WHITESPACE_TESTS[][2048] = {
     'VGhl IHF1aWNr IGJyb3du IGZveCBq dW1w cyBvdmVy IHRoZSBsYXp5 IGRvZy4=',   // Spaces
 
     // Base64 with LF line breaks - properly placing LFs at positions that maintain the Base64 encoding
@@ -79,23 +79,23 @@ constant char WHITESPACE_TESTS[][2048] = {
 }
 
 // Invalid input test cases
-constant char INVALID_LABEL[][128] = {
+constant char BASE64_INVALID_LABEL[][128] = {
     'Base64 with invalid character',
     'Base64 with misplaced padding'
 }
 
-constant char INVALID_TESTS[][2048] = {
+constant char BASE64_INVALID_TESTS[][2048] = {
     'VGhlIHF1aWNrIGJyb3duI*GZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZy4=',  // Invalid char
     'VGhlIHF1aWNrIGJyb3=duIGZveCBqdW1wcyBvdmVyIHRoZSBsYXp5IGRvZy4='   // Misplaced padding
 }
 
-define_function PrintTestHeader(char header[]) {
+define_function Base64PrintTestHeader(char header[]) {
     NAVErrorLog(NAV_LOG_LEVEL_INFO,
                 "'---------------- ', header, ' ----------------'")
 }
 
 // Add a display function to help with debugging binary data
-define_function char[NAV_MAX_BUFFER] FormatBinaryForDisplay(char data[]) {
+define_function char[NAV_MAX_BUFFER] Base64FormatBinaryForDisplay(char data[]) {
     stack_var char result[NAV_MAX_BUFFER]
     stack_var integer i, len
 
@@ -112,7 +112,7 @@ define_function char[NAV_MAX_BUFFER] FormatBinaryForDisplay(char data[]) {
     return result
 }
 
-define_function char[NAV_MAX_BUFFER] FormatStringForDisplay(char str[]) {
+define_function char[NAV_MAX_BUFFER] Base64FormatStringForDisplay(char str[]) {
     stack_var integer i
     stack_var char res[NAV_MAX_BUFFER]
 
@@ -137,17 +137,17 @@ define_function RunBase64Tests() {
     stack_var integer passCount, totalTests
 
     // ENCODING TESTS
-    PrintTestHeader('ENCODING TESTS')
-    totalTests = length_array(TEST)
+    Base64PrintTestHeader('ENCODING TESTS')
+    totalTests = length_array(BASE64_TEST)
     passCount = 0
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Running ', itoa(totalTests), ' Base64 encoding tests'")
 
     for (x = 1; x <= totalTests; x++) {
-        result = NAVBase64Encode(TEST[x])
+        result = NAVBase64Encode(BASE64_TEST[x])
 
-        if (result != EXPECTED[x]) {
+        if (result != BASE64_EXPECTED[x]) {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                        "'Encoding Test #', itoa(x), ' (', TEST_LABEL[x], ') failed. Expected "', EXPECTED[x], '" but got "', result, '"'")
+                        "'Encoding Test #', itoa(x), ' (', BASE64_TEST_LABEL[x], ') failed. Expected "', BASE64_EXPECTED[x], '" but got "', result, '"'")
         } else {
             passCount++
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Encoding Test #', itoa(x), ' passed'")
@@ -156,26 +156,26 @@ define_function RunBase64Tests() {
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Encoding Tests: ', itoa(passCount), ' of ', itoa(totalTests), ' passed'")
 
     // DECODING TESTS
-    PrintTestHeader('DECODING TESTS')
-    totalTests = length_array(TEST)
+    Base64PrintTestHeader('DECODING TESTS')
+    totalTests = length_array(BASE64_TEST)
     passCount = 0
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Running ', itoa(totalTests), ' Base64 decoding tests'")
 
     for (x = 1; x <= totalTests; x++) {
-        result = NAVBase64Decode(EXPECTED[x])
+        result = NAVBase64Decode(BASE64_EXPECTED[x])
 
-        if (result != TEST[x]) {
+        if (result != BASE64_TEST[x]) {
             // For binary data tests, print detailed comparison
             if (x >= 9) {
                 NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                            "'Decoding Test #', itoa(x), ' (', TEST_LABEL[x], ') failed.'")
+                            "'Decoding Test #', itoa(x), ' (', BASE64_TEST_LABEL[x], ') failed.'")
                 NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                            "'Expected: ', FormatBinaryForDisplay(TEST[x])")
+                            "'Expected: ', Base64FormatBinaryForDisplay(BASE64_TEST[x])")
                 NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                            "'Got: ', FormatBinaryForDisplay(result)")
+                            "'Got: ', Base64FormatBinaryForDisplay(result)")
             } else {
                 NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                            "'Decoding Test #', itoa(x), ' (', TEST_LABEL[x], ') failed. Expected "', TEST[x], '" but got "', result, '"'")
+                            "'Decoding Test #', itoa(x), ' (', BASE64_TEST_LABEL[x], ') failed. Expected "', BASE64_TEST[x], '" but got "', result, '"'")
             }
         } else {
             passCount++
@@ -185,21 +185,21 @@ define_function RunBase64Tests() {
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Decoding Tests: ', itoa(passCount), ' of ', itoa(totalTests), ' passed'")
 
     // WHITESPACE HANDLING TESTS
-    PrintTestHeader('WHITESPACE HANDLING TESTS')
-    totalTests = length_array(WHITESPACE_TESTS)
+    Base64PrintTestHeader('WHITESPACE HANDLING TESTS')
+    totalTests = length_array(BASE64_WHITESPACE_TESTS)
     passCount = 0
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Running ', itoa(totalTests), ' whitespace handling tests'")
 
     for (x = 1; x <= totalTests; x++) {
-        result = NAVBase64Decode(WHITESPACE_TESTS[x])
+        result = NAVBase64Decode(BASE64_WHITESPACE_TESTS[x])
 
         if (result != 'The quick brown fox jumps over the lazy dog.') {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                        "'Whitespace Test #', itoa(x), ' (', WHITESPACE_LABEL[x], ') failed.'")
+                        "'Whitespace Test #', itoa(x), ' (', BASE64_WHITESPACE_LABEL[x], ') failed.'")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
                         "'Expected: "The quick brown fox jumps over the lazy dog."'")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                        "'Got: ', FormatStringForDisplay(result)")
+                        "'Got: ', Base64FormatStringForDisplay(result)")
         } else {
             passCount++
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Whitespace Test #', itoa(x), ' passed'")
@@ -208,16 +208,16 @@ define_function RunBase64Tests() {
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Whitespace Tests: ', itoa(passCount), ' of ', itoa(totalTests), ' passed'")
 
     // ERROR HANDLING TESTS
-    PrintTestHeader('ERROR HANDLING TESTS')
-    totalTests = length_array(INVALID_TESTS)
+    Base64PrintTestHeader('ERROR HANDLING TESTS')
+    totalTests = length_array(BASE64_INVALID_TESTS)
     NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Running ', itoa(totalTests), ' error handling tests'")
 
     // Note: Error handling tests don't have a pass/fail criteria since they're testing error conditions
     for (x = 1; x <= totalTests; x++) {
-        result = NAVBase64Decode(INVALID_TESTS[x])
+        result = NAVBase64Decode(BASE64_INVALID_TESTS[x])
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Invalid Test #', itoa(x), ' completed'")
     }
 
     // TESTS SUMMARY
-    PrintTestHeader('TESTS COMPLETED')
+    Base64PrintTestHeader('TESTS COMPLETED')
 }

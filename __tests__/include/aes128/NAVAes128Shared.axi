@@ -16,7 +16,7 @@ define_function SetupMatrix(char source[4][4], char dest[4][4]) {
 
 
 // Utility function to convert a buffer to a hex string
-define_function char[NAV_MAX_BUFFER] BufferToHexString(char buffer[]) {
+define_function char[NAV_MAX_BUFFER] Aes128BufferToHexString(char buffer[]) {
     stack_var char result[NAV_MAX_BUFFER]
     stack_var integer i
 

@@ -4,7 +4,7 @@
 
 DEFINE_CONSTANT
 
-constant char TEST[][2048] = {
+constant char SHA1_TEST[][2048] = {
     '',
     'a',
     'abc',
@@ -20,7 +20,7 @@ constant char TEST[][2048] = {
 }
 
 
-constant char EXPECTED[][20] = {
+constant char SHA1_EXPECTED[][20] = {
     {$DA, $39, $A3, $EE, $5E, $6B, $4B, $0D, $32, $55, $BF, $EF, $95, $60, $18, $90, $AF, $D8, $07, $09},
     {$86, $F7, $E4, $37, $FA, $A5, $A7, $FC, $E1, $5D, $1D, $DC, $B9, $EA, $EA, $EA, $37, $76, $67, $B8},
     {$A9, $99, $3E, $36, $47, $06, $81, $6A, $BA, $3E, $25, $71, $78, $50, $C2, $6C, $9C, $D0, $D8, $9D},
@@ -38,12 +38,12 @@ constant char EXPECTED[][20] = {
 define_function RunSha1Tests() {
     stack_var integer x
 
-    for (x = 1; x <= length_array(TEST); x++) {
+    for (x = 1; x <= length_array(SHA1_TEST); x++) {
         stack_var char result[20]
 
-        result = NAVSha1GetHash(TEST[x])
+        result = NAVSha1GetHash(SHA1_TEST[x])
 
-        if (result != EXPECTED[x]) {
+        if (result != SHA1_EXPECTED[x]) {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
                         "'Test ', itoa(x), ' failed'")
             continue

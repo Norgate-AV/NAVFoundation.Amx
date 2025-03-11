@@ -45,7 +45,7 @@ define_function TestNAVPathDirName(char paths[][]) {
 
         result = NAVPathDirName(paths[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('PathDirName', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }

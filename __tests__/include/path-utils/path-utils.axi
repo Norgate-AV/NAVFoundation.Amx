@@ -1,114 +1,98 @@
+#DEFINE TESTING_NAVPATHBASENAME
+#DEFINE TESTING_NAVPATHEXTNAME
+#DEFINE TESTING_NAVPATHDIRNAME
+#DEFINE TESTING_NAVPATHNORMALIZE
+#DEFINE TESTING_NAVPATHRESOLVE
+#DEFINE TESTING_NAVPATHJOINPATH
+#DEFINE TESTING_NAVPATHRELATIVE
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Assert.axi'
 #include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.PathUtils.axi'
+#include 'NAVFoundation.Testing.axi'
+
+#IF_DEFINED TESTING_NAVPATHBASENAME
+#include 'NAVPathBaseName.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVPATHEXTNAME
+#include 'NAVPathExtName.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVPATHDIRNAME
+#include 'NAVPathDirName.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVPATHNORMALIZE
+#include 'NAVPathNormalize.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVPATHRESOLVE
+#include 'NAVPathResolve.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVPATHJOINPATH
+#include 'NAVPathJoinPath.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVPATHRELATIVE
+#include 'NAVPathRelative.axi'
+#END_IF
+
+DEFINE_CONSTANT
+
+constant char PATH_UTILS_PATHS[][255] = {
+    '/home/user/file.txt',
+    'home/user/docs/file.txt',
+    '\\home\\user\\docs\\file.txt',
+    '\home\user\docs\projects\file.txt',
+    '/lost+found/fortunate_yuck.xht',
+    '/usr/ports/joyfully.ico',
+    '/lib/now_goodwill_yearningly.gif',
+    '/net/duh_bandana_after.so',
+    '/Users/manicure_instead.lrf',
+    '/var/yp/barring_unfortunately.bin',
+    '',
+    '/',
+    'home',
+    'home/',
+    './home',
+    '../home',
+    'home/user',
+    'home/user/',
+    '.',
+    '..',
+    '/',
+    '/var/yp/barring_unfortunately.bin.bak'
+}
+
 
 define_function RunPathUtilsTests() {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'===== Running Path Utilities Tests ====='");
+    #IF_DEFINED TESTING_NAVPATHBASENAME
+    TestNAVPathBaseName(PATH_UTILS_PATHS)
+    #END_IF
 
-    // Test path operations
-    TestPathJoin();
-    TestPathNormalize();
-    TestPathGetDirectory();
-    TestPathGetFilename();
-    TestPathGetExtension();
+    #IF_DEFINED TESTING_NAVPATHEXTNAME
+    TestNAVPathExtName(PATH_UTILS_PATHS)
+    #END_IF
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'All Path Utils tests completed'");
-}
+    #IF_DEFINED TESTING_NAVPATHDIRNAME
+    TestNAVPathDirName(PATH_UTILS_PATHS)
+    #END_IF
 
-define_function TestPathJoin() {
-    stack_var char result[NAV_MAX_PATH];
+    #IF_DEFINED TESTING_NAVPATHNORMALIZE
+    TestNAVPathNormalize(PATH_UTILS_PATHS)
+    #END_IF
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Testing path joining'");
+    #IF_DEFINED TESTING_NAVPATHRESOLVE
+    TestNAVPathResolve(PATH_UTILS_PATHS)
+    #END_IF
 
-    // Basic path joining
-    result = NAVPathJoin('C:\Users', 'John');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Join 'C:\Users' + 'John': '", result, "'");
+    #IF_DEFINED TESTING_NAVPATHJOINPATH
+    TestNAVPathJoinPath(PATH_UTILS_PATHS)
+    #END_IF
 
-    // Path joining with slash at end of first part
-    result = NAVPathJoin('C:\Users\', 'John');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Join 'C:\Users\' + 'John': '", result, "'");
-
-    // Path joining with slash at start of second part
-    result = NAVPathJoin('C:\Users', '\John');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Join 'C:\Users' + '\John': '", result, "'");
-
-    // Three-part path joining
-    result = NAVPathJoin(NAVPathJoin('C:', 'Users'), 'John');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Join 'C:' + 'Users' + 'John': '", result, "'");
-}
-
-define_function TestPathNormalize() {
-    stack_var char result[NAV_MAX_PATH];
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Testing path normalization'");
-
-    // Remove redundant separators
-    result = NAVPathNormalize('C:\\Users\\\\John\\\Documents');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Normalize 'C:\\Users\\\\John\\\Documents': '", result, "'");
-
-    // Handle dot notation
-    result = NAVPathNormalize('C:\Users\John\.\Documents');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Normalize 'C:\Users\John\.\Documents': '", result, "'");
-
-    // Handle dotdot notation
-    result = NAVPathNormalize('C:\Users\John\..\Admin\Documents');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Normalize 'C:\Users\John\..\Admin\Documents': '", result, "'");
-
-    // Complex path with multiple notation types
-    result = NAVPathNormalize('C:\Users\.\John\..\Admin\.\Documents\\Work');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Normalize 'C:\Users\.\John\..\Admin\.\Documents\\Work': '", result, "'");
-}
-
-define_function TestPathGetDirectory() {
-    stack_var char result[NAV_MAX_PATH];
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Testing directory extraction'");
-
-    // Basic directory extraction
-    result = NAVPathGetDirectory('C:\Users\John\Documents\file.txt');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Directory of 'C:\Users\John\Documents\file.txt': '", result, "'");
-
-    // Path with trailing separator
-    result = NAVPathGetDirectory('C:\Users\John\Documents\');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Directory of 'C:\Users\John\Documents\': '", result, "'");
-
-    // Root directory
-    result = NAVPathGetDirectory('C:\file.txt');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Directory of 'C:\file.txt': '", result, "'");
-}
-
-define_function TestPathGetFilename() {
-    stack_var char result[NAV_MAX_FILENAME];
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Testing filename extraction'");
-
-    // Basic filename extraction
-    result = NAVPathGetFilename('C:\Users\John\Documents\file.txt');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Filename of 'C:\Users\John\Documents\file.txt': '", result, "'");
-
-    // Path with no directory
-    result = NAVPathGetFilename('file.txt');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Filename of 'file.txt': '", result, "'");
-
-    // Path with trailing separator
-    result = NAVPathGetFilename('C:\Users\John\Documents\');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Filename of 'C:\Users\John\Documents\': '", result, "'");
-}
-
-define_function TestPathGetExtension() {
-    stack_var char result[NAV_MAX_EXTENSION];
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Testing extension extraction'");
-
-    // Basic extension extraction
-    result = NAVPathGetExtension('C:\Users\John\Documents\file.txt');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Extension of 'C:\Users\John\Documents\file.txt': '", result, "'");
-
-    // Multiple extensions
-    result = NAVPathGetExtension('archive.tar.gz');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Extension of 'archive.tar.gz': '", result, "'");
-
-    // No extension
-    result = NAVPathGetExtension('C:\Users\John\Documents\README');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Extension of 'C:\Users\John\Documents\README': '", result, "'");
+    #IF_DEFINED TESTING_NAVPATHRELATIVE
+    TestNAVPathRelative(PATH_UTILS_PATHS)
+    #END_IF
 }

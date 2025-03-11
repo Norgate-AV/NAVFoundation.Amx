@@ -5,7 +5,7 @@
 
 DEFINE_CONSTANT
 
-constant char TEST[][2048] = {
+constant char SHA256_TEST[][2048] = {
     '',
     'a',
     'abc',
@@ -20,7 +20,7 @@ constant char TEST[][2048] = {
     'This is a longer test case to check the SHA-256 implementation. It should handle longer strings correctly and produce the expected hash value.'
 }
 
-constant char EXPECTED[][32] = {
+constant char SHA256_EXPECTED[][32] = {
     {$e3,$b0,$c4,$42,$98,$fc,$1c,$14,$9a,$fb,$f4,$c8,$99,$6f,$b9,$24,$27,$ae,$41,$e4,$64,$9b,$93,$4c,$a4,$95,$99,$1b,$78,$52,$b8,$55},
     {$ca,$97,$81,$12,$ca,$1b,$bd,$ca,$fa,$c2,$31,$b3,$9a,$23,$dc,$4d,$a7,$86,$ef,$f8,$14,$7c,$4e,$72,$b9,$80,$77,$85,$af,$ee,$48,$bb},
     {$ba,$78,$16,$bf,$8f,$01,$cf,$ea,$41,$41,$40,$de,$5d,$ae,$22,$23,$b0,$03,$61,$a3,$96,$17,$7a,$9c,$b4,$10,$ff,$61,$f2,$00,$15,$ad},
@@ -43,13 +43,13 @@ constant char EXPECTED[][32] = {
 define_function RunSha256Tests() {
     stack_var integer x
 
-    for (x = 1; x <= length_array(TEST); x++) {
+    for (x = 1; x <= length_array(SHA256_TEST); x++) {
         stack_var char result[32]
 
-        result = NAVSha256GetHash(TEST[x])
+        result = NAVSha256GetHash(SHA256_TEST[x])
 
-        if (result != EXPECTED[x]) {
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected: "', NAVHexToString(EXPECTED[x]), '"'")
+        if (result != SHA256_EXPECTED[x]) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected: "', NAVHexToString(SHA256_EXPECTED[x]), '"'")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got     : "', NAVHexToString(result), '"'")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed.'")
             continue

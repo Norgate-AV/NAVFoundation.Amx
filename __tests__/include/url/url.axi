@@ -1,181 +1,366 @@
 #include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.ErrorLogUtils.axi'
-#include 'NAVFoundation.URL.axi'
+#include 'NAVFoundation.Url.axi'
+
+DEFINE_CONSTANT
+
+constant char URL_TEST[][2048] = {
+    'http://example.com',
+    'https://www.example.org/resource',
+    'https://example.com/test?foo=bar&baz=123#frag-01',
+    'http://127.0.0.1:8080/test-page',
+    'https://api.example.com/v1/users/123/posts',
+    'http://localhost:3000/api/data?key=value&sort=desc&page=1',
+    'https://search.example.org/results?q=test%20query&lang=en',
+    'https://subdomain.example.com:8443/path/to/resource',
+    'http://demo.example.net/products?category=electronics&brand=samsung&inStock=true',
+    'https://api.example.com/v2/users/123/posts/comments/456/replies?sort=newest&limit=50#comment-section',
+    'http://subdomain.test.example.com:9000/very/deep/path/structure/file.html?param1=value1&param2=value2&param3=value3#section-2',
+    'https://example.com/search?q=test+with+spaces&category=all&page=1&filter=active#results',
+    'https://example.com/path?param=value#fragment?with?questions',
+    'https://example.com/path#fragment&with&ampersands',
+    'http://example.com/path/with/trailing/slash/'
+    // 'http:/example.com',           // Missing slash
+    // 'https://[invalid.ip]/',       // Invalid IP format
+    // 'http://example.com:abc',      // Invalid port
+    // 'ftp://example.com',          // Unsupported scheme
+    // ':not-valid-url',             // Missing scheme and host
+    // 'http://',                    // Missing host
+    // 'https://example.com:99999',  // Port number too large
+    // 'http://exam ple.com'         // Invalid hostname
+}
+
+constant char URL_EXPECTED_RESULT[] = {
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,   // Long path with queries and fragment
+    true,   // Deep path structure
+    true,   // Multiple queries with spaces
+    true,   // Fragment with question marks
+    true,   // Fragment with ampersands
+    true,   // Trailing slash
+    false,  // Missing slash
+    false,  // Invalid IP
+    false,  // Invalid port
+    false,  // Unsupported scheme
+    false,  // Invalid URL
+    false,  // Missing host
+    false,  // Port too large
+    false   // Invalid hostname
+}
+
+constant char URL_EXPECTED_SCHEME[][16] = {
+    'http',
+    'https',
+    'https',
+    'http',
+    'https',
+    'http',
+    'https',
+    'https',
+    'http',
+    'https',
+    'http',
+    'https',
+    'https',
+    'https',
+    'http',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    ''
+}
+
+constant char URL_EXPECTED_HOST[][255] = {
+    'example.com',
+    'www.example.org',
+    'example.com',
+    '127.0.0.1',
+    'api.example.com',
+    'localhost',
+    'search.example.org',
+    'subdomain.example.com',
+    'demo.example.net',
+    'api.example.com',
+    'subdomain.test.example.com',
+    'example.com',
+    'example.com',
+    'example.com',
+    'example.com',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    ''
+}
+
+constant integer URL_EXPECTED_PORT[] = {
+    0,
+    0,
+    0,
+    8080,
+    0,
+    3000,
+    0,
+    8443,
+     0,
+    0,
+    9000,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+}
+
+constant char URL_EXPECTED_PATH[][255] = {
+    '',
+    '/resource',
+    '/test',
+    '/test-page',
+    '/v1/users/123/posts',
+    '/api/data',
+    '/results',
+    '/path/to/resource',
+    '/products',
+    '/v2/users/123/posts/comments/456/replies',
+    '/very/deep/path/structure/file.html',
+    '/search',
+    '/path',
+    '/path',
+    '/path/with/trailing/slash/',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    ''
+}
+
+constant char URL_EXPECTED_FULL_PATH[][1024] = {
+    '',
+    '/resource',
+    '/test?foo=bar&baz=123#frag-01',
+    '/test-page',
+    '/v1/users/123/posts',
+    '/api/data?key=value&sort=desc&page=1',
+    '/results?q=test%20query&lang=en',
+    '/path/to/resource',
+    '/products?category=electronics&brand=samsung&inStock=true',
+    '/v2/users/123/posts/comments/456/replies?sort=newest&limit=50#comment-section',
+    '/very/deep/path/structure/file.html?param1=value1&param2=value2&param3=value3#section-2',
+    '/search?q=test+with+spaces&category=all&page=1&filter=active#results',
+    '/path?param=value#fragment?with?questions',
+    '/path#fragment&with&ampersands',
+    '/path/with/trailing/slash/'
+}
+
+constant integer URL_EXPECTED_QUERY_COUNT[] = {
+    0,
+    0,
+    2,
+    0,
+    0,
+    3,
+    2,
+    0,
+    3,
+    2,
+    3,
+    4,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+}
+
+constant char URL_EXPECTED_QUERY_KEY[][][255] = {
+    {''},
+    {''},
+    {'foo', 'baz'},
+    {''},
+    {''},
+    {'key', 'sort', 'page'},
+    {'q', 'lang'},
+    {''},
+    {'category', 'brand', 'inStock'},
+    {'sort', 'limit'},
+    {'param1', 'param2', 'param3'},
+    {'q', 'category', 'page', 'filter'},
+    {'param'},
+    {''},
+    {''},
+    {''},
+    {''},
+    {''},
+    {''},
+    {''},
+    {''},
+    {''},
+    {''}
+}
+
+constant char URL_EXPECTED_QUERY_VALUE[][][255] = {
+    {''},
+    {''},
+    {'bar', '123'},
+    {''},
+    {''},
+    {'value', 'desc', '1'},
+    {'test%20query', 'en'},
+    {''},
+    {'electronics', 'samsung', 'true'},
+    {'newest', '50'},
+    {'value1', 'value2', 'value3'},
+    {'test+with+spaces', 'all', '1', 'active'},
+    {'value'},
+    {''},
+    {''},
+    {''},
+    {''},
+    {''},
+    {''},
+    {''},
+    {''},
+    {''},
+    {''}
+}
+
+constant char URL_EXPECTED_FRAGMENT[][255] = {
+    '',
+    '',
+    'frag-01',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    'comment-section',
+    'section-2',
+    'results',
+    'fragment?with?questions',
+    'fragment&with&ampersands',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    ''
+}
+
 
 define_function RunUrlTests() {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'===== Running URL Tests ====='");
+    stack_var integer x
 
-    // Test URL parsing
-    TestUrlParse();
+    for (x = 1; x <= length_array(URL_TEST); x++) {
+        stack_var _NAVUrl url
+        stack_var char result
+        stack_var integer count
+        stack_var char failed
 
-    // Test URL component extraction
-    TestUrlComponents();
+        result = NAVParseUrl(URL_TEST[x], url)
 
-    // Test URL encoding/decoding
-    TestUrlEncoding();
+        if (result != URL_EXPECTED_RESULT[x]) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Expected parse result ', NAVBooleanToString(URL_EXPECTED_RESULT[x]), ' but got ', NAVBooleanToString(result)")
+            continue
+        }
 
-    // Test URL query parameter handling
-    TestUrlQueryParameters();
+        if (URL_EXPECTED_RESULT[x] && !result) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Could not parse URL'")
+            continue
+        }
 
-    // Test URL building
-    TestUrlBuild();
+        if (url.Scheme != URL_EXPECTED_SCHEME[x]) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Expected scheme "', URL_EXPECTED_SCHEME[x], '" but got "', url.Scheme, '"'")
+            continue
+        }
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'All URL tests completed'");
-}
+        if (url.Host != URL_EXPECTED_HOST[x]) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Expected host "', URL_EXPECTED_HOST[x], '" but got "', url.Host, '"'")
+            continue
+        }
 
-define_function TestUrlParse() {
-    stack_var NAVUrl parsedUrl;
+        if (url.Port != URL_EXPECTED_PORT[x]) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Expected port ', itoa(URL_EXPECTED_PORT[x]), ' but got ', itoa(url.Port)")
+            continue
+        }
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Testing URL parsing'");
+        if (url.FullPath != URL_EXPECTED_FULL_PATH[x]) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Expected full path "', URL_EXPECTED_FULL_PATH[x], '" but got "', url.FullPath, '"'")
+            continue
+        }
 
-    // Parse standard URL
-    parsedUrl = NAVParseUrl('https://www.example.com:443/path/to/resource?query=value&param=123#fragment');
-    PrintUrlDetails(parsedUrl, 'Standard URL');
+        if (url.Path != URL_EXPECTED_PATH[x]) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Expected path "', URL_EXPECTED_PATH[x], '" but got "', url.Path, '"'")
+            continue
+        }
 
-    // Parse URL with authentication
-    parsedUrl = NAVParseUrl('http://username:password@example.com/secure');
-    PrintUrlDetails(parsedUrl, 'URL with authentication');
+        count = length_array(url.Queries)
 
-    // Parse URL with IP address
-    parsedUrl = NAVParseUrl('https://192.168.1.1/admin');
-    PrintUrlDetails(parsedUrl, 'URL with IP address');
+        if (count != URL_EXPECTED_QUERY_COUNT[x]) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Expected query count ', itoa(URL_EXPECTED_QUERY_COUNT[x]), ' but got ', itoa(count)")
+            continue
+        }
 
-    // Parse relative URL
-    parsedUrl = NAVParseUrl('/relative/path?param=value');
-    PrintUrlDetails(parsedUrl, 'Relative URL');
+        if (count > 0) {
+            stack_var integer z
 
-    // Parse file URL
-    parsedUrl = NAVParseUrl('file:///C:/path/to/file.txt');
-    PrintUrlDetails(parsedUrl, 'File URL');
-}
+            for (z = 1; z <= count; z++) {
+                if (url.Queries[z].Key != URL_EXPECTED_QUERY_KEY[x][z]) {
+                    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Expected query key "', URL_EXPECTED_QUERY_KEY[x][z], '" but got "', url.Queries[z].Key, '"'")
+                    failed = true
+                    break
+                }
 
-define_function PrintUrlDetails(NAVUrl url, char description[]) {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  ', description, ':'");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'    Scheme: ', url.scheme");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'    Username: ', url.username");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'    Password: ', url.password");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'    Host: ', url.host");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'    Port: ', itoa(url.port)");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'    Path: ', url.path");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'    Query: ', url.query");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'    Fragment: ', url.fragment");
-}
+                if (url.Queries[z].Value != URL_EXPECTED_QUERY_VALUE[x][z]) {
+                    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Expected query value "', URL_EXPECTED_QUERY_VALUE[x][z], '" but got "', url.Queries[z].Value, '"'")
+                    failed = true
+                    break
+                }
+            }
 
-define_function TestUrlComponents() {
-    stack_var char url[256];
-    stack_var char result[256];
+            if (failed) {
+                continue
+            }
+        }
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Testing URL component extraction'");
+        if (url.Fragment != URL_EXPECTED_FRAGMENT[x]) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Expected fragment "', URL_EXPECTED_FRAGMENT[x], '" but got "', url.Fragment, '"'")
+            continue
+        }
 
-    url = 'https://www.example.com:443/path/to/resource?query=value&param=123#fragment';
-
-    // Extract scheme
-    result = NAVUrlGetScheme(url);
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Scheme from URL: '", result, "'");
-
-    // Extract host
-    result = NAVUrlGetHost(url);
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Host from URL: '", result, "'");
-
-    // Extract path
-    result = NAVUrlGetPath(url);
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Path from URL: '", result, "'");
-
-    // Extract query
-    result = NAVUrlGetQuery(url);
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Query from URL: '", result, "'");
-
-    // Extract fragment
-    result = NAVUrlGetFragment(url);
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Fragment from URL: '", result, "'");
-}
-
-define_function TestUrlEncoding() {
-    stack_var char original[256];
-    stack_var char encoded[256];
-    stack_var char decoded[256];
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Testing URL encoding/decoding'");
-
-    // Test with spaces and special characters
-    original = 'Hello World! Special characters: @#$%^&*()';
-    encoded = NAVUrlEncode(original);
-    decoded = NAVUrlDecode(encoded);
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Original: '", original, "'");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Encoded: '", encoded, "'");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Decoded: '", decoded, "'");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Roundtrip successful: '", itoa(decoded == original), "'");
-
-    // Test with already encoded string
-    original = 'already%20encoded%20string';
-    encoded = NAVUrlEncode(original);
-    decoded = NAVUrlDecode(original);
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Original (encoded): '", original, "'");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Double encoded: '", encoded, "'");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Decoded: '", decoded, "'");
-}
-
-define_function TestUrlQueryParameters() {
-    stack_var char url[256];
-    stack_var char result[256];
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Testing URL query parameters'");
-
-    url = 'https://example.com/search?q=test&page=1&sort=desc';
-
-    // Get specific parameter
-    result = NAVUrlGetQueryParam(url, 'q');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Value of 'q' parameter: '", result, "'");
-
-    result = NAVUrlGetQueryParam(url, 'page');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Value of 'page' parameter: '", result, "'");
-
-    result = NAVUrlGetQueryParam(url, 'sort');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Value of 'sort' parameter: '", result, "'");
-
-    result = NAVUrlGetQueryParam(url, 'nonexistent');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Value of nonexistent parameter: '", result, "'");
-
-    // Add parameter to URL
-    result = NAVUrlAddQueryParam(url, 'filter', 'new');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  URL after adding 'filter=new': '", result, "'");
-
-    // Replace parameter
-    result = NAVUrlReplaceQueryParam(url, 'page', '2');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  URL after replacing 'page' with '2': '", result, "'");
-}
-
-define_function TestUrlBuild() {
-    stack_var NAVUrl url;
-    stack_var char result[256];
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Testing URL building'");
-
-    // Build from components
-    url.scheme = 'https';
-    url.host = 'api.example.com';
-    url.port = 443;
-    url.path = '/v1/resources';
-    url.query = 'filter=active&sort=name';
-
-    result = NAVBuildUrl(url);
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Built URL: '", result, "'");
-
-    // Build with authentication
-    url.username = 'user';
-    url.password = 'pass';
-    url.port = 0; // default port
-
-    result = NAVBuildUrl(url);
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Built URL with auth: '", result, "'");
-
-    // Build with fragment
-    url.username = '';
-    url.password = '';
-    url.fragment = 'section2';
-
-    result = NAVBuildUrl(url);
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Built URL with fragment: '", result, "'");
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' passed'")
+    }
 }

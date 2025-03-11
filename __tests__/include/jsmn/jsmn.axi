@@ -1,140 +1,207 @@
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.ErrorLogUtils.axi'
-#include 'NAVFoundation.Json.axi'
+#include 'NAVFoundation.Jsmn.axi'
 
 DEFINE_CONSTANT
-// Test JSON inputs
-constant char TEST_JSON_SIMPLE[] = '{"name":"John", "age":30, "car":null}';
-constant char TEST_JSON_NESTED[] = '{"person":{"name":"John", "age":30, "address":{"city":"New York", "zip":"10001"}}}';
-constant char TEST_JSON_ARRAY[] = '{"people":[{"name":"John", "age":30},{"name":"Jane", "age":25}]}';
-constant char TEST_JSON_COMPLEX[] = '{
-  "firstName": "John",
-  "lastName": "Smith",
-  "isAlive": true,
-  "age": 27,
-  "address": {
-    "streetAddress": "21 2nd Street",
-    "city": "New York",
-    "state": "NY",
-    "postalCode": "10021-3100"
-  },
-  "phoneNumbers": [
+
+constant char JSMN_TEST[][NAV_MAX_BUFFER]       =   {
+    '{"contacts": [{"name": "Alice","age": 28,"phoneNumber": "01265 123456"},{"name": "Bob","age": 32,"phoneNumber": "01256 345678"},{"name": "Charlie","age": 40,"phoneNumber": "01432 678910"}],"details": {"id": "abc123-abc33-fe6899-1209dd","password": "secret","isStupid": true}}',
+    '{"name": "John","age": 30,"cars": [{"name": "Ford","models": ["Fiesta","Focus","Mustang"]},{"name": "BMW","models": ["320","X3","X5"]},{"name": "Fiat","models": ["500","Panda"]}]}'
+}
+
+// Each key is a token
+// Each value is a token
+// Each object (including root) is considered a token
+// Each array (including root) is considered a token
+constant integer JSMN_EXPECTED_COUNT[]     =   {
+    32,
+    30
+}
+
+constant integer JSMN_EXPECTED_TYPE[][]      =   {
     {
-      "type": "home",
-      "number": "212 555-1234"
+        JSMN_TYPE_OBJECT,       // Root object
+        JSMN_TYPE_STRING,       // contacts key
+        JSMN_TYPE_ARRAY,        // contacts array
+        JSMN_TYPE_OBJECT,       // contacts[0]
+        JSMN_TYPE_STRING,       // contacts[0].name.key
+        JSMN_TYPE_STRING,       // contacts[0].name.value
+        JSMN_TYPE_STRING,       // contacts[0].age.key
+        JSMN_TYPE_PRIMITIVE,    // contacts[0].age.value
+        JSMN_TYPE_STRING,       // contacts[0].phoneNumber.key
+        JSMN_TYPE_STRING,       // contacts[0].phoneNumber.value
+        JSMN_TYPE_OBJECT,       // contacts[1]
+        JSMN_TYPE_STRING,       // contacts[1].name.key
+        JSMN_TYPE_STRING,       // contacts[1].name.value
+        JSMN_TYPE_STRING,       // contacts[1].age.key
+        JSMN_TYPE_PRIMITIVE,    // contacts[1].age.value
+        JSMN_TYPE_STRING,       // contacts[1].phoneNumber.key
+        JSMN_TYPE_STRING,       // contacts[1].phoneNumber.value
+        JSMN_TYPE_OBJECT,       // contacts[2]
+        JSMN_TYPE_STRING,       // contacts[2].name.key
+        JSMN_TYPE_STRING,       // contacts[2].name.value
+        JSMN_TYPE_STRING,       // contacts[2].age.key
+        JSMN_TYPE_PRIMITIVE,    // contacts[2].age.value
+        JSMN_TYPE_STRING,       // contacts[2].phoneNumber.key
+        JSMN_TYPE_STRING,       // contacts[2].phoneNumber.value
+        JSMN_TYPE_STRING,       // details key
+        JSMN_TYPE_OBJECT,       // details object
+        JSMN_TYPE_STRING,       // details.id.key
+        JSMN_TYPE_STRING,       // details.id.value
+        JSMN_TYPE_STRING,       // details.password.key
+        JSMN_TYPE_STRING,       // details.password.value
+        JSMN_TYPE_STRING,       // details.isStupid.key
+        JSMN_TYPE_PRIMITIVE     // details.isStupid.value
     },
     {
-      "type": "office",
-      "number": "646 555-4567"
+        JSMN_TYPE_OBJECT,       // Root object
+        JSMN_TYPE_STRING,       // name.key
+        JSMN_TYPE_STRING,       // name.value
+        JSMN_TYPE_STRING,       // age.key
+        JSMN_TYPE_PRIMITIVE,    // age.value
+        JSMN_TYPE_STRING,       // cars
+        JSMN_TYPE_ARRAY,        // cars array
+        JSMN_TYPE_OBJECT,       // cars[0]
+        JSMN_TYPE_STRING,       // cars[0].name.key
+        JSMN_TYPE_STRING,       // cars[0].name.value
+        JSMN_TYPE_STRING,       // cars[0].models.key
+        JSMN_TYPE_ARRAY,        // cars[0].models array
+        JSMN_TYPE_STRING,       // cars[0].models[0]
+        JSMN_TYPE_STRING,       // cars[0].models[1]
+        JSMN_TYPE_STRING,       // cars[0].models[2]
+        JSMN_TYPE_OBJECT,       // cars[1]
+        JSMN_TYPE_STRING,       // cars[1].name.key
+        JSMN_TYPE_STRING,       // cars[1].name.value
+        JSMN_TYPE_STRING,       // cars[1].models.key
+        JSMN_TYPE_ARRAY,        // cars[1].models array
+        JSMN_TYPE_STRING,       // cars[1].models[0]
+        JSMN_TYPE_STRING,       // cars[1].models[1]
+        JSMN_TYPE_STRING,       // cars[1].models[2]
+        JSMN_TYPE_OBJECT,       // cars[2]
+        JSMN_TYPE_STRING,       // cars[2].name.key
+        JSMN_TYPE_STRING,       // cars[2].name.value
+        JSMN_TYPE_STRING,       // cars[2].models.key
+        JSMN_TYPE_ARRAY,        // cars[2].models array
+        JSMN_TYPE_STRING,       // cars[2].models[0]
+        JSMN_TYPE_STRING        // cars[2].models[1]
     }
-  ],
-  "children": [],
-  "spouse": null
-}';
+}
+
+constant char JSMN_EXPECTED_VALUE[][][NAV_MAX_BUFFER] = {
+    {
+        '{"contacts": [{"name": "Alice","age": 28,"phoneNumber": "01265 123456"},{"name": "Bob","age": 32,"phoneNumber": "01256 345678"},{"name": "Charlie","age": 40,"phoneNumber": "01432 678910"}],"details": {"id": "abc123-abc33-fe6899-1209dd","password": "secret","isStupid": true}}',
+        'contacts',
+        '[{"name": "Alice","age": 28,"phoneNumber": "01265 123456"},{"name": "Bob","age": 32,"phoneNumber": "01256 345678"},{"name": "Charlie","age": 40,"phoneNumber": "01432 678910"}]',
+        '{"name": "Alice","age": 28,"phoneNumber": "01265 123456"}',
+        'name',
+        'Alice',
+        'age',
+        '28',
+        'phoneNumber',
+        '01265 123456',
+        '{"name": "Bob","age": 32,"phoneNumber": "01256 345678"}',
+        'name',
+        'Bob',
+        'age',
+        '32',
+        'phoneNumber',
+        '01256 345678',
+        '{"name": "Charlie","age": 40,"phoneNumber": "01432 678910"}',
+        'name',
+        'Charlie',
+        'age',
+        '40',
+        'phoneNumber',
+        '01432 678910',
+        'details',
+        '{"id": "abc123-abc33-fe6899-1209dd","password": "secret","isStupid": true}',
+        'id',
+        'abc123-abc33-fe6899-1209dd',
+        'password',
+        'secret',
+        'isStupid',
+        'true'
+    },
+    {
+        '{"name": "John","age": 30,"cars": [{"name": "Ford","models": ["Fiesta","Focus","Mustang"]},{"name": "BMW","models": ["320","X3","X5"]},{"name": "Fiat","models": ["500","Panda"]}]}',
+        'name',
+        'John',
+        'age',
+        '30',
+        'cars',
+        '[{"name": "Ford","models": ["Fiesta","Focus","Mustang"]},{"name": "BMW","models": ["320","X3","X5"]},{"name": "Fiat","models": ["500","Panda"]}]',
+        '{"name": "Ford","models": ["Fiesta","Focus","Mustang"]}',
+        'name',
+        'Ford',
+        'models',
+        '["Fiesta","Focus","Mustang"]',
+        'Fiesta',
+        'Focus',
+        'Mustang',
+        '{"name": "BMW","models": ["320","X3","X5"]}',
+        'name',
+        'BMW',
+        'models',
+        '["320","X3","X5"]',
+        '320',
+        'X3',
+        'X5',
+        '{"name": "Fiat","models": ["500","Panda"]}',
+        'name',
+        'Fiat',
+        'models',
+        '["500","Panda"]',
+        '500',
+        'Panda'
+    }
+}
+
 
 define_function RunJsmnTests() {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'===== Running JSMN JSON Parser Tests ====='");
+    stack_var integer x
 
-    // Simple JSON parsing
-    TestJsonParsing(TEST_JSON_SIMPLE, 'Simple JSON');
+    for (x = 1; x <= length_array(JSMN_TEST); x++) {
+        stack_var JsmnParser parser
+        stack_var JsmnToken tokens[NAV_MAX_JSMN_TOKENS]
+        stack_var integer count
+        stack_var char failed
 
-    // Nested JSON parsing
-    TestJsonParsing(TEST_JSON_NESTED, 'Nested JSON');
+        jsmn_init(parser)
+        count = jsmn_parse(parser, JSMN_TEST[x], tokens)
 
-    // Array JSON parsing
-    TestJsonParsing(TEST_JSON_ARRAY, 'Array JSON');
+        if (count != JSMN_EXPECTED_COUNT[x]) {
+            NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Test ', itoa(x), ' failed. Expected ', itoa(JSMN_EXPECTED_COUNT[x]), ' tokens, got ', itoa(count)")
+            continue
+        }
 
-    // Complex JSON parsing
-    TestJsonParsing(TEST_JSON_COMPLEX, 'Complex JSON');
+        {
+            stack_var integer z
 
-    // Value extraction tests
-    TestValueExtraction();
+            for (z = 1; z <= count; z++) {
+                if (tokens[z].type != JSMN_EXPECTED_TYPE[x][z]) {
+                    NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Test ', itoa(x), ' failed. Token ', itoa(z), ' expected type ', itoa(JSMN_EXPECTED_TYPE[x][z]), ' got ', itoa(tokens[z].type)")
+                    failed = true
+                    break
+                }
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'All JSMN tests completed'");
-}
+                {
+                    stack_var char value[NAV_MAX_BUFFER]
 
-define_function TestJsonParsing(char jsonString[], char testName[]) {
-    stack_var NAVJsonParser parser;
-    stack_var integer result;
-    stack_var integer i;
+                    value = jsmn_get_token(JSMN_TEST[x], tokens[z])
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Testing ', testName");
+                    if (value != JSMN_EXPECTED_VALUE[x][z]) {
+                        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Test ', itoa(x), ' failed. Token ', itoa(z), ' expected value ', JSMN_EXPECTED_VALUE[x][z], ' got ', value")
+                        failed = true
+                        break
+                    }
+                }
+            }
 
-    // Initialize parser and parse JSON
-    NAVJsonParserInit(parser, 64); // Allow for up to 64 tokens
-    result = NAVJsonParse(parser, jsonString);
+            if (failed) {
+                continue
+            }
+        }
 
-    if (result < 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Failed to parse JSON: Error code ', itoa(result)");
-        return;
-    }
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Successfully parsed JSON'");
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Tokens found: ', itoa(result)");
-
-    // Log the first few tokens to verify parsing
-    for (i = 1; i <= min_value(result, 5); i++) {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Token ', itoa(i), ': type=', itoa(parser.tokens[i].type),
-                    ', start=', itoa(parser.tokens[i].start),
-                    ', end=', itoa(parser.tokens[i].end),
-                    ', size=', itoa(parser.tokens[i].size)");
-    }
-}
-
-define_function TestValueExtraction() {
-    stack_var char result[256];
-    stack_var integer intResult;
-    stack_var double doubleResult;
-    stack_var integer boolResult;
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Testing value extraction'");
-
-    // Test string extraction
-    result = NAVJsonGetString(TEST_JSON_SIMPLE, 'name');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  String value for key "name": ', result");
-    if (result == 'John') {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  String extraction test passed'");
-    } else {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  String extraction test failed'");
-    }
-
-    // Test integer extraction
-    intResult = NAVJsonGetInteger(TEST_JSON_SIMPLE, 'age');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Integer value for key "age": ', itoa(intResult)");
-    if (intResult == 30) {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Integer extraction test passed'");
-    } else {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Integer extraction test failed'");
-    }
-
-    // Test nested value extraction
-    result = NAVJsonGetString(TEST_JSON_NESTED, 'person.name');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Nested string value for key "person.name": ', result");
-    if (result == 'John') {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Nested string extraction test passed'");
-    } else {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Nested string extraction test failed'");
-    }
-
-    // Test array extraction
-    result = NAVJsonGetString(TEST_JSON_ARRAY, 'people[0].name');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Array string value for key "people[0].name": ', result");
-    if (result == 'John') {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Array extraction test passed'");
-    } else {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Array extraction test failed'");
-    }
-
-    // Test null value handling
-    result = NAVJsonGetString(TEST_JSON_SIMPLE, 'car');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Null value test for key "car": ', result");
-
-    // Test complex nested extraction
-    result = NAVJsonGetString(TEST_JSON_COMPLEX, 'phoneNumbers[1].type');
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Complex nested value for key "phoneNumbers[1].type": ', result");
-    if (result == 'office') {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Complex nested extraction test passed'");
-    } else {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Complex nested extraction test failed'");
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' passed'")
     }
 }
