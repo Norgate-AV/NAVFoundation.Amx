@@ -45,7 +45,7 @@ define_function TestNAVPathBaseName(char paths[][]) {
 
         result = NAVPathBaseName(paths[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('PathBaseName', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }

@@ -32,9 +32,9 @@ define_function RunNAVAes128DeriveKeyTests() {
         }
 
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Password  : ', password")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', BufferToHexString(salt)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', Aes128BufferToHexString(salt)")
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Iterations: ', itoa(iterations)")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key       : ', BufferToHexString(key)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key       : ', Aes128BufferToHexString(key)")
     }
 
     // Test 2: Using default iterations (when passing 0)
@@ -61,9 +61,9 @@ define_function RunNAVAes128DeriveKeyTests() {
         }
 
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Password  : ', password")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', BufferToHexString(salt)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', Aes128BufferToHexString(salt)")
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Iterations: Default'")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key       : ', BufferToHexString(key)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key       : ', Aes128BufferToHexString(key)")
     }
 
     // Test 3: Empty password (should return error)
@@ -90,7 +90,7 @@ define_function RunNAVAes128DeriveKeyTests() {
         }
 
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Password  : ""[empty]""'")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', BufferToHexString(salt)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', Aes128BufferToHexString(salt)")
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Iterations: ', itoa(iterations)")
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Error     : ', NAVAes128GetError(result)")
     }
@@ -119,7 +119,7 @@ define_function RunNAVAes128DeriveKeyTests() {
         }
 
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Password  : ', password")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', BufferToHexString(salt), ' (', itoa(length_array(salt)), ' bytes)'")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', Aes128BufferToHexString(salt), ' (', itoa(length_array(salt)), ' bytes)'")
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Iterations: ', itoa(iterations)")
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Error     : ', NAVAes128GetError(result)")
     }
@@ -163,9 +163,9 @@ define_function RunNAVAes128DeriveKeyTests() {
 
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Password 1: ', password1")
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Password 2: ', password2")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', BufferToHexString(salt)")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key 1     : ', BufferToHexString(key1)")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key 2     : ', BufferToHexString(key2)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', Aes128BufferToHexString(salt)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key 1     : ', Aes128BufferToHexString(key1)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key 2     : ', Aes128BufferToHexString(key2)")
     }
 
     // Test 6: Same input produces same key (deterministic)
@@ -205,8 +205,8 @@ define_function RunNAVAes128DeriveKeyTests() {
         }
 
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Password  : ', password")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', BufferToHexString(salt)")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key 1     : ', BufferToHexString(key1)")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key 2     : ', BufferToHexString(key2)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', Aes128BufferToHexString(salt)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key 1     : ', Aes128BufferToHexString(key1)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key 2     : ', Aes128BufferToHexString(key2)")
     }
 }

@@ -45,7 +45,7 @@ define_function TestNAVPathNormalize(char paths[][]) {
 
         result = NAVPathNormalize(paths[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('PathNormalize', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }

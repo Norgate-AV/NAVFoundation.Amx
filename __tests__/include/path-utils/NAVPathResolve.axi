@@ -45,7 +45,7 @@ define_function TestNAVPathResolve(char paths[][]) {
 
         result = NAVPathResolve(paths[x], '', '', '')
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('PathResolve', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }

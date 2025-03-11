@@ -45,7 +45,7 @@ define_function TestNAVPathRelative(char paths[][]) {
 
         result = NAVPathRelative(paths[x], '')
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('PathRelative', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }

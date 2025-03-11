@@ -53,7 +53,7 @@ define_function TestNAVStringSlice() {
 
         result = NAVStringSlice(SLICE_SUBJECT, start, end)
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('String Slice Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }

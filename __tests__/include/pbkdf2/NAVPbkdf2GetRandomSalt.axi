@@ -34,7 +34,7 @@ define_function RunNAVPbkdf2GetRandomSaltTests() {
                       ', got ', itoa(actualLength)")
         }
 
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt: ', BufferToHexString(salt)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt: ', Pbkdf2BufferToHexString(salt)")
     }
 
     // Test 4: Generate salt with default size (when passing 0)
@@ -54,7 +54,7 @@ define_function RunNAVPbkdf2GetRandomSaltTests() {
                       ', got ', itoa(actualLength)")
         }
 
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt: ', BufferToHexString(salt)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt: ', Pbkdf2BufferToHexString(salt)")
     }
 
     // Test 5: Generate multiple salts to ensure uniqueness
@@ -76,7 +76,7 @@ define_function RunNAVPbkdf2GetRandomSaltTests() {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test 5 failed: Two random salts are identical (very unlikely!)'")
         }
 
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt 1: ', BufferToHexString(salt1)")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt 2: ', BufferToHexString(salt2)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt 1: ', Pbkdf2BufferToHexString(salt1)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt 2: ', Pbkdf2BufferToHexString(salt2)")
     }
 }

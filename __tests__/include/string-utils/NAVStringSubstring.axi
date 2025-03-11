@@ -53,7 +53,7 @@ define_function TestNAVStringSubstring() {
 
         result = NAVStringSubstring(SUBSTRING_SUBJECT, start, count)
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('String Substring Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }

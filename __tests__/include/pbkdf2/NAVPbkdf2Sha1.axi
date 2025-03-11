@@ -111,8 +111,8 @@ define_function RunNAVPbkdf2Sha1Tests() {
                 }
                 else {
                     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(testNum), ' failed: Incorrect derived key'")
-                    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Expected: ', BufferToHexString(expected)")
-                    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Actual  : ', BufferToHexString(derivedKey)")
+                    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Expected: ', Pbkdf2BufferToHexString(expected)")
+                    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Actual  : ', Pbkdf2BufferToHexString(derivedKey)")
                 }
             }
             else {

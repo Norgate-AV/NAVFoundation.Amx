@@ -68,8 +68,8 @@ define_function RunNAVPbkdf2FTests() {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt      : ', salt")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Iterations: ', itoa(iterations)")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Block     : ', itoa(blockIndex)")
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Expected  : ', BufferToHexString(expected)")
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Actual    : ', BufferToHexString(result)")
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Expected  : ', Pbkdf2BufferToHexString(expected)")
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Actual    : ', Pbkdf2BufferToHexString(result)")
         }
     }
 }

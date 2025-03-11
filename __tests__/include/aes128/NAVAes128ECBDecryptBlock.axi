@@ -109,9 +109,9 @@ define_function RunNAVAes128ECBDecryptBlockTests() {
         else {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(testNum), ' failed'")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected plaintext:'")
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, BufferToHexString(plaintext))
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, Aes128BufferToHexString(plaintext))
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Actual decrypted data:'")
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, BufferToHexString(buffer))
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, Aes128BufferToHexString(buffer))
         }
     }
 
@@ -161,9 +161,9 @@ define_function RunNAVAes128ECBDecryptBlockTests() {
         else {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Identity test failed: Encrypt + Decrypt != Original'")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Original data:'")
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, BufferToHexString(original))
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, Aes128BufferToHexString(original))
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'After Encrypt+Decrypt:'")
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, BufferToHexString(processed))
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, Aes128BufferToHexString(processed))
         }
     }
 }

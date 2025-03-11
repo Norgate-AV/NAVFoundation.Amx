@@ -69,8 +69,8 @@ define_function RunNAVPbkdf2HmacSha1Tests() {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(testNum), ' failed'")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key     : ', key")
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Message : ', message")
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Expected: ', BufferToHexString(expected)")
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Actual  : ', BufferToHexString(result)")
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Expected: ', Pbkdf2BufferToHexString(expected)")
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Actual  : ', Pbkdf2BufferToHexString(result)")
         }
     }
 }

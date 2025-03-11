@@ -109,7 +109,7 @@ define_function TestNAVStringPascalCase() {
         expected = PASCAL_CASE_EXPECTED[x]
         result = NAVStringPascalCase(CASE_CONVERSION_TEST[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Pascal Case Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }
@@ -130,7 +130,7 @@ define_function TestNAVStringCamelCase() {
         expected = CAMEL_CASE_EXPECTED[x]
         result = NAVStringCamelCase(CASE_CONVERSION_TEST[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Camel Case Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }
@@ -151,7 +151,7 @@ define_function TestNAVStringSnakeCase() {
         expected = SNAKE_CASE_EXPECTED[x]
         result = NAVStringSnakeCase(CASE_CONVERSION_TEST[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Snake Case Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }
@@ -172,7 +172,7 @@ define_function TestNAVStringKebabCase() {
         expected = KEBAB_CASE_EXPECTED[x]
         result = NAVStringKebabCase(CASE_CONVERSION_TEST[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Kebab Case Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }
@@ -193,7 +193,7 @@ define_function TestNAVStringTrainCase() {
         expected = TRAIN_CASE_EXPECTED[x]
         result = NAVStringTrainCase(CASE_CONVERSION_TEST[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Train Case Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }
@@ -214,7 +214,7 @@ define_function TestNAVStringScreamKebabCase() {
         expected = SCREAM_KEBAB_CASE_EXPECTED[x]
         result = NAVStringScreamKebabCase(CASE_CONVERSION_TEST[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Scream Kebab Case Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }

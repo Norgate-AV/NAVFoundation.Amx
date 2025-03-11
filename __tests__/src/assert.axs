@@ -1,24 +1,17 @@
 PROGRAM_NAME='assert'
 
 #DEFINE __MAIN__
-#include 'NAVFoundation.Core.axi'
-#include 'NAVFoundation.Assert.axi'
-#include 'NAVAssertTests.axi'
+#include 'assert.axi'
 
 DEFINE_DEVICE
 
-dvTP = 10001:1:0
-
-
-define_function RunTests() {
-    RunNAVAssertTests()
-}
-
+dvTP    =   10001:1:0
 
 DEFINE_EVENT
 
 button_event[dvTP, 1] {
     push: {
-        RunTests()
+        set_log_level(NAV_LOG_LEVEL_DEBUG)
+        RunAssertTests()
     }
 }
