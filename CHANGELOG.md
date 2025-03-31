@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.1.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v2.0.1...v2.1.0) (2025-03-31)
+
+### 🌟 Features
+
+- **datetime-utils:** add NAVFindTimeServer function ([fcfe1cf](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/fcfe1cf029f5b30752d9207ec82b0535332d3e1b))
+- **datetime-utils:** add NAVGetTimeServers function ([b1d85c9](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b1d85c9cf64ae366c14f1c4dfeafbe8277cdee8b))
+
+### 🐛 Bug Fixes
+
+- **datetime-utils:** dont add timeserver if it already exists ([383eac6](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/383eac6c64a31a7c01c90fe0a8522f2c9372e5b3))
+
 ## [2.0.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v2.0.0...v2.0.1) (2025-03-31)
 
 ### 🐛 Bug Fixes
