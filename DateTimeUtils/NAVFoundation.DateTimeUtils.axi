@@ -1318,6 +1318,37 @@ define_function slong NAVGetTimeServers(clkmgr_timeserver_struct servers[]) {
 
 
 /**
+ * @function NAVFindTimeServer
+ * @public
+ * @description Searches for a time server by IP address or hostname in the provided array.
+ *
+ * @param {clkmgr_timeserver_struct[]} servers - The array of time servers to search.
+ * @param {char[]} ip - The IP address of the time server to find.
+ * @param {char[]} hostname - The hostname of the time server to find.
+ *
+ * @returns {integer} The index of the found time server, or 0 if not found.
+ */
+define_function integer NAVFindTimeServer(clkmgr_timeserver_struct servers[], char ip[], char hostname[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(servers)
+
+    if (!length) {
+        return 0
+    }
+
+    for (x = 1; x <= length; x++) {
+        if (servers[x].ip_address_string == ip || servers[x].url_string == hostname) {
+            return x
+        }
+    }
+
+    return 0
+}
+
+
+/**
  * @function NAVSetupNetworkTime
  * @public
  * @description Configures the system to use network time with predefined settings.
