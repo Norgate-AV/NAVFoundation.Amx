@@ -1287,6 +1287,37 @@ define_function NAVDateTimeTimestampsPrint() {
 
 
 /**
+ * @function NAVGetTimeServers
+ * @public
+ * @description Retrieves the list of time servers configured on the system.
+ *
+ * @param {clkmgr_timeserver_struct[]} servers - Array to store the time server information
+ *
+ * @returns {slong} Number of time servers retrieved
+ *
+ * @example
+ * stack_var clkmgr_timeserver_struct servers[20]
+ * stack_var slong count
+ *
+ * count = NAVGetTimeServers(servers)
+ */
+define_function slong NAVGetTimeServers(clkmgr_timeserver_struct servers[]) {
+    stack_var slong result
+
+    result = clkmgr_get_timeservers(servers)
+
+    if (result > 0) {
+        set_length_array(servers, type_cast(result))
+    }
+    else {
+        set_length_array(servers, 0)
+    }
+
+    return result
+}
+
+
+/**
  * @function NAVSetupNetworkTime
  * @public
  * @description Configures the system to use network time with predefined settings.
