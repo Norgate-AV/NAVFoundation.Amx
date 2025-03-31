@@ -507,6 +507,8 @@ define_function NAVFeedback(dev device, integer channels[], integer value) {
     stack_var integer x
     stack_var integer length
 
+    length = length_array(channels)
+
     for(x = 1; x <= length; x++) {
         [device, channels[x]] = (value == x)
     }
@@ -535,6 +537,8 @@ define_function NAVFeedbackWithDevArray(dev device[], integer channels[], intege
     stack_var integer x
     stack_var integer length
 
+    length = length_array(channels)
+
     for(x = 1; x <= length; x++) {
         [device, channels[x]] = (value == x)
     }
@@ -561,6 +565,8 @@ define_function NAVFeedbackWithDevArray(dev device[], integer channels[], intege
 define_function NAVFeedbackWithValueArray(dev device, integer channels[], integer value[]) {
     stack_var integer x
     stack_var integer length
+
+    length = length_array(channels)
 
     for(x = 1; x <= length; x++) {
         [device, channels[x]] = (value[x])
@@ -642,6 +648,8 @@ define_function NAVSendLevel(dev device, integer level, integer value) {
 define_function NAVSendLevelArray(dev device[], integer level, integer value) {
     stack_var integer x
     stack_var integer length
+
+    length = length_array(device)
 
     for (x = 1; x <= length; x++) {
         send_level device[x], level, value
