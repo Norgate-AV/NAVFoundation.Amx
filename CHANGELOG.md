@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v2.0.0...v2.0.1) (2025-03-31)
+
+### 🐛 Bug Fixes
+
+- **core:** restore init array lengths in core functions ([7ae1212](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/7ae1212552f9f92dc7407e9ba96c4978ca8ef187))
+
 ## [2.0.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.35.0...v2.0.0) (2025-03-11)
 
 ### ⚠ BREAKING CHANGES
