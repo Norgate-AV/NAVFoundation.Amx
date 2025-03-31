@@ -1238,7 +1238,7 @@ define_function NAVDateTimeTimeServersPrint() {
     stack_var long count
     stack_var integer x
 
-    result = clkmgr_get_timeservers(servers)
+    result = NAVGetTimeServers(servers)
 
     if (result < 0) {
         NAVLog("'Time Server => Failed to get time servers'")
@@ -1246,6 +1246,12 @@ define_function NAVDateTimeTimeServersPrint() {
     }
 
     count = type_cast(result)
+
+    if (count <= 0) {
+        NAVLog("'Time Server => No time servers found'")
+        return
+    }
+
     NAVLog("'Time Server => Count :: ', itoa(count)")
 
     for (x = 1; x <= count; x++) {
