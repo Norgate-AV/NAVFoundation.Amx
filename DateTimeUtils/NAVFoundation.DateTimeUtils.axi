@@ -1362,7 +1362,10 @@ define_function integer NAVFindTimeServer(clkmgr_timeserver_struct servers[], ch
  * @note Requires master control rights
  */
 define_function NAVSetupNetworkTime() {
-    clkmgr_timeoffset_struct offset
+    stack_var clkmgr_timeoffset_struct offset
+    stack_var clkmgr_timeserver_struct servers[20]
+
+    NAVGetTimeServers(servers)
 
     offset.hours = 1
     offset.minutes = 0
@@ -1371,12 +1374,17 @@ define_function NAVSetupNetworkTime() {
     clkmgr_set_timezone('UTC+00:00')
     clkmgr_set_clk_source(CLKMGR_MODE_NETWORK)
     clkmgr_set_resync_period(5)
-    clkmgr_add_userdefined_timeserver(timeserver.Ip, timeserver.Hostname, timeserver.Description)
-    clkmgr_set_active_timeserver(timeserver.Ip)
     clkmgr_set_daylightsavings_mode(true)
     clkmgr_set_daylightsavings_offset(offset)
     clkmgr_set_start_daylightsavings_rule('occurrence:5,1,3,02:00:00')
     clkmgr_set_end_daylightsavings_rule('occurrence:5,1,10,02:00:00')
+
+    // Check if the timeserver is already in the list
+    // Seems to cause issues if the timeserver already exists
+    if (!NAVFindTimeServer(servers, timeserver.Ip, timeserver.Hostname)) {
+        clkmgr_add_userdefined_timeserver(timeserver.Ip, timeserver.Hostname, timeserver.Description)
+        clkmgr_set_active_timeserver(timeserver.Ip)
+    }
 }
 
 
