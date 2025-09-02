@@ -35,23 +35,23 @@
         "contrib:check": "all-contributors check"
     },
     "devDependencies": {
-        "@commitlint/cli": "^19.8.0",
-        "@commitlint/config-conventional": "^19.8.0",
+        "@commitlint/cli": "^19.8.1",
+        "@commitlint/config-conventional": "^19.8.1",
         "@norgate-av/dropnode": "^1.0.0",
-        "@norgate-av/genlinx": "^2.6.1",
+        "@norgate-av/genlinx": "^2.7.0",
         "@semantic-release/changelog": "^6.0.3",
-        "@semantic-release/exec": "^7.0.3",
+        "@semantic-release/exec": "^7.1.0",
         "@semantic-release/git": "^10.0.1",
         "@types/conventional-changelog": "^6.0.0",
         "all-contributors-cli": "^6.26.1",
         "commitizen": "^4.3.1",
-        "conventional-changelog": "^6.0.0",
-        "conventional-changelog-conventionalcommits": "^8.0.0",
+        "conventional-changelog": "^7.1.1",
+        "conventional-changelog-conventionalcommits": "^9.1.0",
         "cz-conventional-changelog": "3.3.0",
         "doctoc": "^2.2.1",
         "husky": "^9.1.7",
-        "lint-staged": "^15.5.0",
-        "prettier": "^3.5.3",
-        "semantic-release": "^24.2.3"
+        "lint-staged": "^16.1.6",
+        "prettier": "^3.6.2",
+        "semantic-release": "^24.2.7"
     }
 }
