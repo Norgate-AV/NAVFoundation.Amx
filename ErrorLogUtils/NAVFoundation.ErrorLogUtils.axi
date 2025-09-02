@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.ErrorLogUtils'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -35,21 +35,31 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_ERRORLOGUTILS__ 'NAVFoundation.ErrorLogUtils'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.ErrorLogUtils.h.axi'
 
 
-define_function char[NAV_MAX_CHARS] NAVGetLogLevel(integer level) {
+/**
+ * @function NAVGetLogLevel
+ * @public
+ * @description Converts a numeric log level to its string representation.
+ *
+ * @param {long} level - The numeric log level [NAV_LOG_LEVEL_*]
+ *
+ * @returns {char[]} String representation of the log level (ERROR, WARNING, INFO, DEBUG)
+ *
+ * @example
+ * stack_var char levelStr[NAV_MAX_CHARS]
+ * levelStr = NAVGetLogLevel(NAV_LOG_LEVEL_WARNING)  // Returns 'WARNING'
+ *
+ * @note Returns INFO as default for unrecognized levels
+ */
+define_function char[NAV_MAX_CHARS] NAVGetLogLevel(long level) {
     switch (level) {
-        case NAV_LOG_LEVEL_ERROR: {
-            return 'ERROR'
-        }
-        case NAV_LOG_LEVEL_WARNING: {
-            return 'WARNING'
-        }
-        case NAV_LOG_LEVEL_INFO: {
-            return 'INFO'
-        }
+        case NAV_LOG_LEVEL_ERROR:
+        case NAV_LOG_LEVEL_WARNING:
+        case NAV_LOG_LEVEL_INFO:
         case NAV_LOG_LEVEL_DEBUG: {
-            return 'DEBUG'
+            return NAV_LOG_LEVELS[level]
         }
         default: {
             return NAVGetLogLevel(NAV_LOG_LEVEL_INFO)
@@ -58,7 +68,25 @@ define_function char[NAV_MAX_CHARS] NAVGetLogLevel(integer level) {
 }
 
 
-define_function NAVLibraryFunctionErrorLog(integer level, char libraryName[], char functionName[], char message[]) {
+/**
+ * @function NAVLibraryFunctionErrorLog
+ * @public
+ * @description Logs an error message with library and function context.
+ *
+ * @param {long} level - The log level [NAV_LOG_LEVEL_*]
+ * @param {char[]} libraryName - Name of the library
+ * @param {char[]} functionName - Name of the function
+ * @param {char[]} message - Log message content
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+ *                           'MyLibrary',
+ *                           'MyFunction',
+ *                           'An error occurred')
+ */
+define_function NAVLibraryFunctionErrorLog(long level, char libraryName[], char functionName[], char message[]) {
     stack_var char log[NAV_MAX_BUFFER]
 
     log = NAVFormatLibraryFunctionLog(libraryName, functionName, message)
@@ -66,22 +94,81 @@ define_function NAVLibraryFunctionErrorLog(integer level, char libraryName[], ch
 }
 
 
+/**
+ * @function NAVFormatLibraryFunction
+ * @public
+ * @description Formats a library name and function name into a standard format.
+ *
+ * @param {char[]} libraryName - Name of the library
+ * @param {char[]} functionName - Name of the function
+ *
+ * @returns {char[]} Formatted string in the form "LibraryName.FunctionName()"
+ *
+ * @example
+ * stack_var char funcStr[NAV_MAX_BUFFER]
+ * funcStr = NAVFormatLibraryFunction('MyLibrary', 'MyFunction')  // Returns "MyLibrary.MyFunction()"
+ */
 define_function char[NAV_MAX_BUFFER] NAVFormatLibraryFunction(char libraryName[], char functionName[]) {
     return "libraryName, '.', functionName, '()'"
 }
 
 
+/**
+ * @function NAVFormatLibraryFunctionLog
+ * @public
+ * @description Formats a full library function log message with file information.
+ *
+ * @param {char[]} libraryName - Name of the library
+ * @param {char[]} functionName - Name of the function
+ * @param {char[]} value - Log message content
+ *
+ * @returns {char[]} Formatted log message with library, function, and file context
+ *
+ * @example
+ * stack_var char logMsg[NAV_MAX_BUFFER]
+ * logMsg = NAVFormatLibraryFunctionLog('MyLibrary', 'MyFunction', 'An error occurred')
+ */
 define_function char[NAV_MAX_BUFFER] NAVFormatLibraryFunctionLog(char libraryName[], char functionName[], char value[]) {
-    return "NAVFormatLibraryFunction(libraryName, functionName), ' => ', value"
+    return "NAVFormatLibraryFunction(libraryName, functionName), ' => ', __FILE__, ':: ', value"
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVFormatLog(integer level, char value[]) {
+/**
+ * @function NAVFormatLog
+ * @public
+ * @description Formats a log message with its level indicator.
+ *
+ * @param {long} level - The log level [NAV_LOG_LEVEL_*]
+ * @param {char[]} value - Log message content
+ *
+ * @returns {char[]} Formatted log message with level indicator
+ *
+ * @example
+ * stack_var char formatted[NAV_MAX_BUFFER]
+ * formatted = NAVFormatLog(NAV_LOG_LEVEL_WARNING, 'Low disk space')  // Returns 'WARNING:: Low disk space'
+ */
+define_function char[NAV_MAX_BUFFER] NAVFormatLog(long level, char value[]) {
     return "NAVGetLogLevel(level), ':: ', NAVFormatHex(value)"
 }
 
 
-define_function NAVErrorLog(integer level, char value[]) {
+/**
+ * @function NAVErrorLog
+ * @public
+ * @description Main logging function that handles dispatching to different output methods.
+ * Sends logs to AMX log system, debug console (if enabled), and log files (if enabled).
+ *
+ * @param {long} level - The log level [NAV_LOG_LEVEL_*]
+ * @param {char[]} value - Log message content
+ *
+ * @returns {void}
+ *
+ * @example
+ * NAVErrorLog(NAV_LOG_LEVEL_INFO, 'System starting up')
+ *
+ * @note Using invalid log levels will default to NAV_LOG_LEVEL_ERROR
+ */
+define_function NAVErrorLog(long level, char value[]) {
     switch (level) {
         case NAV_LOG_LEVEL_ERROR:
         case NAV_LOG_LEVEL_WARNING:
@@ -92,11 +179,56 @@ define_function NAVErrorLog(integer level, char value[]) {
             #IF_DEFINED __NAV_FOUNDATION_DEBUGCONSOLE__
             NAVDebugConsoleLog(NAVFormatLog(level, value))
             #END_IF
+
+            #IF_DEFINED __NAV_FOUNDATION_LOGTOFILE__
+            NAVErrorLogToFile(NAV_LOG_FILE_NAME, level, value)
+            #END_IF
         }
         default: {
             NAVErrorLog(NAV_LOG_LEVEL_ERROR, value)
         }
     }
+}
+
+
+/**
+ * @function NAVGetStandardLogMessageType
+ * @public
+ * @description Gets the string representation of a standard log message type.
+ *
+ * @param {integer} type - The message type identifier [NAV_STANDARD_LOG_MESSAGE_TYPE_*]
+ *
+ * @returns {char[]} String representation of the message type
+ *
+ * @example
+ * stack_var char typeStr[NAV_MAX_CHARS]
+ * typeStr = NAVGetStandardLogMessageType(NAV_STANDARD_LOG_MESSAGE_TYPE_STRING_FROM)  // Returns 'String From'
+ */
+define_function char[NAV_MAX_CHARS] NAVGetStandardLogMessageType(integer type) {
+    return NAV_STANDARD_LOG_MESSAGE_TYPE[type]
+}
+
+
+/**
+ * @function NAVFormatStandardLogMessage
+ * @public
+ * @description Formats a standard log message with device information and message content.
+ *
+ * @param {integer} type - The message type identifier [NAV_STANDARD_LOG_MESSAGE_TYPE_*]
+ * @param {dev} device - Device associated with the message
+ * @param {char[]} message - Message content
+ *
+ * @returns {char[]} Formatted standard log message
+ *
+ * @example
+ * stack_var char formattedMsg[NAV_MAX_BUFFER]
+ * formattedMsg = NAVFormatStandardLogMessage(
+ *                    NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_TO,
+ *                    dvProjector,
+ *                    'PWR ON')
+ */
+define_function char[NAV_MAX_BUFFER] NAVFormatStandardLogMessage(integer type, dev device, char message[]) {
+    return "NAVGetStandardLogMessageType(type), ' [', NAVDeviceToString(device), ']-[', NAVFormatHex(message), ']'"
 }
 
 

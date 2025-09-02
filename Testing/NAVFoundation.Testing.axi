@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.Testing'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -202,17 +202,14 @@ define_function NAVUnitTestWithStringResultInit(_NAVUnitTestWithStringResult tes
 //     NAV_TEST_CALLBACK(test)
 //     #END_IF
 
-//     if (test.Result.Actual != test.Result.Expected) {
-//         test.Properties.Message = "Test failed"
-//         test.Properties.Passed = false
-//         suite.FailedCount++
-//         return
-//     }
+define_function NAVLogTestPassed(integer test) {
+    NAVLog("'Test ', itoa(test), ' passed'")
+}
 
-//     test.Properties.Message = "Test passed"
-//     test.Properties.Passed = true
-//     suite.PassedCount++
-// }
+
+define_function NAVLogTestFailed(integer test, char expected[], char result[]) {
+    NAVLog("'Test ', itoa(test), ' failed. Expected "', expected, '" but got "', result, '"'")
+}
 
 
 #END_IF // __NAV_FOUNDATION_TESTING__

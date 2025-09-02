@@ -2,8 +2,28 @@ name: CI
 
 on:
   push:
+    branches:
+      - master
+    paths:
+      - "./**/*.axi"
+      - "./!__tests__/**/*"
+      - ".genlinxrc.yml"
+      - "build.ps1"
+      - "install.ps1"
+      - "manifest.json"
+      - ".github/workflows/main.yml"
 
   pull_request:
+    branches:
+      - master
+    paths:
+      - "./**/*.axi"
+      - "./!__tests__/**/*"
+      - ".genlinxrc.yml"
+      - "build.ps1"
+      - "install.ps1"
+      - "manifest.json"
+      - ".github/workflows/main.yml"
 
   workflow_dispatch:
 
@@ -12,88 +32,93 @@ defaults:
     shell: pwsh
 
 jobs:
-  build:
-    runs-on: ["self-hosted", "windows"]
+  build-and-release:
+    name: Build & Release
+
+    runs-on: [self-hosted, windows, server]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Show Environment
         run: |
           $PSVersionTable
           $pwd
+          Write-Host Path:
+          $env:PATH
+          Write-Host
+          Write-Host whoami:
           whoami
+          Write-Host
+          Write-Host Environment Variables:
+          Get-ChildItem env:
 
-      - name: Check genlinx
-        run: which genlinx
-
-      - name: Run genlinx
-        run: genlinx build -c NAVFoundation.ci.build.cfg
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
         with:
-          name: build-artifacts
-          path: |
-            ./**/*.tkn
-            ./**/*.tko
-            ./*.build.log
+          version: latest
 
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
         with:
-          versionSpec: "5.x"
+          node-version-file: ".nvmrc"
+          cache: pnpm
 
-      - name: Show GitVersion config
-        uses: gittools/actions/gitversion/execute@v0
-        with:
-          additionalArguments: /showConfig
-
-      - name: Determine Version
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v0
-
-      - name: Display GitVersion outputs
+      - name: Update Global Node.js
         run: |
-          echo "Major: ${{ steps.gitversion.outputs.major }}"
-          echo "Minor: ${{ steps.gitversion.outputs.minor }}"
-          echo "Patch: ${{ steps.gitversion.outputs.patch }}"
-          echo "PreReleaseTag: ${{ steps.gitversion.outputs.preReleaseTag }}"
-          echo "PreReleaseTagWithDash: ${{ steps.gitversion.outputs.preReleaseTagWithDash }}"
-          echo "PreReleaseLabel: ${{ steps.gitversion.outputs.preReleaseLabel }}"
-          echo "PreReleaseNumber: ${{ steps.gitversion.outputs.preReleaseNumber }}"
-          echo "WeightedPreReleaseNumber: ${{ steps.gitversion.outputs.weightedPreReleaseNumber }}"
-          echo "BuildMetaData: ${{ steps.gitversion.outputs.buildMetaData }}"
-          echo "BuildMetaDataPadded: ${{ steps.gitversion.outputs.buildMetaDataPadded }}"
-          echo "FullBuildMetaData: ${{ steps.gitversion.outputs.fullBuildMetaData }}"
-          echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
-          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
-          echo "LegacySemVer: ${{ steps.gitversion.outputs.legacySemVer }}"
-          echo "LegacySemVerPadded: ${{ steps.gitversion.outputs.legacySemVerPadded }}"
-          echo "AssemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}"
-          echo "AssemblySemFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}"
-          echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
-          echo "InformationalVersion: ${{ steps.gitversion.outputs.informationalVersion }}"
-          echo "BranchName: ${{ steps.gitversion.outputs.branchName }}"
-          echo "EscapedBranchName: ${{ steps.gitversion.outputs.escapedBranchName }}"
-          echo "Sha: ${{ steps.gitversion.outputs.sha }}"
-          echo "ShortSha: ${{ steps.gitversion.outputs.shortSha }}"
-          echo "NuGetVersionV2: ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
-          echo "NuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}"
-          echo "NuGetPreReleaseTagV2: ${{ steps.gitversion.outputs.nuGetPreReleaseTagV2 }}"
-          echo "NuGetPreReleaseTag: ${{ steps.gitversion.outputs.nuGetPreReleaseTag }}"
-          echo "VersionSourceSha: ${{ steps.gitversion.outputs.versionSourceSha }}"
-          echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.commitsSinceVersionSource }}"
-          echo "CommitsSinceVersionSourcePadded: ${{ steps.gitversion.outputs.commitsSinceVersionSourcePadded }}"
-          echo "UncommittedChanges: ${{ steps.gitversion.outputs.uncommittedChanges }}"
-          echo "CommitDate: ${{ steps.gitversion.outputs.commitDate }}"
+          fnm install ${{ steps.setup-node.outputs.node-version }}
+          fnm use ${{ steps.setup-node.outputs.node-version }}
 
-      - name: Create Tag
-        uses: tvdias/github-tagger@v0.0.1
+      - name: Install
+        run: |
+          pnpm install --frozen-lockfile
+          Write-Host "Environment Check:"
+          Write-Host "CI: $env:CI"
+          Write-Host "GITHUB_TOKEN via `$env:`: $env:GITHUB_TOKEN"
+          Write-Host "GITHUB_TOKEN via Get-ChildItem:" (Get-ChildItem env: | Where-Object {$_.Name -eq 'GITHUB_TOKEN'})
+          ./install.ps1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build
+        run: ./build.ps1 -Verbose
+
+      - name: Release
+        id: release
+        if: github.ref == 'refs/heads/master'
+        uses: cycjimmy/semantic-release-action@v4
         with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "${{ steps.gitversion.outputs.semVer }}"
-          commit-sha: "${{ steps.gitversion.outputs.sha }}"
+          extra_plugins: |
+            @semantic-release/changelog
+            @semantic-release/exec
+            @semantic-release/git
+            conventional-changelog-conventionalcommits
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Wait before Dispatch
+        if: ${{ github.ref == 'refs/heads/master' && steps.release.outputs.new_release_published == 'true' }}
+        run: Start-Sleep -Seconds 30
+
+      - name: Dispatch Scoop Excavator
+        if: ${{ github.ref == 'refs/heads/master' && steps.release.outputs.new_release_published == 'true' }}
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.SCOOP_NORGATEAV_AMX }}
+          repository: norgate-av/scoop-norgateav-amx
+          event-type: excavate
+          client-payload: |-
+            {
+              "repo": {
+                "name": "${{ github.repository }}",
+                "owner": "${{ github.repository_owner }}",
+                "ref": "${{ github.ref }}",
+                "sha": "${{ steps.release.outputs.new_release_git_head }}",
+                "tag": "${{ steps.release.outputs.new_release_git_tag }}"
+              }
+            }

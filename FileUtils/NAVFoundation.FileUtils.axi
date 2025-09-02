@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.FileUtils'
 
 MIT License
 
-Copyright (c) 2022 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,49 +34,32 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_FILEUTILS__
 #DEFINE __NAV_FOUNDATION_FILEUTILS__ 'NAVFoundation.FileUtils'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.FileUtils.h.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
+#include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.PathUtils.axi'
 
 
-DEFINE_CONSTANT
-
-constant slong NAV_FILE_ERROR_INVALID_FILE_HANDLE                          = -1
-constant slong NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME                    = -2
-constant slong NAV_FILE_ERROR_INVALID_VALUE_SUPPLIED_FOR_IO_FLAG           = -3
-constant slong NAV_FILE_ERROR_INVALID_FILE_PATH                            = -4
-constant slong NAV_FILE_ERROR_DISK_IO_ERROR                                = -5
-constant slong NAV_FILE_ERROR_INVALID_PARAMETER                            = -6
-constant slong NAV_FILE_ERROR_FILE_ALREADY_CLOSED                          = -7
-constant slong NAV_FILE_ERROR_FILE_NAME_EXISTS                             = -8
-constant slong NAV_FILE_ERROR_EOF_END_OF_FILE_REACHED                      = -9
-constant slong NAV_FILE_ERROR_BUFFER_TOO_SMALL                             = -10
-constant slong NAV_FILE_ERROR_DISK_FULL                                    = -11
-constant slong NAV_FILE_ERROR_FILE_PATH_NOT_LOADED                         = -12
-constant slong NAV_FILE_ERROR_DIRECTORY_NAME_EXISTS                        = -13
-constant slong NAV_FILE_ERROR_MAXIMUM_NUMBER_OF_FILES_ARE_ALREADY_OPEN     = -14
-constant slong NAV_FILE_ERROR_INVALID_FILE_FORMAT                          = -15
-
-
-DEFINE_TYPE
-
-struct _NAVFileEntity {
-    char Name[NAV_MAX_BUFFER]
-    char BaseName[NAV_MAX_BUFFER]
-    char Extension[NAV_MAX_CHARS]
-    char Path[NAV_MAX_BUFFER]
-    char Parent[NAV_MAX_BUFFER]
-    integer IsDirectory
-}
-
-
-define_function integer NAVIsDirectory(char entity[]) {
-    if (NAVStartsWith(entity, '/')) {
-        return true
-    }
-
-    return false
-}
-
-
+/**
+ * @function NAVGetFileError
+ * @public
+ * @description Converts a file operation error code to a human-readable error message.
+ *
+ * @param {slong} error - Error code returned by a file operation function
+ *
+ * @returns {char[]} Human-readable error description
+ *
+ * @example
+ * stack_var slong result
+ * stack_var char errorMessage[NAV_MAX_BUFFER]
+ *
+ * result = NAVFileOpen('/test.txt', 'r')
+ * if (result < 0) {
+ *     errorMessage = NAVGetFileError(result)
+ *     // Display or log the error message
+ * }
+ */
 define_function char[NAV_MAX_BUFFER] NAVGetFileError(slong error) {
     if (error >= 0) {
         return ""
@@ -106,18 +89,47 @@ define_function char[NAV_MAX_BUFFER] NAVGetFileError(slong error) {
 }
 
 
+/**
+ * @function NAVFileOpen
+ * @public
+ * @description Opens a file with specified access mode.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[]} mode - Access mode ('r' for read-only, 'rw' for read-write, 'rwa' for read-write-append)
+ *
+ * @returns {slong} File handle on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileHandle
+ *
+ * // Open file for reading
+ * fileHandle = NAVFileOpen('/config.txt', 'r')
+ * if (fileHandle < 0) {
+ *     // Handle error
+ * } else {
+ *     // Use the file handle
+ * }
+ *
+ * @note Always close the file handle with NAVFileClose when done
+ * @see NAVFileClose
+ */
 define_function slong NAVFileOpen(char path[], char mode[]) {
     stack_var slong result
     stack_var long flag
+    stack_var char filePath[NAV_MAX_BUFFER]
+    stack_var char fileName[NAV_MAX_BUFFER]
 
     if (!length_array(path)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
-                                'NAVFileOpen',
-                                "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+                                    'NAVFileOpen',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
 
         return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
+
+    filePath = NAVPathDirName(path)
+    fileName = NAVPathBaseName(path)
 
     switch (lower_string(mode)) {
         case 'rwa': {
@@ -147,6 +159,27 @@ define_function slong NAVFileOpen(char path[], char mode[]) {
 }
 
 
+/**
+ * @function NAVFileClose
+ * @public
+ * @description Closes an open file.
+ *
+ * @param {long} handle - File handle previously obtained from NAVFileOpen
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileHandle
+ * stack_var slong result
+ *
+ * fileHandle = NAVFileOpen('/config.txt', 'r')
+ * if (fileHandle >= 0) {
+ *     // Use the file...
+ *     result = NAVFileClose(fileHandle)
+ * }
+ *
+ * @see NAVFileOpen
+ */
 define_function slong NAVFileClose(long handle) {
     stack_var slong result
 
@@ -163,7 +196,29 @@ define_function slong NAVFileClose(long handle) {
 }
 
 
-define_function slong NAVFileRead(char path[], char data[], integer count) {
+/**
+ * @function NAVFileRead
+ * @public
+ * @description Reads the entire content of a file into a buffer.
+ * Opens the file, reads its content, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[]} data - Output buffer to store file content (modified in-place)
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char fileContent[NAV_MAX_BUFFER]
+ * stack_var slong result
+ *
+ * result = NAVFileRead('/config.txt', fileContent)
+ * if (result >= 0) {
+ *     // Use the file content
+ * }
+ *
+ * @note The size of the output buffer limits how much data can be read
+ */
+define_function slong NAVFileRead(char path[], char data[]) {
     stack_var slong result
     stack_var long handle
 
@@ -184,7 +239,7 @@ define_function slong NAVFileRead(char path[], char data[], integer count) {
 
     handle = type_cast(result)
 
-    result = file_read(handle, data, count)
+    result = file_read(handle, data, max_length_array(data))
 
     if (result < 0) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
@@ -193,11 +248,86 @@ define_function slong NAVFileRead(char path[], char data[], integer count) {
                                     "'Error reading file "', path, '" : ', NAVGetFileError(result)")
     }
 
-    NAVFileClose(handle)
+    return NAVFileClose(handle)
+}
+
+
+/**
+ * @function NAVFileReadLine
+ * @public
+ * @description Reads a single line from an open file.
+ *
+ * @param {long} handle - File handle previously obtained from NAVFileOpen
+ * @param {char[]} data - Output buffer to store the line (modified in-place)
+ *
+ * @returns {slong} Number of bytes read on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileHandle
+ * stack_var char line[NAV_MAX_BUFFER]
+ * stack_var slong result
+ *
+ * fileHandle = NAVFileOpen('/config.txt', 'r')
+ * if (fileHandle >= 0) {
+ *     // Read file line by line
+ *     while (1) {
+ *         result = NAVFileReadLine(fileHandle, line)
+ *         if (result < 0) break;  // End of file or error
+ *         // Process the line
+ *     }
+ *     NAVFileClose(fileHandle)
+ * }
+ *
+ * @note Returns NAV_FILE_ERROR_EOF_END_OF_FILE_REACHED when end of file is reached
+ * @see NAVFileOpen
+ * @see NAVFileClose
+ */
+define_function slong NAVFileReadLine(long handle, char data[]) {
+    stack_var slong result
+
+    if (!handle) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileReadLine',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : The handle provided is null.'")
+    }
+
+    result = file_read_line(handle, data, max_length_array(data))
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileReadLine',
+                                    "'Error reading line in file : ', NAVGetFileError(result)")
+    }
+
     return result
 }
 
 
+/**
+ * @function NAVFileWrite
+ * @public
+ * @description Writes data to a file, overwriting any existing content.
+ * Opens the file, writes the data, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[]} data - Data to write to the file
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char content[100]
+ * stack_var slong result
+ *
+ * content = 'New file content'
+ * result = NAVFileWrite('/config.txt', content)
+ * if (result < 0) {
+ *     // Handle error
+ * }
+ *
+ * @note Creates a new file if it doesn't exist, otherwise overwrites existing file
+ */
 define_function slong NAVFileWrite(char path[], char data[]) {
     stack_var slong result
     stack_var long handle
@@ -228,11 +358,56 @@ define_function slong NAVFileWrite(char path[], char data[]) {
                                     "'Error writing file "', path, '" : ', NAVGetFileError(result)")
     }
 
-    NAVFileClose(handle)
-    return result
+    return NAVFileClose(handle)
 }
 
 
+/**
+ * @function NAVFileWriteLine
+ * @public
+ * @description Writes a line to a file, adding a carriage return and line feed.
+ * Opens the file, writes the line with CRLF, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[]} buffer - Line text to write
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char line[100]
+ * stack_var slong result
+ *
+ * line = 'Config setting = value'
+ * result = NAVFileWriteLine('/config.txt', line)
+ *
+ * @note Creates a new file if it doesn't exist, otherwise overwrites existing file
+ * @see NAVFileWrite
+ */
+define_function slong NAVFileWriteLine(char path[], char buffer[]) {
+    return NAVFileWrite(path, "buffer, NAV_CR, NAV_LF")
+}
+
+
+/**
+ * @function NAVFileAppend
+ * @public
+ * @description Appends data to the end of a file.
+ * Opens the file in append mode, writes the data, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[]} data - Data to append to the file
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char content[100]
+ * stack_var slong result
+ *
+ * content = 'Additional content'
+ * result = NAVFileAppend('/log.txt', content)
+ *
+ * @note Creates a new file if it doesn't exist
+ */
 define_function slong NAVFileAppend(char path[], char data[]) {
     stack_var slong result
     stack_var long handle
@@ -263,16 +438,65 @@ define_function slong NAVFileAppend(char path[], char data[]) {
                                     "'Error appending file "', path, '" : ', NAVGetFileError(result)")
     }
 
-    NAVFileClose(handle)
-    return result
+    return NAVFileClose(handle)
 }
 
 
+/**
+ * @function NAVFileAppendLine
+ * @public
+ * @description Appends a line to the end of a file, adding a carriage return and line feed.
+ * Opens the file in append mode, writes the line with CRLF, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[]} buffer - Line text to append
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char logEntry[100]
+ * stack_var slong result
+ *
+ * logEntry = "NAVGetTimeStamp(), ': System started'"
+ * result = NAVFileAppendLine('/log.txt', logEntry)
+ *
+ * @note Creates a new file if it doesn't exist
+ * @see NAVFileAppend
+ */
 define_function slong NAVFileAppendLine(char path[], char buffer[]) {
     return NAVFileAppend(path, "buffer, NAV_CR, NAV_LF")
 }
 
 
+/**
+ * @function NAVReadDirectory
+ * @public
+ * @description Reads the contents of a directory and returns details about each file and subdirectory.
+ *
+ * @param {char[]} path - Directory path to read
+ * @param {_NAVFileEntity[]} entities - Output array to store file/directory information (modified in-place)
+ *
+ * @returns {slong} Number of entries found on success, or negative error code on failure
+ *
+ * @example
+ * stack_var _NAVFileEntity dirEntities[100]
+ * stack_var slong count
+ * stack_var integer i
+ *
+ * count = NAVReadDirectory('/user', dirEntities)
+ * if (count > 0) {
+ *     for (i = 1; i <= count; i++) {
+ *         // Process each file entity
+ *         if (dirEntities[i].IsDirectory) {
+ *             // Handle directory
+ *         } else {
+ *             // Handle file
+ *         }
+ *     }
+ * }
+ *
+ * @note The path should start with a '/' or one will be added automatically
+ */
 define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
     stack_var char entity[NAV_MAX_BUFFER]
     stack_var slong result
@@ -281,18 +505,18 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
 
     index = 1
 
-    if (!length_array(path)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
-                                    __NAV_FOUNDATION_FILEUTILS__,
-                                    'NAVReadDirectory',
-                                    'The path supplied is empty. Using root directory.')
-
-        path = '/'
+    if (!NAVStartsWith(path, '/')) {
+        path = "'/', path"
     }
 
     result = file_dir(path, entity, index)
 
     if (result < 0) {
+        if (result == NAV_FILE_ERROR_FILE_PATH_NOT_LOADED) {
+            // Empty directory
+            return 0
+        }
+
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
                                     'NAVReadDirectory',
@@ -302,10 +526,6 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
     }
 
     count = type_cast(result)
-    if (count == 0) {
-        return type_cast(count)
-    }
-
     count = count + index
     set_length_array(entities, count)
 
@@ -313,6 +533,11 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
         result = file_dir(path, entity, index)
 
         if (result < 0) {
+            if (result == NAV_FILE_ERROR_FILE_PATH_NOT_LOADED) {
+                // Empty directory
+                continue
+            }
+
             NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                         __NAV_FOUNDATION_FILEUTILS__,
                                         'NAVReadDirectory',
@@ -321,124 +546,50 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
             continue
         }
 
-        entities[index].Name = NAVGetFileEntityName(entity)
-        entities[index].BaseName = NAVGetFileEntityBaseName(entity)
-        entities[index].Extension = NAVGetFileEntityExtension(entity)
+        entities[index].Name = NAVPathName(entity)
+        entities[index].BaseName = NAVPathBaseName(entity)
+        entities[index].Extension = NAVPathExtName(entity)
         entities[index].Path = entity
-        entities[index].Parent = NAVGetFileEntityParent(entity)
-        entities[index].IsDirectory = NAVIsDirectory(entity)
-
-        #IF_DEFINED NAV_FILEUTILS_DEBUG
-        NAVLog("'Entity ', itoa(index), ' Name: ', entities[index].Name")
-        NAVLog("'Entity ', itoa(index), ' BaseName: ', entities[index].BaseName")
-        NAVLog("'Entity ', itoa(index), ' Extension: ', entities[index].Extension")
-        NAVLog("'Entity ', itoa(index), ' Path: ', entities[index].Path")
-        NAVLog("'Entity ', itoa(index), ' Parent: ', entities[index].Parent")
-        NAVLog("'Entity ', itoa(index), ' IsDirectory: ', NAVIntegerToBooleanString(entities[index].IsDirectory)")
-        #END_IF
+        entities[index].Parent = NAVPathDirName(entity)
+        entities[index].IsDirectory = NAVPathIsDirectory(entity)
 
         index++
     }
-
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_FILEUTILS__,
-                                'NAVReadDirectory',
-                                "'Number of entities: ', itoa(count)")
 
     return type_cast(count)
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVGetFileEntityBaseName(char path[]) {
-    stack_var char name[NAV_MAX_BUFFER]
-    stack_var integer index
-
-    if (NAVIsDirectory(path)) {
-        return name
-    }
-
-    index = length_array(path)
-
-    while (index > 0) {
-        if (path[index] == '/' || path[index] == '\') {
-            break
-        }
-
-        index--
-    }
-
-    // name = NAVGetFileEntityName(path)
-
-    return NAVStringSubstring(name, index + 1, NAVIndexOf(name, '.', 1))
-}
-
-
-define_function char[NAV_MAX_BUFFER] NAVGetFileEntityParent(char path[]) {
-    stack_var integer index
-    stack_var char parent[NAV_MAX_BUFFER]
-
-    index = length_array(path)
-
-    while (index > 0) {
-        if (path[index] == '/' || path[index] == '\') {
-            break
-        }
-
-        index--
-    }
-
-    parent = NAVStringSubstring(path, 1, index)
-
-    if (length_array(parent) == 0) {
-        parent = '/'
-    }
-
-    return parent
-}
-
-
-define_function char[NAV_MAX_BUFFER] NAVGetFileEntityName(char path[]) {
-    stack_var integer index
-
-    index = length_array(path)
-
-    while (index > 0) {
-        if (path[index] == '/' || path[index] == '\') {
-            break
-        }
-
-        index--
-    }
-
-    return NAVStringSubstring(path, index + 1, length_array(path))
-}
-
-
-define_function char[NAV_MAX_CHARS] NAVGetFileEntityExtension(char path[]) {
-    stack_var integer index
-
-    if (NAVIsDirectory(path)) {
-        return ''
-    }
-
-    index = length_array(path)
-
-    while (index > 0) {
-        if (path[index] == '.') {
-            break
-        }
-
-        index--
-    }
-
-    return NAVStringSubstring(path, index + 1, length_array(path))
-}
-
-
+/**
+ * @function NAVWalkDirectory
+ * @public
+ * @description Recursively walks a directory structure and returns all files found.
+ *
+ * @param {char[]} path - Starting directory path
+ * @param {char[][]} files - Output array to store file paths (modified in-place)
+ *
+ * @returns {slong} Number of files found on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char allFiles[1000][NAV_MAX_BUFFER]
+ * stack_var slong count
+ * stack_var integer i
+ *
+ * count = NAVWalkDirectory('/user', allFiles)
+ * if (count > 0) {
+ *     for (i = 1; i <= count; i++) {
+ *         // Process each file
+ *     }
+ * }
+ *
+ * @note If path is empty, it defaults to the root directory '/'
+ * @note This function will recursively scan all subdirectories
+ */
 define_function slong NAVWalkDirectory(char path[], char files[][]) {
     stack_var _NAVFileEntity entities[1000]
     stack_var slong count
     stack_var integer x
+    local_var integer fileCount
 
     if (!length_array(path)) {
         path = '/'
@@ -454,21 +605,46 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
         stack_var char entityPath[NAV_MAX_BUFFER]
 
         entity = entities[x]
-        entityPath = NAVJoinPath(path, entity.Name)
+        entityPath = NAVPathJoinPath(path, entity.BaseName, '', '')
 
         if (entity.IsDirectory) {
-            NAVWalkDirectory(entityPath, files)
+            fileCount = fileCount + type_cast(NAVWalkDirectory(entityPath, files))
         }
         else {
-            // files[count] = entityPath
-            // count++
+            fileCount++
+            files[fileCount] = entityPath
         }
     }
+
+    set_length_array(files, fileCount)
+    count = type_cast(fileCount)
+
+    fileCount = 0
 
     return count
 }
 
 
+/**
+ * @function NAVFileExists
+ * @public
+ * @description Checks if a file exists in the specified directory.
+ *
+ * @param {char[]} path - Directory path to check
+ * @param {char[]} fileName - Name of the file to look for
+ *
+ * @returns {integer} true if the file exists, false otherwise
+ *
+ * @example
+ * stack_var integer exists
+ *
+ * exists = NAVFileExists('/user', 'config.txt')
+ * if (exists) {
+ *     // File exists, proceed
+ * }
+ *
+ * @note If path is empty, it defaults to the root directory '/'
+ */
 define_function integer NAVFileExists(char path[], char fileName[]) {
     stack_var _NAVFileEntity entities[255]
     stack_var integer x
@@ -479,6 +655,10 @@ define_function integer NAVFileExists(char path[], char fileName[]) {
 
     if (!length_array(path)) {
         path = '/'
+    }
+
+    if (!NAVStartsWith(path, '/')) {
+        path = "'/', path"
     }
 
     if (NAVReadDirectory(path, entities) <= 0) {
@@ -495,94 +675,361 @@ define_function integer NAVFileExists(char path[], char fileName[]) {
 }
 
 
-define_function char[NAV_MAX_BUFFER] NAVJoinPath(char parent[], char child[]) {
-    stack_var char path[NAV_MAX_BUFFER]
+/**
+ * @function NAVDirectoryExists
+ * @public
+ * @description Checks if a directory exists.
+ *
+ * @param {char[]} path - Directory path to check
+ *
+ * @returns {integer} true if the directory exists, false otherwise
+ *
+ * @example
+ * stack_var integer exists
+ *
+ * exists = NAVDirectoryExists('/user/data')
+ * if (!exists) {
+ *     // Directory doesn't exist, create it
+ *     NAVDirectoryCreate('/user/data')
+ * }
+ *
+ * @note If path is empty, it defaults to the root directory '/'
+ */
+define_function integer NAVDirectoryExists(char path[]) {
+    stack_var _NAVFileEntity entities[255]
+    stack_var integer x
 
-    path = ""
-
-    if (!length_array(parent)) {
-        return path
+    if (!length_array(path)) {
+        path = '/'
     }
 
-    path = parent
     if (!NAVStartsWith(path, '/')) {
         path = "'/', path"
     }
 
-    if (!length_array(child)) {
-        return path
+    if (NAVReadDirectory(path, entities) <= 0) {
+        return false
     }
 
-    path = "path, '/', child"
+    for (x = 1; x <= length_array(entities); x++) {
+        if (entities[x].Name == path && entities[x].IsDirectory) {
+            return true
+        }
+    }
 
-    return path
+    return false
 }
 
 
-// define_function NAVReadCsvFile(char path[], char lines[][]) {
-//     stack_var char file[NAV_MAX_BUFFER]
-//     stack_var integer index
-//     stack_var integer lineIndex
+/**
+ * @function NAVDirectoryCreate
+ * @public
+ * @description Creates a new directory.
+ *
+ * @param {char[]} path - Path of the directory to create
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVDirectoryCreate('/user/logs')
+ * if (result < 0) {
+ *     // Handle directory creation error
+ * }
+ *
+ * @note Parent directories must exist
+ */
+define_function slong NAVDirectoryCreate(char path[]) {
+    stack_var slong result
 
-//     if (!length_array(path)) {
-//         return
-//     }
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVDirectoryCreate',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
 
-//     file = NAVFileRead(path)
-//     if (!length_array(file)) {
-//         return
-//     }
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
 
-//     index = 0
-//     lineIndex = 0
+    result = file_createdir(path)
 
-//     while (index < length_array(file)) {
-//         stack_var char line[NAV_MAX_BUFFER]
-//         stack_var integer lineLength
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVDirectoryCreate',
+                                    "'Error creating directory "', path, '" : ', NAVGetFileError(result)")
+    }
 
-//         line = NAVStringSubstring(file, index, index + 1)
-//         lineLength = length_array(line)
-
-//         if (lineLength == 0) {
-//             break
-//         }
-
-//     }
-// }
+    return result
+}
 
 
-// define_function slong NAVSplitPath(char path[], char elements[][]) {
-//     stack_var char element[NAV_MAX_BUFFER]
-//     stack_var long index
-//     stack_var long count
+/**
+ * @function NAVDirectoryDelete
+ * @public
+ * @description Deletes a directory.
+ *
+ * @param {char[]} path - Path of the directory to delete
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVDirectoryDelete('/user/temp')
+ * if (result < 0) {
+ *     // Handle directory deletion error
+ * }
+ *
+ * @note Directory must be empty to be deleted
+ */
+define_function slong NAVDirectoryDelete(char path[]) {
+    stack_var slong result
 
-//     if (!length_array(path)) {
-//         return 0
-//     }
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVDirectoryDelete',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
 
-//     count = 0
-//     index = 0
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
 
-//     while (index < length_array(path)) {
-//         element = NAVSubstring(path, index, index + 1)
+    result = file_removedir(path)
 
-//         if (element == '/') {
-//             if (length_array(elements[count])) {
-//                 count++
-//             }
-//         } else {
-//             elements[count] = "elements[count], element"
-//         }
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVDirectoryDelete',
+                                    "'Error deleting directory "', path, '" : ', NAVGetFileError(result)")
+    }
 
-//         index++
-//     }
+    return result
+}
 
-//     if (length_array(elements[count])) {
-//         count++
-//     }
 
-//     return count
-// }
+/**
+ * @function NAVFileGetSize
+ * @public
+ * @description Gets the size of a file in bytes.
+ *
+ * @param {char[]} path - Path to the file
+ *
+ * @returns {slong} File size in bytes on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileSize
+ *
+ * fileSize = NAVFileGetSize('/user/data.bin')
+ * if (fileSize >= 0) {
+ *     // Use file size
+ * }
+ */
+define_function slong NAVFileGetSize(char path[]) {
+    stack_var slong result
+    stack_var long handle
+    stack_var slong count
+
+    result = NAVFileOpen(path, 'r')
+
+    if (result < 0) {
+        return result
+    }
+
+    handle = type_cast(result)
+
+    /**
+     * Ref: NetLinx Keywords Help
+     *
+     * SLONG FILE_SEEK (LONG HFile, LONG Pos)
+     *
+     * Parameters:
+     *      HFile - handle to the file returned by FILE_OPEN.
+     *      Pos - The byte position to set the file pointer (0 = beginning of file, -1 = end of file)
+     */
+    // I need to seek staright to the end of the file to get the size.
+    // The help docs for "file_seek" say that -1 is the end of the file.
+    // However, the function takes an argument of type LONG for the position.
+    // Passing -1 to the function results in the compiler warning 10571.
+    // The function does work as expected, but the warning is annoying.
+    // Should the position argument be changed to type SLONG AMX?
+    // I tried to use this compiler directive,
+    // since I'm unable to suppress the warning using "type_cast".
+    // #DISABLE_WARNING 10571
+    // However, this disables all type mismatch warnings globally,
+    // which is not desirable.
+    result = file_seek(handle, type_cast(NAV_FILE_SEEK_END))
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileGetSize',
+                                    "'Error seeking to the end of file "', path, '" : ', NAVGetFileError(result)")
+
+        NAVFileClose(handle)
+        return result
+    }
+
+    count = result
+
+    result = NAVFileClose(handle)
+
+    if (result < 0) {
+        return result
+    }
+
+    return count
+}
+
+
+/**
+ * @function NAVFileRename
+ * @public
+ * @description Renames a file or moves it to a new location.
+ *
+ * @param {char[]} source - Current path of the file
+ * @param {char[]} destination - New path for the file
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * // Rename a file
+ * result = NAVFileRename('/user/old.txt', '/user/new.txt')
+ *
+ * // Move a file
+ * result = NAVFileRename('/user/file.txt', '/archive/file.txt')
+ */
+define_function slong NAVFileRename(char source[], char destination[]) {
+    stack_var slong result
+
+    if (!length_array(source)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVRenameFile',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The source path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    if (!length_array(destination)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileRename',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The destination path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    result = file_rename(source, destination)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileRename',
+                                    "'Error renaming file "', source, '" : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+/**
+ * @function NAVFileDelete
+ * @public
+ * @description Deletes a file.
+ *
+ * @param {char[]} path - Path of the file to delete
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVFileDelete('/user/temp.txt')
+ * if (result < 0) {
+ *     // Handle file deletion error
+ * }
+ */
+define_function slong NAVFileDelete(char path[]) {
+    stack_var slong result
+
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileDelete',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    result = file_delete(path)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileDelete',
+                                    "'Error deleting file "', path, '" : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+/**
+ * @function NAVFileCopy
+ * @public
+ * @description Copies a file from one location to another.
+ *
+ * @param {char[]} source - Path of the source file
+ * @param {char[]} destination - Path of the destination file
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVFileCopy('/user/original.txt', '/backup/original.txt')
+ * if (result < 0) {
+ *     // Handle file copy error
+ * }
+ *
+ * @note If the destination file already exists, it will be overwritten
+ */
+define_function slong NAVFileCopy(char source[], char destination[]) {
+    stack_var slong result
+
+    if (!length_array(source)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileCopy',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The source path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    if (!length_array(destination)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileCopy',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The destination path supplied is empty.'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    result = file_copy(source, destination)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileCopy',
+                                    "'Error copying file "', source, '" to "', destination, '" : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
 
 
 #END_IF // __NAV_FOUNDATION_FILEUTILS__

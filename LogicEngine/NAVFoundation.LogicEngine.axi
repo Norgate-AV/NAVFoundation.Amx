@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.LogicEngine'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,9 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_LOGICENGINE__
 #DEFINE __NAV_FOUNDATION_LOGICENGINE__ 'NAVFoundation.LogicEngine'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.ArrayUtils.axi'
+#include 'NAVFoundation.TimelineUtils.axi'
 
 
 DEFINE_CONSTANT
@@ -77,39 +79,41 @@ struct _NAVLogicEngineRuntime {
 
 
 struct _NAVLogicEngineTimer {
-    long Ticks[MAX_NAV_LOGIC_ENGINE_TICKS]
     double Duration
+    long Ticks[MAX_NAV_LOGIC_ENGINE_TICKS]
 }
 
 
 struct _NAVLogicEngine {
-    char IsRunning
     _NAVLogicEngineTimer Timer
     _NAVLogicEngineRuntime Runtime
+
+    char IsRunning
     integer PreviousEventId
+
     char EventNames[NAV_LOGIC_ENGINE_NUMBER_OF_EVENTS][NAV_MAX_CHARS]
 }
 
 
 struct _NAVLogicEngineEvent {
+    _NAVLogicEngine Engine
+    ttimeline Timeline
     integer Id
     char Name[NAV_MAX_CHARS]
-    ttimeline Timeline
-    _NAVLogicEngine Engine
 }
 
 
 DEFINE_VARIABLE
 
-volatile _NAVLogicEngine navLogicEngine
+volatile _NAVLogicEngine engine
 
 
 define_function NAVLogicEngineStart() {
-    if (navLogicEngine.IsRunning) {
+    if (engine.IsRunning) {
         return
     }
 
-    if (NAVTimelineStart(TL_NAV_LOGIC_ENGINE, navLogicEngine.Timer.Ticks, TIMELINE_RELATIVE, TIMELINE_REPEAT) != 0) {
+    if (NAVTimelineStart(TL_NAV_LOGIC_ENGINE, engine.Timer.Ticks, TIMELINE_RELATIVE, TIMELINE_REPEAT) != 0) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_LOGICENGINE__,
                                     'NAVLogicEngineStart',
@@ -118,12 +122,12 @@ define_function NAVLogicEngineStart() {
         return
     }
 
-    navLogicEngine.IsRunning = true
+    engine.IsRunning = true
 }
 
 
 define_function NAVLogicEngineStop() {
-    if (!navLogicEngine.IsRunning) {
+    if (!engine.IsRunning) {
         return
     }
 
@@ -136,12 +140,12 @@ define_function NAVLogicEngineStop() {
         return
     }
 
-    navLogicEngine.IsRunning = false
+    engine.IsRunning = false
 }
 
 
 define_function NAVLogicEngineRestart() {
-    if (!navLogicEngine.IsRunning) {
+    if (!engine.IsRunning) {
         return
     }
 
@@ -203,23 +207,23 @@ define_function NAVLogicEngineInit(_NAVLogicEngine engine) {
     engine.EventNames[NAV_LOGIC_ENGINE_EVENT_ID_IDLE] = NAV_LOGIC_ENGINE_EVENT_IDLE
 
     for (x = 1; x <= length_array(NAV_LOGIC_ENGINE_EVENT_IDS); x++) {
-        set_length_array(engine.Timer.Ticks, x)
         engine.Timer.Ticks[x] = NAV_LOGIC_ENGINE_TICK
     }
 
+    set_length_array(engine.Timer.Ticks, length_array(NAV_LOGIC_ENGINE_EVENT_IDS))
     engine.Timer.Duration = NAVArraySumLong(engine.Timer.Ticks)
 }
 
 
 DEFINE_START {
-    NAVLogicEngineInit(navLogicEngine)
+    NAVLogicEngineInit(engine)
 }
 
 
 DEFINE_EVENT
 
 timeline_event[TL_NAV_LOGIC_ENGINE] {
-    NAVLogicEngineDrive(navLogicEngine, timeline)
+    NAVLogicEngineDrive(engine, timeline)
 }
 
 

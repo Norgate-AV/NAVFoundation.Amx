@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.DebugConsole'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,9 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.SocketUtils.axi'
 #include 'NAVFoundation.ConsoleUtils.axi'
+#include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.Queue.axi'
+#include 'NAVFoundation.Tui.axi'
 
 
 (***********************************************************)
@@ -69,14 +72,41 @@ DEFINE_VARIABLE
 
 volatile dev dvaNAVDebugConsole[MAX_NAV_DEBUG_CONSOLE_CONNECTIONS]
 volatile _NAVConsole NAVDebugConsole[MAX_NAV_DEBUG_CONSOLE_CONNECTIONS]
+volatile _NAVQueue NAVDebugConsoleQueue
 
 
 (***********************************************************)
 (*        SUBROUTINE/FUNCTION DEFINITIONS GO BELOW         *)
 (***********************************************************)
 
+define_function char[NAV_MAX_BUFFER] NAVColorLog(char log[]) {
+    select {
+        active(NAVStartsWith(log, NAVGetLogLevel(NAV_LOG_LEVEL_ERROR))): {
+            return NAVColorRed(log)
+        }
+        active(NAVStartsWith(log, NAVGetLogLevel(NAV_LOG_LEVEL_WARNING))): {
+            return NAVColorYellow(log)
+        }
+        active(NAVStartsWith(log, NAVGetLogLevel(NAV_LOG_LEVEL_INFO))): {
+            return NAVColorGreen(log)
+        }
+        active(NAVStartsWith(log, NAVGetLogLevel(NAV_LOG_LEVEL_DEBUG))): {
+            return NAVColorBlue(log)
+        }
+        active(true): {
+            return log
+        }
+    }
+}
+
+
 define_function char[NAV_MAX_BUFFER] NAVFormatDebugConsoleLog(char log[]) {
-    return "NAVGetTimeStamp(), ':: ', log, NAV_CR, NAV_LF"
+    return "NAVGetTimeStamp(), ':: ', NAVColorLog(log), NAV_CR, NAV_LF"
+}
+
+
+define_function NAVDebugConsoleLogEnqueue(char log[]) {
+    // NAVQueueEnqueue(NAVDebugConsoleQueue, log)
 }
 
 
@@ -93,6 +123,7 @@ define_function NAVDebugConsoleLog(char log[]) {
 }
 
 
+#IF_NOT_DEFINED NAV_MODULE
 define_function slong NAVDebugConsoleServerOpen(integer server, integer port) {
     stack_var integer socket
     stack_var integer serverIndex
@@ -115,6 +146,7 @@ define_function slong NAVDebugConsoleServerOpen(integer server, integer port) {
 
     return result
 }
+#END_IF
 
 
 define_function NAVDebugConsoleHandleDataEvent(char event[], tdata args) {
@@ -126,26 +158,34 @@ define_function NAVDebugConsoleHandleDataEvent(char event[], tdata args) {
         case NAV_EVENT_ONLINE: {
             NAVDebugConsole[serverIndex].SocketConnection.IsConnected = true
 
+            #IF_NOT_DEFINED NAV_MODULE
             NAVErrorLog(NAV_LOG_LEVEL_INFO,
                         "'NAVDebugConsole: Server', format('%02d', serverIndex), ': Client Connected: ', args.sourceip, ':', args.sourceport")
+            #END_IF
         }
         case NAV_EVENT_OFFLINE: {
             NAVDebugConsole[serverIndex].SocketConnection.IsConnected = false
 
+            #IF_NOT_DEFINED NAV_MODULE
             NAVErrorLog(NAV_LOG_LEVEL_INFO,
                         "'NAVDebugConsole: Server', format('%02d', serverIndex), ': Client Disconnected'")
 
             NAVDebugConsoleServerOpen(NAVZeroBase(serverIndex), NAV_DEBUG_CONSOLE_PORT)
+            #END_IF
         }
         case NAV_EVENT_ONERROR: {
             NAVDebugConsole[serverIndex].SocketConnection.IsConnected = false
 
+            #IF_NOT_DEFINED NAV_MODULE
             NAVErrorLog(NAV_LOG_LEVEL_ERROR,
                         "'NAVDebugConsole: Server', format('%02d', serverIndex), ': Socket OnError'")
+            #END_IF
         }
         case NAV_EVENT_STRING: {
+            #IF_NOT_DEFINED NAV_MODULE
             NAVErrorLog(NAV_LOG_LEVEL_INFO,
                         "'NAVDebugConsole: Server', format('%02d', serverIndex), ': Data Received: ', args.text")
+            #END_IF
 
             NAVDebugConsole[serverIndex].RxBuffer = ""
         }
@@ -155,6 +195,8 @@ define_function NAVDebugConsoleHandleDataEvent(char event[], tdata args) {
 
 DEFINE_START {
     stack_var integer x
+
+    // NAVQueueInit(NAVDebugConsoleQueue, 2048)
 
     for (x = 0; x < MAX_NAV_DEBUG_CONSOLE_CONNECTIONS; x++) {
         stack_var integer socket
@@ -172,7 +214,9 @@ DEFINE_START {
 
         create_buffer NAVDebugConsole[serverIndex].Socket, NAVDebugConsole[serverIndex].RxBuffer
 
+        #IF_NOT_DEFINED NAV_MODULE
         NAVDebugConsoleServerOpen(x, NAV_DEBUG_CONSOLE_PORT)
+        #END_IF
     }
 }
 

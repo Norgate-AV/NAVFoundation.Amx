@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.Jsmn'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -70,64 +70,6 @@ constant sinteger JSMN_ERROR_PART = -3
 constant sinteger JSMN_ERROR_OUT_OF_RANGE = -4
 
 constant sinteger JSMN_SUCCESS = 0
-
-constant char NAV_JSON_TEST_DATA_1[NAV_MAX_BUFFER] = '
-    {
-        "contacts": [
-            {
-                "name": "Alice",
-                "age": 28,
-                "phoneNumber": "01265 123456"
-            },
-            {
-                "name": "Bob",
-                "age": 32,
-                "phoneNumber": "01256 345678"
-            },
-            {
-                "name": "Charlie",
-                "age": 40,
-                "phoneNumber": "01432 678910"
-            }
-        ],
-        "details": {
-            "id": "abc123-abc33-fe6899-1209dd",
-            "password": "secret",
-            "isStupid": true
-        }
-    }
-'
-constant char NAV_JSON_TEST_DATA_2[NAV_MAX_BUFFER] = '
-    {
-        "name": "John",
-        "age": 30,
-        "cars": [
-            {
-                "name": "Ford",
-                "models": [
-                    "Fiesta",
-                    "Focus",
-                    "Mustang"
-                ]
-            },
-            {
-                "name": "BMW",
-                "models": [
-                    "320",
-                    "X3",
-                    "X5"
-                ]
-            },
-            {
-                "name": "Fiat",
-                "models": [
-                    "500",
-                    "Panda"
-                ]
-            }
-        ]
-    }
-'
 
 
 DEFINE_TYPE

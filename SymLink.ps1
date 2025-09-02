@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 #Requires -RunAsAdministrator
 
 <#
@@ -10,7 +11,7 @@
 
 MIT License
 
-Copyright (c) 2022 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,35 +34,61 @@ SOFTWARE.
 
 [CmdletBinding()]
 
-param(
+param (
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
     [string]
-    $Directory = "C:/Program Files (x86)/Common Files/AMXShare/AXIs"
+    $ModulePath = "C:\Program Files (x86)\Common Files\AMXShare\Duet\module",
+
+    [Parameter(Mandatory = $false)]
+    [string]
+    $IncludePath = "C:\Program Files (x86)\Common Files\AMXShare\AXIs",
+
+    [Parameter(Mandatory = $false)]
+    [switch]
+    $Delete = $false
 )
 
-try {
-    $files = Get-ChildItem -Filter *.axi -Recurse | Where-Object { $_.FullName -notmatch '\.history' }
+$prevPWD = $PWD
+Set-Location $PSScriptRoot
 
-    if (!$files) {
-        Write-Error "No files found"
-        exit
+try {
+    $directories = Get-ChildItem -Directory -ErrorAction SilentlyContinue | Where-Object { $_.FullName -notmatch "(\.\w+|node_modules|dist)" }
+
+    # Needed for scoop as all files with be in the root directory
+    $directories += $PWD
+
+    $includeFiles = $directories | Get-ChildItem -Filter "*.axi"
+
+    if (!$includeFiles) {
+        Write-Host "No include files found"
+        exit 1
     }
 
-    $Directory = Resolve-Path $Directory
+    $ModulePath = Resolve-Path $ModulePath
+    $IncludePath = Resolve-Path $IncludePath
 
-    foreach ($file in $files) {
+    !$Delete ? (Write-Host "Creating symlinks...") : (Write-Host "Deleting symlinks...")
+
+    foreach ($file in $includeFiles) {
+        $path = "$IncludePath\$($file.Name)"
+
+        if ($Delete) {
+            Write-Verbose "Deleting symlink: $path"
+            Remove-Item -Path $path -Force | Out-Null
+            continue
+        }
+
         $target = $file.FullName
-        $linkPath = "$Directory/$($file.Name)"
 
-        Write-Host "Creating symlink: $linkPath -> $target"
-        New-Item -ItemType SymbolicLink -Path $linkPath -Target $target -Force | Out-Null
+        Write-Verbose "Creating symlink: $path -> $target"
+        New-Item -ItemType SymbolicLink -Path $path -Target $target -Force | Out-Null
     }
 }
 catch {
     Write-Host $_.Exception.GetBaseException().Message -ForegroundColor Red
     exit 1
 }
-
-Write-Host
-Read-Host -Prompt "Press any key to exit..."
+finally {
+    Set-Location $prevPWD
+}

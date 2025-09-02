@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.Stack.h'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,6 @@ SOFTWARE.
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_STACK_H__
 #DEFINE __NAV_FOUNDATION_STACK_H__ 'NAVFoundation.Stack.h'
-
 
 DEFINE_CONSTANT
 

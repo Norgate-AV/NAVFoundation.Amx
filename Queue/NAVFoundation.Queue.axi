@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.Queue'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,8 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_QUEUE__
 #DEFINE __NAV_FOUNDATION_QUEUE__ 'NAVFoundation.Queue'
 
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Queue.h.axi'
 
 
@@ -51,6 +53,7 @@ define_function NAVQueueInit(_NAVQueue queue, integer capacity) {
     queue.Capacity = capacity
     queue.Head = 0
     queue.Tail = capacity
+    queue.Count = 0
 
     set_length_array(queue.Items, capacity)
 
@@ -62,11 +65,18 @@ define_function NAVQueueInit(_NAVQueue queue, integer capacity) {
 
 define_function integer NAVQueueEnqueue(_NAVQueue queue, char item[]) {
     if (NAVQueueIsFull(queue)) {
-        NAVLog("'NAVQueueEnqueue(): Queue is full. Cannot enqueue item.'")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_QUEUE__,
+                                    'NAVQueueEnqueue',
+                                    "'Queue is full. Cannot enqueue item: ', item")
         return false
     }
 
     queue.Tail = (queue.Tail + 1) % queue.Capacity
+    if (queue.Tail == 0) {
+        queue.Tail = queue.Capacity
+    }
+
     queue.Count++
 
     queue.Items[queue.Tail] = item
@@ -83,6 +93,10 @@ define_function char[NAV_MAX_BUFFER] NAVQueueDequeue(_NAVQueue queue) {
     }
 
     queue.Head = (queue.Head + 1) % queue.Capacity
+    if (queue.Head == 0) {
+        queue.Head = queue.Capacity
+    }
+
     queue.Count--
 
     item = queue.Items[queue.Head]

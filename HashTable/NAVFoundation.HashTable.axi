@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.HashTable'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,9 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_HASHTABLE__
 #DEFINE __NAV_FOUNDATION_HASHTABLE__ 'NAVFoundation.HashTable'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.HashTable.h.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 define_function integer NAVHashTableGetKeyHash(char key[]) {

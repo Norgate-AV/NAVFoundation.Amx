@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.RmsEvents'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Solutions Ltd
+Copyright (c) 2023 Norgate AV Services Limited
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,7 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.RmsUtils.axi'
 #include 'NAVFoundation.ArrayUtils.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 // #DEFINE USING_NAV_RMS_ADAPTER_ONLINE_EVENT_PRE_CLIENT_CONNECTION_INIT_CALLBACK
@@ -84,6 +85,27 @@ SOFTWARE.
 // #DEFINE USING_NAV_RMS_CLIENT_LOCATION_EVENT_CALLBACK
 // define_function NAVRmsClientLocationEventCallback(_NAVRmsClient client, tdata args) {}
 
+// #DEFINE USING_NAV_RMS_CLIENT_ASSETS_REGISTER_EVENT_CALLBACK
+// define_function NAVRmsClientAssetsRegisterEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_ASSET_REGISTERED_EVENT_CALLBACK
+// define_function NAVRmsClientAssetRegisteredEventCallback(_NAVRmsClient client, _NAVRmsRegisteredAsset asset) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_ASSET_REGISTER_METADATA_CALLBACK
+// define_function NAVRmsClientAssetRegisterMetadataCallback(_NAVRmsClient client, _NAVRmsRegisteredAsset asset) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_ASSET_REGISTER_PARAMETERS_CALLBACK
+// define_function NAVRmsClientAssetRegisterParametersCallback(_NAVRmsClient client, _NAVRmsRegisteredAsset asset) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_ASSET_REGISTER_CONTROL_METHODS_CALLBACK
+// define_function NAVRmsClientAssetRegisterControlMethodsCallback(_NAVRmsClient client, _NAVRmsRegisteredAsset asset) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_ASSET_RELOCATED_EVENT_CALLBACK
+// define_function NAVRmsClientAssetRelocatedEventCallback(_NAVRmsClient client, tdata args) {}
+
+// #DEFINE USING_NAV_RMS_CLIENT_ASSET_METHOD_EXECUTE_EVENT_CALLBACK
+// define_function NAVRmsClientAssetMethodExecuteEventCallback(_NAVRmsClient client, _NAVRmsAssetMethodExecuteEvent event) {}
+
 // #DEFINE USING_NAV_RMS_CLIENT_CONFIG_CHANGE_EVENT_CALLBACK
 // define_function NAVRmsClientConfigChangeEventCallback(_NAVRmsClient client, tdata args) {}
 
@@ -111,7 +133,7 @@ SOFTWARE.
 
 DEFINE_EVENT
 
-#IF_DEFINED vdvRms
+#IF_DEFINED USING_RMS
 data_event[vdvRms] {
     online: {
         NAVRmsClientInit(rmsClient, data)
@@ -122,13 +144,7 @@ data_event[vdvRms] {
 
         #IF_DEFINED USING_NAV_RMS_CLIENT_CONNECTION_INIT_EVENT_CALLBACK
         NAVRmsClientConnectionInitEventCallback(rmsClient, data)
-
-        NAVCommand(data.device, "'CONFIG.CLIENT.NAME-', rmsClient.Connection.Name")
-        NAVCommand(data.device, "'CONFIG.SERVER.URL-', rmsClient.Connection.Url")
-        NAVCommand(data.device, "'CONFIG.SERVER.PASSWORD-', rmsClient.Connection.Password")
-        NAVCommand(data.device, "'CONFIG.CLIENT.ENABLED-', rmsClient.Connection.Enabled")
-
-        NAVCommand(data.device, RMS_COMMAND_REINITIALIZE)
+        NAVRmsAdapterConnectionInit(rmsClient)
         #ELSE
         #warn 'USING_NAV_RMS_CLIENT_CONNECTION_INIT_EVENT_CALLBACK not defined'
         #warn 'RMS Client will not be configured and will not connect to the RMS Server!!!'
@@ -139,7 +155,7 @@ data_event[vdvRms] {
         #END_IF
 
         NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                    "'RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Adapter Device Online'")
+                    "'RMS Adapter [', NAVDeviceToString(data.device), '] Adapter Device Online'")
     }
     offline: {
         #IF_DEFINED USING_NAV_RMS_ADAPTER_OFFLINE_EVENT_CALLBACK
@@ -147,7 +163,7 @@ data_event[vdvRms] {
         #END_IF
 
         NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                    "'RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Adapter Device Offline'")
+                    "'RMS Adapter [', NAVDeviceToString(data.device), '] Adapter Device Offline'")
     }
     onerror: {
         #IF_DEFINED USING_NAV_RMS_ADAPTER_ONERROR_EVENT_CALLBACK
@@ -155,29 +171,12 @@ data_event[vdvRms] {
         #END_IF
 
         NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                    "'RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Adapter Device OnError: ', data.text")
-    }
-    awake: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                    "'RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Adapter Device Awake'")
-    }
-    standby: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                    "'RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Adapter Device Standby'")
-    }
-    string: {
-        NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                    "'String from RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-[', data.text, ']'")
+                    "'RMS Adapter [', NAVDeviceToString(data.device), '] Adapter Device OnError: ', data.text")
     }
     command: {
-        stack_var integer x
         stack_var _NAVSnapiMessage message
 
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                    "'Command from RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
-
         NAVParseSnapiMessage(data.text, message)
-        NAVSnapiMessageLog(message)
 
         switch (upper_string(message.Header)) {
             // Client Exception Notifications
@@ -204,7 +203,7 @@ data_event[vdvRms] {
                 #END_IF
 
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Client Online'")
+                            "'RMS Client [', NAVDeviceToString(data.device), '] Client Online'")
             }
             case RMS_EVENT_CLIENT_REGISTERED: {
                 rmsClient.IsRegistered = true
@@ -214,7 +213,7 @@ data_event[vdvRms] {
                 #END_IF
 
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Client Registered'")
+                            "'RMS Client [', NAVDeviceToString(data.device), '] Client Registered'")
             }
             case RMS_EVENT_CLIENT_OFFLINE: {
                 rmsClient.IsOnline = false
@@ -224,7 +223,7 @@ data_event[vdvRms] {
                 #END_IF
 
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Client Offline'")
+                            "'RMS Client [', NAVDeviceToString(data.device), '] Client Offline'")
             }
             case RMS_EVENT_CLIENT_STATE_TRANSITION: {
                 rmsClient.ConnectionState.OldState = message.Parameter[1]
@@ -242,7 +241,7 @@ data_event[vdvRms] {
                 #END_IF
 
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Version Information Request'")
+                            "'RMS Client [', NAVDeviceToString(data.device), '] Version Information Request'")
             }
             case RMS_EVENT_SYSTEM_POWER_ON: {
                 #IF_DEFINED USING_NAV_RMS_CLIENT_SYSTEM_POWER_ON_EVENT_CALLBACK
@@ -250,7 +249,7 @@ data_event[vdvRms] {
                 #END_IF
 
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' System Power On'")
+                            "'RMS Client [', NAVDeviceToString(data.device), '] System Power On'")
             }
             case RMS_EVENT_SYSTEM_POWER_OFF: {
                 #IF_DEFINED USING_NAV_RMS_CLIENT_SYSTEM_POWER_OFF_EVENT_CALLBACK
@@ -258,7 +257,7 @@ data_event[vdvRms] {
                 #END_IF
 
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' System Power Off'")
+                            "'RMS Client [', NAVDeviceToString(data.device), '] System Power Off'")
             }
             case NAV_RMS_CLIENT_EVENT_SERVER_INFO: {
                 rmsClient.ServerInformation.AppVersion = message.Parameter[1]
@@ -312,90 +311,111 @@ data_event[vdvRms] {
             // Asset Registration Event Notifications
             case RMS_EVENT_ASSETS_REGISTER: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Assets Register Request'")
+                            "'RMS Client [', NAVDeviceToString(data.device), '] Assets Register Request'")
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSETS_REGISTER_EVENT_CALLBACK
+                NAVRmsClientAssetsRegisterEventCallback(rmsClient, data)
+                #END_IF
             }
             case RMS_EVENT_ASSET_REGISTERED: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Registered: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset ID: ', message.Parameter[2]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   New Registration: ', message.Parameter[3]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset DPS: ', message.Parameter[4]")
+                stack_var _NAVRmsRegisteredAsset asset
+
+                asset.Key = message.Parameter[1]
+                asset.Id = message.Parameter[2]
+                asset.NewRegistration = NAVStringToBoolean(message.Parameter[3])
+                NAVStringToDevice(message.Parameter[4], asset.Device)
+
+                if (asset.Device == 0:1:0) {
+                    rmsClient.ClientKey = asset.Key
+                }
+
+                NAVRmsClientAssetRegisteredLog(asset, data)
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSET_REGISTERED_EVENT_CALLBACK
+                NAVRmsClientAssetRegisteredEventCallback(rmsClient, asset)
+                #END_IF
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSET_REGISTER_METADATA_CALLBACK
+                NAVRmsClientAssetRegisterMetadataCallback(rmsClient, asset)
+                #END_IF
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSET_REGISTER_PARAMETERS_CALLBACK
+                NAVRmsClientAssetRegisterParametersCallback(rmsClient, asset)
+                #END_IF
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSET_REGISTER_CONTROL_METHODS_CALLBACK
+                NAVRmsClientAssetRegisterControlMethodsCallback(rmsClient, asset)
+                #END_IF
             }
             case RMS_EVENT_ASSET_RELOCATED: {
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Location Change: '")
+                            "'RMS Client [', NAVDeviceToString(data.device), '] Asset Location Change: '")
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
+                            "'RMS Client [', NAVDeviceToString(data.device), ']   Asset Client Key: ', message.Parameter[1]")
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset ID: ', message.Parameter[2]")
+                            "'RMS Client [', NAVDeviceToString(data.device), ']   Asset ID: ', message.Parameter[2]")
                 NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   New Location ID: ', message.Parameter[3]")
+                            "'RMS Client [', NAVDeviceToString(data.device), ']   New Location ID: ', message.Parameter[3]")
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSET_RELOCATED_EVENT_CALLBACK
+                NAVRmsClientAssetRelocatedEventCallback(rmsClient, data)
+                #END_IF
             }
 
             // Asset Parameter Event Notifications
-            case RMS_EVENT_ASSET_PARAM_UPDATE: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Parameter Update: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Key: ', message.Parameter[2]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Change Operator: ', message.Parameter[3]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Change Value: ', message.Parameter[4]")
-            }
-            case RMS_EVENT_ASSET_PARAM_VALUE: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Parameter Value: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Key: ', message.Parameter[2]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Name: ', message.Parameter[3]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Value: ', message.Parameter[4]")
-            }
-            case RMS_EVENT_ASSET_PARAM_RESET: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Parameter Reset: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Key: ', message.Parameter[2]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Name: ', message.Parameter[3]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Parameter Value: ', message.Parameter[4]")
-            }
+            // case RMS_EVENT_ASSET_PARAM_UPDATE: {
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), '] Asset Parameter Update: '")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), ']   Asset Client Key: ', message.Parameter[1]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), ']   Parameter Key: ', message.Parameter[2]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), ']   Change Operator: ', message.Parameter[3]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), ']   Change Value: ', message.Parameter[4]")
+            // }
+            // case RMS_EVENT_ASSET_PARAM_VALUE: {
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), '] Asset Parameter Value: '")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), ']   Asset Client Key: ', message.Parameter[1]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), ']   Parameter Key: ', message.Parameter[2]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), ']   Parameter Name: ', message.Parameter[3]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), ']   Parameter Value: ', message.Parameter[4]")
+            // }
+            // case RMS_EVENT_ASSET_PARAM_RESET: {
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), '] Asset Parameter Reset: '")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), ']   Asset Client Key: ', message.Parameter[1]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), ']   Parameter Key: ', message.Parameter[2]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), ']   Parameter Name: ', message.Parameter[3]")
+            //     NAVErrorLog(NAV_LOG_LEVEL_INFO,
+            //                 "'RMS Client [', NAVDeviceToString(data.device), ']   Parameter Value: ', message.Parameter[4]")
+            // }
 
             // Asset Control Methods Event Notifications
             case RMS_EVENT_ASSET_METHOD_EXECUTE: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), ' Asset Method Execute: '")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Asset Client Key: ', message.Parameter[1]")
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Method Key: ', message.Parameter[2]")
+                stack_var _NAVRmsAssetMethodExecuteEvent event
 
-                // Loop through the parameters
-                for (x = 3; x <= length_array(message.Parameter); x++) {
-                    stack_var integer index
+                event.AssetKey = message.Parameter[1]
+                event.Method = message.Parameter[2]
 
-                    if (message.Parameter[x] == '') {
-                        break
-                    }
-
-                    index = x - 2
-                    NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                                "'RMS Client ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '   Method Argument ', itoa(index), ': ', message.Parameter[x]")
+                if (length_array(message.Parameter) > 2) {
+                    NAVArraySliceString(message.Parameter, 3, length_array(message.Parameter), event.Parameter)
                 }
+
+                NAVRmsClientAssetMethodExecuteLog(event, data)
+
+                #IF_DEFINED USING_NAV_RMS_CLIENT_ASSET_METHOD_EXECUTE_EVENT_CALLBACK
+                NAVRmsClientAssetMethodExecuteEventCallback(rmsClient, event)
+                #END_IF
             }
 
             // Hotlist Event Notifications
@@ -425,11 +445,6 @@ data_event[vdvRms] {
                 #END_IF
 
                 NAVRmsMessageDisplayLog(rmsClient.Message, data)
-            }
-
-            default: {
-                NAVErrorLog(NAV_LOG_LEVEL_INFO,
-                            "'Command from RMS Adapter ', NAVStringSurroundWith(NAVDeviceToString(data.device), '[', ']'), '-', NAVStringSurroundWith(data.text, '[', ']')")
             }
         }
     }

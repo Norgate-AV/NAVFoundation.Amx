@@ -1,14 +1,28 @@
 {
     "name": "NAVFoundation.Amx",
     "description": "A collection of libraries for NetLinx software development",
-    "version": "0.0.0",
+    "version": "2.1.0",
     "license": "MIT",
-    "files": ["**/*.axi", "./SymLink.ps1", "LICENSE"],
+    "files": ["**/*.axi", "SymLink.ps1", "LICENSE", "README.md"],
     "repository": {
         "type": "git",
-        "url": "https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx.git"
+        "url": "https://github.com/Norgate-AV/NAVFoundation.Amx.git"
     },
     "bugs": {
-        "url": "https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx/issues"
-    }
+        "url": "https://github.com/Norgate-AV/NAVFoundation.Amx/issues"
+    },
+    "dependencies": [
+        {
+            "version": "~1.2.0",
+            "url": "github.com/Norgate-AV/NAVDatabase.Amx.EnovaDVX"
+        },
+        {
+            "version": "~1.0.0",
+            "url": "github.com/Norgate-AV/NAVDatabase.Amx.NtpClient"
+        },
+        {
+            "version": "4.7.21",
+            "url": "github.com/Norgate-AV/RMS-SDK"
+        }
+    ]
 }
