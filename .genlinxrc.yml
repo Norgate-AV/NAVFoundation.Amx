@@ -45,7 +45,6 @@ build:
       - ./__tests__/include/pbkdf2
       - ./__tests__/include/int64
       - ./__tests__/include/assert
-      - ./__tests__/include/array-utils
       - ./__tests__/include/sha1
       - ./__tests__/include/sha512
       - ./__tests__/include/sha256
@@ -55,6 +54,3 @@ build:
       - ./__tests__/include/http
       - ./__tests__/include/url
       - ./__tests__/include/jsmn
-      - ./include
-    modulePath:
-      - ./module
