@@ -75,7 +75,4 @@ define_module 'RmsNetLinxAdapter_dr4_0_0' RmsNetLinxAdapterComm(vdvRMS)
 define_module 'RmsControlSystemMonitor' RmsControlSystemMonitorComm(vdvRMS, dvMaster)
 
 
-DEFINE_EVENT
-
-
 #END_IF // __NAV_FOUNDATION_RMSBASE__

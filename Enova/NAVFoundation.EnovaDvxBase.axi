@@ -141,22 +141,11 @@ constant dev DVA_ENOVA[]    =   {
 #END_IF
 
 
-DEFINE_VARIABLE
-
-
 #include 'NAVFoundation.Enova.axi'
 #include 'NAVFoundation.EnovaEvents.axi'
 
 
-DEFINE_START {
-
-}
-
-
 define_module 'mEnovaDVX' mEnovaDvxComm(vdvEnovaDvx, DVA_ENOVA[1])
-
-
-DEFINE_EVENT
 
 
 #END_IF // __NAV_FOUNDATION_ENOVA_DVX_BASE__
