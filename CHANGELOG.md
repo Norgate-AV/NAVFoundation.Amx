@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.1.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.0.0...v3.1.0) (2025-09-14)
+
+### 🌟 Features
+
+- **socket-utils:** add NAVClientTlsSocketOpen, NAVClientTlsSocketClose ([6b0855c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6b0855c5eead63c84b92ac130424e3043ad9c42e))
+
 ## [3.0.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v2.1.0...v3.0.0) (2025-09-14)
 
 ### ⚠ BREAKING CHANGES
