@@ -109,6 +109,31 @@ define_function char[NAV_MAX_BUFFER] NAVGetSocketProtocol(integer protocol) {
 
 
 /**
+ * @function NAVGetTlsSocketMode
+ * @public
+ * @description Converts a TLS mode constant to a human-readable mode name.
+ *
+ * @param {integer} mode - Protocol value (TLS_VALIDATE_CERTIFICATE, or TLS_IGNORE_CERTIFICATE_ERRORS)
+ *
+ * @returns {char[]} Human-readable mode name
+ *
+ * @example
+ * stack_var integer mode
+ * stack_var char modeName[NAV_MAX_BUFFER]
+ *
+ * mode = TLS_VALIDATE_CERTIFICATE
+ * modeName = NAVGetTlsSocketMode(mode)  // Returns 'TLS Validate Certificate'
+ */
+define_function char[NAV_MAX_BUFFER] NAVGetTlsSocketMode(integer mode) {
+    switch (mode) {
+        case TLS_VALIDATE_CERTIFICATE:      { return 'TLS Validate Certificate' }
+        case TLS_IGNORE_CERTIFICATE_ERRORS: { return 'TLS Ignore Certificate Errors' }
+        default:                            { return "'Unknown mode (', itoa(mode), ')'" }
+    }
+}
+
+
+/**
  * @function NAVServerSocketOpen
  * @public
  * @description Opens a server socket that listens for incoming connections.
@@ -352,6 +377,101 @@ define_function slong NAVClientSecureSocketOpen(integer socket,
  */
 define_function slong NAVClientSecureSocketClose(integer socket) {
     return ssh_client_close(socket)
+}
+
+
+/**
+ * @function NAVClientTlsSocketOpen
+ * @public
+ * @description Opens a TLS client socket connection to a remote server.
+ *
+ * @param {integer} socket - Socket ID to use
+ * @param {char[]} address - IP address or hostname of remote server
+ * @param {integer} port - Port number to connect to
+ * @param {integer} mode - TLS_VALIDATE_CERTIFICATE (0), or TLS_IGNORE_CERTIFICATE_ERRORS (1)
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * // Connect to a device at 192.168.1.100 on port 23 (Telnet)
+ * result = NAVClientTlsSocketOpen(dvTCPClient.PORT, '192.168.1.100', 23, 0)
+ * if (result < 0) {
+ *     // Handle error
+ * }
+ *
+ * @note IP_UDP client sockets can send datagrams without establishing a connection
+ * @note For hostname resolution, ensure DNS is properly configured on the master
+ */
+define_function slong NAVClientTlsSocketOpen(integer socket, char address[], integer port, integer mode) {
+    stack_var slong result
+
+    address = NAVTrimString(address)
+
+    if (!length_array(address)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientTlsSocketOpen',
+                                    "'The host address is an empty string.'")
+        return NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS
+    }
+
+    if (port <= 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientTlsSocketOpen',
+                                    "NAVGetSocketError(NAV_SOCKET_ERROR_INVALID_PORT)")
+        return NAV_SOCKET_ERROR_INVALID_PORT
+    }
+
+    result = tls_client_open(socket, address, port, mode)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientTlsSocketOpen',
+                                    "'Failed to open socket to ', address, ':', itoa(port), ' TLS mode: ', NAVGetTlsSocketMode(mode)")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientTlsSocketOpen',
+                                    "'Socket error: ', NAVGetSocketError(result)")
+    }
+
+    return result
+}
+
+
+/**
+ * @function NAVClientTlsSocketClose
+ * @public
+ * @description Closes a TLS client socket connection.
+ *
+ * @param {integer} socket - Socket ID to close
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVClientTlsSocketClose(dvTCPClient.PORT)
+ * if (result < 0) {
+ *     // Handle error
+ * }
+ */
+define_function slong NAVClientTlsSocketClose(integer socket) {
+    stack_var slong result
+
+    result = tls_client_close(socket)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientTlsSocketClose',
+                                    "'Failed to close socket. ', NAVGetSocketError(result)")
+    }
+
+    return result
 }
 
 
