@@ -35,9 +35,9 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_MODULEBASE__ 'NAVFoundation.ModuleBase'
 
 #include 'NAVFoundation.Core.h.axi'
-#include 'NAVFoundation.ModuleBase.h.axi'
 #include 'NAVFoundation.ArrayUtils.axi'
 #include 'NAVFoundation.SnapiHelpers.axi'
+#include 'NAVFoundation.ModuleBase.h.axi'
 
 DEFINE_CONSTANT
 
