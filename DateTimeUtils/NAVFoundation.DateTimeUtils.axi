@@ -635,9 +635,12 @@ define_function char[NAV_MAX_CHARS] NAVDateTimeGetShortDayString(integer day) {
  * stack_var integer days
  * days = NAVDateTimeGetDaysInMonth(2)  // Returns 28 (or 29 in leap years)
  *
- * @note Does not automatically adjust for leap years, use in conjunction with NAVDateTimeIsLeapYear
  */
 define_function integer NAVDateTimeGetDaysInMonth(integer month) {
+    if (month == 2 && NAVDateTimeIsLeapYear(type_cast(date_to_year(ldate)))) {
+        return 29
+    }
+
     return NAV_DAYS_IN_MONTH[month]
 }
 
