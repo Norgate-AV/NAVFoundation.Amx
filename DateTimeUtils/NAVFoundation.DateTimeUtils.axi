@@ -247,67 +247,49 @@ define_function integer NAVDateTimeGetLastSundayInMonth(integer year, integer mo
  * isDst = NAVDateTimeIsDst(now)
  */
 define_function char NAVDateTimeIsDst(_NAVTimespec timespec) {
-    stack_var integer year
+    // UK DST rules: last Sunday in March to last Sunday in October
+    // Optimized mathematical calculation
+
     stack_var integer month
     stack_var integer day
-    stack_var integer hour
-    stack_var integer minute
-    stack_var integer second
+    stack_var integer year
+    stack_var integer lastDayOfMonth
+    stack_var integer lastDayDOW
+    stack_var integer transitionDay
 
-    stack_var integer dayOfWeek
-    stack_var integer dayOfYear
-
-    stack_var integer dstStartMonth
-    stack_var integer dstStartDay
-    stack_var integer dstStartHour
-    stack_var integer dstStartMinute
-
-    stack_var integer dstEndMonth
-    stack_var integer dstEndDay
-    stack_var integer dstEndHour
-    stack_var integer dstEndMinute
-
-    stack_var integer dstStartDayOfYear
-    stack_var integer dstEndDayOfYear
-
-    stack_var integer dstStartEpoch
-    stack_var integer dstEndEpoch
-
-    stack_var integer currentEpoch
-
-    year = timespec.Year
-    month = timespec.Month
+    month = timespec.Month + 1  // Convert from 0-based to 1-based
     day = timespec.MonthDay
-    hour = timespec.Hour
-    minute = timespec.Minute
-    second = timespec.Seconds
+    year = timespec.Year + 1900 // Convert from years since 1900
 
-    dayOfWeek = timespec.WeekDay
-    dayOfYear = timespec.YearDay
+    // Not in DST months
+    if (month < 3 || month > 10) {
+        return false
+    }
 
-    dstStartMonth = NAV_DATETIME_DST_START_MONTH
-    dstStartDay = NAVDateTimeGetLastSundayInMonth(year, dstStartMonth)
-    dstStartHour = NAV_DATETIME_DST_START_HOUR
-    dstStartMinute = NAV_DATETIME_DST_START_MINUTE
+    // April to September: always in DST
+    if (month > 3 && month < 10) {
+        return true
+    }
 
-    dstEndMonth = NAV_DATETIME_DST_END_MONTH
-    dstEndDay = NAVDateTimeGetLastSundayInMonth(year, dstEndMonth)
-    dstEndHour = NAV_DATETIME_DST_END_HOUR
-    dstEndMinute = NAV_DATETIME_DST_END_MINUTE
+    // Get days in month (handles leap years)
+    lastDayOfMonth = NAVDateTimeGetDaysInMonth(month)
 
-    // dstStartDayOfYear = NAVDateTimeGetYearDay(year, dstStartMonth, dstStartDay)
-    // dstEndDayOfYear = NAVDateTimeGetYearDay(year, dstEndMonth, dstEndDay)
+    // Calculate day of week for the last day of month
+    // Using the current date as reference point
+    lastDayDOW = (timespec.WeekDay + (lastDayOfMonth - day)) % 7
 
-    // dstStartEpoch = NAVDateTimeGetEpoch(year, dstStartMonth, dstStartDay, dstStartHour, dstStartMinute, 0)
-    // dstEndEpoch = NAVDateTimeGetEpoch(year, dstEndMonth, dstEndDay, dstEndHour, dstEndMinute, 0)
+    // Last Sunday is lastDayOfMonth - lastDayDOW (adjusted for Sunday = 0)
+    if (lastDayDOW == 0) {
+        transitionDay = lastDayOfMonth
+    } else {
+        transitionDay = lastDayOfMonth - lastDayDOW
+    }
 
-    // currentEpoch = NAVDateTimeGetEpoch(year, month, day, hour, minute, second)
-
-    // if (currentEpoch >= dstStartEpoch && currentEpoch <= dstEndEpoch) {
-    //     return true
-    // }
-
-    return false
+    if (month == 3) {  // March - DST starts on transition day
+        return (day >= transitionDay)
+    } else { // October - DST ends on transition day
+        return (day <= transitionDay)
+    }
 }
 
 
