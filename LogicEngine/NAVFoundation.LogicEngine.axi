@@ -34,86 +34,37 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_LOGICENGINE__
 #DEFINE __NAV_FOUNDATION_LOGICENGINE__ 'NAVFoundation.LogicEngine'
 
-#include 'NAVFoundation.Core.h.axi'
-#include 'NAVFoundation.ArrayUtils.axi'
+#include 'NAVFoundation.LogicEngine.h.axi'
 #include 'NAVFoundation.TimelineUtils.axi'
-
-
-DEFINE_CONSTANT
-
-constant long TL_NAV_LOGIC_ENGINE                   = 301
-
-constant long NAV_LOGIC_ENGINE_TICK                 = 200
-
-constant integer NAV_LOGIC_ENGINE_NUMBER_OF_EVENTS  = 3
-constant integer NAV_LOGIC_ENGINE_EVENT_ID_QUERY    = 1
-constant integer NAV_LOGIC_ENGINE_EVENT_ID_ACTION   = 2
-constant integer NAV_LOGIC_ENGINE_EVENT_ID_IDLE     = 3
-
-constant char NAV_LOGIC_ENGINE_EVENT_QUERY[]        = 'query'
-constant char NAV_LOGIC_ENGINE_EVENT_ACTION[]       = 'action'
-constant char NAV_LOGIC_ENGINE_EVENT_IDLE[]         = 'idle'
-
-constant integer MAX_NAV_LOGIC_ENGINE_TICKS         = 6
-
-constant integer NAV_LOGIC_ENGINE_EVENT_IDS[]       =   {
-                                                            NAV_LOGIC_ENGINE_EVENT_ID_QUERY,
-                                                            NAV_LOGIC_ENGINE_EVENT_ID_ACTION,
-                                                            NAV_LOGIC_ENGINE_EVENT_ID_ACTION,
-                                                            NAV_LOGIC_ENGINE_EVENT_ID_ACTION,
-                                                            NAV_LOGIC_ENGINE_EVENT_ID_ACTION,
-                                                            NAV_LOGIC_ENGINE_EVENT_ID_IDLE
-                                                        }
 
 
 // #DEFINE USING_NAV_LOGIC_ENGINE_EVENT_CALLBACK
 // define_function NAVLogicEngineEventCallback(_NAVLogicEngineEvent args) {}
 
+// !!! You must define the engine variable in your main .axs file !!!
 
-DEFINE_TYPE
+// DEFINE_VARIABLE
 
-struct _NAVLogicEngineRuntime {
-    double Milliseconds
-    char TimespanString[NAV_MAX_BUFFER]
-}
+// _NAVLogicEngine engine
 
+// !!! You MUST define the event below in your main .axs file !!!
 
-struct _NAVLogicEngineTimer {
-    double Duration
-    long Ticks[MAX_NAV_LOGIC_ENGINE_TICKS]
-}
+// DEFINE_EVENT
 
-
-struct _NAVLogicEngine {
-    _NAVLogicEngineTimer Timer
-    _NAVLogicEngineRuntime Runtime
-
-    char IsRunning
-    integer PreviousEventId
-
-    char EventNames[NAV_LOGIC_ENGINE_NUMBER_OF_EVENTS][NAV_MAX_CHARS]
-}
+// timeline_event[TL_NAV_LOGIC_ENGINE] {
+//     NAVLogicEngineDrive(engine, timeline) <-- <-- MUST MATCH THE VARIABLE NAME DECLARED FOR THE ENGINE
+// }
 
 
-struct _NAVLogicEngineEvent {
-    _NAVLogicEngine Engine
-    ttimeline Timeline
-    integer Id
-    char Name[NAV_MAX_CHARS]
-}
-
-
-DEFINE_VARIABLE
-
-volatile _NAVLogicEngine engine
-
-
-define_function NAVLogicEngineStart() {
+define_function NAVLogicEngineStart(_NAVLogicEngine engine) {
     if (engine.IsRunning) {
         return
     }
 
-    if (NAVTimelineStart(TL_NAV_LOGIC_ENGINE, engine.Timer.Ticks, TIMELINE_RELATIVE, TIMELINE_REPEAT) != 0) {
+    if (NAVTimelineStart(TL_NAV_LOGIC_ENGINE,
+                            engine.Ticks,
+                            TIMELINE_RELATIVE,
+                            TIMELINE_REPEAT) != 0) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_LOGICENGINE__,
                                     'NAVLogicEngineStart',
@@ -126,7 +77,7 @@ define_function NAVLogicEngineStart() {
 }
 
 
-define_function NAVLogicEngineStop() {
+define_function NAVLogicEngineStop(_NAVLogicEngine engine) {
     if (!engine.IsRunning) {
         return
     }
@@ -144,7 +95,7 @@ define_function NAVLogicEngineStop() {
 }
 
 
-define_function NAVLogicEngineRestart() {
+define_function NAVLogicEngineRestart(_NAVLogicEngine engine) {
     if (!engine.IsRunning) {
         return
     }
@@ -156,8 +107,6 @@ define_function NAVLogicEngineRestart() {
 define_function NAVLogicEngineCopyEvent(_NAVLogicEngineEvent source, _NAVLogicEngineEvent destination) {
     destination.Id = source.Id
     destination.Name = source.Name
-    destination.Timeline = source.Timeline
-    destination.Engine = source.Engine
 }
 
 
@@ -171,21 +120,11 @@ define_function integer NAVLogicEngineGetEventId(ttimeline args) {
 }
 
 
-define_function double NAVLogicEngineGetRuntime(_NAVLogicEngineTimer timer, ttimeline args) {
-    return (timer.Duration * args.Repetition) + args.Time
-}
-
-
 define_function NAVLogicEngineDrive(_NAVLogicEngine engine, ttimeline args) {
     stack_var _NAVLogicEngineEvent event
 
-    engine.Runtime.Milliseconds = NAVLogicEngineGetRuntime(engine.Timer, args)
-    engine.Runtime.TimespanString = NAVGetTimeSpan(engine.Runtime.Milliseconds)
-
     event.Id = NAVLogicEngineGetEventId(args)
     event.Name = NAVLogicEngineGetEventName(engine, event.Id)
-    event.Timeline = args
-    event.Engine = engine
 
     #IF_DEFINED USING_NAV_LOGIC_ENGINE_EVENT_CALLBACK
     NAVLogicEngineEventCallback(event)
@@ -199,31 +138,16 @@ define_function NAVLogicEngineInit(_NAVLogicEngine engine) {
     stack_var integer x
 
     engine.IsRunning = false
-    engine.Runtime.Milliseconds = 0
-    engine.Runtime.TimespanString = ''
     engine.PreviousEventId = 0
     engine.EventNames[NAV_LOGIC_ENGINE_EVENT_ID_QUERY] = NAV_LOGIC_ENGINE_EVENT_QUERY
     engine.EventNames[NAV_LOGIC_ENGINE_EVENT_ID_ACTION] = NAV_LOGIC_ENGINE_EVENT_ACTION
     engine.EventNames[NAV_LOGIC_ENGINE_EVENT_ID_IDLE] = NAV_LOGIC_ENGINE_EVENT_IDLE
 
     for (x = 1; x <= length_array(NAV_LOGIC_ENGINE_EVENT_IDS); x++) {
-        engine.Timer.Ticks[x] = NAV_LOGIC_ENGINE_TICK
+        engine.Ticks[x] = NAV_LOGIC_ENGINE_TICK
     }
 
-    set_length_array(engine.Timer.Ticks, length_array(NAV_LOGIC_ENGINE_EVENT_IDS))
-    engine.Timer.Duration = NAVArraySumLong(engine.Timer.Ticks)
-}
-
-
-DEFINE_START {
-    NAVLogicEngineInit(engine)
-}
-
-
-DEFINE_EVENT
-
-timeline_event[TL_NAV_LOGIC_ENGINE] {
-    NAVLogicEngineDrive(engine, timeline)
+    set_length_array(engine.Ticks, length_array(NAV_LOGIC_ENGINE_EVENT_IDS))
 }
 
 
