@@ -1,5 +1,38 @@
 # Changelog
 
+## [3.0.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v2.1.0...v3.0.0) (2025-09-14)
+
+### ⚠ BREAKING CHANGES
+
+- **module-base:** Consumers must now declare their own \_NAVModule
+  variable in DEFINE_VARIABLE and call NAVModuleInit() in DEFINE_START.
+  The library no longer provides automatic module setup.
+- **logic-engine:** Struct definitions have changed. Users must update
+  code that accesses nested struct members or relies on previous
+  \_NAVLogicEngine layout. The \_NAVLogicEngineRuntime and
+  \_NAVLogicEngineTimer structs have been removed.
+- **device-priority-queue:** Remove global queue variable and timeline event for failed responses
+
+* Remove `volatile _NAVDevicePriorityQueue priorityQueue` global variable
+* Remove timeline event that handled failed responses
+* Users must now declare their own queue instances
+* Failed response handling now requires custom callback implementation
+* Update documentation with new usage patterns
+
+### 🌟 Features
+
+- **module-base:** remove automatic module initialization ([7b7d589](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/7b7d5898883fa63ba619208690a332159bfca02d))
+- **device-priority-queue:** remove global state and timeline handling ([8ed2a6e](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/8ed2a6e79e821b0de5ad6fc60329bc36aa13df17))
+- **logic-engine:** simplify architecture and optimize memory usage ([ec80995](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/ec80995a7b9bc7a40ef7bd23d5c14e722d9e24ad))
+
+### 🐛 Bug Fixes
+
+- **date-time-utils:** allow for leap year when getting days in month ([6f77f5f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6f77f5f67a1d8165ad0848496244476774fae40b))
+
+### 🚀 Performance
+
+- **date-time-utils:** optimize calculations for DST ([3ab0f55](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3ab0f5523cac6d5c1c5b7784bb9caaa33146aa9d))
+
 ## [2.1.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v2.0.1...v2.1.0) (2025-03-31)
 
 ### 🌟 Features
