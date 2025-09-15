@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.2.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.1.0...v3.2.0) (2025-09-15)
+
+### 🌟 Features
+
+- **rms-utils:** add NAVRmsAdapterConnectionUpdate ([b1acb17](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b1acb17baf4924f5668fc5b2175de3945c5aef19))
+
+### 🚀 Performance
+
+- **rms-utils:** reduce memory footprint for some structs ([f949171](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/f949171d9133017b98b7bc8c57ccfe866f371dd1))
+
 ## [3.1.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.0.0...v3.1.0) (2025-09-14)
 
 ### 🌟 Features
