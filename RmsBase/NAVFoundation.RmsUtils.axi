@@ -207,13 +207,18 @@ define_function NAVRmsMessageCopy(_NAVRmsMessage source, _NAVRmsMessage destinat
 }
 
 
-define_function NAVRmsAdapterConnectionInit(_NAVRmsClient client) {
-    NAVCommand(client.Device, "'CONFIG.CLIENT.NAME-', client.Connection.Name")
-    NAVCommand(client.Device, "'CONFIG.SERVER.URL-', client.Connection.Url")
-    NAVCommand(client.Device, "'CONFIG.SERVER.PASSWORD-', client.Connection.Password")
-    NAVCommand(client.Device, "'CONFIG.CLIENT.ENABLED-', client.Connection.Enabled")
+define_function NAVRmsAdapterConnectionUpdate(dev device, _NAVRmsConnection connection) {
+    NAVCommand(device, "'CONFIG.CLIENT.NAME-', connection.Name")
+    NAVCommand(device, "'CONFIG.SERVER.URL-', connection.Url")
+    NAVCommand(device, "'CONFIG.SERVER.PASSWORD-', connection.Password")
+    NAVCommand(device, "'CONFIG.CLIENT.ENABLED-', connection.Enabled")
 
-    NAVCommand(client.Device, NAV_RMS_CLIENT_REINITIALIZE)
+    NAVCommand(device, NAV_RMS_CLIENT_REINITIALIZE)
+}
+
+
+define_function NAVRmsAdapterConnectionInit(_NAVRmsClient client) {
+    NAVRmsAdapterConnectionUpdate(client.Device, client.Connection)
 }
 
 
