@@ -5,8 +5,8 @@ on:
     branches:
       - master
     paths:
-      - "./**/*.axi"
-      - "./!__tests__/**/*"
+      - "**/*.axi"
+      - "!__tests__/**/*.axi"
       - ".genlinxrc.yml"
       - "build.ps1"
       - "install.ps1"
@@ -17,8 +17,8 @@ on:
     branches:
       - master
     paths:
-      - "./**/*.axi"
-      - "./!__tests__/**/*"
+      - "**/*.axi"
+      - "!__tests__/**/*.axi"
       - ".genlinxrc.yml"
       - "build.ps1"
       - "install.ps1"
@@ -64,7 +64,7 @@ jobs:
 
       - name: Setup Node.js
         id: setup-node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -119,6 +119,7 @@ jobs:
                 "owner": "${{ github.repository_owner }}",
                 "ref": "${{ github.ref }}",
                 "sha": "${{ steps.release.outputs.new_release_git_head }}",
-                "tag": "${{ steps.release.outputs.new_release_git_tag }}"
+                "tag": "${{ steps.release.outputs.new_release_git_tag }}",
+                "branch": "master"
               }
             }
