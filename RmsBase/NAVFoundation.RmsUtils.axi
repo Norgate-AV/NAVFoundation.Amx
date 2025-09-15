@@ -49,116 +49,116 @@ DEFINE_TYPE
 struct _NAVRmsServerInformation {
     char AppVersion[NAV_MAX_CHARS]
     char DatabaseVersion[NAV_MAX_CHARS]
-    char TimesyncEnabled
-    char SmtpEnabled
     integer MinPollTime
     integer MaxPollTime
-}
+    char TimesyncEnabled
+    char SmtpEnabled
+} // Total: 106 bytes
 
 
 struct _NAVRmsLocation {
-    char ClientDefaultLocation
-    char Id[NAV_MAX_CHARS]
-    char Name[NAV_MAX_CHARS]
-    char Owner[NAV_MAX_CHARS]
-    char PhoneNumber[NAV_MAX_CHARS]
-    char Occupancy[NAV_MAX_CHARS]
-    char PrestigeName[NAV_MAX_CHARS]
-    char Timezone[NAV_MAX_CHARS]
-    char AssetLicensed
-}
+    char Id[NAV_MAX_CHARS]          // 50 bytes
+    char Name[NAV_MAX_CHARS]        // 50 bytes
+    char Owner[NAV_MAX_CHARS]       // 50 bytes
+    char PhoneNumber[NAV_MAX_CHARS] // 50 bytes
+    char Occupancy[NAV_MAX_CHARS]   // 50 bytes
+    char PrestigeName[NAV_MAX_CHARS] // 50 bytes
+    char Timezone[NAV_MAX_CHARS]    // 50 bytes
+    char ClientDefaultLocation      // 1 byte
+    char AssetLicensed              // 1 byte
+}                                   // Total: 402 bytes (unchanged)
 
 
 struct _NAVRmsAdapter {
     char IsOnline
-}
+} // Total: 1 byte
 
 
 struct _NAVRmsConnection {
     char Name[NAV_MAX_CHARS]
-    char Url[NAV_MAX_BUFFER]
+    char Url[255]
     char Password[NAV_MAX_CHARS]
-    char Enabled[NAV_MAX_CHARS]
-}
+    char Enabled[5] // 'true' or 'false'
+} // Total: 360 bytes
 
 
 struct _NAVRmsException {
-    char Message[NAV_MAX_BUFFER]
-    char ThrownByCommand[NAV_MAX_BUFFER]
-}
+    char Message[255]           // 255 bytes (reduced from 1024)
+    char ThrownByCommand[50]    // 50 bytes (reduced from 1024)
+}                               // Total: 305 bytes (was 2048, saved 1743 bytes)
 
 
 struct _NAVRmsConnectionState {
     char OldState[NAV_MAX_CHARS]
     char NewState[NAV_MAX_CHARS]
-}
+} // Total: 100 bytes
 
 
 struct _NAVRmsHotlist {
-    char ClientDefaultLocation
     integer LocationId
     integer Count
-}
+    char ClientDefaultLocation
+} // Total: 7 bytes
 
 
 struct _NAVRmsMessage {
-    char Type[NAV_MAX_CHARS]
-    char Title[NAV_MAX_BUFFER]
-    char Body[NAV_MAX_BUFFER]
-    integer TimeOutSeconds
-    char Modal
-    char ResponseMessage[NAV_MAX_BUFFER]
-}
+    char Type[NAV_MAX_CHARS]       // 50 bytes
+    integer TimeOutSeconds         // 2 bytes
+    char Modal                     // 1 byte
+    char Title[50]                // 50 bytes
+    char Body[255]                 // 255 bytes
+    char ResponseMessage[255]      // 255 bytes
+}                                  // Total: 613 bytes
 
 
 struct _NAVRmsClient {
-    _NAVRmsServerInformation ServerInformation
-    _NAVRmsLocation Location
-    _NAVRmsConnection Connection
-    _NAVRmsConnectionState ConnectionState
-    _NAVKeyValuePair ConfigChange
-    _NAVRmsHotlist Hotlist
-    _NAVRmsMessage Message
-    _NAVRmsException Exception
-    dev Device
-    char IsOnline
-    char IsRegistered
-    char ClientKey[NAV_MAX_CHARS]
-}
+    dev Device                                    // 6 bytes
+    char IsOnline                                 // 1 byte
+    char IsRegistered                             // 1 byte
+    char ClientKey[NAV_MAX_CHARS]                 // 50 bytes
+    _NAVRmsServerInformation ServerInformation    // 106 bytes
+    _NAVRmsLocation Location                      // 402 bytes
+    _NAVRmsConnection Connection                  // 360 bytes
+    _NAVRmsConnectionState ConnectionState        // 100 bytes
+    _NAVKeyValuePair ConfigChange                 // 1074 bytes
+    _NAVRmsHotlist Hotlist                        // 7 bytes
+    _NAVRmsMessage Message                        // 613 bytes
+    _NAVRmsException Exception                    // 305 bytes
+}                                                 // Total: 4,025 bytes (was ~10785, saved ~6740 bytes)
 
 
 struct _NAVRmsMonitorAssetProperties {
-    char MonitorAssetName[NAV_MAX_CHARS]
-    char MonitorAssetDescription[NAV_MAX_BUFFER]
-    char MonitorAssetManufacturerName[NAV_MAX_CHARS]
-    char MonitorAssetModelName[NAV_MAX_CHARS]
-    char MonitorAssetManufacturerURL[NAV_MAX_BUFFER]
-    char MonitorAssetModelURL[NAV_MAX_BUFFER]
-    char MonitorAssetSerialNumber[NAV_MAX_CHARS]
-    char MonitorAssetFirmwareVersion[NAV_MAX_CHARS]
-}
+    char MonitorAssetName[NAV_MAX_CHARS]              // 50 bytes
+    char MonitorAssetDescription[255]                 // 255 bytes
+    char MonitorAssetManufacturerName[NAV_MAX_CHARS]  // 50 bytes
+    char MonitorAssetManufacturerURL[255]             // 255 bytes
+    char MonitorAssetModelName[NAV_MAX_CHARS]         // 50 bytes
+    char MonitorAssetModelURL[255]                    // 255 bytes
+    char MonitorAssetSerialNumber[NAV_MAX_CHARS]      // 50 bytes
+    char MonitorAssetFirmwareVersion[NAV_MAX_CHARS]   // 50 bytes
+} // Total: 965 bytes
 
 
 struct _NAVRmsSource {
-    dev Device
-    char Name[NAV_MAX_CHARS]
-    char Description[NAV_MAX_BUFFER]
-}
+    dev Device              // 6 bytes
+    char Name[NAV_MAX_CHARS] // 50 bytes
+    char Description[255]   // 255 bytes
+} // Total: 311 bytes
 
 
 struct _NAVRmsRegisteredAsset {
-    char Key[NAV_MAX_CHARS]
-    char Id[NAV_MAX_CHARS]
-    char NewRegistration
-    dev Device
-}
+    dev Device                    // 6 bytes
+    char Key[NAV_MAX_CHARS]       // 50 bytes
+    char Id[NAV_MAX_CHARS]        // 50 bytes
+    char NewRegistration          // 1 byte
+} // Total: 107 bytes
 
 
 struct _NAVRmsAssetMethodExecuteEvent {
     char AssetKey[NAV_MAX_CHARS]
     char Method[NAV_MAX_CHARS]
     char Parameter[20][NAV_MAX_CHARS]
-}
+} // Total: 1,051 bytes
 
 
 define_function NAVRmsClientInit(_NAVRmsClient client, tdata args) {
