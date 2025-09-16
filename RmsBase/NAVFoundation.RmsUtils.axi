@@ -208,6 +208,10 @@ define_function NAVRmsMessageCopy(_NAVRmsMessage source, _NAVRmsMessage destinat
 
 
 define_function NAVRmsAdapterConnectionUpdate(dev device, _NAVRmsConnection connection) {
+    if (!device_id(device)) {
+        return
+    }
+
     NAVCommand(device, "'CONFIG.CLIENT.NAME-', connection.Name")
     NAVCommand(device, "'CONFIG.SERVER.URL-', connection.Url")
     NAVCommand(device, "'CONFIG.SERVER.PASSWORD-', connection.Password")
