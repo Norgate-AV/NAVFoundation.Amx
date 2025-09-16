@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.2.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.2.0...v3.2.1) (2025-09-16)
+
+### 🐛 Bug Fixes
+
+- **rms-utils:** dont send commands to device if it's not online ([073f482](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/073f4829de10210c7806ec1a933baafc24466d63))
+
 ## [3.2.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.1.0...v3.2.0) (2025-09-15)
 
 ### 🌟 Features
