@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.2.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.2.1...v3.2.2) (2025-09-18)
+
+### 🐛 Bug Fixes
+
+- **file-utils:** return byte count from NAVFileRead/NAVFileWrite ([4950382](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/49503820c6bf2a0036a5103ae5202ade6730e661))
+
 ## [3.2.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.2.0...v3.2.1) (2025-09-16)
 
 ### 🐛 Bug Fixes
