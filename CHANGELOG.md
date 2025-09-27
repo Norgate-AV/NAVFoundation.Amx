@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.3.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.2.2...v3.3.0) (2025-09-27)
+
+### 🌟 Features
+
+- add IniUtils library ([c05ec83](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c05ec835b79836d75bd75c3c8fb4bd0bc5e50368))
+
 ## [3.2.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.2.1...v3.2.2) (2025-09-18)
 
 ### 🐛 Bug Fixes
