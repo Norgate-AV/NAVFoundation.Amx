@@ -53,5 +53,8 @@
     },
     "[xml]": {
         "editor.defaultFormatter": "DotJoshJohnson.xml"
-    }
+    },
+    "github-actions.workflows.pinned.workflows": [
+        ".github/workflows/main.yml"
+    ]
 }
