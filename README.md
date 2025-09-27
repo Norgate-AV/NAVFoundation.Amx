@@ -88,6 +88,8 @@ For more detailed guides and documentation, please refer the `README.md` files i
 - [HashTable](./HashTable)
 - [HttpUtils](./HttpUtils)
     - Provides functions for HTTP requests and responses.
+- [IniUtils](./IniUtils)
+    - Provides functions for parsing and working with INI configuration files.
 - [Int64](./Int64)
 - [InterModuleApi](./InterModuleApi)
 - [Jsmn](./Jsmn)

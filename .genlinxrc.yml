@@ -14,7 +14,7 @@ build:
       - ./FileUtils
       - ./HashTable
       - ./HttpUtils
-      - ./IniParser
+      - ./IniUtils
       - ./Int64
       - ./InterModuleApi
       - ./Jsmn
@@ -43,6 +43,7 @@ build:
       - ./__tests__/include/string-utils
       - ./__tests__/include/aes128
       - ./__tests__/include/pbkdf2
+      - ./__tests__/include/ini-utils
       - ./__tests__/include/int64
       - ./__tests__/include/assert
       - ./__tests__/include/sha1
