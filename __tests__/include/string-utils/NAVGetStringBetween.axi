@@ -37,7 +37,7 @@ constant char GET_STRING_BETWEEN_EXPECTED[][NAV_MAX_BUFFER] = {
 define_function TestNAVGetStringBetween() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVGetStringBetween *****************'")
+    NAVLog("'***************** NAVGetStringBetween *****************'")
 
     for (x = 1; x <= length_array(GET_STRING_BETWEEN_TEST); x++) {
         stack_var char token[2][NAV_MAX_BUFFER]
