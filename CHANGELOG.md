@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.4.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.4.0...v3.4.1) (2025-09-28)
+
+### 🐛 Bug Fixes
+
+- **string-utils:** various fixes and improvements ([9e94494](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9e944941c82421bb83dbcac4a843ca8da3ff315d))
+
 ## [3.4.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.3.0...v3.4.0) (2025-09-28)
 
 ### 🌟 Features
