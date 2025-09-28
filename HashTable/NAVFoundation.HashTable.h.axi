@@ -37,20 +37,57 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
+// Hash table size configuration
+// Memory footprint: ~1.83MB for 5000 items, recommended load factor <70%
 #IF_NOT_DEFINED NAV_HASH_TABLE_SIZE
-constant integer NAV_HASH_TABLE_SIZE = 1000
+constant integer NAV_HASH_TABLE_SIZE = 5000
 #END_IF
 
 #IF_NOT_DEFINED NAV_MAX_HASH_TABLE_ITEMS
 constant long NAV_MAX_HASH_TABLE_ITEMS = NAV_HASH_TABLE_SIZE / 2
 #END_IF
 
+#IF_NOT_DEFINED NAV_HASH_TABLE_MAX_KEY_LENGTH
+constant integer NAV_HASH_TABLE_MAX_KEY_LENGTH = 128
+#END_IF
+
+#IF_NOT_DEFINED NAV_HASH_TABLE_MAX_VALUE_LENGTH
+constant integer NAV_HASH_TABLE_MAX_VALUE_LENGTH = 256
+#END_IF
+
+constant integer NAV_HASH_TABLE_ERROR_NONE          = 0
+constant integer NAV_HASH_TABLE_ERROR_EMPTY_KEY     = 1
+constant integer NAV_HASH_TABLE_ERROR_INVALID_HASH  = 2
+constant integer NAV_HASH_TABLE_ERROR_FULL          = 3
+constant integer NAV_HASH_TABLE_ERROR_KEY_NOT_FOUND = 4
+constant integer NAV_HASH_TABLE_ERROR_COLLISION     = 5
+
 
 DEFINE_TYPE
 
+/**
+ * @struct _NAVHashTableKeyValuePair
+ * @description Hash table specific key-value pair with optimized string lengths
+ * @property {char[]} Key - Hash table key (up to 128 characters)
+ * @property {char[]} Value - Hash table value (up to 256 characters)
+ */
+struct _NAVHashTableKeyValuePair {
+    char Key[NAV_HASH_TABLE_MAX_KEY_LENGTH];
+    char Value[NAV_HASH_TABLE_MAX_VALUE_LENGTH];
+}
+
+/**
+ * @struct _NAVHashTable
+ * @description Main hash table structure containing the item array and metadata.
+ *              Uses linear probing for collision resolution with polynomial rolling hash.
+ * @property {_NAVHashTableKeyValuePair[]} Items - Array of key-value pairs (size NAV_HASH_TABLE_SIZE)
+ * @property {integer} ItemCount - Current number of items stored in the table
+ * @property {integer} LastError - Last error code from hash table operations
+ */
 struct _NAVHashTable {
-    _NAVKeyValuePair Items[NAV_HASH_TABLE_SIZE];
+    _NAVHashTableKeyValuePair Items[NAV_HASH_TABLE_SIZE];
     integer ItemCount;
+    integer LastError;
 }
 
 

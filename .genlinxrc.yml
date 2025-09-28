@@ -38,7 +38,10 @@ build:
       - ./Tui
       - ./UIUtils
       - ./Url
+      - ./__tests__/include/aes128
+      - ./__tests__/include/hash-table
       - ./__tests__/include/path-utils
+      - ./__tests__/include/pbkdf2
       - ./__tests__/include/regex
       - ./__tests__/include/string-utils
       - ./__tests__/include/aes128
