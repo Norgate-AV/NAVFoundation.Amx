@@ -35,6 +35,7 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_INIFILE_PARSER_H__ 'NAVFoundation.IniFileParser.h'
 
 #include 'NAVFoundation.IniFileLexer.h.axi'
+#include 'NAVFoundation.HashTable.h.axi'
 
 
 DEFINE_CONSTANT
@@ -78,6 +79,9 @@ struct _NAVIniSection {
 struct _NAVIniFile {
     _NAVIniSection sections[NAV_INI_PARSER_MAX_SECTIONS]
     integer sectionCount
+
+    _NAVHashTable table
+    char tableInitialized
 }
 
 

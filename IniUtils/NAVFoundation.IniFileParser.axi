@@ -36,6 +36,7 @@ SOFTWARE.
 
 #include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.IniFileLexer.axi'
+#include 'NAVFoundation.HashTable.axi'
 #include 'NAVFoundation.IniFileParser.h.axi'
 
 
@@ -349,6 +350,20 @@ define_function char NAVIniParserParseProperty(_NAVIniParser parser, _NAVIniFile
     iniFile.sections[index].properties[iniFile.sections[index].propertyCount].key = key
     iniFile.sections[index].properties[iniFile.sections[index].propertyCount].value = value
     set_length_array(iniFile.sections[index].properties, iniFile.sections[index].propertyCount)
+
+    if (!iniFile.tableInitialized) {
+        NAVHashTableInit(iniFile.table)
+        iniFile.tableInitialized = true
+    }
+
+    // Add to hash table for quick lookup
+    if (!NAVHashTableAddItem(iniFile.table, "iniFile.sections[index].name, '.', key", value)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_INIFILE_PARSER__,
+                                    'NAVIniParserParseProperty',
+                                    "'Failed to insert property into hash table: ', iniFile.sections[index].name, '.', key, ' = ', value")
+        return false
+    }
 
     return true
 }
