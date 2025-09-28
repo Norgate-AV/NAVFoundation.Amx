@@ -68,7 +68,7 @@ define_function char[NAV_MAX_BUFFER] NAVStripCharsFromRight(char buffer[], integ
     }
 
     if (count >= length) {
-        return buffer
+        return ''
     }
 
     return left_string(buffer, length_array(buffer) - count)
@@ -117,7 +117,7 @@ define_function char[NAV_MAX_BUFFER] NAVStripCharsFromLeft(char buffer[], intege
     }
 
     if (count >= length) {
-        return buffer
+        return ''
     }
 
     return right_string(buffer, length_array(buffer) - count)
@@ -144,17 +144,21 @@ define_function char[NAV_MAX_BUFFER] NAVStripLeft(char buffer[], integer count) 
 /**
  * @function NAVRemoveStringByLength
  * @public
- * @description Removes a specified number of characters from the beginning of a string.
+ * @description Removes a specified number of characters from the beginning of a string and returns them.
+ * Note that the original string buffer is mutated to contain the remaining characters after removal.
  *
- * @param {char[]} buffer - Input string to modify
- * @param {integer} count - Number of characters to remove from the start
+ * @param {char[]} buffer - Input string buffer to modify (will be mutated)
+ * @param {integer} count - Number of characters to remove from the start of the buffer
  *
- * @returns {char[]} Modified string with characters removed
+ * @returns {char[]} The characters that were removed from the beginning of the string
  *
  * @example
+ * stack_var char buffer[50]
  * stack_var char text[50]
- * text = 'Hello World'
- * text = NAVRemoveStringByLength(text, 6)  // Returns 'World'
+ * buffer = 'Hello World'
+ * text = NAVRemoveStringByLength(buffer, 6)  // Returns 'Hello '
+ * // text = 'Hello '
+ * // buffer = 'World'
  */
 define_function char[NAV_MAX_BUFFER] NAVRemoveStringByLength(char buffer[], integer count) {
     stack_var integer length
@@ -162,11 +166,16 @@ define_function char[NAV_MAX_BUFFER] NAVRemoveStringByLength(char buffer[], inte
     length = length_array(buffer)
 
     if (count <= 0 || !length) {
-        return buffer
+        return ''
     }
 
     if (count >= length) {
-        return buffer
+        stack_var char result[NAV_MAX_BUFFER]
+
+        result = buffer
+        buffer = ''
+
+        return result
     }
 
     return remove_string(buffer, left_string(buffer, count), 1)
@@ -381,11 +390,11 @@ define_function char[NAV_MAX_BUFFER] NAVStringNormalizeAndReplace(char buffer[],
  * count = NAVStringCount(text, 'hello', NAV_CASE_SENSITIVE)    // Returns 1
  */
 define_function integer NAVStringCount(char buffer[], char value[], integer caseSensitivity) {
-    stack_var integer x
     stack_var integer index
     stack_var integer result
     stack_var char tempBuffer[65534]
     stack_var char tempValue[NAV_MAX_BUFFER]
+    stack_var integer x
 
     result = 0
 
@@ -404,10 +413,12 @@ define_function integer NAVStringCount(char buffer[], char value[], integer case
     for (x = 1; x <= length_array(tempBuffer); x++) {
         index = NAVIndexOf(tempBuffer, tempValue, x)
 
-        if (index) {
-            result++
-            x = (index + length_array(tempValue))
+        if (index == 0) {
+            break
         }
+
+        result++
+        x = index + length_array(tempValue) - 1
     }
 
     return result
@@ -585,7 +596,7 @@ define_function char[NAV_MAX_BUFFER] NAVTrimStringRight(char buffer[]) {
     result = buffer
     length = length_array(result)
 
-    for (count = length; count > 1; count--) {
+    for (count = length; count >= 1; count--) {
         byte = NAVCharCodeAt(result, count)
 
         if (!NAVIsWhitespace(byte)) {
@@ -656,13 +667,14 @@ define_function NAVTrimStringArray(char array[][]) {
  * @param {char[]} buffer - Input string
  * @param {char[]} token - The token to search for
  *
- * @returns {char[]} Substring before the token, or the entire string if token not found
+ * @returns {char[]} Substring before the token, empty string if token is at the beginning, or the entire string if token not found
  *
  * @example
  * stack_var char text[50]
  * stack_var char result[50]
  * text = 'Hello World'
  * result = NAVGetStringBefore(text, ' ')  // Returns 'Hello'
+ * result = NAVGetStringBefore(text, 'Hello')  // Returns ''
  */
 define_function char[NAV_MAX_BUFFER] NAVGetStringBefore(char buffer[], char token[]) {
     stack_var integer index
@@ -675,6 +687,10 @@ define_function char[NAV_MAX_BUFFER] NAVGetStringBefore(char buffer[], char toke
 
     if (index == 0) {
         return buffer
+    }
+
+    if (index == 1) {
+        return ''
     }
 
     return NAVStringSubstring(buffer, 1, index - 1)
@@ -910,6 +926,10 @@ define_function char[NAV_MAX_BUFFER] NAVStringBetweenGreedy(char buffer[], char 
  * result = NAVStartsWith(text, 'World')  // Returns false
  */
 define_function char NAVStartsWith(char buffer[], char match[]) {
+    if (!length_array(match)) {
+        return true
+    }
+
     return (find_string(buffer, match, 1) == 1)
 }
 
@@ -949,6 +969,10 @@ define_function char NAVStringStartsWith(char buffer[], char match[]) {
  * result = NAVContains(text, 'Moon')   // Returns false
  */
 define_function char NAVContains(char buffer[], char match[]) {
+    if (!length_array(match)) {
+        return true
+    }
+
     return (find_string(buffer, match, 1) > 0)
 }
 
@@ -1150,10 +1174,10 @@ define_function integer NAVSplitString(char buffer[], char separator[], char res
 /**
  * @function NAVArrayJoinString
  * @public
- * @description Joins an array of strings into a single string with a specified separator.
+ * @description Joins an array of strings into a single string using a specified separator.
  *
  * @param {char[][]} array - Array of strings to join
- * @param {char[]} separator - Separator to insert between elements (defaults to space if empty)
+ * @param {char[]} separator - String to use as separator between elements
  *
  * @returns {char[]} Joined string
  *
@@ -1181,10 +1205,6 @@ define_function char[NAV_MAX_BUFFER] NAVArrayJoinString(char array[][], char sep
                                     'Invalid argument. The provided argument "array" is empty array')
 
         return result
-    }
-
-    if (!length_array(separator)) {
-        separator = ' '
     }
 
     result = array[1]
@@ -1460,7 +1480,9 @@ define_function char[NAV_MAX_BUFFER] NAVStringCapitalize(char buffer[]) {
         return result
     }
 
-    result[1] = result[1] - 32
+    if (NAVIsLowerCase(result[1])) {
+        result[1] = result[1] - 32
+    }
 
     for (x = 2; x <= length; x++) {
         byte = result[x]
@@ -1469,7 +1491,9 @@ define_function char[NAV_MAX_BUFFER] NAVStringCapitalize(char buffer[]) {
             continue
         }
 
-        result[x + 1] = result[x + 1] - 32
+        if (x + 1 <= length && NAVIsLowerCase(result[x + 1])) {
+            result[x + 1] = result[x + 1] - 32
+        }
     }
 
     return result
