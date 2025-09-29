@@ -2,6 +2,7 @@ build:
   nlrc:
     includePath:
       - ./ArrayUtils
+      - ./Assert
       - ./BinaryUtils
       - ./Console
       - ./Core
@@ -13,7 +14,9 @@ build:
       - ./FileUtils
       - ./HashTable
       - ./HttpUtils
-      - ./IniParser
+      - ./IniUtils
+      - ./Int64
+      - ./InterModuleApi
       - ./Jsmn
       - ./Json
       - ./Lexer
@@ -35,12 +38,23 @@ build:
       - ./Tui
       - ./UIUtils
       - ./Url
+      - ./__tests__/include/aes128
+      - ./__tests__/include/hash-table
       - ./__tests__/include/path-utils
+      - ./__tests__/include/pbkdf2
       - ./__tests__/include/regex
       - ./__tests__/include/string-utils
       - ./__tests__/include/aes128
       - ./__tests__/include/pbkdf2
-      - ./__tests__/include/queue
-      - ./include
-    modulePath:
-      - ./module
+      - ./__tests__/include/ini-utils
+      - ./__tests__/include/int64
+      - ./__tests__/include/assert
+      - ./__tests__/include/sha1
+      - ./__tests__/include/sha512
+      - ./__tests__/include/sha256
+      - ./__tests__/include/md5
+      - ./__tests__/include/base64
+      - ./__tests__/include/base32
+      - ./__tests__/include/http
+      - ./__tests__/include/url
+      - ./__tests__/include/jsmn

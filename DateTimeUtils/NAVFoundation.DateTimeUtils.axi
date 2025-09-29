@@ -34,6 +34,7 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_DATETIMEUTILS__
 #DEFINE __NAV_FOUNDATION_DATETIMEUTILS__ 'NAVFoundation.DateTimeUtils'
 
+#include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.DateTimeUtils.h.axi'
 
 /**
@@ -86,71 +87,36 @@ define_function char NAVDateTimeGetTimespec(_NAVTimespec timespec, char date[], 
 
     seconds = time_to_second(time)
     if (seconds < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get seconds from time')
-
         return false
     }
 
     minutes = time_to_minute(time)
     if (minutes < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get minutes from time')
-
         return false
     }
 
     hours = time_to_hour(time)
     if (hours < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get hours from time')
-
         return false
     }
 
     day = date_to_day(date)
     if (day < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get day from date')
-
         return false
     }
 
     month = date_to_month(date)
     if (month < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get month from date')
-
         return false
     }
 
     year = date_to_year(date)
     if (year < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get year from date')
-
         return false
     }
 
     dayOfWeek = day_of_week(date)
     if (dayOfWeek < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_DATETIMEUTILS__,
-                                    'NAVDateTimeGetTimespec',
-                                    'Failed to get day of week from date')
-
         return false
     }
 
@@ -281,67 +247,49 @@ define_function integer NAVDateTimeGetLastSundayInMonth(integer year, integer mo
  * isDst = NAVDateTimeIsDst(now)
  */
 define_function char NAVDateTimeIsDst(_NAVTimespec timespec) {
-    stack_var integer year
+    // UK DST rules: last Sunday in March to last Sunday in October
+    // Optimized mathematical calculation
+
     stack_var integer month
     stack_var integer day
-    stack_var integer hour
-    stack_var integer minute
-    stack_var integer second
+    stack_var integer year
+    stack_var integer lastDayOfMonth
+    stack_var integer lastDayDOW
+    stack_var integer transitionDay
 
-    stack_var integer dayOfWeek
-    stack_var integer dayOfYear
-
-    stack_var integer dstStartMonth
-    stack_var integer dstStartDay
-    stack_var integer dstStartHour
-    stack_var integer dstStartMinute
-
-    stack_var integer dstEndMonth
-    stack_var integer dstEndDay
-    stack_var integer dstEndHour
-    stack_var integer dstEndMinute
-
-    stack_var integer dstStartDayOfYear
-    stack_var integer dstEndDayOfYear
-
-    stack_var integer dstStartEpoch
-    stack_var integer dstEndEpoch
-
-    stack_var integer currentEpoch
-
-    year = timespec.Year
-    month = timespec.Month
+    month = timespec.Month + 1  // Convert from 0-based to 1-based
     day = timespec.MonthDay
-    hour = timespec.Hour
-    minute = timespec.Minute
-    second = timespec.Seconds
+    year = timespec.Year + 1900 // Convert from years since 1900
 
-    dayOfWeek = timespec.WeekDay
-    dayOfYear = timespec.YearDay
+    // Not in DST months
+    if (month < 3 || month > 10) {
+        return false
+    }
 
-    dstStartMonth = NAV_DATETIME_DST_START_MONTH
-    dstStartDay = NAVDateTimeGetLastSundayInMonth(year, dstStartMonth)
-    dstStartHour = NAV_DATETIME_DST_START_HOUR
-    dstStartMinute = NAV_DATETIME_DST_START_MINUTE
+    // April to September: always in DST
+    if (month > 3 && month < 10) {
+        return true
+    }
 
-    dstEndMonth = NAV_DATETIME_DST_END_MONTH
-    dstEndDay = NAVDateTimeGetLastSundayInMonth(year, dstEndMonth)
-    dstEndHour = NAV_DATETIME_DST_END_HOUR
-    dstEndMinute = NAV_DATETIME_DST_END_MINUTE
+    // Get days in month (handles leap years)
+    lastDayOfMonth = NAVDateTimeGetDaysInMonth(month)
 
-    // dstStartDayOfYear = NAVDateTimeGetYearDay(year, dstStartMonth, dstStartDay)
-    // dstEndDayOfYear = NAVDateTimeGetYearDay(year, dstEndMonth, dstEndDay)
+    // Calculate day of week for the last day of month
+    // Using the current date as reference point
+    lastDayDOW = (timespec.WeekDay + (lastDayOfMonth - day)) % 7
 
-    // dstStartEpoch = NAVDateTimeGetEpoch(year, dstStartMonth, dstStartDay, dstStartHour, dstStartMinute, 0)
-    // dstEndEpoch = NAVDateTimeGetEpoch(year, dstEndMonth, dstEndDay, dstEndHour, dstEndMinute, 0)
+    // Last Sunday is lastDayOfMonth - lastDayDOW (adjusted for Sunday = 0)
+    if (lastDayDOW == 0) {
+        transitionDay = lastDayOfMonth
+    } else {
+        transitionDay = lastDayOfMonth - lastDayDOW
+    }
 
-    // currentEpoch = NAVDateTimeGetEpoch(year, month, day, hour, minute, second)
-
-    // if (currentEpoch >= dstStartEpoch && currentEpoch <= dstEndEpoch) {
-    //     return true
-    // }
-
-    return false
+    if (month == 3) {  // March - DST starts on transition day
+        return (day >= transitionDay)
+    } else { // October - DST ends on transition day
+        return (day <= transitionDay)
+    }
 }
 
 
@@ -573,14 +521,14 @@ define_function long NAVDateTimeGetEpoch(_NAVTimespec timespec) {
  * NAVDateTimeTimespecLog('MyFunction', now)
  */
 define_function NAVDateTimeTimespecLog(char sender[], _NAVTimespec timespec) {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Year: ', NAVStringSurround(itoa(timespec.Year), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Month: ', NAVStringSurround(itoa(timespec.Month), '[', ']'), '-', NAVStringSurround(NAVDateTimeGetMonthString(timespec.Month), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Day: ', NAVStringSurround(itoa(timespec.MonthDay), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Day Of Week: ', NAVStringSurround(itoa(timespec.WeekDay), '[', ']'), '-', NAVStringSurround(NAVDateTimeGetDayString(timespec.WeekDay), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Day Of Year: ', NAVStringSurround(itoa(timespec.YearDay), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Hour: ', NAVStringSurround(itoa(timespec.Hour), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Minute: ', NAVStringSurround(itoa(timespec.Minute), '[', ']')")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "sender, ' => Second: ', NAVStringSurround(itoa(timespec.Seconds), '[', ']')")
+    NAVLog("sender, ' => Year: ', itoa(timespec.Year)")
+    NAVLog("sender, ' => Month: ', itoa(timespec.Month), '-', NAVDateTimeGetMonthString(timespec.Month)")
+    NAVLog("sender, ' => Day: ', itoa(timespec.MonthDay)")
+    NAVLog("sender, ' => Day Of Week: ', itoa(timespec.WeekDay), '-', NAVDateTimeGetDayString(timespec.WeekDay)")
+    NAVLog("sender, ' => Day Of Year: ', itoa(timespec.YearDay)")
+    NAVLog("sender, ' => Hour: ', itoa(timespec.Hour)")
+    NAVLog("sender, ' => Minute: ', itoa(timespec.Minute)")
+    NAVLog("sender, ' => Second: ', itoa(timespec.Seconds)")
 }
 
 
@@ -669,9 +617,12 @@ define_function char[NAV_MAX_CHARS] NAVDateTimeGetShortDayString(integer day) {
  * stack_var integer days
  * days = NAVDateTimeGetDaysInMonth(2)  // Returns 28 (or 29 in leap years)
  *
- * @note Does not automatically adjust for leap years, use in conjunction with NAVDateTimeIsLeapYear
  */
 define_function integer NAVDateTimeGetDaysInMonth(integer month) {
+    if (month == 2 && NAVDateTimeIsLeapYear(type_cast(date_to_year(ldate)))) {
+        return 29
+    }
+
     return NAV_DAYS_IN_MONTH[month]
 }
 
@@ -1072,7 +1023,7 @@ define_function char[2] NAVDateTimeGetAmPm(_NAVTimespec timespec) {
  * @note Requires master control rights
  */
 define_function NAVDateTimeSetClock(char date[], char time[]) {
-    NAVCommand(dvNAVMaster, "'CLOCK ', date, ' ', time")
+    NAVCommand(0:1:0, "'CLOCK ', date, ' ', time")
 }
 
 
@@ -1175,7 +1126,7 @@ define_function long NAVDateTimeGetDifference(_NAVTimespec timespec1, _NAVTimesp
  * NAVDateTimeTimezonePrint()
  */
 define_function NAVDateTimeTimezonePrint() {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timezone => ', clkmgr_get_timezone()")
+    NAVLog("'Timezone => ', clkmgr_get_timezone()")
 }
 
 
@@ -1190,8 +1141,8 @@ define_function NAVDateTimeTimezonePrint() {
  * NAVDateTimeClockSourcePrint()
  */
 define_function NAVDateTimeClockSourcePrint() {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Is Network Sourced => ', itoa(clkmgr_is_network_sourced())")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Clock Resync Period => ', itoa(clkmgr_get_resync_period())")
+    NAVLog("'Is Network Sourced => ', itoa(clkmgr_is_network_sourced())")
+    NAVLog("'Clock Resync Period => ', itoa(clkmgr_get_resync_period())")
 }
 
 
@@ -1212,18 +1163,18 @@ define_function NAVDateTimeDaylightSavingsInfoPrint() {
     result = clkmgr_get_daylightsavings_offset(offset)
 
     if (result < 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Daylight Savings Time Offset => Failed to get daylight savings time offset'")
+        NAVLog("'Daylight Savings Time Offset => Failed to get daylight savings time offset'")
         return
     }
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Daylight Savings Time Offset => Hours :: ', itoa(offset.hours)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Daylight Savings Time Offset => Minutes :: ', itoa(offset.minutes)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Daylight Savings Time Offset => Seconds :: ', itoa(offset.seconds)")
+    NAVLog("'Daylight Savings Time Offset => Hours :: ', itoa(offset.hours)")
+    NAVLog("'Daylight Savings Time Offset => Minutes :: ', itoa(offset.minutes)")
+    NAVLog("'Daylight Savings Time Offset => Seconds :: ', itoa(offset.seconds)")
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Daylight Savings Start Rule => ', clkmgr_get_start_daylightsavings_rule()")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Daylight Savings End Rule => ', clkmgr_get_end_daylightsavings_rule()")
+    NAVLog("'Daylight Savings Start Rule => ', clkmgr_get_start_daylightsavings_rule()")
+    NAVLog("'Daylight Savings End Rule => ', clkmgr_get_end_daylightsavings_rule()")
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Daylight Savings Is On => ', itoa(clkmgr_is_daylightsavings_on())")
+    NAVLog("'Daylight Savings Is On => ', itoa(clkmgr_is_daylightsavings_on())")
 }
 
 
@@ -1244,15 +1195,15 @@ define_function NAVDateTimeActiveTimeServerPrint() {
     result = clkmgr_get_active_timeserver(server)
 
     if (result < 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Active Time Server => Failed to get active time server'")
+        NAVLog("'Active Time Server => Failed to get active time server'")
         return
     }
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Active Time Server => Is Selected :: ', itoa(server.is_selected)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Active Time Server => Is User Defined :: ', itoa(server.is_user_defined)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Active Time Server => IP Address :: ', server.ip_address_string")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Active Time Server => URL :: ', server.url_string")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Active Time Server => Location :: ', server.location_string")
+    NAVLog("'Active Time Server => Is Selected :: ', itoa(server.is_selected)")
+    NAVLog("'Active Time Server => Is User Defined :: ', itoa(server.is_user_defined)")
+    NAVLog("'Active Time Server => IP Address :: ', server.ip_address_string")
+    NAVLog("'Active Time Server => URL :: ', server.url_string")
+    NAVLog("'Active Time Server => Location :: ', server.location_string")
 }
 
 
@@ -1272,22 +1223,28 @@ define_function NAVDateTimeTimeServersPrint() {
     stack_var long count
     stack_var integer x
 
-    result = clkmgr_get_timeservers(servers)
+    result = NAVGetTimeServers(servers)
 
     if (result < 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Time Server => Failed to get time servers'")
+        NAVLog("'Time Server => Failed to get time servers'")
         return
     }
 
     count = type_cast(result)
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Time Server => Count :: ', itoa(count)")
+
+    if (count <= 0) {
+        NAVLog("'Time Server => No time servers found'")
+        return
+    }
+
+    NAVLog("'Time Server => Count :: ', itoa(count)")
 
     for (x = 1; x <= count; x++) {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Time Server => Is Selected :: ', itoa(servers[x].is_selected)")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Time Server => Is User Defined :: ', itoa(servers[x].is_user_defined)")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Time Server => IP Address :: ', servers[x].ip_address_string")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Time Server => URL :: ', servers[x].url_string")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Time Server => Location :: ', servers[x].location_string")
+        NAVLog("'Time Server => Is Selected :: ', itoa(servers[x].is_selected)")
+        NAVLog("'Time Server => Is User Defined :: ', itoa(servers[x].is_user_defined)")
+        NAVLog("'Time Server => IP Address :: ', servers[x].ip_address_string")
+        NAVLog("'Time Server => URL :: ', servers[x].url_string")
+        NAVLog("'Time Server => Location :: ', servers[x].location_string")
     }
 }
 
@@ -1303,20 +1260,82 @@ define_function NAVDateTimeTimeServersPrint() {
  * NAVDateTimeTimestampsPrint()
  */
 define_function NAVDateTimeTimestampsPrint() {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp UTC => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_UTC)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp Atom => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_ATOM)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp Cookie => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_COOKIE)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp ISO8601 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_ISO8601)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC822 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC822)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC850 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC850)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC1036 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC1036)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC1123 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC1123)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC7231 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC7231)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC2822 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC2822)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC3339 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC3339)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RFC3339EXT => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC3339EXT)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp RSS => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RSS)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Timestamp W3C => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_W3C)")
+    NAVLog("'Timestamp UTC => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_UTC)")
+    NAVLog("'Timestamp Atom => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_ATOM)")
+    NAVLog("'Timestamp Cookie => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_COOKIE)")
+    NAVLog("'Timestamp ISO8601 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_ISO8601)")
+    NAVLog("'Timestamp RFC822 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC822)")
+    NAVLog("'Timestamp RFC850 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC850)")
+    NAVLog("'Timestamp RFC1036 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC1036)")
+    NAVLog("'Timestamp RFC1123 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC1123)")
+    NAVLog("'Timestamp RFC7231 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC7231)")
+    NAVLog("'Timestamp RFC2822 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC2822)")
+    NAVLog("'Timestamp RFC3339 => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC3339)")
+    NAVLog("'Timestamp RFC3339EXT => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RFC3339EXT)")
+    NAVLog("'Timestamp RSS => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_RSS)")
+    NAVLog("'Timestamp W3C => ', NAVDateTimeGetTimestampNowFormat(NAV_DATETIME_TIMESTAMP_FORMAT_W3C)")
+}
+
+
+/**
+ * @function NAVGetTimeServers
+ * @public
+ * @description Retrieves the list of time servers configured on the system.
+ *
+ * @param {clkmgr_timeserver_struct[]} servers - Array to store the time server information
+ *
+ * @returns {slong} Number of time servers retrieved
+ *
+ * @example
+ * stack_var clkmgr_timeserver_struct servers[20]
+ * stack_var slong count
+ *
+ * count = NAVGetTimeServers(servers)
+ */
+define_function slong NAVGetTimeServers(clkmgr_timeserver_struct servers[]) {
+    stack_var slong result
+
+    result = clkmgr_get_timeservers(servers)
+
+    if (result > 0) {
+        set_length_array(servers, type_cast(result))
+    }
+    else {
+        set_length_array(servers, 0)
+    }
+
+    return result
+}
+
+
+/**
+ * @function NAVFindTimeServer
+ * @public
+ * @description Searches for a time server by IP address or hostname in the provided array.
+ *
+ * @param {clkmgr_timeserver_struct[]} servers - The array of time servers to search.
+ * @param {char[]} ip - The IP address of the time server to find.
+ * @param {char[]} hostname - The hostname of the time server to find.
+ *
+ * @returns {integer} The index of the found time server, or 0 if not found.
+ */
+define_function integer NAVFindTimeServer(clkmgr_timeserver_struct servers[], char ip[], char hostname[]) {
+    stack_var integer x
+    stack_var integer length
+
+    length = length_array(servers)
+
+    if (!length) {
+        return 0
+    }
+
+    for (x = 1; x <= length; x++) {
+        if (servers[x].ip_address_string == ip || servers[x].url_string == hostname) {
+            return x
+        }
+    }
+
+    return 0
 }
 
 
@@ -1334,7 +1353,10 @@ define_function NAVDateTimeTimestampsPrint() {
  * @note Requires master control rights
  */
 define_function NAVSetupNetworkTime() {
-    clkmgr_timeoffset_struct offset
+    stack_var clkmgr_timeoffset_struct offset
+    stack_var clkmgr_timeserver_struct servers[20]
+
+    NAVGetTimeServers(servers)
 
     offset.hours = 1
     offset.minutes = 0
@@ -1343,12 +1365,17 @@ define_function NAVSetupNetworkTime() {
     clkmgr_set_timezone('UTC+00:00')
     clkmgr_set_clk_source(CLKMGR_MODE_NETWORK)
     clkmgr_set_resync_period(5)
-    clkmgr_add_userdefined_timeserver(timeserver.Ip, timeserver.Hostname, timeserver.Description)
-    clkmgr_set_active_timeserver(timeserver.Ip)
     clkmgr_set_daylightsavings_mode(true)
     clkmgr_set_daylightsavings_offset(offset)
     clkmgr_set_start_daylightsavings_rule('occurrence:5,1,3,02:00:00')
     clkmgr_set_end_daylightsavings_rule('occurrence:5,1,10,02:00:00')
+
+    // Check if the timeserver is already in the list
+    // Seems to cause issues if the timeserver already exists
+    if (!NAVFindTimeServer(servers, timeserver.Ip, timeserver.Hostname)) {
+        clkmgr_add_userdefined_timeserver(timeserver.Ip, timeserver.Hostname, timeserver.Description)
+        clkmgr_set_active_timeserver(timeserver.Ip)
+    }
 }
 
 

@@ -60,30 +60,24 @@ SOFTWARE.
  *
  * @param {char[]} value - The input string to be hashed
  *
- * @returns {char[32]} 32-character hexadecimal string representing the MD5 hash value
+ * @returns {char[16]} 16-character binary array representing the MD5 hash value
  *
  * @example
  * stack_var char message[100]
- * stack_var char hash[32]
+ * stack_var char hash[16]
  *
  * message = 'Hello, World!'
  * hash = NAVMd5GetHash(message)
- * // hash now contains '65a8e27d8879283831b664bd8b7f0ad4'
+ * // hash now contains "$65, $a8, $e2, $7d, $88, $79, $28, $38, $31, $b6, $64, $bd, $8b, $7f, $0a, $d4"
  */
-define_function char[32] NAVMd5GetHash(char value[]) {
-    stack_var integer x
+define_function char[16] NAVMd5GetHash(char value[]) {
     stack_var _NAVMd5Context context
-    stack_var char hash[32]
 
     NAVMd5Init(context)
     NAVMd5Update(context, value, length_array(value))
     NAVMd5Final(context)
 
-    for (x = 1; x <= 16; x++) {
-        hash = "hash, format('%02x', context.digest[x])"
-    }
-
-    return hash
+    return context.digest
 }
 
 
@@ -261,76 +255,76 @@ define_function NAVMd5Transform(long state[], char block[]) {
     NAVMd5Decode(x, block, 64)
 
     // Round 1
-    FF(a, b, c, d,  x[1], S11, $d76aa478, t, x, 0)
-    FF(d, a, b, c,  x[2], S12, $e8c7b756, t, x, 1)
-    FF(c, d, a, b,  x[3], S13, $242070db, t, x, 2)
-    FF(b, c, d, a,  x[4], S14, $c1bdceee, t, x, 3)
-    FF(a, b, c, d,  x[5], S11, $f57c0faf, t, x, 4)
-    FF(d, a, b, c,  x[6], S12, $4787c62a, t, x, 5)
-    FF(c, d, a, b,  x[7], S13, $a8304613, t, x, 6)
-    FF(b, c, d, a,  x[8], S14, $fd469501, t, x, 7)
-    FF(a, b, c, d,  x[9], S11, $698098d8, t, x, 8)
-    FF(d, a, b, c, x[10], S12, $8b44f7af, t, x, 9)
-    FF(c, d, a, b, x[11], S13, $ffff5bb1, t, x, 10)
-    FF(b, c, d, a, x[12], S14, $895cd7be, t, x, 11)
-    FF(a, b, c, d, x[13], S11, $6b901122, t, x, 12)
-    FF(d, a, b, c, x[14], S12, $fd987193, t, x, 13)
-    FF(c, d, a, b, x[15], S13, $a679438e, t, x, 14)
-    FF(b, c, d, a, x[16], S14, $49b40821, t, x, 15)
+    MD5_FF(a, b, c, d,  x[1], MD5_S11, $d76aa478, t, x, 0)
+    MD5_FF(d, a, b, c,  x[2], MD5_S12, $e8c7b756, t, x, 1)
+    MD5_FF(c, d, a, b,  x[3], MD5_S13, $242070db, t, x, 2)
+    MD5_FF(b, c, d, a,  x[4], MD5_S14, $c1bdceee, t, x, 3)
+    MD5_FF(a, b, c, d,  x[5], MD5_S11, $f57c0faf, t, x, 4)
+    MD5_FF(d, a, b, c,  x[6], MD5_S12, $4787c62a, t, x, 5)
+    MD5_FF(c, d, a, b,  x[7], MD5_S13, $a8304613, t, x, 6)
+    MD5_FF(b, c, d, a,  x[8], MD5_S14, $fd469501, t, x, 7)
+    MD5_FF(a, b, c, d,  x[9], MD5_S11, $698098d8, t, x, 8)
+    MD5_FF(d, a, b, c, x[10], MD5_S12, $8b44f7af, t, x, 9)
+    MD5_FF(c, d, a, b, x[11], MD5_S13, $ffff5bb1, t, x, 10)
+    MD5_FF(b, c, d, a, x[12], MD5_S14, $895cd7be, t, x, 11)
+    MD5_FF(a, b, c, d, x[13], MD5_S11, $6b901122, t, x, 12)
+    MD5_FF(d, a, b, c, x[14], MD5_S12, $fd987193, t, x, 13)
+    MD5_FF(c, d, a, b, x[15], MD5_S13, $a679438e, t, x, 14)
+    MD5_FF(b, c, d, a, x[16], MD5_S14, $49b40821, t, x, 15)
 
     // Round 2
-    GG(a, b, c, d,  x[2], S21, $f61e2562, t, x, 1)
-    GG(d, a, b, c,  x[7], S22, $c040b340, t, x, 6)
-    GG(c, d, a, b, x[12], S23, $265e5a51, t, x, 11)
-    GG(b, c, d, a,  x[1], S24, $e9b6c7aa, t, x, 0)
-    GG(a, b, c, d,  x[6], S21, $d62f105d, t, x, 5)
-    GG(d, a, b, c, x[11], S22, $02441453, t, x, 10)
-    GG(c, d, a, b, x[16], S23, $d8a1e681, t, x, 15)
-    GG(b, c, d, a,  x[5], S24, $e7d3fbc8, t, x, 4)
-    GG(a, b, c, d, x[10], S21, $21e1cde6, t, x, 9)
-    GG(d, a, b, c, x[15], S22, $c33707d6, t, x, 14)
-    GG(c, d, a, b,  x[4], S23, $f4d50d87, t, x, 3)
-    GG(b, c, d, a,  x[9], S24, $455a14ed, t, x, 8)
-    GG(a, b, c, d, x[14], S21, $a9e3e905, t, x, 13)
-    GG(d, a, b, c,  x[3], S22, $fcefa3f8, t, x, 2)
-    GG(c, d, a, b,  x[8], S23, $676f02d9, t, x, 7)
-    GG(b, c, d, a, x[13], S24, $8d2a4c8a, t, x, 12)
+    MD5_GG(a, b, c, d,  x[2], MD5_S21, $f61e2562, t, x, 1)
+    MD5_GG(d, a, b, c,  x[7], MD5_S22, $c040b340, t, x, 6)
+    MD5_GG(c, d, a, b, x[12], MD5_S23, $265e5a51, t, x, 11)
+    MD5_GG(b, c, d, a,  x[1], MD5_S24, $e9b6c7aa, t, x, 0)
+    MD5_GG(a, b, c, d,  x[6], MD5_S21, $d62f105d, t, x, 5)
+    MD5_GG(d, a, b, c, x[11], MD5_S22, $02441453, t, x, 10)
+    MD5_GG(c, d, a, b, x[16], MD5_S23, $d8a1e681, t, x, 15)
+    MD5_GG(b, c, d, a,  x[5], MD5_S24, $e7d3fbc8, t, x, 4)
+    MD5_GG(a, b, c, d, x[10], MD5_S21, $21e1cde6, t, x, 9)
+    MD5_GG(d, a, b, c, x[15], MD5_S22, $c33707d6, t, x, 14)
+    MD5_GG(c, d, a, b,  x[4], MD5_S23, $f4d50d87, t, x, 3)
+    MD5_GG(b, c, d, a,  x[9], MD5_S24, $455a14ed, t, x, 8)
+    MD5_GG(a, b, c, d, x[14], MD5_S21, $a9e3e905, t, x, 13)
+    MD5_GG(d, a, b, c,  x[3], MD5_S22, $fcefa3f8, t, x, 2)
+    MD5_GG(c, d, a, b,  x[8], MD5_S23, $676f02d9, t, x, 7)
+    MD5_GG(b, c, d, a, x[13], MD5_S24, $8d2a4c8a, t, x, 12)
 
     // Round 3
-    HH(a, b, c, d,  x[6], S31, $fffa3942, t, x, 5)
-    HH(d, a, b, c,  x[9], S32, $8771f681, t, x, 8)
-    HH(c, d, a, b, x[12], S33, $6d9d6122, t, x, 11)
-    HH(b, c, d, a, x[15], S34, $fde5380c, t, x, 14)
-    HH(a, b, c, d,  x[1], S31, $a4beea44, t, x, 1)
-    HH(d, a, b, c,  x[5], S32, $4bdecfa9, t, x, 4)
-    HH(c, d, a, b,  x[8], S33, $f6bb4b60, t, x, 7)
-    HH(b, c, d, a, x[11], S34, $bebfbc70, t, x, 10)
-    HH(a, b, c, d, x[14], S31, $289b7ec6, t, x, 13)
-    HH(d, a, b, c,  x[1], S32, $eaa127fa, t, x, 0)
-    HH(c, d, a, b,  x[4], S33, $d4ef3085, t, x, 3)
-    HH(b, c, d, a,  x[7], S34, $04881d05, t, x, 6)
-    HH(a, b, c, d, x[10], S31, $d9d4d039, t, x, 9)
-    HH(d, a, b, c, x[13], S32, $e6db99e5, t, x, 12)
-    HH(c, d, a, b, x[16], S33, $1fa27cf8, t, x, 15)
-    HH(b, c, d, a,  x[3], S34, $c4ac5665, t, x, 2)
+    MD5_HH(a, b, c, d,  x[6], MD5_S31, $fffa3942, t, x, 5)
+    MD5_HH(d, a, b, c,  x[9], MD5_S32, $8771f681, t, x, 8)
+    MD5_HH(c, d, a, b, x[12], MD5_S33, $6d9d6122, t, x, 11)
+    MD5_HH(b, c, d, a, x[15], MD5_S34, $fde5380c, t, x, 14)
+    MD5_HH(a, b, c, d,  x[1], MD5_S31, $a4beea44, t, x, 1)
+    MD5_HH(d, a, b, c,  x[5], MD5_S32, $4bdecfa9, t, x, 4)
+    MD5_HH(c, d, a, b,  x[8], MD5_S33, $f6bb4b60, t, x, 7)
+    MD5_HH(b, c, d, a, x[11], MD5_S34, $bebfbc70, t, x, 10)
+    MD5_HH(a, b, c, d, x[14], MD5_S31, $289b7ec6, t, x, 13)
+    MD5_HH(d, a, b, c,  x[1], MD5_S32, $eaa127fa, t, x, 0)
+    MD5_HH(c, d, a, b,  x[4], MD5_S33, $d4ef3085, t, x, 3)
+    MD5_HH(b, c, d, a,  x[7], MD5_S34, $04881d05, t, x, 6)
+    MD5_HH(a, b, c, d, x[10], MD5_S31, $d9d4d039, t, x, 9)
+    MD5_HH(d, a, b, c, x[13], MD5_S32, $e6db99e5, t, x, 12)
+    MD5_HH(c, d, a, b, x[16], MD5_S33, $1fa27cf8, t, x, 15)
+    MD5_HH(b, c, d, a,  x[3], MD5_S34, $c4ac5665, t, x, 2)
 
     // Round 4
-    II(a, b, c, d,  x[1], S41, $f4292244, t, x, 0)
-    II(d, a, b, c,  x[8], S42, $432aff97, t, x, 7)
-    II(c, d, a, b, x[15], S43, $ab9423a7, t, x, 14)
-    II(b, c, d, a,  x[6], S44, $fc93a039, t, x, 5)
-    II(a, b, c, d, x[13], S41, $655b59c3, t, x, 12)
-    II(d, a, b, c,  x[4], S42, $8f0ccc92, t, x, 3)
-    II(c, d, a, b, x[11], S43, $ffeff47d, t, x, 10)
-    II(b, c, d, a,  x[2], S44, $85845dd1, t, x, 1)
-    II(a, b, c, d,  x[9], S41, $6fa87e4f, t, x, 8)
-    II(d, a, b, c, x[16], S42, $fe2ce6e0, t, x, 15)
-    II(c, d, a, b,  x[7], S43, $a3014314, t, x, 6)
-    II(b, c, d, a, x[14], S44, $4e0811a1, t, x, 13)
-    II(a, b, c, d,  x[5], S41, $f7537e82, t, x, 4)
-    II(d, a, b, c, x[12], S42, $bd3af235, t, x, 11)
-    II(c, d, a, b,  x[3], S43, $2ad7d2bb, t, x, 2)
-    II(b, c, d, a, x[10], S44, $eb86d391, t, x, 9)
+    MD5_II(a, b, c, d,  x[1], MD5_S41, $f4292244, t, x, 0)
+    MD5_II(d, a, b, c,  x[8], MD5_S42, $432aff97, t, x, 7)
+    MD5_II(c, d, a, b, x[15], MD5_S43, $ab9423a7, t, x, 14)
+    MD5_II(b, c, d, a,  x[6], MD5_S44, $fc93a039, t, x, 5)
+    MD5_II(a, b, c, d, x[13], MD5_S41, $655b59c3, t, x, 12)
+    MD5_II(d, a, b, c,  x[4], MD5_S42, $8f0ccc92, t, x, 3)
+    MD5_II(c, d, a, b, x[11], MD5_S43, $ffeff47d, t, x, 10)
+    MD5_II(b, c, d, a,  x[2], MD5_S44, $85845dd1, t, x, 1)
+    MD5_II(a, b, c, d,  x[9], MD5_S41, $6fa87e4f, t, x, 8)
+    MD5_II(d, a, b, c, x[16], MD5_S42, $fe2ce6e0, t, x, 15)
+    MD5_II(c, d, a, b,  x[7], MD5_S43, $a3014314, t, x, 6)
+    MD5_II(b, c, d, a, x[14], MD5_S44, $4e0811a1, t, x, 13)
+    MD5_II(a, b, c, d,  x[5], MD5_S41, $f7537e82, t, x, 4)
+    MD5_II(d, a, b, c, x[12], MD5_S42, $bd3af235, t, x, 11)
+    MD5_II(c, d, a, b,  x[3], MD5_S43, $2ad7d2bb, t, x, 2)
+    MD5_II(b, c, d, a, x[10], MD5_S44, $eb86d391, t, x, 9)
 
     state[1] = state[1] + a
     state[2] = state[2] + b
@@ -438,7 +432,7 @@ define_function NAVMd5Final(_NAVMd5Context context){
     NAVMd5Encode(bits, context.count, 8)
 
     // Pad out to 56 mod 64.
-    NAVMd5Update(context, PADDING, NAVMd5GetPaddingLength(context))
+    NAVMd5Update(context, MD5_PADDING, NAVMd5GetPaddingLength(context))
 
     // Append length (before padding)
     NAVMd5Update(context, bits, 8)
@@ -449,7 +443,7 @@ define_function NAVMd5Final(_NAVMd5Context context){
 
 
 /**
- * @function F
+ * @function MD5_F
  * @internal
  * @description Basic MD5 function F.
  *
@@ -459,11 +453,11 @@ define_function NAVMd5Final(_NAVMd5Context context){
  *
  * @returns {long} Result of the F function
  */
-define_function long F(long x, long y, long z) { return ((x & y) | (~x & z)) }
+define_function long MD5_F(long x, long y, long z) { return ((x & y) | (~x & z)) }
 
 
 /**
- * @function G
+ * @function MD5_G
  * @internal
  * @description Basic MD5 function G.
  *
@@ -473,11 +467,11 @@ define_function long F(long x, long y, long z) { return ((x & y) | (~x & z)) }
  *
  * @returns {long} Result of the G function
  */
-define_function long G(long x, long y, long z) { return ((x & z) | (y & ~z)) }
+define_function long MD5_G(long x, long y, long z) { return ((x & z) | (y & ~z)) }
 
 
 /**
- * @function H
+ * @function MD5_H
  * @internal
  * @description Basic MD5 function H.
  *
@@ -487,11 +481,11 @@ define_function long G(long x, long y, long z) { return ((x & z) | (y & ~z)) }
  *
  * @returns {long} Result of the H function
  */
-define_function long H(long x, long y, long z) { return (x ^ y ^ z)          }
+define_function long MD5_H(long x, long y, long z) { return (x ^ y ^ z)          }
 
 
 /**
- * @function I
+ * @function MD5_I
  * @internal
  * @description Basic MD5 function I.
  *
@@ -501,11 +495,11 @@ define_function long H(long x, long y, long z) { return (x ^ y ^ z)          }
  *
  * @returns {long} Result of the I function
  */
-define_function long I(long x, long y, long z) { return (y ^ (x | ~z))       }
+define_function long MD5_I(long x, long y, long z) { return (y ^ (x | ~z))       }
 
 
 /**
- * @function FF
+ * @function MD5_FF
  * @internal
  * @description MD5 transformation function for round 1.
  *
@@ -522,10 +516,10 @@ define_function long I(long x, long y, long z) { return (y ^ (x | ~z))       }
  *
  * @returns {void}
  */
-define_function FF(long a, long b, long c, long d, long x, long s, long ac, long t, long xx[], long k) {
+define_function MD5_FF(long a, long b, long c, long d, long x, long s, long ac, long t, long xx[], long k) {
     k++
     // a = a + F(b, c, d) + x + ac
-    t = a + F(b, c, d) + xx[k] + ac
+    t = a + MD5_F(b, c, d) + xx[k] + ac
     // a = NAVBitRotateLeft(a, s)
     a = NAVBitRotateLeft(t, s)
     a = a + b
@@ -533,7 +527,7 @@ define_function FF(long a, long b, long c, long d, long x, long s, long ac, long
 
 
 /**
- * @function GG
+ * @function MD5_GG
  * @internal
  * @description MD5 transformation function for round 2.
  *
@@ -550,10 +544,10 @@ define_function FF(long a, long b, long c, long d, long x, long s, long ac, long
  *
  * @returns {void}
  */
-define_function GG(long a, long b, long c, long d, long x, long s, long ac, long t, long xx[], long k) {
+define_function MD5_GG(long a, long b, long c, long d, long x, long s, long ac, long t, long xx[], long k) {
     k++
     // a = a + G(b, c, d) + x + ac
-    t = a + G(b, c, d) + xx[k] + ac
+    t = a + MD5_G(b, c, d) + xx[k] + ac
     // a = NAVBitRotateLeft(a, s)
     a = NAVBitRotateLeft(t, s)
     a = a + b
@@ -561,7 +555,7 @@ define_function GG(long a, long b, long c, long d, long x, long s, long ac, long
 
 
 /**
- * @function HH
+ * @function MD5_HH
  * @internal
  * @description MD5 transformation function for round 3.
  *
@@ -578,10 +572,10 @@ define_function GG(long a, long b, long c, long d, long x, long s, long ac, long
  *
  * @returns {void}
  */
-define_function HH(long a, long b, long c, long d, long x, long s, long ac, long t, long xx[], long k) {
+define_function MD5_HH(long a, long b, long c, long d, long x, long s, long ac, long t, long xx[], long k) {
     k++
     // a = a + H(b, c, d) + x + ac
-    t = a + H(b, c, d) + xx[k] + ac
+    t = a + MD5_H(b, c, d) + xx[k] + ac
     // a = NAVBitRotateLeft(a, s)
     a = NAVBitRotateLeft(t, s)
     a = a + b
@@ -589,7 +583,7 @@ define_function HH(long a, long b, long c, long d, long x, long s, long ac, long
 
 
 /**
- * @function II
+ * @function MD5_II
  * @internal
  * @description MD5 transformation function for round 4.
  *
@@ -606,10 +600,10 @@ define_function HH(long a, long b, long c, long d, long x, long s, long ac, long
  *
  * @returns {void}
  */
-define_function II(long a, long b, long c, long d, long x, long s, long ac, long t, long xx[], long k) {
+define_function MD5_II(long a, long b, long c, long d, long x, long s, long ac, long t, long xx[], long k) {
     k++
     // a = a + I(b, c, d) + x + ac
-    t = a + I(b, c, d) + xx[k] + ac
+    t = a + MD5_I(b, c, d) + xx[k] + ac
     // a = NAVBitRotateLeft(a, s)
     a = NAVBitRotateLeft(t, s)
     a = a + b

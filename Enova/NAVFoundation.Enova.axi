@@ -35,6 +35,8 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_ENOVA__ 'NAVFoundation.Enova'
 
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 
 DEFINE_CONSTANT

@@ -38,7 +38,7 @@ constant char SUBSTRING_EXPECTED[][NAV_MAX_BUFFER] = {
 define_function TestNAVStringSubstring() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVStringSubstring *****************'")
+    NAVLog("'***************** NAVStringSubstring *****************'")
 
     for (x = 1; x <= length_array(SUBSTRING_TEST); x++) {
         stack_var integer start
@@ -53,7 +53,7 @@ define_function TestNAVStringSubstring() {
 
         result = NAVStringSubstring(SUBSTRING_SUBJECT, start, count)
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('String Substring Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }

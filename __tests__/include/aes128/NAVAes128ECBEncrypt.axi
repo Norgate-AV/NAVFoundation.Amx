@@ -131,7 +131,7 @@ define_function RunNAVAes128ECBEncryptTests() {
             // Log detailed information if test fails
             if (length_array(plaintext) <= 64) {  // Only show full data if reasonably small
                 NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(i), ' key: ', NAVByteArrayToNetLinxHexString(ECB_ENCRYPT_TESTS[i][1])")
-                NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(i), ' plaintext: \"', plaintext, '\"'")
+                NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(i), ' plaintext: "', plaintext, '"'")
                 NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(i), ' plaintext hex: ', NAVByteArrayToNetLinxHexString(plaintext)")
                 NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(i), ' expected: ', NAVByteArrayToNetLinxHexString(ECB_ENCRYPT_TESTS[i][3])")
                 NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(i), ' actual: ', NAVByteArrayToNetLinxHexString(ciphertext)")

@@ -51,7 +51,7 @@ constant char SPLIT_STRING_EXPECTED[][][NAV_MAX_BUFFER] = {
 define_function TestNAVSplitString() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVSplitString *****************'")
+    NAVLog("'***************** NAVSplitString *****************'")
 
     for (x = 1; x <= length_array(SPLIT_STRING_TEST); x++) {
         stack_var integer count
@@ -63,7 +63,7 @@ define_function TestNAVSplitString() {
         count = NAVSplitString(SPLIT_STRING_TEST[x][1], separator, result)
 
         if (count != length_array(SPLIT_STRING_EXPECTED[x])) {
-            send_string 0, "'Test ', itoa(x), ' failed. Expected count: ', itoa(length_array(SPLIT_STRING_EXPECTED[x])), ' Actual count: ', itoa(count)"
+            NAVLogTestFailed(x, itoa(length_array(SPLIT_STRING_EXPECTED[x])), itoa(count))
             continue
         }
 
@@ -72,14 +72,14 @@ define_function TestNAVSplitString() {
 
             for (z = 1; z <= count; z++) {
                 if (result[z] != SPLIT_STRING_EXPECTED[x][z]) {
-                    send_string 0, "'Expected index ', itoa(z), ': ', SPLIT_STRING_EXPECTED[x][z], ' Actual: ', result[z]"
+                    NAVLogTestFailed(x, SPLIT_STRING_EXPECTED[x][z], result[z])
                     failed = true
+                    break
                 }
             }
         }
 
         if (failed) {
-            send_string 0, "'Test ', itoa(x), ' failed'"
             continue
         }
 

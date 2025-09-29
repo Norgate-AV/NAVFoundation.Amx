@@ -32,9 +32,10 @@ SOFTWARE.
 */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_INTERMODULE_API__
-#DEFINE __NAV_FOUNDATION_INTERMODULE_API__ 'NAVFoundation.InterModuleApi.h'
+#DEFINE __NAV_FOUNDATION_INTERMODULE_API__ 'NAVFoundation.InterModuleApi'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.StringUtils.axi'
 
 
 DEFINE_CONSTANT
@@ -148,11 +149,6 @@ define_function char[NAV_MAX_BUFFER] NAVInterModuleApiGetObjectTagList(_ModuleOb
 
 
 define_function NAVInterModuleApiSendObjectMessage(dev device, char payload[]) {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                NAVFormatStandardLogMessage(NAV_STANDARD_LOG_MESSAGE_TYPE_COMMAND_TO,
-                                            device,
-                                            payload))
-
     NAVCommand(device, "payload")
 }
 

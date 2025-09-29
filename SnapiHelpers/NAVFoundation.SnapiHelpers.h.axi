@@ -34,8 +34,6 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_SNAPIHELPERS_H__
 #DEFINE __NAV_FOUNDATION_SNAPIHELPERS_H__ 'NAVFoundation.SnapiHelpers.h'
 
-#include 'NAVFoundation.Core.axi'
-
 
 (***********************************************************)
 (*               CONSTANT DEFINITIONS GO BELOW             *)

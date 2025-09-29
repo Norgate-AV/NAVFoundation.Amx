@@ -34,8 +34,10 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__
 #DEFINE __NAV_FOUNDATION_DEVICE_PRIORITY_QUEUE__ 'NAVFoundation.DevicePriorityQueue'
 
-#include 'NAVFoundation.DevicePriorityQueue.h.axi'
+#include 'NAVFoundation.Core.h.axi'
 #include 'NAVFoundation.Queue.axi'
+#include 'NAVFoundation.TimelineUtils.axi'
+#include 'NAVFoundation.DevicePriorityQueue.h.axi'
 
 
 // #DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK
@@ -44,15 +46,14 @@ SOFTWARE.
 // #DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE_EVENT_CALLBACK
 // define_function NAVDevicePriorityQueueFailedResponseEventCallback(_NAVDevicePriorityQueue queue) {}
 
+// !!! If you define the above callback, you MUST also define the event below in your main .axs file !!!
 
-DEFINE_VARIABLE
+// DEFINE_EVENT
 
-volatile _NAVDevicePriorityQueue priorityQueue
+// timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE] {
+//     NAVDevicePriorityQueueFailedResponse(queue)  <-- MUST MATCH THE VARIABLE NAME DECLARED FOR THE QUEUE
+// }
 
-
-(***********************************************************)
-(*        SUBROUTINE/FUNCTION DEFINITIONS GO BELOW         *)
-(***********************************************************)
 
 define_function integer NAVDevicePriorityQueueIsEmpty(_NAVDevicePriorityQueue queue) {
     return (NAVQueueIsEmpty(queue.CommandQueue) && NAVQueueIsEmpty(queue.QueryQueue))
@@ -141,7 +142,13 @@ define_function NAVDevicePriorityQueueSendNextItem(_NAVDevicePriorityQueue queue
 
     #IF_DEFINED USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK
     NAVDevicePriorityQueueSendNextItemEventCallback(item)
-    NAVTimelineStart(queue.FailedResponseTimeline.Id, queue.FailedResponseTimeline.Time, TIMELINE_ABSOLUTE, TIMELINE_ONCE)
+    #END_IF
+
+    #IF_DEFINED USING_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE_EVENT_CALLBACK
+    NAVTimelineStart(queue.FailedResponseTimeline.Id,
+                        queue.FailedResponseTimeline.Time,
+                        TIMELINE_ABSOLUTE,
+                        TIMELINE_ONCE)
     #END_IF
 }
 
@@ -181,18 +188,6 @@ define_function NAVDevicePriorityQueueInit(_NAVDevicePriorityQueue queue) {
 
     NAVQueueInit(queue.CommandQueue, NAV_DEVICE_PRIORITY_QUEUE_COMMAND_QUEUE_SIZE)
     NAVQueueInit(queue.QueryQueue, NAV_DEVICE_PRIORITY_QUEUE_QUERY_QUEUE_SIZE)
-}
-
-
-DEFINE_START {
-    NAVDevicePriorityQueueInit(priorityQueue)
-}
-
-
-DEFINE_EVENT
-
-timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE] {
-    NAVDevicePriorityQueueFailedResponse(priorityQueue)
 }
 
 

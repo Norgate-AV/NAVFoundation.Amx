@@ -100,7 +100,7 @@ define_function RunNAVAes128EndToEndTests() {
         // Copy the plaintext
         plaintext = TEST_PLAINTEXTS[testNum]
 
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(testNum), ': Password: \"', password, '\", Plaintext (', itoa(length_array(plaintext)), ' bytes)'")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(testNum), ': Password: "', password, '", Plaintext (', itoa(length_array(plaintext)), ' bytes)'")
 
         // 1. Derive encryption key from password and salt
         result = NAVAes128DeriveKey(password, salt, PBKDF2_TEST_ITERATIONS, derivedKey)
@@ -142,8 +142,8 @@ define_function RunNAVAes128EndToEndTests() {
         if (NAVCompareBuffers(plaintext, decryptedText)) {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(testNum), ' - PASSED: Decrypted text matches original'")
             if (length_array(plaintext) <= 64) {
-                NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(testNum), ' - Original: \"', plaintext, '\"'")
-                NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(testNum), ' - Decrypted: \"', decryptedText, '\"'")
+                NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(testNum), ' - Original: "', plaintext, '"'")
+                NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(testNum), ' - Decrypted: "', decryptedText, '"'")
             }
         }
         else {

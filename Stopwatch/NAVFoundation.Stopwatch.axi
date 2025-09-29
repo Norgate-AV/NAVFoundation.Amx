@@ -31,10 +31,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#IF_NOT_DEFINED __NAV_FOUNDATIONSTOPWATCH__
+#IF_NOT_DEFINED __NAV_FOUNDATION_STOPWATCH__
 #DEFINE __NAV_FOUNDATION_STOPWATCH__ 'NAVFoundation.Stopwatch'
 
-#include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.TimelineUtils.axi'
 #include 'NAVFoundation.Stopwatch.h.axi'
 

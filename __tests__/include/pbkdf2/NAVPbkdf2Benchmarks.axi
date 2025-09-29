@@ -37,7 +37,7 @@ define_function BenchmarkPBKDF2() {
 
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'PBKDF2 Performance Benchmarks:'")
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Password: ', password")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt: ', BufferToHexString(salt)")
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Salt: ', Pbkdf2BufferToHexString(salt)")
 
     // Run tests with different iteration counts
     for (i = 1; i <= length_array(iterationCounts); i++) {
@@ -54,7 +54,7 @@ define_function BenchmarkPBKDF2() {
         // Log results
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Result: ', itoa(result), ' (', NAVPbkdf2GetError(result), ')'")
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Time: ', itoa(elapsedTime), ' ms'")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key: ', BufferToHexString(key)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key: ', Pbkdf2BufferToHexString(key)")
 
         // Now test AES key derivation wrapper
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'----- Testing NAVAes128DeriveKey with ', itoa(iterationCounts[i]), ' iterations -----'")
@@ -65,6 +65,6 @@ define_function BenchmarkPBKDF2() {
 
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Result: ', itoa(result), ' (', NAVAes128GetError(result), ')'")
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Time: ', itoa(elapsedTime), ' ms'")
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key: ', BufferToHexString(key)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Key: ', Pbkdf2BufferToHexString(key)")
     }
 }

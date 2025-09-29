@@ -1,5 +1,166 @@
 # Changelog
 
+## [3.4.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.4.0...v3.4.1) (2025-09-28)
+
+### 🐛 Bug Fixes
+
+- **string-utils:** various fixes and improvements ([9e94494](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9e944941c82421bb83dbcac4a843ca8da3ff315d))
+
+## [3.4.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.3.0...v3.4.0) (2025-09-28)
+
+### 🌟 Features
+
+- **hashtable:** various enhancements and improvements ([c525954](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c525954240f6bf459cee8545675ac942b3488c17))
+
+## [3.3.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.2.2...v3.3.0) (2025-09-27)
+
+### 🌟 Features
+
+- add IniUtils library ([c05ec83](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c05ec835b79836d75bd75c3c8fb4bd0bc5e50368))
+
+## [3.2.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.2.1...v3.2.2) (2025-09-18)
+
+### 🐛 Bug Fixes
+
+- **file-utils:** return byte count from NAVFileRead/NAVFileWrite ([4950382](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/49503820c6bf2a0036a5103ae5202ade6730e661))
+
+## [3.2.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.2.0...v3.2.1) (2025-09-16)
+
+### 🐛 Bug Fixes
+
+- **rms-utils:** dont send commands to device if it's not online ([073f482](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/073f4829de10210c7806ec1a933baafc24466d63))
+
+## [3.2.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.1.0...v3.2.0) (2025-09-15)
+
+### 🌟 Features
+
+- **rms-utils:** add NAVRmsAdapterConnectionUpdate ([b1acb17](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b1acb17baf4924f5668fc5b2175de3945c5aef19))
+
+### 🚀 Performance
+
+- **rms-utils:** reduce memory footprint for some structs ([f949171](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/f949171d9133017b98b7bc8c57ccfe866f371dd1))
+
+## [3.1.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.0.0...v3.1.0) (2025-09-14)
+
+### 🌟 Features
+
+- **socket-utils:** add NAVClientTlsSocketOpen, NAVClientTlsSocketClose ([6b0855c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6b0855c5eead63c84b92ac130424e3043ad9c42e))
+
+## [3.0.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v2.1.0...v3.0.0) (2025-09-14)
+
+### ⚠ BREAKING CHANGES
+
+- **module-base:** Consumers must now declare their own \_NAVModule
+  variable in DEFINE_VARIABLE and call NAVModuleInit() in DEFINE_START.
+  The library no longer provides automatic module setup.
+- **logic-engine:** Struct definitions have changed. Users must update
+  code that accesses nested struct members or relies on previous
+  \_NAVLogicEngine layout. The \_NAVLogicEngineRuntime and
+  \_NAVLogicEngineTimer structs have been removed.
+- **device-priority-queue:** Remove global queue variable and timeline event for failed responses
+
+* Remove `volatile _NAVDevicePriorityQueue priorityQueue` global variable
+* Remove timeline event that handled failed responses
+* Users must now declare their own queue instances
+* Failed response handling now requires custom callback implementation
+* Update documentation with new usage patterns
+
+### 🌟 Features
+
+- **module-base:** remove automatic module initialization ([7b7d589](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/7b7d5898883fa63ba619208690a332159bfca02d))
+- **device-priority-queue:** remove global state and timeline handling ([8ed2a6e](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/8ed2a6e79e821b0de5ad6fc60329bc36aa13df17))
+- **logic-engine:** simplify architecture and optimize memory usage ([ec80995](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/ec80995a7b9bc7a40ef7bd23d5c14e722d9e24ad))
+
+### 🐛 Bug Fixes
+
+- **date-time-utils:** allow for leap year when getting days in month ([6f77f5f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6f77f5f67a1d8165ad0848496244476774fae40b))
+
+### 🚀 Performance
+
+- **date-time-utils:** optimize calculations for DST ([3ab0f55](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3ab0f5523cac6d5c1c5b7784bb9caaa33146aa9d))
+
+## [2.1.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v2.0.1...v2.1.0) (2025-03-31)
+
+### 🌟 Features
+
+- **datetime-utils:** add NAVFindTimeServer function ([fcfe1cf](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/fcfe1cf029f5b30752d9207ec82b0535332d3e1b))
+- **datetime-utils:** add NAVGetTimeServers function ([b1d85c9](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b1d85c9cf64ae366c14f1c4dfeafbe8277cdee8b))
+
+### 🐛 Bug Fixes
+
+- **datetime-utils:** dont add timeserver if it already exists ([383eac6](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/383eac6c64a31a7c01c90fe0a8522f2c9372e5b3))
+
+## [2.0.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v2.0.0...v2.0.1) (2025-03-31)
+
+### 🐛 Bug Fixes
+
+- **core:** restore init array lengths in core functions ([7ae1212](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/7ae1212552f9f92dc7407e9ba96c4978ca8ef187))
+
+## [2.0.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.35.0...v2.0.0) (2025-03-11)
+
+### ⚠ BREAKING CHANGES
+
+- **cryptography:** Any usages of the MD5 function will now output a raw 16 byte digest as per the RFC
+  spec. If you need the 32 byte string representation of the digest the output of the MD5 function
+  will now need to converted manually. The Encoding library provides such a function, called
+  NAVHexToString that can be used.
+- This update will inevitably causes some breakage but will make things more modular,
+  maintainable and efficient moving forward. Programs using Core alone may now be missing various
+  includes like StringUtils, TimelineUtils, ErrorLogUtils, etc. As these are not included
+  automatically by Core anymore, these will need to be included manually where required. As Core has
+  also now been split into header and implementation files, if you just need to use the constants or
+  types it provides, you can simply include just the header file now.
+- The automatic creation of the TL_NAV_FEEDBACK and
+  TL_NAV_BLINKER timelines has been removed from DEFINE_START in Core. The
+  creation of these timelines have been moved into some helper functions
+  in the NAVFoundation.Timers.axi file. If you need to run these timelines
+  you will need to start them manually using
+  NAVGlobalFeedbackTimelineStart, or NAVGlobalBlinkerTimelineStart. A call
+  to these functions can be placed in DEFINE_START in your program. The
+  Timers.axi also provides helper functions for stopping, pausing and
+  resetting these timelines.
+
+### 🌟 Features
+
+- split apart the Core library to remove circular dependencies and reduce overall size ([d745f51](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/d745f519fdc07354d9797a84e729c585273996c8))
+
+### 🐛 Bug Fixes
+
+- **stopewatch:** fix missing underscore in include guard directive ([02dc0aa](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/02dc0aaf14501f07a59405852b615c75bf378b5b))
+- **cryptography:** output raw 16 byte char array for MD5 ([191ead0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/191ead07466bc12a3ce876fe27998fe8550b904f))
+
+## [1.35.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.34.0...v1.35.0) (2025-03-08)
+
+### 🌟 Features
+
+- **encoding:** add initial implementation of base32 ([0f72585](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/0f72585dab7c39534ec9f47b60474d24fc81ef78))
+
+## [1.34.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.33.0...v1.34.0) (2025-03-07)
+
+### 🌟 Features
+
+- add Assert library ([0bda330](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/0bda330deb17bdb8e96472d4a4a635f793e1d6ee))
+- add initial sha512 implementation ([cf06b42](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/cf06b42ab8fcda8b3e998e38c32887a3600f169b))
+- add Int64 library ([a64a190](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a64a190a21f0d795b7bd043629696d79204c8016))
+- **encoding:** add NAVByteToHexString function ([0910cb4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/0910cb43f355d0c2bc29ed105367d29f33498166))
+
+## [1.33.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.32.0...v1.33.0) (2025-03-05)
+
+### 🌟 Features
+
+- **core:** use log level INFO only to show banner ([3869fd0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3869fd04bf6a50ffcfb1e7f9eba34116b4888426))
+
+## [1.32.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.31.0...v1.32.0) (2025-03-05)
+
+### 🌟 Features
+
+- **cryptography:** add initial sha256 implementation ([75ab001](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/75ab001145d6aa63fed5cd308a7c3440a29e1c31))
+- **encoding:** add NAVHexToString alias function ([4f53b43](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/4f53b43cf8d08ae33814bb17a936c44775378de1))
+
+### 🐛 Bug Fixes
+
+- **intermodule-api:** remove unnecessary logging ([997d228](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/997d228bc5782e4f579390de39d01f3502a011c3))
+
 ## [1.31.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v1.30.0...v1.31.0) (2025-02-28)
 
 ### 🌟 Features

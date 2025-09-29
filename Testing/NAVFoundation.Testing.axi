@@ -203,82 +203,12 @@ define_function NAVUnitTestWithStringResultInit(_NAVUnitTestWithStringResult tes
 //     #END_IF
 
 define_function NAVLogTestPassed(integer test) {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(test), ' passed'")
+    NAVLog("'Test ', itoa(test), ' passed'")
 }
 
 
 define_function NAVLogTestFailed(integer test, char expected[], char result[]) {
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(test), ' failed. Expected "', expected, '" but got "', result, '"'")
-}
-
-
-define_function char NAVAssertStringEqual(char expected[], char result[]) {
-    return expected == result
-}
-
-
-define_function char NAVAssertStringNotEqual(char expected[], char result[]) {
-    return expected != result
-}
-
-
-define_function char NAVAssertIntegerEqual(integer expected, integer result) {
-    return expected == result
-}
-
-
-define_function char NAVAssertIntegerNotEqual(integer expected, integer result) {
-    return expected != result
-}
-
-
-define_function char NAVAssertIntegerGreaterThan(integer expected, integer result) {
-    return expected > result
-}
-
-
-define_function char NAVAssertIntegerLessThan(integer expected, integer result) {
-    return expected < result
-}
-
-
-define_function char NAVAssertIntegerGreaterThanOrEqual(integer expected, integer result) {
-    return expected >= result
-}
-
-
-define_function char NAVAssertIntegerLessThanOrEqual(integer expected, integer result) {
-    return expected <= result
-}
-
-
-define_function char NAVAssertFloatEqual(float expected, float result) {
-    return expected == result
-}
-
-
-define_function char NAVAssertFloatNotEqual(float expected, float result) {
-    return expected != result
-}
-
-
-define_function char NAVAssertFloatGreaterThan(float expected, float result) {
-    return expected > result
-}
-
-
-define_function char NAVAssertFloatLessThan(float expected, float result) {
-    return expected < result
-}
-
-
-define_function char NAVAssertFloatGreaterThanOrEqual(float expected, float result) {
-    return expected >= result
-}
-
-
-define_function char NAVAssertFloatLessThanOrEqual(float expected, float result) {
-    return expected <= result
+    NAVLog("'Test ', itoa(test), ' failed. Expected "', expected, '" but got "', result, '"'")
 }
 
 // define_function NAVTestAssertContains(char message[], char actual[], char expected[]) {

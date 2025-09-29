@@ -35,116 +35,8 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_SOCKETUTILS__ 'NAVFoundation.SocketUtils'
 
 #include 'NAVFoundation.Core.axi'
-
-
-DEFINE_CONSTANT
-
-/**
- * @section Socket Error Constants
- * @description Error codes returned by socket operations
- */
-
-/**
- * @constant NAV_SOCKET_ERROR_INVALID_SERVER_PORT
- * @description Error: Invalid server port specified
- */
-constant slong NAV_SOCKET_ERROR_INVALID_SERVER_PORT             = -1
-
-/**
- * @constant NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE
- * @description Error: Invalid protocol value specified
- */
-constant slong NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE          = -2
-
-/**
- * @constant NAV_SOCKET_ERROR_UNABLE_TO_OPEN_PORT
- * @description Error: Unable to open communication port
- */
-constant slong NAV_SOCKET_ERROR_UNABLE_TO_OPEN_PORT             = -3
-
-/**
- * @constant NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS
- * @description Error: Invalid host address provided
- */
-constant slong NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS            = -10
-
-/**
- * @constant NAV_SOCKET_ERROR_INVALID_PORT
- * @description Error: Invalid port number specified
- */
-constant slong NAV_SOCKET_ERROR_INVALID_PORT                    = -11
-
-/**
- * @constant NAV_SOCKET_ERROR_GENERAL_FAILURE
- * @description Error: General failure (usually out of memory)
- */
-constant slong NAV_SOCKET_ERROR_GENERAL_FAILURE                 = 2
-
-/**
- * @constant NAV_SOCKET_ERROR_UNKNOWN_HOST
- * @description Error: Unknown host (DNS resolution failed)
- */
-constant slong NAV_SOCKET_ERROR_UNKNOWN_HOST                    = 4
-
-/**
- * @constant NAV_SOCKET_ERROR_CONNECTION_REFUSED
- * @description Error: Connection refused by remote host
- */
-constant slong NAV_SOCKET_ERROR_CONNECTION_REFUSED              = 6
-
-/**
- * @constant NAV_SOCKET_ERROR_CONNECTION_TIMED_OUT
- * @description Error: Connection attempt timed out
- */
-constant slong NAV_SOCKET_ERROR_CONNECTION_TIMED_OUT            = 7
-
-/**
- * @constant NAV_SOCKET_ERROR_UNKNOWN_CONNECTION_ERROR
- * @description Error: Unknown connection error
- */
-constant slong NAV_SOCKET_ERROR_UNKNOWN_CONNECTION_ERROR        = 8
-
-/**
- * @constant NAV_SOCKET_ERROR_ALREADY_CLOSED
- * @description Error: Socket is already closed
- */
-constant slong NAV_SOCKET_ERROR_ALREADY_CLOSED                  = 9
-
-/**
- * @constant NAV_SOCKET_ERROR_BINDING_ERROR
- * @description Error: Unable to bind socket to address/port
- */
-constant slong NAV_SOCKET_ERROR_BINDING_ERROR                   = 10
-
-/**
- * @constant NAV_SOCKET_ERROR_LISTENING_ERROR
- * @description Error: Unable to start listening on socket
- */
-constant slong NAV_SOCKET_ERROR_LISTENING_ERROR                 = 11
-
-/**
- * @constant NAV_SOCKET_ERROR_LOCAL_PORT_ALREADY_USED
- * @description Error: The specified local port is already in use
- */
-constant slong NAV_SOCKET_ERROR_LOCAL_PORT_ALREADY_USED         = 14
-
-/**
- * @constant NAV_SOCKET_ERROR_UDP_SOCKET_ALREADY_LISTENING
- * @description Error: UDP socket is already listening
- */
-constant slong NAV_SOCKET_ERROR_UDP_SOCKET_ALREADY_LISTENING    = 15
-
-/**
- * @constant NAV_SOCKET_ERROR_TOO_MANY_OPEN_SOCKETS
- * @description Error: Too many open sockets (system limit reached)
- */
-constant slong NAV_SOCKET_ERROR_TOO_MANY_OPEN_SOCKETS           = 16
-
-/**
- * @constant NAV_SOCKET_ERROR_LOCAL_PORT_NOT_OPEN
- * @description Error: The specified local port is not open
- */
-constant slong NAV_SOCKET_ERROR_LOCAL_PORT_NOT_OPEN             = 17
+#include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.SocketUtils.h.axi'
 
 
 /**
@@ -212,6 +104,31 @@ define_function char[NAV_MAX_BUFFER] NAVGetSocketProtocol(integer protocol) {
         case IP_UDP:        { return 'UDP' }
         case IP_UDP_2WAY:   { return 'UDP 2-Way' }
         default:            { return "'Unknown protocol (', itoa(protocol), ')'" }
+    }
+}
+
+
+/**
+ * @function NAVGetTlsSocketMode
+ * @public
+ * @description Converts a TLS mode constant to a human-readable mode name.
+ *
+ * @param {integer} mode - Protocol value (TLS_VALIDATE_CERTIFICATE, or TLS_IGNORE_CERTIFICATE_ERRORS)
+ *
+ * @returns {char[]} Human-readable mode name
+ *
+ * @example
+ * stack_var integer mode
+ * stack_var char modeName[NAV_MAX_BUFFER]
+ *
+ * mode = TLS_VALIDATE_CERTIFICATE
+ * modeName = NAVGetTlsSocketMode(mode)  // Returns 'TLS Validate Certificate'
+ */
+define_function char[NAV_MAX_BUFFER] NAVGetTlsSocketMode(integer mode) {
+    switch (mode) {
+        case TLS_VALIDATE_CERTIFICATE:      { return 'TLS Validate Certificate' }
+        case TLS_IGNORE_CERTIFICATE_ERRORS: { return 'TLS Ignore Certificate Errors' }
+        default:                            { return "'Unknown mode (', itoa(mode), ')'" }
     }
 }
 
@@ -460,6 +377,101 @@ define_function slong NAVClientSecureSocketOpen(integer socket,
  */
 define_function slong NAVClientSecureSocketClose(integer socket) {
     return ssh_client_close(socket)
+}
+
+
+/**
+ * @function NAVClientTlsSocketOpen
+ * @public
+ * @description Opens a TLS client socket connection to a remote server.
+ *
+ * @param {integer} socket - Socket ID to use
+ * @param {char[]} address - IP address or hostname of remote server
+ * @param {integer} port - Port number to connect to
+ * @param {integer} mode - TLS_VALIDATE_CERTIFICATE (0), or TLS_IGNORE_CERTIFICATE_ERRORS (1)
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * // Connect to a device at 192.168.1.100 on port 23 (Telnet)
+ * result = NAVClientTlsSocketOpen(dvTCPClient.PORT, '192.168.1.100', 23, 0)
+ * if (result < 0) {
+ *     // Handle error
+ * }
+ *
+ * @note IP_UDP client sockets can send datagrams without establishing a connection
+ * @note For hostname resolution, ensure DNS is properly configured on the master
+ */
+define_function slong NAVClientTlsSocketOpen(integer socket, char address[], integer port, integer mode) {
+    stack_var slong result
+
+    address = NAVTrimString(address)
+
+    if (!length_array(address)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientTlsSocketOpen',
+                                    "'The host address is an empty string.'")
+        return NAV_SOCKET_ERROR_INVALID_HOST_ADDRESS
+    }
+
+    if (port <= 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientTlsSocketOpen',
+                                    "NAVGetSocketError(NAV_SOCKET_ERROR_INVALID_PORT)")
+        return NAV_SOCKET_ERROR_INVALID_PORT
+    }
+
+    result = tls_client_open(socket, address, port, mode)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientTlsSocketOpen',
+                                    "'Failed to open socket to ', address, ':', itoa(port), ' TLS mode: ', NAVGetTlsSocketMode(mode)")
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientTlsSocketOpen',
+                                    "'Socket error: ', NAVGetSocketError(result)")
+    }
+
+    return result
+}
+
+
+/**
+ * @function NAVClientTlsSocketClose
+ * @public
+ * @description Closes a TLS client socket connection.
+ *
+ * @param {integer} socket - Socket ID to close
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong result
+ *
+ * result = NAVClientTlsSocketClose(dvTCPClient.PORT)
+ * if (result < 0) {
+ *     // Handle error
+ * }
+ */
+define_function slong NAVClientTlsSocketClose(integer socket) {
+    stack_var slong result
+
+    result = tls_client_close(socket)
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_SOCKETUTILS__,
+                                    'NAVClientTlsSocketClose',
+                                    "'Failed to close socket. ', NAVGetSocketError(result)")
+    }
+
+    return result
 }
 
 

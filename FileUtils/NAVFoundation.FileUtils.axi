@@ -34,7 +34,10 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_FILEUTILS__
 #DEFINE __NAV_FOUNDATION_FILEUTILS__ 'NAVFoundation.FileUtils'
 
-#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.FileUtils.h.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
+#include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.PathUtils.axi'
 
 
@@ -245,7 +248,9 @@ define_function slong NAVFileRead(char path[], char data[]) {
                                     "'Error reading file "', path, '" : ', NAVGetFileError(result)")
     }
 
-    return NAVFileClose(handle)
+    NAVFileClose(handle)
+
+    return result
 }
 
 
@@ -355,7 +360,9 @@ define_function slong NAVFileWrite(char path[], char data[]) {
                                     "'Error writing file "', path, '" : ', NAVGetFileError(result)")
     }
 
-    return NAVFileClose(handle)
+    NAVFileClose(handle)
+
+    return result
 }
 
 

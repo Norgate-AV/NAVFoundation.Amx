@@ -136,3 +136,4 @@ dist
 *.AXW
 
 .history/
+.cache_ggshield

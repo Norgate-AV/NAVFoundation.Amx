@@ -1,0 +1,96 @@
+#DEFINE TESTING_NAVINIFILEPARSE
+#DEFINE TESTING_NAVINIFILEFINDSECTION
+#DEFINE TESTING_NAVINIFILEFINDPROPERTY
+#DEFINE TESTING_NAVINIFILEGETVALUE
+#DEFINE TESTING_NAVINIFILECOMPLEXPARSE
+#DEFINE TESTING_NAVINILEXER
+#DEFINE TESTING_NAVINIPARSER
+#DEFINE TESTING_NAVINIUTILSBOUNDARYTESTS
+#DEFINE TESTING_NAVINIUTILSFUNCTIONCOVERAGE
+#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.IniFileUtils.axi'
+#include 'NAVFoundation.Assert.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
+#include 'NAVFoundation.Testing.axi'
+
+#IF_DEFINED TESTING_NAVINIFILEPARSE
+#include 'NAVIniFileParse.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVINIFILEFINDSECTION
+#include 'NAVIniFileFindSection.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVINIFILEFINDPROPERTY
+#include 'NAVIniFileFindProperty.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVINIFILEGETVALUE
+#include 'NAVIniFileGetValue.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVINIFILECOMPLEXPARSE
+#include 'NAVIniFileComplexParse.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVINILEXER
+#include 'NAVIniLexer.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVINIPARSER
+#include 'NAVIniParser.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVINIUTILSBOUNDARYTESTS
+#include 'NAVIniUtilsBoundaryTests.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVINIUTILSFUNCTIONCOVERAGE
+#include 'NAVIniUtilsFunctionCoverage.axi'
+#END_IF
+
+define_function RunIniUtilsTests() {
+    #IF_DEFINED TESTING_NAVINILEXER
+    TestNAVIniLexerInit()
+    TestNAVIniLexerTokenize()
+    TestNAVIniLexerIsIdentifierChar()
+    TestNAVIniLexerTokenTypes()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVINIPARSER
+    TestNAVIniParserInit()
+    TestNAVIniParserParse()
+    TestNAVIniParserParseSection()
+    TestNAVIniParserParseProperty()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVINIFILEFINDSECTION
+    TestNAVIniFileFindSection()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVINIFILEFINDPROPERTY
+    TestNAVIniFileFindProperty()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVINIFILEGETVALUE
+    TestNAVIniFileGetValue()
+    TestNAVIniFileGetSectionValue()
+    TestNAVIniFileGetGlobalValue()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVINIFILEPARSE
+    TestNAVIniFileParse()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVINIFILECOMPLEXPARSE
+    TestNAVIniFileComplexParse()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVINIUTILSBOUNDARYTESTS
+    TestNAVIniUtilsBoundaryTests()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVINIUTILSFUNCTIONCOVERAGE
+    TestNAVIniUtilsFunctionCoverage()
+    #END_IF
+}

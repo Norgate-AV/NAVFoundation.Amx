@@ -100,7 +100,7 @@ constant char SCREAM_KEBAB_CASE_EXPECTED[][NAV_MAX_BUFFER] = {
 define_function TestNAVStringPascalCase() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVStringPascalCase *****************'")
+    NAVLog("'***************** NAVStringPascalCase *****************'")
 
     for (x = 1; x <= length_array(CASE_CONVERSION_TEST); x++) {
         stack_var char expected[NAV_MAX_BUFFER]
@@ -109,7 +109,7 @@ define_function TestNAVStringPascalCase() {
         expected = PASCAL_CASE_EXPECTED[x]
         result = NAVStringPascalCase(CASE_CONVERSION_TEST[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Pascal Case Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }
@@ -121,7 +121,7 @@ define_function TestNAVStringPascalCase() {
 define_function TestNAVStringCamelCase() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVStringCamelCase *****************'")
+    NAVLog("'***************** NAVStringCamelCase *****************'")
 
     for (x = 1; x <= length_array(CASE_CONVERSION_TEST); x++) {
         stack_var char expected[NAV_MAX_BUFFER]
@@ -130,7 +130,7 @@ define_function TestNAVStringCamelCase() {
         expected = CAMEL_CASE_EXPECTED[x]
         result = NAVStringCamelCase(CASE_CONVERSION_TEST[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Camel Case Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }
@@ -142,7 +142,7 @@ define_function TestNAVStringCamelCase() {
 define_function TestNAVStringSnakeCase() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVStringSnakeCase *****************'")
+    NAVLog("'***************** NAVStringSnakeCase *****************'")
 
     for (x = 1; x <= length_array(CASE_CONVERSION_TEST); x++) {
         stack_var char expected[NAV_MAX_BUFFER]
@@ -151,7 +151,7 @@ define_function TestNAVStringSnakeCase() {
         expected = SNAKE_CASE_EXPECTED[x]
         result = NAVStringSnakeCase(CASE_CONVERSION_TEST[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Snake Case Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }
@@ -163,7 +163,7 @@ define_function TestNAVStringSnakeCase() {
 define_function TestNAVStringKebabCase() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVStringKebabCase *****************'")
+    NAVLog("'***************** NAVStringKebabCase *****************'")
 
     for (x = 1; x <= length_array(CASE_CONVERSION_TEST); x++) {
         stack_var char expected[NAV_MAX_BUFFER]
@@ -172,7 +172,7 @@ define_function TestNAVStringKebabCase() {
         expected = KEBAB_CASE_EXPECTED[x]
         result = NAVStringKebabCase(CASE_CONVERSION_TEST[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Kebab Case Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }
@@ -184,7 +184,7 @@ define_function TestNAVStringKebabCase() {
 define_function TestNAVStringTrainCase() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVStringTrainCase *****************'")
+    NAVLog("'***************** NAVStringTrainCase *****************'")
 
     for (x = 1; x <= length_array(CASE_CONVERSION_TEST); x++) {
         stack_var char expected[NAV_MAX_BUFFER]
@@ -193,7 +193,7 @@ define_function TestNAVStringTrainCase() {
         expected = TRAIN_CASE_EXPECTED[x]
         result = NAVStringTrainCase(CASE_CONVERSION_TEST[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Train Case Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }
@@ -205,7 +205,7 @@ define_function TestNAVStringTrainCase() {
 define_function TestNAVStringScreamKebabCase() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVStringScreamKebabCase *****************'")
+    NAVLog("'***************** NAVStringScreamKebabCase *****************'")
 
     for (x = 1; x <= length_array(CASE_CONVERSION_TEST); x++) {
         stack_var char expected[NAV_MAX_BUFFER]
@@ -214,7 +214,7 @@ define_function TestNAVStringScreamKebabCase() {
         expected = SCREAM_KEBAB_CASE_EXPECTED[x]
         result = NAVStringScreamKebabCase(CASE_CONVERSION_TEST[x])
 
-        if (!NAVAssertStringEqual(expected, result)) {
+        if (!NAVAssertStringEqual('Scream Kebab Case Test', expected, result)) {
             NAVLogTestFailed(x, expected, result)
             continue
         }

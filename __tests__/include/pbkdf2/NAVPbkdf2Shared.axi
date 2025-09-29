@@ -6,7 +6,7 @@ PROGRAM_NAME='NAVPbkdf2Shared'
 #include 'NAVFoundation.Core.axi'
 
 // Utility function to convert a buffer to a hex string
-define_function char[NAV_MAX_BUFFER] BufferToHexString(char buffer[]) {
+define_function char[NAV_MAX_BUFFER] Pbkdf2BufferToHexString(char buffer[]) {
     stack_var char result[NAV_MAX_BUFFER]
     stack_var integer i
 

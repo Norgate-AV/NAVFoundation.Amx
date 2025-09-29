@@ -34,6 +34,9 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_MODULEBASE__
 #DEFINE __NAV_FOUNDATION_MODULEBASE__ 'NAVFoundation.ModuleBase'
 
+#include 'NAVFoundation.Core.h.axi'
+#include 'NAVFoundation.ArrayUtils.axi'
+#include 'NAVFoundation.SnapiHelpers.axi'
 #include 'NAVFoundation.ModuleBase.h.axi'
 
 DEFINE_CONSTANT
@@ -47,13 +50,11 @@ DEFINE_CONSTANT
 // #DEFINE USING_NAV_MODULE_BASE_PASSTHRU_EVENT_CALLBACK
 // define_function NAVModulePassthruEventCallback(_NAVModulePassthruEvent event) {}
 
+// !!! You must define the module variable in your main .axs file !!!
 
-DEFINE_TYPE
+// DEFINE_VARIABLE
 
-
-DEFINE_VARIABLE
-
-volatile _NAVModule module
+// _NAVModule module
 
 
 define_function NAVModulePropertyEventInit(dev device, _NAVSnapiMessage message, _NAVModulePropertyEvent event) {
@@ -88,11 +89,6 @@ define_function NAVModuleInit(_NAVModule module) {
 
     module.Enabled = true
     module.CommandBusy = false
-}
-
-
-DEFINE_START {
-    NAVModuleInit(module)
 }
 
 
