@@ -102,6 +102,8 @@ define_function TestNAVArraySumFloat() {
 define_function TestNAVArraySumDouble() {
     stack_var double array[5]
     stack_var double result
+    stack_var double expected
+    stack_var double epsilon
 
     NAVLog("'***************** NAVArraySumDouble *****************'")
 
@@ -115,7 +117,10 @@ define_function TestNAVArraySumDouble() {
     result = NAVArraySumDouble(array)
 
     // Expected sum: 16.665
-    if (result != 16.665) {
+    expected = 16.665
+    epsilon = 0.0001  // Tolerance for floating-point comparison
+
+    if (abs_value(result - expected) > epsilon) {
         NAVLogTestFailed(1, "'16.665'", "ftoa(result)")
     }
     else {
@@ -222,6 +227,8 @@ define_function TestNAVArrayAverageFloat() {
 define_function TestNAVArrayAverageDouble() {
     stack_var double array[5]
     stack_var double result
+    stack_var double expected
+    stack_var double epsilon
 
     NAVLog("'***************** NAVArrayAverageDouble *****************'")
 
@@ -235,7 +242,10 @@ define_function TestNAVArrayAverageDouble() {
     result = NAVArrayAverageDouble(array)
 
     // Expected average: 3.333
-    if (result != 3.333) {
+    expected = 3.333
+    epsilon = 0.0001  // Tolerance for floating-point comparison
+
+    if (abs_value(result - expected) > epsilon) {
         NAVLogTestFailed(1, "'3.333'", "ftoa(result)")
     }
     else {
