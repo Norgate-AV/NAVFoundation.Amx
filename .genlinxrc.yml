@@ -58,3 +58,4 @@ build:
       - ./__tests__/include/http
       - ./__tests__/include/url
       - ./__tests__/include/jsmn
+      - ./__tests__/include/queue
