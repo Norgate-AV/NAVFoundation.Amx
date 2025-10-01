@@ -15,21 +15,6 @@ Working with arrays in NetLinx can be challenging due to limited built-in functi
 - **Array Analysis**: Sum, average, check if sorted
 - **String Array Operations**: Case conversion, trimming
 
-## Installation
-
-1. Copy the `NAVFoundation.ArrayUtils.axi` and `NAVFoundation.ArrayUtils.h.axi` files to your includes directory
-2. Include the library in your code:
-
-```netlinx
-#include 'NAVFoundation.ArrayUtils.axi'
-```
-
-## Requirements
-
-- NAVFoundation.Core.axi
-- NAVFoundation.Stack.axi
-- NAVFoundation.Math.axi
-
 ## Array Manipulation Functions
 
 ### Setting Array Values
