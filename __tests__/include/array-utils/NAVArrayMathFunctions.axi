@@ -14,6 +14,7 @@ define_function TestNAVArraySumInteger() {
     array[3] = 30
     array[4] = 40
     array[5] = 50
+    set_length_array(array, 5)
 
     result = NAVArraySumInteger(array)
 
@@ -37,6 +38,7 @@ define_function TestNAVArraySumSignedInteger() {
     array[3] = -30
     array[4] = 40
     array[5] = -50
+    set_length_array(array, 5)
 
     result = NAVArraySumSignedInteger(array)
 
@@ -60,6 +62,7 @@ define_function TestNAVArraySumLong() {
     array[3] = 3000000
     array[4] = 4000000
     array[5] = 5000000
+    set_length_array(array, 5)
 
     result = NAVArraySumLong(array)
 
@@ -83,6 +86,7 @@ define_function TestNAVArraySumFloat() {
     array[3] = 3.5
     array[4] = 4.5
     array[5] = 5.5
+    set_length_array(array, 5)
 
     result = NAVArraySumFloat(array)
 
@@ -106,6 +110,7 @@ define_function TestNAVArraySumDouble() {
     array[3] = 3.333
     array[4] = 4.444
     array[5] = 5.555
+    set_length_array(array, 5)
 
     result = NAVArraySumDouble(array)
 
@@ -129,6 +134,7 @@ define_function TestNAVArrayAverageInteger() {
     array[3] = 30
     array[4] = 40
     array[5] = 50
+    set_length_array(array, 5)
 
     result = NAVArrayAverageInteger(array)
 
@@ -152,6 +158,7 @@ define_function TestNAVArrayAverageSignedInteger() {
     array[3] = -30
     array[4] = 40
     array[5] = -50
+    set_length_array(array, 5)
 
     result = NAVArrayAverageSignedInteger(array)
 
@@ -175,6 +182,7 @@ define_function TestNAVArrayAverageLong() {
     array[3] = 3000000
     array[4] = 4000000
     array[5] = 5000000
+    set_length_array(array, 5)
 
     result = NAVArrayAverageLong(array)
 
@@ -198,6 +206,7 @@ define_function TestNAVArrayAverageFloat() {
     array[3] = 3.5
     array[4] = 4.5
     array[5] = 5.5
+    set_length_array(array, 5)
 
     result = NAVArrayAverageFloat(array)
 
@@ -221,6 +230,7 @@ define_function TestNAVArrayAverageDouble() {
     array[3] = 3.333
     array[4] = 4.444
     array[5] = 5.555
+    set_length_array(array, 5)
 
     result = NAVArrayAverageDouble(array)
 

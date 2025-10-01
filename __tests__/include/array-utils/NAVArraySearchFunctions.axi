@@ -14,6 +14,7 @@ define_function TestNAVArrayBinarySearchIntegerRecursive() {
     array[3] = 30
     array[4] = 40
     array[5] = 50
+    set_length_array(array, 5)
 
     // Test 1: Find existing value in middle
     result = NAVArrayBinarySearchIntegerRecursive(array, 30)
@@ -63,6 +64,7 @@ define_function TestNAVArrayBinarySearchIntegerIterative() {
     array[3] = 30
     array[4] = 40
     array[5] = 50
+    set_length_array(array, 5)
 
     // Test 1: Find existing value in middle
     result = NAVArrayBinarySearchIntegerIterative(array, 30)
@@ -103,6 +105,7 @@ define_function TestNAVArrayTernarySearchInteger() {
     array[3] = 30
     array[4] = 40
     array[5] = 50
+    set_length_array(array, 5)
 
     // Test 1: Find existing value
     result = NAVArrayTernarySearchInteger(array, 30)
@@ -138,6 +141,7 @@ define_function TestNAVArrayJumpSearchInteger() {
     array[7] = 70
     array[8] = 80
     array[9] = 90
+    set_length_array(array, 9)
 
     // Test 1: Find existing value
     result = NAVArrayJumpSearchInteger(array, 50)
@@ -169,6 +173,7 @@ define_function TestNAVArrayExponentialSearchInteger() {
     array[3] = 30
     array[4] = 40
     array[5] = 50
+    set_length_array(array, 5)
 
     // Test 1: Find existing value
     result = NAVArrayExponentialSearchInteger(array, 30)

@@ -14,6 +14,7 @@ define_function TestNAVArraySliceInteger() {
     for (x = 1; x <= 10; x++) {
         array[x] = x * 10
     }
+    set_length_array(array, 10)
 
     // Test 1: Slice from index 3 to 7
     result = NAVArraySliceInteger(array, 3, 7, slice)
@@ -73,6 +74,7 @@ define_function TestNAVArraySliceString() {
     array[8] = 'eight'
     array[9] = 'nine'
     array[10] = 'ten'
+    set_length_array(array, 10)
 
     // Test 1: Slice from index 3 to 7
     result = NAVArraySliceString(array, 3, 7, slice)

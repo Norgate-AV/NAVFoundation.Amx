@@ -9,13 +9,15 @@ define_function TestNAVSetArrayChar() {
 
     NAVLog("'***************** NAVSetArrayChar *****************'")
 
+    set_length_array(array, 10)
     NAVSetArrayChar(array, $FF)
 
-    for (x = 1; x <= length_array(array); x++) {
+    for (x = 1; x <= max_length_array(array); x++) {
         if (array[x] != $FF) {
             NAVLogTestFailed(x, "'$FF'", "itoa(array[x])")
             continue
         }
+
         NAVLogTestPassed(x)
     }
 }
@@ -26,13 +28,15 @@ define_function TestNAVSetArrayInteger() {
 
     NAVLog("'***************** NAVSetArrayInteger *****************'")
 
+    set_length_array(array, 5)
     NAVSetArrayInteger(array, 42)
 
-    for (x = 1; x <= length_array(array); x++) {
+    for (x = 1; x <= max_length_array(array); x++) {
         if (array[x] != 42) {
             NAVLogTestFailed(x, "'42'", "itoa(array[x])")
             continue
         }
+
         NAVLogTestPassed(x)
     }
 }
@@ -43,13 +47,15 @@ define_function TestNAVSetArraySignedInteger() {
 
     NAVLog("'***************** NAVSetArraySignedInteger *****************'")
 
+    set_length_array(array, 5)
     NAVSetArraySignedInteger(array, -10)
 
-    for (x = 1; x <= length_array(array); x++) {
+    for (x = 1; x <= max_length_array(array); x++) {
         if (array[x] != -10) {
             NAVLogTestFailed(x, "'-10'", "itoa(array[x])")
             continue
         }
+
         NAVLogTestPassed(x)
     }
 }
@@ -60,13 +66,15 @@ define_function TestNAVSetArrayLong() {
 
     NAVLog("'***************** NAVSetArrayLong *****************'")
 
+    set_length_array(array, 5)
     NAVSetArrayLong(array, 1000000)
 
-    for (x = 1; x <= length_array(array); x++) {
+    for (x = 1; x <= max_length_array(array); x++) {
         if (array[x] != 1000000) {
             NAVLogTestFailed(x, "'1000000'", "itoa(array[x])")
             continue
         }
+
         NAVLogTestPassed(x)
     }
 }
@@ -77,9 +85,10 @@ define_function TestNAVSetArraySignedLong() {
 
     NAVLog("'***************** NAVSetArraySignedLong *****************'")
 
+    set_length_array(array, 5)
     NAVSetArraySignedLong(array, -1000000)
 
-    for (x = 1; x <= length_array(array); x++) {
+    for (x = 1; x <= max_length_array(array); x++) {
         if (array[x] != -1000000) {
             NAVLogTestFailed(x, "'-1000000'", "itoa(array[x])")
             continue
@@ -95,13 +104,15 @@ define_function TestNAVSetArrayFloat() {
 
     NAVLog("'***************** NAVSetArrayFloat *****************'")
 
+    set_length_array(array, 5)
     NAVSetArrayFloat(array, 3.14)
 
-    for (x = 1; x <= length_array(array); x++) {
+    for (x = 1; x <= max_length_array(array); x++) {
         if (array[x] != 3.14) {
             NAVLogTestFailed(x, "'3.14'", "ftoa(array[x])")
             continue
         }
+
         NAVLogTestPassed(x)
     }
 }
@@ -112,13 +123,15 @@ define_function TestNAVSetArrayDouble() {
 
     NAVLog("'***************** NAVSetArrayDouble *****************'")
 
+    set_length_array(array, 5)
     NAVSetArrayDouble(array, 3.14159265359)
 
-    for (x = 1; x <= length_array(array); x++) {
+    for (x = 1; x <= max_length_array(array); x++) {
         if (array[x] != 3.14159265359) {
             NAVLogTestFailed(x, "'3.14159265359'", "ftoa(array[x])")
             continue
         }
+
         NAVLogTestPassed(x)
     }
 }
@@ -129,13 +142,15 @@ define_function TestNAVSetArrayString() {
 
     NAVLog("'***************** NAVSetArrayString *****************'")
 
+    set_length_array(array, 5)
     NAVSetArrayString(array, 'test')
 
-    for (x = 1; x <= length_array(array); x++) {
+    for (x = 1; x <= max_length_array(array); x++) {
         if (array[x] != 'test') {
             NAVLogTestFailed(x, "'test'", "array[x]")
             continue
         }
+
         NAVLogTestPassed(x)
     }
 }

@@ -13,6 +13,7 @@ define_function TestNAVArrayReverseInteger() {
     array[3] = 30
     array[4] = 40
     array[5] = 50
+    set_length_array(array, 5)
 
     NAVArrayReverseInteger(array)
 
@@ -35,6 +36,7 @@ define_function TestNAVArrayReverseString() {
     array[3] = 'third'
     array[4] = 'fourth'
     array[5] = 'fifth'
+    set_length_array(array, 5)
 
     NAVArrayReverseString(array)
 
@@ -58,6 +60,8 @@ define_function TestNAVArrayCopyInteger() {
     source[3] = 30
     source[4] = 40
     source[5] = 50
+    set_length_array(source, 5)
+    set_length_array(destination, 5)
 
     NAVArrayCopyInteger(source, destination)
 
@@ -81,6 +85,8 @@ define_function TestNAVArrayCopyString() {
     source[3] = 'cherry'
     source[4] = 'date'
     source[5] = 'elderberry'
+    set_length_array(source, 5)
+    set_length_array(destination, 5)
 
     NAVArrayCopyString(source, destination)
 
@@ -105,12 +111,14 @@ define_function TestNAVArrayIsSortedInteger() {
     sortedArray[3] = 30
     sortedArray[4] = 40
     sortedArray[5] = 50
+    set_length_array(sortedArray, 5)
 
     unsortedArray[1] = 50
     unsortedArray[2] = 20
     unsortedArray[3] = 40
     unsortedArray[4] = 10
     unsortedArray[5] = 30
+    set_length_array(unsortedArray, 5)
 
     // Test 1: Check sorted array
     result = NAVArrayIsSortedInteger(sortedArray)
@@ -143,12 +151,14 @@ define_function TestNAVArrayIsSortedString() {
     sortedArray[3] = 'charlie'
     sortedArray[4] = 'delta'
     sortedArray[5] = 'echo'
+    set_length_array(sortedArray, 5)
 
     unsortedArray[1] = 'echo'
     unsortedArray[2] = 'bravo'
     unsortedArray[3] = 'delta'
     unsortedArray[4] = 'alpha'
     unsortedArray[5] = 'charlie'
+    set_length_array(unsortedArray, 5)
 
     // Test 1: Check sorted array
     result = NAVArrayIsSortedString(sortedArray)
@@ -177,6 +187,7 @@ define_function TestNAVArrayToLowerString() {
     array[1] = 'HELLO'
     array[2] = 'WORLD'
     array[3] = 'TEST'
+    set_length_array(array, 3)
 
     NAVArrayToLowerString(array)
 
@@ -197,6 +208,7 @@ define_function TestNAVArrayToUpperString() {
     array[1] = 'hello'
     array[2] = 'world'
     array[3] = 'test'
+    set_length_array(array, 3)
 
     NAVArrayToUpperString(array)
 
@@ -217,6 +229,7 @@ define_function TestNAVArrayTrimString() {
     array[1] = '  hello  '
     array[2] = '  world  '
     array[3] = '  test  '
+    set_length_array(array, 3)
 
     NAVArrayTrimString(array)
 

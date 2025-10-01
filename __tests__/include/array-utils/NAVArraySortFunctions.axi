@@ -14,6 +14,7 @@ define_function TestNAVArrayBubbleSortInteger() {
     array[3] = 40
     array[4] = 10
     array[5] = 30
+    set_length_array(array, 5)
 
     NAVArrayBubbleSortInteger(array)
 
@@ -36,6 +37,7 @@ define_function TestNAVArraySelectionSortInteger() {
     array[3] = 40
     array[4] = 10
     array[5] = 30
+    set_length_array(array, 5)
 
     NAVArraySelectionSortInteger(array)
 
@@ -58,6 +60,7 @@ define_function TestNAVArraySelectionSortString() {
     array[3] = 'delta'
     array[4] = 'alpha'
     array[5] = 'charlie'
+    set_length_array(array, 5)
 
     NAVArraySelectionSortString(array)
 
@@ -80,6 +83,7 @@ define_function TestNAVArrayInsertionSortInteger() {
     array[3] = 40
     array[4] = 10
     array[5] = 30
+    set_length_array(array, 5)
 
     NAVArrayInsertionSortInteger(array)
 
@@ -102,6 +106,7 @@ define_function TestNAVArrayQuickSortInteger() {
     array[3] = 40
     array[4] = 10
     array[5] = 30
+    set_length_array(array, 5)
 
     NAVArrayQuickSortInteger(array)
 
@@ -124,6 +129,7 @@ define_function TestNAVArrayMergeSortInteger() {
     array[3] = 40
     array[4] = 10
     array[5] = 30
+    set_length_array(array, 5)
 
     NAVArrayMergeSortInteger(array)
 
@@ -146,6 +152,7 @@ define_function TestNAVArrayCountingSortInteger() {
     array[3] = 40
     array[4] = 10
     array[5] = 30
+    set_length_array(array, 5)
 
     NAVArrayCountingSortInteger(array, 50)
 

@@ -14,6 +14,7 @@ define_function TestNAVFormatArrayInteger() {
     array[3] = 30
     array[4] = 40
     array[5] = 50
+    set_length_array(array, 5)
 
     result = NAVFormatArrayInteger(array)
 
@@ -35,6 +36,7 @@ define_function TestNAVFormatArrayString() {
     array[1] = 'apple'
     array[2] = 'banana'
     array[3] = 'cherry'
+    set_length_array(array, 3)
 
     result = NAVFormatArrayString(array)
 

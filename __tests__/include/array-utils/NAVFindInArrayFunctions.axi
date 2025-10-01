@@ -14,6 +14,7 @@ define_function TestNAVFindInArrayINTEGER() {
     array[3] = 30
     array[4] = 40
     array[5] = 50
+    set_length_array(array, 5)
 
     // Test 1: Find existing value
     result = NAVFindInArrayINTEGER(array, 30)
@@ -63,6 +64,7 @@ define_function TestNAVFindInArrayCHAR() {
     array[3] = 'C'
     array[4] = 'D'
     array[5] = 'E'
+    set_length_array(array, 5)
 
     // Test 1: Find existing value
     result = NAVFindInArrayCHAR(array, 'C')
@@ -94,6 +96,7 @@ define_function TestNAVFindInArraySTRING() {
     array[3] = 'cherry'
     array[4] = 'date'
     array[5] = 'elderberry'
+    set_length_array(array, 5)
 
     // Test 1: Find existing value
     result = NAVFindInArraySTRING(array, 'cherry')
@@ -143,6 +146,7 @@ define_function TestNAVFindInArrayLONG() {
     array[3] = 3000000
     array[4] = 4000000
     array[5] = 5000000
+    set_length_array(array, 5)
 
     // Test 1: Find existing value
     result = NAVFindInArrayLONG(array, 3000000)
@@ -174,6 +178,7 @@ define_function TestNAVFindInArrayFLOAT() {
     array[3] = 3.3
     array[4] = 4.4
     array[5] = 5.5
+    set_length_array(array, 5)
 
     // Test 1: Find existing value
     result = NAVFindInArrayFLOAT(array, 3.3)
