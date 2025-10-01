@@ -98,6 +98,9 @@ define_function TestNAVDevicePriorityQueueEmptyState() {
         NAVLogTestPassed(2)
     }
 
+    // Set busy to prevent auto-send on enqueue (for testing enqueue behavior in isolation)
+    queue.Busy = true
+
     // Add a command
     NAVDevicePriorityQueueEnqueue(queue, DPQ_BASIC_TEST_COMMANDS[1], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
 
@@ -127,6 +130,9 @@ define_function TestNAVDevicePriorityQueueGetLastMessage() {
     NAVLog("'***************** TestNAVDevicePriorityQueueGetLastMessage *****************'")
 
     NAVDevicePriorityQueueInit(queue)
+
+    // Set busy to prevent auto-send on enqueue
+    queue.Busy = true
     NAVDevicePriorityQueueEnqueue(queue, DPQ_BASIC_TEST_COMMANDS[1], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
 
     queue.Busy = false

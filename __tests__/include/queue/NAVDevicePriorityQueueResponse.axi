@@ -24,6 +24,9 @@ define_function TestNAVDevicePriorityQueueGoodResponse() {
     NAVLog("'***************** TestNAVDevicePriorityQueueGoodResponse *****************'")
 
     NAVDevicePriorityQueueInit(queue)
+
+    // Set busy to prevent auto-send on first enqueue
+    queue.Busy = true
     NAVDevicePriorityQueueEnqueue(queue, DPQ_RESPONSE_TEST_COMMANDS[1], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
     NAVDevicePriorityQueueEnqueue(queue, DPQ_RESPONSE_TEST_COMMANDS[2], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
 
@@ -32,8 +35,9 @@ define_function TestNAVDevicePriorityQueueGoodResponse() {
 
     NAVDevicePriorityQueueGoodResponse(queue)
 
-    if (!NAVAssertIntegerEqual('Busy flag should be false after good response', false, queue.Busy)) {
-        NAVLogTestFailed(1, itoa(false), itoa(queue.Busy))
+    // GoodResponse clears busy, then SendNextItem dequeues next item and sets busy again
+    if (!NAVAssertIntegerEqual('Busy flag should be true after processing next item', true, queue.Busy)) {
+        NAVLogTestFailed(1, itoa(true), itoa(queue.Busy))
     }
     else {
         NAVLogTestPassed(1)
@@ -53,16 +57,19 @@ define_function TestNAVDevicePriorityQueueGoodResponse() {
         NAVLogTestPassed(3)
     }
 
-    // GoodResponse should have dequeued the next item and set busy again
-    if (!NAVAssertIntegerEqual('Busy flag should be true after processing next item', true, queue.Busy)) {
-        NAVLogTestFailed(4, itoa(true), itoa(queue.Busy))
+    // Note: GoodResponse calls SendNextItem which dequeues next item
+    // Since we have 2 items, after processing the first good response,
+    // SendNextItem will dequeue and send the second item
+    if (!NAVAssertStringEqual('LastMessage should be second command', DPQ_RESPONSE_TEST_COMMANDS[2], queue.LastMessage)) {
+        NAVLogTestFailed(4, DPQ_RESPONSE_TEST_COMMANDS[2], queue.LastMessage)
     }
     else {
         NAVLogTestPassed(4)
     }
 
-    if (!NAVAssertStringEqual('LastMessage should be second command', DPQ_RESPONSE_TEST_COMMANDS[2], queue.LastMessage)) {
-        NAVLogTestFailed(5, DPQ_RESPONSE_TEST_COMMANDS[2], queue.LastMessage)
+    // Both items should now be dequeued (first was dequeued manually, second by GoodResponse)
+    if (!NAVAssertIntegerEqual('Command queue should be empty', 0, NAVQueueGetCount(queue.CommandQueue))) {
+        NAVLogTestFailed(5, itoa(0), itoa(NAVQueueGetCount(queue.CommandQueue)))
     }
     else {
         NAVLogTestPassed(5)
@@ -80,6 +87,9 @@ define_function TestNAVDevicePriorityQueueFailedResponse() {
     NAVLog("'***************** TestNAVDevicePriorityQueueFailedResponse *****************'")
 
     NAVDevicePriorityQueueInit(queue)
+
+    // Set busy to prevent auto-send on enqueue
+    queue.Busy = true
     NAVDevicePriorityQueueEnqueue(queue, DPQ_RESPONSE_TEST_COMMANDS[1], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
 
     queue.Busy = false
@@ -94,8 +104,10 @@ define_function TestNAVDevicePriorityQueueFailedResponse() {
         NAVLogTestPassed(1)
     }
 
-    if (!NAVAssertIntegerEqual('Resend flag should be true', true, queue.Resend)) {
-        NAVLogTestFailed(2, itoa(true), itoa(queue.Resend))
+    // FailedResponse sets Resend=true then calls SendNextItem
+    // SendNextItem checks Resend flag, uses LastMessage, then clears Resend
+    if (!NAVAssertIntegerEqual('Resend flag should be false after SendNextItem', false, queue.Resend)) {
+        NAVLogTestFailed(2, itoa(false), itoa(queue.Resend))
     }
     else {
         NAVLogTestPassed(2)
@@ -121,24 +133,30 @@ define_function TestNAVDevicePriorityQueueMaxFailures() {
     NAVLog("'***************** TestNAVDevicePriorityQueueMaxFailures *****************'")
 
     NAVDevicePriorityQueueInit(queue)
+
+    // Set busy to prevent auto-send on first enqueue
+    queue.Busy = true
     NAVDevicePriorityQueueEnqueue(queue, DPQ_RESPONSE_TEST_COMMANDS[1], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
     NAVDevicePriorityQueueEnqueue(queue, DPQ_RESPONSE_TEST_COMMANDS[2], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
 
     queue.Busy = false
     result = NAVDevicePriorityQueueDequeue(queue)
 
-    // Fail 3 times (max failures)
-    for (i = 1; i <= 3; i++) {
+    // Fail 4 times (3 retries + 1 final failure triggers reinit)
+    // MaxFailedCount = 3, so: 0→1, 1→2, 2→3 (all retry), then 3 triggers reinit
+    for (i = 1; i <= 4; i++) {
         NAVDevicePriorityQueueFailedResponse(queue)
     }
 
-    if (!NAVAssertIntegerEqual('FailedCount should be 0 after max failures', 0, queue.FailedCount)) {
+    // After max failures, FailedResponse calls Init which clears everything
+    if (!NAVAssertIntegerEqual('FailedCount should be 0 after reinit', 0, queue.FailedCount)) {
         NAVLogTestFailed(1, itoa(0), itoa(queue.FailedCount))
     }
     else {
         NAVLogTestPassed(1)
     }
 
+    // After Init, Busy will be false (cleared by Init)
     if (!NAVAssertIntegerEqual('Busy flag should be false after reinit', false, queue.Busy)) {
         NAVLogTestFailed(2, itoa(false), itoa(queue.Busy))
     }
@@ -146,6 +164,7 @@ define_function TestNAVDevicePriorityQueueMaxFailures() {
         NAVLogTestPassed(2)
     }
 
+    // LastMessage should be empty (cleared by Init)
     if (!NAVAssertStringEqual('LastMessage should be empty after reinit', '', queue.LastMessage)) {
         NAVLogTestFailed(3, "''", queue.LastMessage)
     }
@@ -153,9 +172,9 @@ define_function TestNAVDevicePriorityQueueMaxFailures() {
         NAVLogTestPassed(3)
     }
 
-    // The queues should still have the remaining item (second command)
-    if (!NAVAssertIntegerEqual('Command queue should have 1 item remaining', 1, NAVQueueGetCount(queue.CommandQueue))) {
-        NAVLogTestFailed(4, itoa(1), itoa(NAVQueueGetCount(queue.CommandQueue)))
+    // The queues should be empty (cleared by Init)
+    if (!NAVAssertIntegerEqual('Command queue should be empty after reinit', 0, NAVQueueGetCount(queue.CommandQueue))) {
+        NAVLogTestFailed(4, itoa(0), itoa(NAVQueueGetCount(queue.CommandQueue)))
     }
     else {
         NAVLogTestPassed(4)
@@ -204,6 +223,9 @@ define_function TestNAVDevicePriorityQueueResend() {
     NAVLog("'***************** TestNAVDevicePriorityQueueResend *****************'")
 
     NAVDevicePriorityQueueInit(queue)
+
+    // Set busy to prevent auto-send on first enqueue
+    queue.Busy = true
     NAVDevicePriorityQueueEnqueue(queue, DPQ_RESPONSE_TEST_COMMANDS[1], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
     NAVDevicePriorityQueueEnqueue(queue, DPQ_RESPONSE_TEST_COMMANDS[2], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
 
@@ -213,8 +235,10 @@ define_function TestNAVDevicePriorityQueueResend() {
     // Simulate failure and resend
     NAVDevicePriorityQueueFailedResponse(queue)
 
-    if (!NAVAssertIntegerEqual('Resend flag should be true', true, queue.Resend)) {
-        NAVLogTestFailed(1, itoa(true), itoa(queue.Resend))
+    // FailedResponse sets Resend=true then calls SendNextItem
+    // SendNextItem uses LastMessage (resend), then clears Resend flag
+    if (!NAVAssertIntegerEqual('Resend flag should be false after SendNextItem', false, queue.Resend)) {
+        NAVLogTestFailed(1, itoa(false), itoa(queue.Resend))
     }
     else {
         NAVLogTestPassed(1)

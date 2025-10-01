@@ -24,6 +24,9 @@ define_function TestNAVDevicePriorityQueueDequeueBusyFlag() {
     NAVLog("'***************** TestNAVDevicePriorityQueueDequeueBusyFlag *****************'")
 
     NAVDevicePriorityQueueInit(queue)
+
+    // Set busy to prevent auto-send on enqueue
+    queue.Busy = true
     NAVDevicePriorityQueueEnqueue(queue, DPQ_STATE_TEST_COMMANDS[1], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
 
     queue.Busy = false
@@ -55,6 +58,9 @@ define_function TestNAVDevicePriorityQueueDequeueWhenBusy() {
     NAVLog("'***************** TestNAVDevicePriorityQueueDequeueWhenBusy *****************'")
 
     NAVDevicePriorityQueueInit(queue)
+
+    // Set busy to prevent auto-send on first enqueue
+    queue.Busy = true
     NAVDevicePriorityQueueEnqueue(queue, DPQ_STATE_TEST_COMMANDS[1], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
     NAVDevicePriorityQueueEnqueue(queue, DPQ_STATE_TEST_COMMANDS[2], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
 

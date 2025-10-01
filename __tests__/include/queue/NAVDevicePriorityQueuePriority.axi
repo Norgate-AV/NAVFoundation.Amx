@@ -36,6 +36,9 @@ define_function TestNAVDevicePriorityQueueEnqueueCommands() {
 
     NAVDevicePriorityQueueInit(queue)
 
+    // Set busy to prevent auto-send on first enqueue
+    queue.Busy = true
+
     // Enqueue multiple commands
     for (i = 1; i <= 3; i++) {
         NAVDevicePriorityQueueEnqueue(queue, DPQ_PRIORITY_TEST_COMMANDS[i], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
@@ -68,6 +71,9 @@ define_function TestNAVDevicePriorityQueueEnqueueQueries() {
 
     NAVDevicePriorityQueueInit(queue)
 
+    // Set busy to prevent auto-send on first enqueue
+    queue.Busy = true
+
     // Enqueue multiple queries
     for (i = 1; i <= 3; i++) {
         NAVDevicePriorityQueueEnqueue(queue, DPQ_PRIORITY_TEST_QUERIES[i], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
@@ -99,6 +105,9 @@ define_function TestNAVDevicePriorityQueuePriorityOrdering() {
     NAVLog("'***************** TestNAVDevicePriorityQueuePriorityOrdering *****************'")
 
     NAVDevicePriorityQueueInit(queue)
+
+    // Set busy to prevent auto-send on first enqueue
+    queue.Busy = true
 
     // Add queries first
     NAVDevicePriorityQueueEnqueue(queue, DPQ_PRIORITY_TEST_QUERIES[1], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
@@ -159,6 +168,9 @@ define_function TestNAVDevicePriorityQueueMixedOperations() {
     NAVLog("'***************** TestNAVDevicePriorityQueueMixedOperations *****************'")
 
     NAVDevicePriorityQueueInit(queue)
+
+    // Set busy to prevent auto-send on first enqueue
+    queue.Busy = true
 
     // Mix of commands and queries
     NAVDevicePriorityQueueEnqueue(queue, DPQ_PRIORITY_TEST_QUERIES[1], NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
