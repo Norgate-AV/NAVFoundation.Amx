@@ -579,9 +579,14 @@
             <UserName></UserName>
             <Password></Password>
             <Comments></Comments>
-            <File CompileType="Netlinx" Type="MasterSrc">
+            <File CompileType="Netlinx" Type="Source">
                 <Identifier>array-utils</Identifier>
                 <FilePathName>src\array-utils.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>length-array-behavior-test</Identifier>
+                <FilePathName>src\length-array-behavior-test.axs</FilePathName>
                 <Comments></Comments>
             </File>
         </System>
