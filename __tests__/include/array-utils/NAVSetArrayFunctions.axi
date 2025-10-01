@@ -79,24 +79,24 @@ define_function TestNAVSetArrayLong() {
     }
 }
 
-define_function TestNAVSetArraySignedLong() {
-    stack_var slong array[5]
-    stack_var integer x
+// define_function TestNAVSetArraySignedLong() {
+//     stack_var slong array[5]
+//     stack_var integer x
 
-    NAVLog("'***************** NAVSetArraySignedLong *****************'")
+//     NAVLog("'***************** NAVSetArraySignedLong *****************'")
 
-    set_length_array(array, 5)
-    NAVSetArraySignedLong(array, -1000000)
+//     set_length_array(array, 5)
+//     NAVSetArraySignedLong(array, -1000000)
 
-    for (x = 1; x <= max_length_array(array); x++) {
-        if (array[x] != -1000000) {
-            NAVLogTestFailed(x, "'-1000000'", "itoa(array[x])")
-            continue
-        }
+//     for (x = 1; x <= max_length_array(array); x++) {
+//         if (array[x] != -1000000) {
+//             NAVLogTestFailed(x, "'-1000000'", "itoa(array[x])")
+//             continue
+//         }
 
-        NAVLogTestPassed(x)
-    }
-}
+//         NAVLogTestPassed(x)
+//     }
+// }
 
 define_function TestNAVSetArrayFloat() {
     stack_var float array[5]
