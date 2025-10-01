@@ -59,3 +59,4 @@ build:
       - ./__tests__/include/url
       - ./__tests__/include/jsmn
       - ./__tests__/include/queue
+      - ./__tests__/include/array-utils
