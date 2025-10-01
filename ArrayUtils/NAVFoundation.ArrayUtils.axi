@@ -571,7 +571,7 @@ define_function integer NAVFindInArraySTRING(char array[][], char value[]) {
  * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
  * stack_var char output[200]
  *
- * output = NAVFormatArrayString(names) // Returns "[ 'Alice', 'Bob', 'Charlie' ]"
+ * output = NAVFormatArrayString(names) // Returns "[Alice, Bob, Charlie]"
  */
 define_function char[NAV_MAX_BUFFER] NAVFormatArrayString(char array[][]) {
     stack_var integer x
@@ -609,7 +609,7 @@ define_function char[NAV_MAX_BUFFER] NAVFormatArrayString(char array[][]) {
  * stack_var integer values[3] = {10, 20, 30}
  * stack_var char output[200]
  *
- * output = NAVFormatArrayInteger(values) // Returns "[ 10, 20, 30 ]"
+ * output = NAVFormatArrayInteger(values) // Returns "[10, 20, 30]"
  */
 define_function char[NAV_MAX_BUFFER] NAVFormatArrayInteger(integer array[]) {
     stack_var integer x
@@ -645,7 +645,7 @@ define_function char[NAV_MAX_BUFFER] NAVFormatArrayInteger(integer array[]) {
  *
  * @example
  * stack_var integer values[3] = {10, 20, 30}
- * NAVPrintArrayInteger(values) // Logs "[ 10, 20, 30 ]" to the debug log
+ * NAVPrintArrayInteger(values) // Logs "[10, 20, 30]" to the debug log
  *
  * @see NAVFormatArrayInteger
  */
@@ -665,7 +665,7 @@ define_function NAVPrintArrayInteger(integer array[]) {
  *
  * @example
  * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
- * NAVPrintArrayString(names) // Logs "[ 'Alice', 'Bob', 'Charlie' ]" to the debug log
+ * NAVPrintArrayString(names) // Logs "[Alice, Bob, Charlie]" to the debug log
  *
  * @see NAVFormatArrayString
  */
