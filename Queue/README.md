@@ -482,9 +482,778 @@ if (nextItem == 'EMERGENCY_STOP') {
 }
 ```
 
-## Breaking Changes
+---
 
-### v3.0.0 - Event Handling Refactor
+# NAVFoundation.DevicePriorityQueue
+
+A specialized dual-queue implementation designed for device communication with built-in priority handling, automatic retry logic, busy state management, and timeout detection. This library extends the basic queue functionality to provide robust command/query management for unreliable device communication.
+
+## Features
+
+- **Dual-Queue Architecture**: Separate high-priority (command) and low-priority (query) queues
+- **Priority Management**: Commands always processed before queries
+- **Automatic Retry Logic**: Configurable retry attempts with failed response tracking
+- **Busy State Management**: Prevents concurrent requests to devices
+- **Auto-Send on First Item**: Automatically sends first item when queue is idle
+- **Timeline-Based Timeout**: Failed response detection for unresponsive devices
+- **Resend Capability**: Automatic retry of failed messages
+- **Callback Support**: Optional event callbacks for send and failure events
+- **Production Ready**: Extensively tested with 22 comprehensive tests (16 core + 6 callback tests)
+
+## Quick Start
+
+### Basic Usage
+
+```netlinx
+#include 'NAVFoundation.DevicePriorityQueue.axi'
+
+DEFINE_VARIABLE
+volatile _NAVDevicePriorityQueue deviceQueue
+
+DEFINE_START
+// Initialize the queue
+NAVDevicePriorityQueueInit(deviceQueue)
+
+// Enqueue high-priority command (will auto-send if queue is idle)
+NAVDevicePriorityQueueEnqueue(deviceQueue, '?POWER', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
+
+// Enqueue low-priority query
+NAVDevicePriorityQueueEnqueue(deviceQueue, '?INPUT', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
+
+// Handle the timeline event for failed response detection
+DEFINE_EVENT
+timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE] {
+    NAVDevicePriorityQueueFailedResponse(deviceQueue)
+}
+
+// When device responds successfully
+string_event[dvDevice] {
+    // Process the response...
+    
+    // Mark as good response and send next item
+    NAVDevicePriorityQueueGoodResponse(deviceQueue)
+}
+```
+
+## Architecture
+
+### Dual-Queue System
+
+The DevicePriorityQueue maintains two internal queues:
+
+| Queue Type | Capacity | Priority | Use Case |
+|------------|----------|----------|----------|
+| **Command Queue** | 50 items | High (true) | Critical commands that must execute first |
+| **Query Queue** | 100 items | Low (false) | Status queries that can wait |
+
+Commands are always processed before queries. When `SendNextItem()` is called, it checks the command queue first, then the query queue.
+
+### State Machine
+
+```
+┌─────────────┐
+│   Idle      │  Busy = false, queues empty
+│ (Not Busy)  │
+└──────┬──────┘
+       │ Enqueue() with empty queue
+       ▼
+┌─────────────┐
+│   Sending   │  Busy = true, timeline started
+│  (Busy)     │  LastMessage stored
+└──────┬──────┘
+       │
+       ├─────── Good Response ────────┐
+       │                              │
+       │                              ▼
+       │                    ┌──────────────────┐
+       │                    │   Send Next or   │
+       │                    │   Return to Idle │
+       │                    └──────────────────┘
+       │
+       ├─────── Failed Response ──────┐
+       │        (FailedCount < Max)   │
+       │                              ▼
+       │                    ┌──────────────────┐
+       │                    │ Resend = true    │
+       │                    │ FailedCount++    │
+       │                    │ SendNextItem()   │
+       │                    └──────────────────┘
+       │
+       └─────── Max Failures ─────────┐
+                (FailedCount >= Max)  │
+                                      ▼
+                            ┌──────────────────┐
+                            │ Callback (opt)   │
+                            │ Init() - Reset   │
+                            └──────────────────┘
+```
+
+## API Reference
+
+### Initialization
+
+#### `NAVDevicePriorityQueueInit`
+**Purpose**: Initialize a device priority queue with default settings.
+
+**Signature**: `NAVDevicePriorityQueueInit(_NAVDevicePriorityQueue queue)`
+
+**Parameters**:
+- `queue` - Device priority queue structure to initialize
+
+**Behavior**:
+- Sets `Busy = false`, `FailedCount = 0`, `Resend = false`
+- Initializes `MaxFailedCount = 3` (configurable constant)
+- Clears `LastMessage`
+- Initializes both command queue (50 items) and query queue (100 items)
+- Configures failed response timeline
+
+**Example**:
+```netlinx
+stack_var _NAVDevicePriorityQueue queue
+NAVDevicePriorityQueueInit(queue)
+```
+
+### Queue Operations
+
+#### `NAVDevicePriorityQueueEnqueue`
+**Purpose**: Add an item to the appropriate priority queue and auto-send if idle.
+
+**Signature**: `sinteger NAVDevicePriorityQueueEnqueue(_NAVDevicePriorityQueue queue, char item[NAV_MAX_BUFFER], integer priority)`
+
+**Parameters**:
+- `queue` - Device priority queue
+- `item` - Message to enqueue (max 65535 characters)
+- `priority` - `NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND` (true) for high priority, `NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY` (false) for low priority
+
+**Returns**: `1` on success, `0` if target queue is full
+
+**Behavior**:
+- Routes item to command queue (high priority) or query queue (low priority)
+- **Auto-send**: If both queues are empty AND `Busy = false`, automatically calls `SendNextItem()`
+- Returns success/failure based on target queue capacity
+
+**Example**:
+```netlinx
+// High-priority command
+NAVDevicePriorityQueueEnqueue(queue, 'POWER=ON', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
+
+// Low-priority query
+NAVDevicePriorityQueueEnqueue(queue, '?STATUS', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
+```
+
+#### `NAVDevicePriorityQueueDequeue`
+**Purpose**: Remove and return the next item based on priority.
+
+**Signature**: `char[NAV_MAX_BUFFER] NAVDevicePriorityQueueDequeue(_NAVDevicePriorityQueue queue)`
+
+**Returns**: Next item (commands before queries), or empty string if both queues are empty
+
+**Example**:
+```netlinx
+stack_var char nextItem[NAV_MAX_BUFFER]
+nextItem = NAVDevicePriorityQueueDequeue(queue)
+```
+
+#### `NAVDevicePriorityQueueHasItems`
+**Purpose**: Check if either queue has items.
+
+**Signature**: `sinteger NAVDevicePriorityQueueHasItems(_NAVDevicePriorityQueue queue)`
+
+**Returns**: `1` if either queue has items, `0` if both are empty
+
+**Example**:
+```netlinx
+if (NAVDevicePriorityQueueHasItems(queue)) {
+    // Process items
+}
+```
+
+#### `NAVDevicePriorityQueueGetCount`
+**Purpose**: Get total number of items across both queues.
+
+**Signature**: `sinteger NAVDevicePriorityQueueGetCount(_NAVDevicePriorityQueue queue)`
+
+**Returns**: Combined count of command queue + query queue
+
+**Example**:
+```netlinx
+send_string 0, "'Total queued: ', itoa(NAVDevicePriorityQueueGetCount(queue))"
+```
+
+### Message Handling
+
+#### `NAVDevicePriorityQueueSendNextItem`
+**Purpose**: Dequeue and send the next item based on priority.
+
+**Signature**: `NAVDevicePriorityQueueSendNextItem(_NAVDevicePriorityQueue queue)`
+
+**Behavior**:
+- If `Resend = true`: Re-sends `LastMessage` without dequeuing
+- Otherwise: Dequeues next item (commands before queries) and sends it
+- Sets `Busy = true` and stores message in `LastMessage`
+- Starts failed response timeline for timeout detection
+- Triggers optional `SendNextItemEventCallback` if enabled
+- Does nothing if both queues are empty
+
+**Timeline**: Starts `TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE` to detect response timeout
+
+**Example**:
+```netlinx
+// Typically called internally, but can be called manually
+NAVDevicePriorityQueueSendNextItem(queue)
+```
+
+#### `NAVDevicePriorityQueueGoodResponse`
+**Purpose**: Mark the current message as successfully responded to.
+
+**Signature**: `NAVDevicePriorityQueueGoodResponse(_NAVDevicePriorityQueue queue)`
+
+**Behavior**:
+- Stops failed response timeline
+- Resets `FailedCount = 0`
+- Sets `Busy = false`, `Resend = false`, clears `LastMessage`
+- Automatically calls `SendNextItem()` if more items are queued
+
+**Example**:
+```netlinx
+string_event[dvDevice] {
+    if (find_string(string.text, 'OK', 1)) {
+        NAVDevicePriorityQueueGoodResponse(deviceQueue)
+    }
+}
+```
+
+### Failure Handling
+
+#### `NAVDevicePriorityQueueFailedResponse`
+**Purpose**: Handle a failed or timed-out response.
+
+**Signature**: `NAVDevicePriorityQueueFailedResponse(_NAVDevicePriorityQueue queue)`
+
+**Behavior**:
+- Does nothing if `Busy = false`
+- If `FailedCount < MaxFailedCount` (default 3):
+  - Increments `FailedCount`
+  - Sets `Resend = true`
+  - Calls `SendNextItem()` to retry
+- If `FailedCount >= MaxFailedCount`:
+  - Triggers optional `FailedResponseEventCallback` if enabled
+  - Calls `Init()` to reset the queue (clears all state and items)
+
+**Example**:
+```netlinx
+// Typically called from timeline event
+timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE] {
+    NAVDevicePriorityQueueFailedResponse(deviceQueue)
+}
+
+// Can also be called manually when error is detected
+string_event[dvDevice] {
+    if (find_string(string.text, 'ERROR', 1)) {
+        NAVDevicePriorityQueueFailedResponse(deviceQueue)
+    }
+}
+```
+
+### Utility Functions
+
+#### `NAVDevicePriorityQueueToString`
+**Purpose**: Get a human-readable representation for debugging.
+
+**Signature**: `char[NAV_MAX_CHARS] NAVDevicePriorityQueueToString(_NAVDevicePriorityQueue queue)`
+
+**Returns**: String showing queue counts and state
+
+**Example**:
+```netlinx
+send_string 0, NAVDevicePriorityQueueToString(queue)
+// Output: "DevicePriorityQueue [Commands: 3/50, Queries: 5/100, Busy: true]"
+```
+
+## Configuration
+
+### Constants
+
+```netlinx
+// Maximum retry attempts before reinitializing (default: 3)
+constant integer NAV_DEVICE_PRIORITY_QUEUE_MAX_FAILED_RESPONSE_COUNT = 3
+
+// Timeline ID for failed response detection
+constant long TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE = 1000
+
+// Timeout period for failed response (default: 5000ms = 5 seconds)
+constant long TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE_TIME = 5000
+
+// Queue capacities
+constant integer NAV_DEVICE_PRIORITY_QUEUE_COMMAND_QUEUE_SIZE = 50   // High priority
+constant integer NAV_DEVICE_PRIORITY_QUEUE_QUERY_QUEUE_SIZE = 100    // Low priority
+
+// Priority values
+constant integer NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND = true   // High priority
+constant integer NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY = false    // Low priority
+```
+
+### Customization
+
+To customize timeout or retry behavior, modify the constants in `NAVFoundation.DevicePriorityQueue.h.axi` before including the library:
+
+```netlinx
+// Custom configuration
+#define NAV_DEVICE_PRIORITY_QUEUE_MAX_FAILED_RESPONSE_COUNT 5  // Allow 5 retries
+#define TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE_TIME 10000  // 10 second timeout
+
+#include 'NAVFoundation.DevicePriorityQueue.axi'
+```
+
+## Callback System
+
+The library supports optional callbacks for advanced event handling. Callbacks must be defined **before** including the library.
+
+### Available Callbacks
+
+#### 1. SendNextItem Event Callback
+
+**Purpose**: Called whenever an item is sent (new or resend).
+
+**Enable**: `#DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK`
+
+**Signature**: `define_function NAVDevicePriorityQueueSendNextItemEventCallback(_NAVDevicePriorityQueue queue, char message[NAV_MAX_BUFFER], integer isResend)`
+
+**Parameters**:
+- `queue` - The device priority queue
+- `message` - The message being sent
+- `isResend` - `1` if this is a retry, `0` if new message
+
+**Example**:
+```netlinx
+#DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK
+#include 'NAVFoundation.DevicePriorityQueue.axi'
+
+define_function NAVDevicePriorityQueueSendNextItemEventCallback(_NAVDevicePriorityQueue queue, char message[NAV_MAX_BUFFER], integer isResend) {
+    if (isResend) {
+        NAVErrorLog(NAV_LOG_LEVEL_WARNING, "'Resending: ', message")
+    } else {
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Sending: ', message")
+    }
+    
+    // Send to device
+    send_string dvDevice, message
+}
+```
+
+#### 2. FailedResponse Event Callback
+
+**Purpose**: Called when maximum retry attempts are reached before queue reinitializes.
+
+**Enable**: `#DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE_EVENT_CALLBACK`
+
+**Signature**: `define_function NAVDevicePriorityQueueFailedResponseEventCallback(_NAVDevicePriorityQueue queue)`
+
+**Parameters**:
+- `queue` - The device priority queue (contains `FailedCount`, `LastMessage` before reset)
+
+**Example**:
+```netlinx
+#DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE_EVENT_CALLBACK
+#include 'NAVFoundation.DevicePriorityQueue.axi'
+
+define_function NAVDevicePriorityQueueFailedResponseEventCallback(_NAVDevicePriorityQueue queue) {
+    NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Device failed to respond after ', itoa(queue.FailedCount), ' attempts'")
+    NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Last message: ', queue.LastMessage")
+    
+    // Notify user or trigger recovery actions
+    send_command dvTP, "'@PPN-Device Communication Failed'"
+}
+```
+
+### Complete Callback Example
+
+```netlinx
+PROGRAM_NAME='DeviceControl'
+
+// Enable both callbacks BEFORE including library
+#DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK
+#DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE_EVENT_CALLBACK
+
+#include 'NAVFoundation.DevicePriorityQueue.axi'
+
+DEFINE_VARIABLE
+volatile _NAVDevicePriorityQueue projectorQueue
+dev dvProjector = 5001:1:0
+
+// SendNextItem callback - handles actual device communication
+define_function NAVDevicePriorityQueueSendNextItemEventCallback(_NAVDevicePriorityQueue queue, char message[NAV_MAX_BUFFER], integer isResend) {
+    if (isResend) {
+        NAVErrorLog(NAV_LOG_LEVEL_WARNING, "'[Projector] Retry #', itoa(queue.FailedCount), ': ', message")
+    }
+    
+    send_string dvProjector, "message, $0D"  // Add carriage return
+}
+
+// FailedResponse callback - handles max failures
+define_function NAVDevicePriorityQueueFailedResponseEventCallback(_NAVDevicePriorityQueue queue) {
+    NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'[Projector] Communication failed after ', itoa(queue.FailedCount), ' attempts'")
+    send_command dvTP, "'@PPN-Projector Not Responding'"
+    
+    // Try power cycling the device
+    pulse[dvProjectorRelay, 1]
+}
+
+DEFINE_START
+NAVDevicePriorityQueueInit(projectorQueue)
+
+DEFINE_EVENT
+// Timeline event for timeout detection
+timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE] {
+    NAVDevicePriorityQueueFailedResponse(projectorQueue)
+}
+
+// Device response handling
+string_event[dvProjector] {
+    if (find_string(string.text, 'OK', 1)) {
+        NAVDevicePriorityQueueGoodResponse(projectorQueue)
+    }
+    else if (find_string(string.text, 'ERR', 1)) {
+        NAVDevicePriorityQueueFailedResponse(projectorQueue)
+    }
+}
+
+// Button to send commands
+button_event[dvTP, 1] {
+    push: {
+        NAVDevicePriorityQueueEnqueue(projectorQueue, 'PWR ON', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
+    }
+}
+```
+
+## Common Use Cases
+
+### 1. Projector Control with Query Feedback
+
+```netlinx
+DEFINE_VARIABLE
+volatile _NAVDevicePriorityQueue projQueue
+
+DEFINE_START
+NAVDevicePriorityQueueInit(projQueue)
+
+DEFINE_FUNCTION powerOnProjector() {
+    // Send power command (high priority)
+    NAVDevicePriorityQueueEnqueue(projQueue, 'PWR ON', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
+    
+    // Follow with status queries (low priority - will wait for command to complete)
+    NAVDevicePriorityQueueEnqueue(projQueue, '?PWR', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
+    NAVDevicePriorityQueueEnqueue(projQueue, '?LAMP', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
+}
+
+DEFINE_EVENT
+timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE] {
+    NAVDevicePriorityQueueFailedResponse(projQueue)
+}
+
+string_event[dvProjector] {
+    // Process response...
+    NAVDevicePriorityQueueGoodResponse(projQueue)
+}
+```
+
+### 2. Matrix Switcher with Priority Override
+
+```netlinx
+DEFINE_VARIABLE
+volatile _NAVDevicePriorityQueue matrixQueue
+
+DEFINE_FUNCTION routeInput(integer input, integer output) {
+    // Normal routing (low priority - can be interrupted)
+    NAVDevicePriorityQueueEnqueue(matrixQueue, "input, '*', output, '!'", NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
+}
+
+DEFINE_FUNCTION emergencyRoute(integer input, integer output) {
+    // Emergency routing (high priority - executes immediately)
+    NAVDevicePriorityQueueEnqueue(matrixQueue, "input, '*', output, '!'", NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
+}
+
+// Commands are always sent before queries, so emergency routes jump the queue
+```
+
+### 3. Display Control with Retry Logic
+
+```netlinx
+DEFINE_VARIABLE
+volatile _NAVDevicePriorityQueue displayQueue
+
+DEFINE_START
+NAVDevicePriorityQueueInit(displayQueue)
+
+DEFINE_FUNCTION setDisplayInput(char input[]) {
+    NAVDevicePriorityQueueEnqueue(displayQueue, "'INPUT=', input", NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
+}
+
+DEFINE_EVENT
+// Automatically retries up to 3 times if display doesn't respond
+timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE] {
+    NAVDevicePriorityQueueFailedResponse(displayQueue)
+}
+
+string_event[dvDisplay] {
+    if (find_string(string.text, 'OK', 1)) {
+        NAVDevicePriorityQueueGoodResponse(displayQueue)
+    }
+}
+```
+
+### 4. Multi-Device Coordinator
+
+```netlinx
+DEFINE_VARIABLE
+volatile _NAVDevicePriorityQueue projectorQueue
+volatile _NAVDevicePriorityQueue audioQueue
+volatile _NAVDevicePriorityQueue lightsQueue
+
+DEFINE_START
+NAVDevicePriorityQueueInit(projectorQueue)
+NAVDevicePriorityQueueInit(audioQueue)
+NAVDevicePriorityQueueInit(lightsQueue)
+
+DEFINE_FUNCTION startPresentation() {
+    // All high-priority commands - execute immediately
+    NAVDevicePriorityQueueEnqueue(projectorQueue, 'PWR ON', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
+    NAVDevicePriorityQueueEnqueue(audioQueue, 'MUTE OFF', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
+    NAVDevicePriorityQueueEnqueue(lightsQueue, 'PRESET 1', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
+    
+    // Low-priority status queries - execute after commands
+    NAVDevicePriorityQueueEnqueue(projectorQueue, '?STATUS', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
+    NAVDevicePriorityQueueEnqueue(audioQueue, '?VOLUME', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
+}
+
+// Each device has its own queue with independent retry logic
+```
+
+## Best Practices
+
+### 1. Always Handle Timeline Events
+
+```netlinx
+// Required - library needs this for timeout detection
+DEFINE_EVENT
+timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE] {
+    NAVDevicePriorityQueueFailedResponse(yourQueue)
+}
+```
+
+### 2. Use Priority Appropriately
+
+```netlinx
+// HIGH priority (commands) - state changes, critical operations
+NAVDevicePriorityQueueEnqueue(queue, 'POWER=ON', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
+NAVDevicePriorityQueueEnqueue(queue, 'INPUT=HDMI1', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
+
+// LOW priority (queries) - status requests, polling
+NAVDevicePriorityQueueEnqueue(queue, '?POWER', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
+NAVDevicePriorityQueueEnqueue(queue, '?TEMP', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
+```
+
+### 3. Don't Manually Set Busy State (Usually)
+
+```netlinx
+// WRONG - breaks auto-send behavior
+queue.Busy = true
+NAVDevicePriorityQueueEnqueue(queue, 'CMD')
+
+// RIGHT - let the library manage Busy state
+NAVDevicePriorityQueueEnqueue(queue, 'CMD')  // Auto-sends if idle
+```
+
+**Exception**: In unit tests where you need to test queue behavior in isolation without triggering auto-send.
+
+### 4. Monitor Queue Depth for Debugging
+
+```netlinx
+// Useful for identifying communication bottlenecks
+if (NAVDevicePriorityQueueGetCount(queue) > 20) {
+    NAVErrorLog(NAV_LOG_LEVEL_WARNING, "'Queue backup detected: ', itoa(NAVDevicePriorityQueueGetCount(queue)), ' items'")
+}
+```
+
+### 5. Use Callbacks for Custom Communication
+
+```netlinx
+// Instead of manually sending in Enqueue, use the SendNextItem callback
+#DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK
+#include 'NAVFoundation.DevicePriorityQueue.axi'
+
+define_function NAVDevicePriorityQueueSendNextItemEventCallback(_NAVDevicePriorityQueue queue, char message[NAV_MAX_BUFFER], integer isResend) {
+    // Add protocol-specific formatting here
+    send_string dvDevice, "STX, message, ETX"
+}
+```
+
+## Error Handling
+
+### Automatic Error Recovery
+
+The library includes built-in error recovery:
+
+1. **Failed Response Detection**: Timeline automatically detects when device doesn't respond within timeout period (default 5 seconds)
+2. **Automatic Retry**: Retries failed messages up to `MaxFailedCount` times (default 3)
+3. **Queue Reinitialization**: After max failures, reinitializes queue to prevent permanent stuck state
+4. **Callback Notifications**: Optional callbacks allow custom error handling
+
+### Error Logging
+
+```netlinx
+// Enable logging to diagnose issues
+#define NAV_LOG_LEVEL_DEBUG
+#include 'NAVFoundation.DevicePriorityQueue.axi'
+
+// Library will log:
+// - Enqueue to full queue
+// - Failed responses and retry attempts
+// - Queue reinitialization after max failures
+```
+
+## Performance Characteristics
+
+### Memory Usage
+
+- **Per Queue Instance**: ~40 KB
+  - Command Queue: 50 items × ~250 bytes = ~12.5 KB
+  - Query Queue: 100 items × ~250 bytes = ~25 KB
+  - Overhead: ~2.5 KB
+
+### Timing
+
+- **Auto-Send Delay**: Immediate (0ms) when enqueuing to idle queue
+- **Default Timeout**: 5000ms (5 seconds) - configurable
+- **Retry Overhead**: ~10ms per retry (timeline + function call)
+
+### Complexity
+
+- **Enqueue**: O(1) constant time
+- **Dequeue**: O(1) constant time (priority check is O(1))
+- **SendNextItem**: O(1) constant time
+- **GoodResponse**: O(1) constant time (+ O(1) for next send if queued)
+- **FailedResponse**: O(1) constant time (+ O(n) for Init if max failures)
+
+## Troubleshooting
+
+### Queue Gets Stuck / Nothing Sends
+
+**Symptoms**: Items enqueue but never send
+
+**Causes**:
+1. Missing timeline event handler
+2. `Busy` flag stuck as `true`
+3. Timeline not triggering
+
+**Solutions**:
+```netlinx
+// 1. Ensure timeline event is defined
+DEFINE_EVENT
+timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE] {
+    NAVDevicePriorityQueueFailedResponse(queue)
+}
+
+// 2. Check Busy state
+send_string 0, "'Queue Busy: ', itoa(queue.Busy)"
+
+// 3. Manually trigger next send if stuck
+if (queue.Busy) {
+    NAVDevicePriorityQueueFailedResponse(queue)  // Force timeout
+}
+```
+
+### Commands Execute Out of Order
+
+**Symptoms**: Low-priority commands execute before high-priority ones
+
+**Cause**: Using wrong priority constant
+
+**Solution**:
+```netlinx
+// Use the defined constants, not magic numbers
+NAVDevicePriorityQueueEnqueue(queue, 'CMD', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)  // ✓ Correct
+NAVDevicePriorityQueueEnqueue(queue, 'QRY', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)    // ✓ Correct
+
+// NOT:
+NAVDevicePriorityQueueEnqueue(queue, 'CMD', 1)  // ✗ Wrong
+NAVDevicePriorityQueueEnqueue(queue, 'QRY', 0)  // ✗ Wrong
+```
+
+### Device Never Responds / Constant Retries
+
+**Symptoms**: Library keeps retrying, eventually reinitializes
+
+**Causes**:
+1. Device not connected
+2. Wrong baud rate / protocol
+3. Not calling `GoodResponse()` when device responds
+4. Timeline timeout too short
+
+**Solutions**:
+```netlinx
+// 1. Verify device connection
+send_string 0, "'Device online: ', itoa(device_id(dvDevice))"
+
+// 2. Check protocol in callback
+define_function NAVDevicePriorityQueueSendNextItemEventCallback(_NAVDevicePriorityQueue queue, char message[NAV_MAX_BUFFER], integer isResend) {
+    send_string 0, "'Sending: ', message"  // Verify format
+    send_string dvDevice, message
+}
+
+// 3. Ensure GoodResponse is called
+string_event[dvDevice] {
+    send_string 0, "'Device response: ', string.text"  // Debug
+    NAVDevicePriorityQueueGoodResponse(queue)  // Must call this!
+}
+
+// 4. Increase timeout if device is slow
+#define TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE_TIME 10000  // 10 seconds
+```
+
+### Callback Not Being Called
+
+**Symptoms**: Callback define is set but function never executes
+
+**Causes**:
+1. `#DEFINE` placed after `#include`
+2. Callback function not defined
+3. Wrong function signature
+
+**Solution**:
+```netlinx
+// ✓ CORRECT ORDER
+#DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK
+#include 'NAVFoundation.DevicePriorityQueue.axi'
+
+define_function NAVDevicePriorityQueueSendNextItemEventCallback(_NAVDevicePriorityQueue queue, char message[NAV_MAX_BUFFER], integer isResend) {
+    // Function body
+}
+
+// ✗ WRONG ORDER - won't work!
+#include 'NAVFoundation.DevicePriorityQueue.axi'
+#DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK  // Too late!
+```
+
+## Testing
+
+The DevicePriorityQueue library has been extensively tested:
+
+- **Core Tests**: 16 tests covering initialization, enqueue/dequeue, priority handling, state management, and response handling
+- **Callback Tests**: 6 tests covering callback invocation and behavior
+- **Total Coverage**: 22 comprehensive tests validating all functionality
+
+Test categories:
+- Basic operations (init, enqueue, dequeue)
+- Priority handling (command vs query order)
+- State management (busy flag, counters)
+- Response handling (good, failed, resend, max failures)
+- Callback integration (send event, failed response event)
+- Sequence verification (end-to-end workflows)
+
+All tests must pass before release.
+
+## Breaking Changes
 
 **Important**: As of version 3.0.0, the `timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE]` and the global variable declaration have been removed from the library to minimize side effects and avoid global variable dependencies. This is a breaking change that requires updates to consumer code.
 
