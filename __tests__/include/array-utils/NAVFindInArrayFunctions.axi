@@ -198,3 +198,44 @@ define_function TestNAVFindInArrayFLOAT() {
         NAVLogTestPassed(2)
     }
 }
+
+define_function TestNAVFindInArrayDOUBLE() {
+    stack_var double array[5]
+    stack_var integer result
+
+    NAVLog("'***************** NAVFindInArrayDOUBLE *****************'")
+
+    array[1] = 1.123456789
+    array[2] = 2.234567890
+    array[3] = 3.345678901
+    array[4] = 4.456789012
+    array[5] = 5.567890123
+    set_length_array(array, 5)
+
+    // Test 1: Find existing value
+    result = NAVFindInArrayDOUBLE(array, 3.345678901)
+    if (result != 3) {
+        NAVLogTestFailed(1, "'3'", "itoa(result)")
+    }
+    else {
+        NAVLogTestPassed(1)
+    }
+
+    // Test 2: Find non-existing value
+    result = NAVFindInArrayDOUBLE(array, 9.999999999)
+    if (result != 0) {
+        NAVLogTestFailed(2, "'0'", "itoa(result)")
+    }
+    else {
+        NAVLogTestPassed(2)
+    }
+
+    // Test 3: Find first element
+    result = NAVFindInArrayDOUBLE(array, 1.123456789)
+    if (result != 1) {
+        NAVLogTestFailed(3, "'1'", "itoa(result)")
+    }
+    else {
+        NAVLogTestPassed(3)
+    }
+}

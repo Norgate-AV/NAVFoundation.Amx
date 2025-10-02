@@ -75,6 +75,30 @@ define_function TestNAVArraySumLong() {
     }
 }
 
+define_function TestNAVArraySumSignedLong() {
+    stack_var slong array[5]
+    stack_var double result
+
+    NAVLog("'***************** NAVArraySumSignedLong *****************'")
+
+    array[1] = type_cast(-1000000)
+    array[2] = type_cast(2000000)
+    array[3] = type_cast(-3000000)
+    array[4] = type_cast(4000000)
+    array[5] = type_cast(-5000000)
+    set_length_array(array, 5)
+
+    result = NAVArraySumSignedLong(array)
+
+    // Expected sum: -1000000 + 2000000 + -3000000 + 4000000 + -5000000 = -3000000
+    if (result != -3000000.0) {
+        NAVLogTestFailed(1, "'-3000000.0'", "ftoa(result)")
+    }
+    else {
+        NAVLogTestPassed(1)
+    }
+}
+
 define_function TestNAVArraySumFloat() {
     stack_var float array[5]
     stack_var double result
@@ -194,6 +218,30 @@ define_function TestNAVArrayAverageLong() {
     // Expected average: 3000000.0
     if (result != 3000000.0) {
         NAVLogTestFailed(1, "'3000000.0'", "ftoa(result)")
+    }
+    else {
+        NAVLogTestPassed(1)
+    }
+}
+
+define_function TestNAVArrayAverageSignedLong() {
+    stack_var slong array[5]
+    stack_var double result
+
+    NAVLog("'***************** NAVArrayAverageSignedLong *****************'")
+
+    array[1] = type_cast(-1000000)
+    array[2] = type_cast(2000000)
+    array[3] = type_cast(-3000000)
+    array[4] = type_cast(4000000)
+    array[5] = type_cast(-5000000)
+    set_length_array(array, 5)
+
+    result = NAVArrayAverageSignedLong(array)
+
+    // Expected average: (-1000000 + 2000000 + -3000000 + 4000000 + -5000000) / 5 = -600000.0
+    if (result != -600000.0) {
+        NAVLogTestFailed(1, "'-600000.0'", "ftoa(result)")
     }
     else {
         NAVLogTestPassed(1)

@@ -238,3 +238,201 @@ define_function TestNAVArrayIntegerSetRemove() {
         NAVLogTestPassed(2)
     }
 }
+
+define_function TestNAVArrayCharSetFrom() {
+    stack_var _NAVArrayCharSet set
+    stack_var char sourceArray[5]
+
+    NAVLog("'***************** NAVArrayCharSetFrom *****************'")
+
+    // Test 1: Create set from array with unique values
+    set_length_array(sourceArray, 5)
+    sourceArray[1] = 'A'
+    sourceArray[2] = 'B'
+    sourceArray[3] = 'C'
+    sourceArray[4] = 'D'
+    sourceArray[5] = 'E'
+
+    NAVArrayCharSetFrom(set, sourceArray)
+
+    if (set.size != 5) {
+        NAVLogTestFailed(1, "'size=5'", "itoa(set.size)")
+    }
+    else if (!NAVArrayCharSetContains(set, 'A') || !NAVArrayCharSetContains(set, 'E')) {
+        NAVLogTestFailed(1, "'contains A and E'", "'missing values'")
+    }
+    else {
+        NAVLogTestPassed(1)
+    }
+
+    // Test 2: Create set from array with duplicate values
+    set_length_array(sourceArray, 5)
+    sourceArray[1] = 'X'
+    sourceArray[2] = 'Y'
+    sourceArray[3] = 'X'
+    sourceArray[4] = 'Y'
+    sourceArray[5] = 'Z'
+
+    NAVArrayCharSetFrom(set, sourceArray)
+
+    if (set.size != 3) {
+        NAVLogTestFailed(2, "'size=3 (duplicates removed)'", "itoa(set.size)")
+    }
+    else if (!NAVArrayCharSetContains(set, 'X') || !NAVArrayCharSetContains(set, 'Y') || !NAVArrayCharSetContains(set, 'Z')) {
+        NAVLogTestFailed(2, "'contains X, Y, Z'", "'missing values'")
+    }
+    else {
+        NAVLogTestPassed(2)
+    }
+
+    // Test 3: Create set from empty array
+    set_length_array(sourceArray, 0)
+
+    NAVArrayCharSetFrom(set, sourceArray)
+
+    if (set.size != 0) {
+        NAVLogTestFailed(3, "'size=0'", "itoa(set.size)")
+    }
+    else {
+        NAVLogTestPassed(3)
+    }
+}
+
+define_function TestNAVArrayIntegerSetFrom() {
+    stack_var _NAVArrayIntegerSet set
+    stack_var integer sourceArray[5]
+
+    NAVLog("'***************** NAVArrayIntegerSetFrom *****************'")
+
+    // Test 1: Create set from array with unique values
+    set_length_array(sourceArray, 5)
+    sourceArray[1] = 10
+    sourceArray[2] = 20
+    sourceArray[3] = 30
+    sourceArray[4] = 40
+    sourceArray[5] = 50
+
+    NAVArrayIntegerSetFrom(set, sourceArray)
+
+    if (set.size != 5) {
+        NAVLogTestFailed(1, "'size=5'", "itoa(set.size)")
+    }
+    else if (!NAVArrayIntegerSetContains(set, 10) || !NAVArrayIntegerSetContains(set, 50)) {
+        NAVLogTestFailed(1, "'contains 10 and 50'", "'missing values'")
+    }
+    else {
+        NAVLogTestPassed(1)
+    }
+
+    // Test 2: Create set from array with duplicate values
+    set_length_array(sourceArray, 5)
+    sourceArray[1] = 100
+    sourceArray[2] = 200
+    sourceArray[3] = 100
+    sourceArray[4] = 200
+    sourceArray[5] = 300
+
+    NAVArrayIntegerSetFrom(set, sourceArray)
+
+    if (set.size != 3) {
+        NAVLogTestFailed(2, "'size=3 (duplicates removed)'", "itoa(set.size)")
+    }
+    else if (!NAVArrayIntegerSetContains(set, 100) || !NAVArrayIntegerSetContains(set, 200) || !NAVArrayIntegerSetContains(set, 300)) {
+        NAVLogTestFailed(2, "'contains 100, 200, 300'", "'missing values'")
+    }
+    else {
+        NAVLogTestPassed(2)
+    }
+
+    // Test 3: Create set from empty array
+    set_length_array(sourceArray, 0)
+
+    NAVArrayIntegerSetFrom(set, sourceArray)
+
+    if (set.size != 0) {
+        NAVLogTestFailed(3, "'size=0'", "itoa(set.size)")
+    }
+    else {
+        NAVLogTestPassed(3)
+    }
+}
+
+define_function TestNAVArrayCharSetFind() {
+    stack_var _NAVArrayCharSet set
+    stack_var integer index
+
+    NAVLog("'***************** NAVArrayCharSetFind *****************'")
+
+    NAVArrayCharSetInit(set, 10)
+    NAVArrayCharSetAdd(set, 'A')
+    NAVArrayCharSetAdd(set, 'B')
+    NAVArrayCharSetAdd(set, 'C')
+    NAVArrayCharSetAdd(set, 'D')
+
+    // Test 1: Find existing value at start
+    index = NAVArrayCharSetFind(set, 'A')
+    if (index <> 1) {
+        NAVLogTestFailed(1, "'1'", "itoa(index)")
+    }
+    else {
+        NAVLogTestPassed(1)
+    }
+
+    // Test 2: Find existing value in middle
+    index = NAVArrayCharSetFind(set, 'C')
+    if (index <> 3) {
+        NAVLogTestFailed(2, "'3'", "itoa(index)")
+    }
+    else {
+        NAVLogTestPassed(2)
+    }
+
+    // Test 3: Find non-existing value
+    index = NAVArrayCharSetFind(set, 'Z')
+    if (index <> 0) {
+        NAVLogTestFailed(3, "'0'", "itoa(index)")
+    }
+    else {
+        NAVLogTestPassed(3)
+    }
+}
+
+define_function TestNAVArrayIntegerSetFind() {
+    stack_var _NAVArrayIntegerSet set
+    stack_var integer index
+
+    NAVLog("'***************** NAVArrayIntegerSetFind *****************'")
+
+    NAVArrayIntegerSetInit(set, 10)
+    NAVArrayIntegerSetAdd(set, 10)
+    NAVArrayIntegerSetAdd(set, 20)
+    NAVArrayIntegerSetAdd(set, 30)
+    NAVArrayIntegerSetAdd(set, 40)
+
+    // Test 1: Find existing value at start
+    index = NAVArrayIntegerSetFind(set, type_cast(10))
+    if (index <> 1) {
+        NAVLogTestFailed(1, "'1'", "itoa(index)")
+    }
+    else {
+        NAVLogTestPassed(1)
+    }
+
+    // Test 2: Find existing value in middle
+    index = NAVArrayIntegerSetFind(set, type_cast(30))
+    if (index <> 3) {
+        NAVLogTestFailed(2, "'3'", "itoa(index)")
+    }
+    else {
+        NAVLogTestPassed(2)
+    }
+
+    // Test 3: Find non-existing value
+    index = NAVArrayIntegerSetFind(set, type_cast(99))
+    if (index <> 0) {
+        NAVLogTestFailed(3, "'0'", "itoa(index)")
+    }
+    else {
+        NAVLogTestPassed(3)
+    }
+}

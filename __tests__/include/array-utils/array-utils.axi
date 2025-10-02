@@ -7,6 +7,7 @@
 #DEFINE TESTING_NAVARRAYSETFUNCTIONS
 #DEFINE TESTING_NAVARRAYFORMATFUNCTIONS
 #DEFINE TESTING_NAVARRAYSEARCHFUNCTIONS
+#DEFINE TESTING_NAVARRAYSWAPFUNCTIONS
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.ArrayUtils.axi'
 #include 'NAVFoundation.Assert.axi'
@@ -49,13 +50,17 @@
 #include 'NAVArraySearchFunctions.axi'
 #END_IF
 
+#IF_DEFINED TESTING_NAVARRAYSWAPFUNCTIONS
+#include 'NAVArraySwapFunctions.axi'
+#END_IF
+
 define_function RunArrayUtilsTests() {
     #IF_DEFINED TESTING_NAVSETARRAYFUNCTIONS
     TestNAVSetArrayChar()
     TestNAVSetArrayInteger()
     TestNAVSetArraySignedInteger()
     TestNAVSetArrayLong()
-    // TestNAVSetArraySignedLong()
+    TestNAVSetArraySignedLong()
     TestNAVSetArrayFloat()
     TestNAVSetArrayDouble()
     TestNAVSetArrayString()
@@ -67,6 +72,7 @@ define_function RunArrayUtilsTests() {
     TestNAVFindInArraySTRING()
     TestNAVFindInArrayLONG()
     TestNAVFindInArrayFLOAT()
+    TestNAVFindInArrayDOUBLE()
     #END_IF
 
     #IF_DEFINED TESTING_NAVARRAYSORTFUNCTIONS
@@ -95,11 +101,13 @@ define_function RunArrayUtilsTests() {
     TestNAVArraySumInteger()
     TestNAVArraySumSignedInteger()
     TestNAVArraySumLong()
+    TestNAVArraySumSignedLong()
     TestNAVArraySumFloat()
     TestNAVArraySumDouble()
     TestNAVArrayAverageInteger()
     TestNAVArrayAverageSignedInteger()
     TestNAVArrayAverageLong()
+    TestNAVArrayAverageSignedLong()
     TestNAVArrayAverageFloat()
     TestNAVArrayAverageDouble()
     #END_IF
@@ -114,10 +122,14 @@ define_function RunArrayUtilsTests() {
     TestNAVArrayCharSetAdd()
     TestNAVArrayCharSetContains()
     TestNAVArrayCharSetRemove()
+    TestNAVArrayCharSetFrom()
+    TestNAVArrayCharSetFind()
     TestNAVArrayIntegerSetInit()
     TestNAVArrayIntegerSetAdd()
     TestNAVArrayIntegerSetContains()
     TestNAVArrayIntegerSetRemove()
+    TestNAVArrayIntegerSetFrom()
+    TestNAVArrayIntegerSetFind()
     #END_IF
 
     #IF_DEFINED TESTING_NAVARRAYFORMATFUNCTIONS
@@ -131,5 +143,10 @@ define_function RunArrayUtilsTests() {
     TestNAVArrayTernarySearchInteger()
     TestNAVArrayJumpSearchInteger()
     TestNAVArrayExponentialSearchInteger()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVARRAYSWAPFUNCTIONS
+    TestNAVArraySwapInteger()
+    TestNAVArraySwapString()
     #END_IF
 }
