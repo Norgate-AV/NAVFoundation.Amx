@@ -51,7 +51,7 @@ define_function NAVStackInitString(_NAVStackString stack, integer capacity) {
 }
 
 
-define_function integer NAVStackPushString(_NAVStackString stack, char item[]) {
+define_function char NAVStackPushString(_NAVStackString stack, char item[]) {
     stack_var integer x
 
     if (NAVStackIsFull(stack.Properties)) {
@@ -130,7 +130,7 @@ define_function NAVStackInitInteger(_NAVStackInteger stack, integer capacity) {
 }
 
 
-define_function integer NAVStackPushInteger(_NAVStackInteger stack, integer item) {
+define_function char NAVStackPushInteger(_NAVStackInteger stack, integer item) {
     stack_var integer x
 
     if (NAVStackIsFull(stack.Properties)) {
@@ -195,7 +195,7 @@ define_function integer NAVStackGetCount(_NAVStackProperties stack) {
 }
 
 
-define_function integer NAVStackIsFull(_NAVStackProperties stack) {
+define_function char NAVStackIsFull(_NAVStackProperties stack) {
     return stack.Top == stack.Capacity
 }
 
@@ -205,7 +205,7 @@ define_function integer NAVStackGetCapacity(_NAVStackProperties stack) {
 }
 
 
-define_function integer NAVStackIsEmpty(_NAVStackProperties stack) {
+define_function char NAVStackIsEmpty(_NAVStackProperties stack) {
     return stack.Top == NAV_STACK_EMPTY
 }
 
@@ -215,7 +215,7 @@ define_function integer NAVStackStringGetCount(_NAVStackString stack) {
 }
 
 
-define_function integer NAVStackStringIsFull(_NAVStackString stack) {
+define_function char NAVStackStringIsFull(_NAVStackString stack) {
     return NAVStackIsFull(stack.Properties)
 }
 
@@ -225,7 +225,7 @@ define_function integer NAVStackStringGetCapacity(_NAVStackString stack) {
 }
 
 
-define_function integer NAVStackStringIsEmpty(_NAVStackString stack) {
+define_function char NAVStackStringIsEmpty(_NAVStackString stack) {
     return NAVStackIsEmpty(stack.Properties)
 }
 
@@ -235,7 +235,7 @@ define_function integer NAVStackIntegerGetCount(_NAVStackInteger stack) {
 }
 
 
-define_function integer NAVStackIntegerIsFull(_NAVStackInteger stack) {
+define_function char NAVStackIntegerIsFull(_NAVStackInteger stack) {
     return NAVStackIsFull(stack.Properties)
 }
 
@@ -245,7 +245,7 @@ define_function integer NAVStackIntegerGetCapacity(_NAVStackInteger stack) {
 }
 
 
-define_function integer NAVStackIntegerIsEmpty(_NAVStackInteger stack) {
+define_function char NAVStackIntegerIsEmpty(_NAVStackInteger stack) {
     return NAVStackIsEmpty(stack.Properties)
 }
 
