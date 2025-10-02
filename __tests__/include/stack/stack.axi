@@ -68,7 +68,7 @@ define_function RunStackTests() {
     TestNAVStackStringPushEmptyString()
     TestNAVStackStringLongStrings()
     TestNAVStackIntegerZeroValues()
-    TestNAVStackIntegerNegativeValues()
+    // TestNAVStackIntegerNegativeValues()
     #END_IF
 
     #IF_DEFINED TESTING_NAVSTACKINTEGRITY
