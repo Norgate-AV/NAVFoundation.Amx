@@ -8,16 +8,6 @@ This implementation is based on [RFC 1321](https://www.rfc-editor.org/rfc/rfc132
 
 > **Security Note**: While MD5 is no longer considered cryptographically secure against well-funded attackers, it remains useful for checksumming, data integrity verification, and other non-security-critical applications.
 
-## Installation
-
-Include the following files in your NetLinx project:
-
-```netlinx
-#include 'NAVFoundation.Cryptography.Md5.axi'
-#include 'NAVFoundation.Cryptography.Md5.h.axi'
-#include 'NAVFoundation.BinaryUtils.axi'  // Required dependency
-```
-
 ## API Reference
 
 ### `NAVMd5GetHash`
