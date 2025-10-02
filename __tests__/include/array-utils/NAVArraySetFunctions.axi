@@ -246,6 +246,7 @@ define_function TestNAVArrayCharSetFrom() {
     NAVLog("'***************** NAVArrayCharSetFrom *****************'")
 
     // Test 1: Create set from array with unique values
+    NAVArrayCharSetInit(set, 10)  // Initialize set with capacity first
     set_length_array(sourceArray, 5)
     sourceArray[1] = 'A'
     sourceArray[2] = 'B'
@@ -266,6 +267,7 @@ define_function TestNAVArrayCharSetFrom() {
     }
 
     // Test 2: Create set from array with duplicate values
+    NAVArrayCharSetInit(set, 10)  // Re-initialize for test 2
     set_length_array(sourceArray, 5)
     sourceArray[1] = 'X'
     sourceArray[2] = 'Y'
@@ -286,6 +288,7 @@ define_function TestNAVArrayCharSetFrom() {
     }
 
     // Test 3: Create set from empty array
+    NAVArrayCharSetInit(set, 10)  // Re-initialize for test 3
     set_length_array(sourceArray, 0)
 
     NAVArrayCharSetFrom(set, sourceArray)
@@ -305,6 +308,7 @@ define_function TestNAVArrayIntegerSetFrom() {
     NAVLog("'***************** NAVArrayIntegerSetFrom *****************'")
 
     // Test 1: Create set from array with unique values
+    NAVArrayIntegerSetInit(set, 10)  // Initialize set with capacity first
     set_length_array(sourceArray, 5)
     sourceArray[1] = 10
     sourceArray[2] = 20
@@ -325,6 +329,7 @@ define_function TestNAVArrayIntegerSetFrom() {
     }
 
     // Test 2: Create set from array with duplicate values
+    NAVArrayIntegerSetInit(set, 10)  // Re-initialize for test 2
     set_length_array(sourceArray, 5)
     sourceArray[1] = 100
     sourceArray[2] = 200
@@ -345,6 +350,7 @@ define_function TestNAVArrayIntegerSetFrom() {
     }
 
     // Test 3: Create set from empty array
+    NAVArrayIntegerSetInit(set, 10)  // Re-initialize for test 3
     set_length_array(sourceArray, 0)
 
     NAVArrayIntegerSetFrom(set, sourceArray)
