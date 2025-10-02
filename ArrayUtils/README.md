@@ -15,21 +15,6 @@ Working with arrays in NetLinx can be challenging due to limited built-in functi
 - **Array Analysis**: Sum, average, check if sorted
 - **String Array Operations**: Case conversion, trimming
 
-## Installation
-
-1. Copy the `NAVFoundation.ArrayUtils.axi` and `NAVFoundation.ArrayUtils.h.axi` files to your includes directory
-2. Include the library in your code:
-
-```netlinx
-#include 'NAVFoundation.ArrayUtils.axi'
-```
-
-## Requirements
-
-- NAVFoundation.Core.axi
-- NAVFoundation.Stack.axi
-- NAVFoundation.Math.axi
-
 ## Array Manipulation Functions
 
 ### Setting Array Values
@@ -66,8 +51,8 @@ NAVArraySliceString(sourceArray, 2, 5, resultArray)  // Creates slice from index
 ### Linear Search
 
 ```netlinx
-index = NAVFindInArrayInteger(intArray, 42)  // Returns index of first occurrence of 42
-index = NAVFindInArrayString(stringArray, 'Hello') // Returns index of "Hello"
+index = NAVFindInArrayINTEGER(intArray, 42)  // Returns index of first occurrence of 42
+index = NAVFindInArraySTRING(stringArray, 'Hello') // Returns index of "Hello"
 ```
 
 ### Binary Search (for sorted arrays)
@@ -99,9 +84,10 @@ NAVArrayInsertionSortInteger(intArray)   // Good for nearly sorted data
 ### Advanced Sorting
 
 ```netlinx
-NAVArrayQuickSortInteger(intArray)       // Efficient divide-and-conquer sort
-NAVArrayMergeSortInteger(intArray)       // Stable, efficient sort
-NAVArrayCountingSortInteger(intArray, 100) // Efficient for small integer ranges
+NAVArrayQuickSortInteger(intArray)                // Efficient divide-and-conquer sort
+NAVArrayMergeSortInteger(intArray)                // Stable, efficient sort
+NAVArrayCountingSortInteger(intArray, maxValue)   // Efficient for small integer ranges
+                                                  // maxValue should be the maximum value in array
 ```
 
 ### String Sorting
@@ -155,13 +141,23 @@ NAVArrayIntegerSetRemove(integerSet, 42)
 ```netlinx
 sum = NAVArraySumInteger(intArray)            // Calculate sum of array
 average = NAVArrayAverageInteger(intArray)    // Calculate average of array
+
+// Also available for: SignedInteger, Long, SignedLong, Float, Double
 ```
 
 ### Array Characteristics
 
 ```netlinx
-isSorted = NAVArrayIsSortedInteger(intArray)             // Check if sorted ascending
+isSorted = NAVArrayIsSortedInteger(intArray)             // Check if sorted (ascending)
+isSorted = NAVArrayIsSortedAscendingInteger(intArray)    // Check if sorted ascending
 isSortedDesc = NAVArrayIsSortedDescendingInteger(intArray) // Check if sorted descending
+```
+
+### Array Element Swapping
+
+```netlinx
+NAVArraySwapInteger(intArray, 1, 3)      // Swap elements at index 1 and 3
+NAVArraySwapString(stringArray, 2, 5)    // Swap string elements at index 2 and 5
 ```
 
 ## String Array Operations
@@ -185,6 +181,33 @@ NAVPrintArrayString(stringArray) // Print string array to debug log
 - For larger arrays, prefer quick sort or merge sort
 - Binary search is significantly faster than linear search for sorted arrays
 - For frequent lookups, consider using set data structures instead of arrays
+- Counting sort requires knowledge of the maximum value in the array, but is very efficient for small integer ranges
+
+## Important Usage Notes
+
+### Array Length Management
+
+When working with stack arrays in NetLinx, you should always use `set_length_array()` after populating the array to ensure the length is properly set:
+
+```netlinx
+stack_var integer values[10]
+values[1] = 5
+values[2] = 3
+values[3] = 8
+set_length_array(values, 3)  // Important: Set the length explicitly
+```
+
+Without calling `set_length_array()`, many array functions may not work correctly because `length_array()` will return 0 for unpopulated stack arrays.
+
+### Function Name Conventions
+
+Most find and search functions use ALL CAPS for the data type in the function name:
+
+- `NAVFindInArrayINTEGER()` (not `NAVFindInArrayInteger()`)
+- `NAVFindInArraySTRING()` (not `NAVFindInArrayString()`)
+- `NAVFindInArrayCHAR()`, `NAVFindInArrayLONG()`, etc.
+
+This matches the NetLinx naming convention for these fundamental search operations.
 
 ## Complete API Reference
 
@@ -220,7 +243,7 @@ values[2] = 3
 values[3] = 8
 values[4] = 1
 values[5] = 9
-set_length_array(values, 5) // Resize to actual data size
+set_length_array(values, 5) // Set array length to actual data size
 
 // Sort the array
 NAVArrayQuickSortInteger(values)
@@ -233,7 +256,7 @@ index = NAVArrayBinarySearchIntegerIterative(values, 5) // Returns 3
 isSorted = NAVArrayIsSortedAscendingInteger(values) // Returns true
 
 // Print array to debug log
-NAVPrintArrayInteger(values) // Outputs: [ 1, 3, 5, 8, 9 ]
+NAVPrintArrayInteger(values) // Outputs: [1, 3, 5, 8, 9]
 ```
 
 ## Example: Working with String Arrays
@@ -246,6 +269,7 @@ names[2] = 'Bob'
 names[3] = 'Alice'
 names[4] = 'Charlie'
 names[5] = 'Eve'
+set_length_array(names, 5) // Set array length to actual data size
 
 // Sort alphabetically
 NAVArraySelectionSortString(names)
@@ -282,6 +306,19 @@ if (NAVArrayIntegerSetContains(uniqueNumbers, 10)) {
 // Remove a value
 NAVArrayIntegerSetRemove(uniqueNumbers, 10)
 ```
+
+## Testing
+
+The ArrayUtils library includes a comprehensive test suite located in `__tests__/include/array-utils/`. The test suite covers:
+
+- All array manipulation functions (set, copy, reverse, slice)
+- All sorting algorithms with edge cases (empty, single element, duplicates, reverse sorted, etc.)
+- All search algorithms
+- Mathematical operations (sum, average)
+- Set operations
+- Format and print functions
+
+To run the tests, compile and run the test program at `__tests__/src/array-utils.axs`.
 
 ## Contributing
 
