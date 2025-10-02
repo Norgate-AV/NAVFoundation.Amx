@@ -208,6 +208,7 @@ define_function TestNAVByteToHexString() {
 
     // Test $01 using byte array
     bytes[1] = $01
+    set_length_array(bytes, 1)
     result = NAVByteArrayToHexString(bytes)
 
     if (!NAVAssertStringEqual('Should convert 01 to hex', '01', result)) {
@@ -219,6 +220,7 @@ define_function TestNAVByteToHexString() {
 
     // Test $FF
     bytes[1] = $FF
+    set_length_array(bytes, 1)
     result = NAVByteArrayToHexString(bytes)
 
     if (!NAVAssertStringEqual('Should convert FF to hex', 'ff', result)) {
@@ -230,6 +232,7 @@ define_function TestNAVByteToHexString() {
 
     // Test $00
     bytes[1] = $00
+    set_length_array(bytes, 1)
     result = NAVByteArrayToHexString(bytes)
 
     if (!NAVAssertStringEqual('Should convert 00 to hex', '00', result)) {
@@ -241,6 +244,7 @@ define_function TestNAVByteToHexString() {
 
     // Test $AB
     bytes[1] = $AB
+    set_length_array(bytes, 1)
     result = NAVByteArrayToHexString(bytes)
 
     if (!NAVAssertStringEqual('Should handle hex letters', 'ab', result)) {

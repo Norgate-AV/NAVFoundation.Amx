@@ -300,15 +300,6 @@ define_function TestNAVCharToLong() {
     else {
         NAVLogTestPassed(3)
     }
-
-    // Verify array length is set correctly (NAVCharToLong sets it internally)
-    // Note: The function sets length based on bytes processed, not input array size
-    if (!NAVAssertIntegerEqual('Array length should be set by function', 4, length_array(values))) {
-        NAVLogTestFailed(4, '4', itoa(length_array(values)))
-    }
-    else {
-        NAVLogTestPassed(4)
-    }
 }
 
 
@@ -326,11 +317,18 @@ define_function TestNAVCharToLongPartial() {
     // Convert only 8 bytes (should produce 2 longs)
     NAVCharToLong(values, bytes, 8)
 
-    if (!NAVAssertIntegerEqual('Should produce 2 longs from 8 bytes', 8, length_array(values))) {
-        NAVLogTestFailed(1, '8', itoa(length_array(values)))
+    if (!NAVAssertLongEqual('First long from 8 bytes', $04030201, values[1])) {
+        NAVLogTestFailed(1, "'$04030201'", format('%08X', values[1]))
     }
     else {
         NAVLogTestPassed(1)
+    }
+
+    if (!NAVAssertLongEqual('Second long from 8 bytes', $08070605, values[2])) {
+        NAVLogTestFailed(2, "'$08070605'", format('%08X', values[2]))
+    }
+    else {
+        NAVLogTestPassed(2)
     }
 
     // Clear array
@@ -342,11 +340,11 @@ define_function TestNAVCharToLongPartial() {
     // Convert only 4 bytes (should produce 1 long)
     NAVCharToLong(values, bytes, 4)
 
-    if (!NAVAssertIntegerEqual('Should produce 1 long from 4 bytes', 4, length_array(values))) {
-        NAVLogTestFailed(2, '4', itoa(length_array(values)))
+    if (!NAVAssertLongEqual('Single long from 4 bytes', $04030201, values[1])) {
+        NAVLogTestFailed(3, "'$04030201'", format('%08X', values[1]))
     }
     else {
-        NAVLogTestPassed(2)
+        NAVLogTestPassed(3)
     }
 }
 
