@@ -238,8 +238,17 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
             }
 
             case '\': {
+                #IF_DEFINED REGEX_DEBUG
+                NAVLog("'[ Compile ]: Backslash case - cursor=', itoa(parser.pattern.cursor), ' checking (cursor+2) <= length: (', itoa(parser.pattern.cursor + 2), ') <= (', itoa(parser.pattern.length), ') = ', itoa((parser.pattern.cursor + 2) <= parser.pattern.length)")
+                #END_IF
+
                 if ((parser.pattern.cursor + 2) <= parser.pattern.length) {
+                    // Increment cursor to look at the character after the backslash
                     parser.pattern.cursor++
+
+                    #IF_DEFINED REGEX_DEBUG
+                    NAVLog("'[ Compile ]: Backslash processing - cursor now=', itoa(parser.pattern.cursor), ' next char at pos ', itoa(parser.pattern.cursor + 1), ' is: ', NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1))")
+                    #END_IF
 
                     switch (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1))) {
                         case 'b': { parser.state[(parser.count + 1)].type = REGEX_TYPE_WORD_BOUNDARY }      // Not implemented
@@ -259,6 +268,7 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                             parser.state[(parser.count + 1)].value = NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1))
                         }
                     }
+                    // Note: Main loop will increment cursor again, so \d sequence will advance by 2 total
                 }
             }
 
@@ -363,8 +373,16 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
             }
         }
 
+        #IF_DEFINED REGEX_DEBUG
+        NAVLog("'[ Compile ]: About to increment - cursor=', itoa(parser.pattern.cursor), ' count=', itoa(parser.count), ' length=', itoa(parser.pattern.length)")
+        #END_IF
+
         parser.pattern.cursor++
         parser.count++
+
+        #IF_DEFINED REGEX_DEBUG
+        NAVLog("'[ Compile ]: After increment - cursor=', itoa(parser.pattern.cursor), ' count=', itoa(parser.count), ' condition=', itoa((parser.pattern.cursor + 1) <= parser.pattern.length)")
+        #END_IF
     }
 
     parser.state[(parser.count + 1)].type = REGEX_TYPE_UNUSED
