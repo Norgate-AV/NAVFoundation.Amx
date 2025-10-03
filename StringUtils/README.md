@@ -16,26 +16,6 @@ Working with strings in NetLinx can be challenging due to limited built-in funct
 - **String Splitting and Joining**: Split strings into arrays, join arrays into strings
 - **String Formatting**: Various case conversions (snake_case, kebab-case, etc.)
 
-## Installation
-
-1. Copy the `NAVFoundation.StringUtils.axi` and `NAVFoundation.StringUtils.h.axi` files to your includes directory
-2. Include the library in your code:
-
-```netlinx
-#include 'NAVFoundation.StringUtils.axi'
-```
-
-## Requirements
-
-- NAVFoundation.Core.axi
-
-## Constants
-
-```netlinx
-NAV_CASE_INSENSITIVE = 0  // Flag for case-insensitive string operations
-NAV_CASE_SENSITIVE = 1    // Flag for case-sensitive string operations
-```
-
 ## Function Reference
 
 ### String Manipulation

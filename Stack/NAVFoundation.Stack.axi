@@ -39,6 +39,23 @@ SOFTWARE.
 #include 'NAVFoundation.ErrorLogUtils.axi'
 
 
+/**
+ * @function NAVStackInitString
+ * @public
+ * @description Initializes a string stack with the specified capacity.
+ *              Sets up the stack for use by resetting the top pointer and establishing
+ *              the maximum capacity. If an invalid capacity is provided (<=0 or > NAV_MAX_STACK_SIZE),
+ *              it defaults to NAV_MAX_STACK_SIZE.
+ *
+ * @param {_NAVStackString} stack - Stack instance to initialize (passed by reference)
+ * @param {integer} capacity - Maximum number of items the stack can hold
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVStackString myStack
+ * NAVStackInitString(myStack, 10)  // Initialize with capacity of 10
+ */
 define_function NAVStackInitString(_NAVStackString stack, integer capacity) {
     stack_var integer x
 
@@ -51,7 +68,26 @@ define_function NAVStackInitString(_NAVStackString stack, integer capacity) {
 }
 
 
-define_function integer NAVStackPushString(_NAVStackString stack, char item[]) {
+/**
+ * @function NAVStackPushString
+ * @public
+ * @description Pushes a string item onto the top of the stack.
+ *              Follows LIFO (Last-In-First-Out) behavior. Logs an error if the stack is full.
+ *              Logs a warning if an empty string is pushed (but still adds it to the stack).
+ *
+ * @param {_NAVStackString} stack - Stack instance to push to (passed by reference)
+ * @param {char[]} item - String item to push onto the stack
+ *
+ * @returns {char} true if successful, false if stack is full
+ *
+ * @example
+ * stack_var _NAVStackString myStack
+ * NAVStackInitString(myStack, 10)
+ * if (NAVStackPushString(myStack, 'Hello World')) {
+ *     // Successfully pushed
+ * }
+ */
+define_function char NAVStackPushString(_NAVStackString stack, char item[]) {
     stack_var integer x
 
     if (NAVStackIsFull(stack.Properties)) {
@@ -78,6 +114,25 @@ define_function integer NAVStackPushString(_NAVStackString stack, char item[]) {
 }
 
 
+/**
+ * @function NAVStackPopString
+ * @public
+ * @description Removes and returns the top item from the string stack.
+ *              Follows LIFO (Last-In-First-Out) behavior. The most recently pushed item
+ *              is returned and removed from the stack. Logs an error if the stack is empty.
+ *
+ * @param {_NAVStackString} stack - Stack instance to pop from (passed by reference)
+ *
+ * @returns {char[]} The popped string item, or empty string if stack is empty
+ *
+ * @example
+ * stack_var _NAVStackString myStack
+ * stack_var char result[NAV_MAX_BUFFER]
+ * NAVStackInitString(myStack, 10)
+ * NAVStackPushString(myStack, 'First')
+ * NAVStackPushString(myStack, 'Second')
+ * result = NAVStackPopString(myStack)  // Returns 'Second'
+ */
 define_function char[NAV_MAX_BUFFER] NAVStackPopString(_NAVStackString stack) {
     stack_var integer x
     stack_var char item[NAV_MAX_BUFFER]
@@ -99,6 +154,25 @@ define_function char[NAV_MAX_BUFFER] NAVStackPopString(_NAVStackString stack) {
 }
 
 
+/**
+ * @function NAVStackPeekString
+ * @public
+ * @description Returns the top item from the string stack without removing it.
+ *              Allows you to view the most recently pushed item while keeping it on the stack.
+ *              Logs an error if the stack is empty.
+ *
+ * @param {_NAVStackString} stack - Stack instance to peek at (passed by reference)
+ *
+ * @returns {char[]} The top string item, or empty string if stack is empty
+ *
+ * @example
+ * stack_var _NAVStackString myStack
+ * stack_var char result[NAV_MAX_BUFFER]
+ * NAVStackInitString(myStack, 10)
+ * NAVStackPushString(myStack, 'Hello')
+ * result = NAVStackPeekString(myStack)  // Returns 'Hello' without removing it
+ * // Stack still contains 'Hello'
+ */
 define_function char[NAV_MAX_BUFFER] NAVStackPeekString(_NAVStackString stack) {
     stack_var integer x
     stack_var char item[NAV_MAX_BUFFER]
@@ -118,6 +192,23 @@ define_function char[NAV_MAX_BUFFER] NAVStackPeekString(_NAVStackString stack) {
 }
 
 
+/**
+ * @function NAVStackInitInteger
+ * @public
+ * @description Initializes an integer stack with the specified capacity.
+ *              Sets up the stack for use by resetting the top pointer and establishing
+ *              the maximum capacity. If an invalid capacity is provided (<=0 or > NAV_MAX_STACK_SIZE),
+ *              it defaults to NAV_MAX_STACK_SIZE.
+ *
+ * @param {_NAVStackInteger} stack - Stack instance to initialize (passed by reference)
+ * @param {integer} capacity - Maximum number of items the stack can hold
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVStackInteger myStack
+ * NAVStackInitInteger(myStack, 10)  // Initialize with capacity of 10
+ */
 define_function NAVStackInitInteger(_NAVStackInteger stack, integer capacity) {
     stack_var integer x
 
@@ -130,7 +221,25 @@ define_function NAVStackInitInteger(_NAVStackInteger stack, integer capacity) {
 }
 
 
-define_function integer NAVStackPushInteger(_NAVStackInteger stack, integer item) {
+/**
+ * @function NAVStackPushInteger
+ * @public
+ * @description Pushes an integer item onto the top of the stack.
+ *              Follows LIFO (Last-In-First-Out) behavior. Logs an error if the stack is full.
+ *
+ * @param {_NAVStackInteger} stack - Stack instance to push to (passed by reference)
+ * @param {integer} item - Integer value to push onto the stack
+ *
+ * @returns {char} true if successful, false if stack is full
+ *
+ * @example
+ * stack_var _NAVStackInteger myStack
+ * NAVStackInitInteger(myStack, 10)
+ * if (NAVStackPushInteger(myStack, 42)) {
+ *     // Successfully pushed
+ * }
+ */
+define_function char NAVStackPushInteger(_NAVStackInteger stack, integer item) {
     stack_var integer x
 
     if (NAVStackIsFull(stack.Properties)) {
@@ -150,6 +259,25 @@ define_function integer NAVStackPushInteger(_NAVStackInteger stack, integer item
 }
 
 
+/**
+ * @function NAVStackPopInteger
+ * @public
+ * @description Removes and returns the top item from the integer stack.
+ *              Follows LIFO (Last-In-First-Out) behavior. The most recently pushed item
+ *              is returned and removed from the stack. Logs an error if the stack is empty.
+ *
+ * @param {_NAVStackInteger} stack - Stack instance to pop from (passed by reference)
+ *
+ * @returns {integer} The popped integer value, or 0 if stack is empty
+ *
+ * @example
+ * stack_var _NAVStackInteger myStack
+ * stack_var integer result
+ * NAVStackInitInteger(myStack, 10)
+ * NAVStackPushInteger(myStack, 10)
+ * NAVStackPushInteger(myStack, 20)
+ * result = NAVStackPopInteger(myStack)  // Returns 20
+ */
 define_function integer NAVStackPopInteger(_NAVStackInteger stack) {
     stack_var integer x
     stack_var integer item
@@ -171,6 +299,25 @@ define_function integer NAVStackPopInteger(_NAVStackInteger stack) {
 }
 
 
+/**
+ * @function NAVStackPeekInteger
+ * @public
+ * @description Returns the top item from the integer stack without removing it.
+ *              Allows you to view the most recently pushed item while keeping it on the stack.
+ *              Logs an error if the stack is empty.
+ *
+ * @param {_NAVStackInteger} stack - Stack instance to peek at (passed by reference)
+ *
+ * @returns {integer} The top integer value, or 0 if stack is empty
+ *
+ * @example
+ * stack_var _NAVStackInteger myStack
+ * stack_var integer result
+ * NAVStackInitInteger(myStack, 10)
+ * NAVStackPushInteger(myStack, 42)
+ * result = NAVStackPeekInteger(myStack)  // Returns 42 without removing it
+ * // Stack still contains 42
+ */
 define_function integer NAVStackPeekInteger(_NAVStackInteger stack) {
     stack_var integer x
     stack_var integer item
@@ -190,62 +337,256 @@ define_function integer NAVStackPeekInteger(_NAVStackInteger stack) {
 }
 
 
+/**
+ * @function NAVStackGetCount
+ * @private
+ * @description Internal helper function that returns the current number of items in a stack.
+ *              This operates on the generic stack properties structure.
+ *
+ * @param {_NAVStackProperties} stack - Stack properties structure
+ *
+ * @returns {integer} Current number of items in the stack
+ *
+ * @see NAVStackStringGetCount
+ * @see NAVStackIntegerGetCount
+ */
 define_function integer NAVStackGetCount(_NAVStackProperties stack) {
     return stack.Top
 }
 
 
-define_function integer NAVStackIsFull(_NAVStackProperties stack) {
+/**
+ * @function NAVStackIsFull
+ * @private
+ * @description Internal helper function that checks if a stack has reached its capacity.
+ *              This operates on the generic stack properties structure.
+ *
+ * @param {_NAVStackProperties} stack - Stack properties structure
+ *
+ * @returns {char} true if stack is full, false otherwise
+ *
+ * @see NAVStackStringIsFull
+ * @see NAVStackIntegerIsFull
+ */
+define_function char NAVStackIsFull(_NAVStackProperties stack) {
     return stack.Top == stack.Capacity
 }
 
 
+/**
+ * @function NAVStackGetCapacity
+ * @private
+ * @description Internal helper function that returns the maximum capacity of a stack.
+ *              This operates on the generic stack properties structure.
+ *
+ * @param {_NAVStackProperties} stack - Stack properties structure
+ *
+ * @returns {integer} Maximum capacity of the stack
+ *
+ * @see NAVStackStringGetCapacity
+ * @see NAVStackIntegerGetCapacity
+ */
 define_function integer NAVStackGetCapacity(_NAVStackProperties stack) {
     return stack.Capacity
 }
 
 
-define_function integer NAVStackIsEmpty(_NAVStackProperties stack) {
+/**
+ * @function NAVStackIsEmpty
+ * @private
+ * @description Internal helper function that checks if a stack contains no items.
+ *              This operates on the generic stack properties structure.
+ *
+ * @param {_NAVStackProperties} stack - Stack properties structure
+ *
+ * @returns {char} true if stack is empty, false otherwise
+ *
+ * @see NAVStackStringIsEmpty
+ * @see NAVStackIntegerIsEmpty
+ */
+define_function char NAVStackIsEmpty(_NAVStackProperties stack) {
     return stack.Top == NAV_STACK_EMPTY
 }
 
 
+/**
+ * @function NAVStackStringGetCount
+ * @public
+ * @description Returns the current number of items in a string stack.
+ *
+ * @param {_NAVStackString} stack - String stack instance
+ *
+ * @returns {integer} Current number of items in the stack (0 if empty)
+ *
+ * @example
+ * stack_var _NAVStackString myStack
+ * stack_var integer count
+ * NAVStackInitString(myStack, 10)
+ * NAVStackPushString(myStack, 'Item1')
+ * NAVStackPushString(myStack, 'Item2')
+ * count = NAVStackStringGetCount(myStack)  // Returns 2
+ */
 define_function integer NAVStackStringGetCount(_NAVStackString stack) {
     return NAVStackGetCount(stack.Properties)
 }
 
 
-define_function integer NAVStackStringIsFull(_NAVStackString stack) {
+/**
+ * @function NAVStackStringIsFull
+ * @public
+ * @description Checks if a string stack has reached its maximum capacity.
+ *
+ * @param {_NAVStackString} stack - String stack instance
+ *
+ * @returns {char} true if stack is full, false if there is available space
+ *
+ * @example
+ * stack_var _NAVStackString myStack
+ * NAVStackInitString(myStack, 2)
+ * NAVStackPushString(myStack, 'Item1')
+ * NAVStackPushString(myStack, 'Item2')
+ * if (NAVStackStringIsFull(myStack)) {
+ *     // Stack is full, cannot push more items
+ * }
+ */
+define_function char NAVStackStringIsFull(_NAVStackString stack) {
     return NAVStackIsFull(stack.Properties)
 }
 
 
+/**
+ * @function NAVStackStringGetCapacity
+ * @public
+ * @description Returns the maximum capacity of a string stack.
+ *              This value is set during initialization and does not change.
+ *
+ * @param {_NAVStackString} stack - String stack instance
+ *
+ * @returns {integer} Maximum number of items the stack can hold
+ *
+ * @example
+ * stack_var _NAVStackString myStack
+ * stack_var integer capacity
+ * NAVStackInitString(myStack, 10)
+ * capacity = NAVStackStringGetCapacity(myStack)  // Returns 10
+ */
 define_function integer NAVStackStringGetCapacity(_NAVStackString stack) {
     return NAVStackGetCapacity(stack.Properties)
 }
 
 
-define_function integer NAVStackStringIsEmpty(_NAVStackString stack) {
+/**
+ * @function NAVStackStringIsEmpty
+ * @public
+ * @description Checks if a string stack contains no items.
+ *
+ * @param {_NAVStackString} stack - String stack instance
+ *
+ * @returns {char} true if stack is empty, false if it contains items
+ *
+ * @example
+ * stack_var _NAVStackString myStack
+ * NAVStackInitString(myStack, 10)
+ * if (NAVStackStringIsEmpty(myStack)) {
+ *     // Stack is empty
+ * }
+ * NAVStackPushString(myStack, 'Item1')
+ * if (!NAVStackStringIsEmpty(myStack)) {
+ *     // Stack now has items
+ * }
+ */
+define_function char NAVStackStringIsEmpty(_NAVStackString stack) {
     return NAVStackIsEmpty(stack.Properties)
 }
 
 
+/**
+ * @function NAVStackIntegerGetCount
+ * @public
+ * @description Returns the current number of items in an integer stack.
+ *
+ * @param {_NAVStackInteger} stack - Integer stack instance
+ *
+ * @returns {integer} Current number of items in the stack (0 if empty)
+ *
+ * @example
+ * stack_var _NAVStackInteger myStack
+ * stack_var integer count
+ * NAVStackInitInteger(myStack, 10)
+ * NAVStackPushInteger(myStack, 10)
+ * NAVStackPushInteger(myStack, 20)
+ * count = NAVStackIntegerGetCount(myStack)  // Returns 2
+ */
 define_function integer NAVStackIntegerGetCount(_NAVStackInteger stack) {
     return NAVStackGetCount(stack.Properties)
 }
 
 
-define_function integer NAVStackIntegerIsFull(_NAVStackInteger stack) {
+/**
+ * @function NAVStackIntegerIsFull
+ * @public
+ * @description Checks if an integer stack has reached its maximum capacity.
+ *
+ * @param {_NAVStackInteger} stack - Integer stack instance
+ *
+ * @returns {char} true if stack is full, false if there is available space
+ *
+ * @example
+ * stack_var _NAVStackInteger myStack
+ * NAVStackInitInteger(myStack, 2)
+ * NAVStackPushInteger(myStack, 10)
+ * NAVStackPushInteger(myStack, 20)
+ * if (NAVStackIntegerIsFull(myStack)) {
+ *     // Stack is full, cannot push more items
+ * }
+ */
+define_function char NAVStackIntegerIsFull(_NAVStackInteger stack) {
     return NAVStackIsFull(stack.Properties)
 }
 
 
+/**
+ * @function NAVStackIntegerGetCapacity
+ * @public
+ * @description Returns the maximum capacity of an integer stack.
+ *              This value is set during initialization and does not change.
+ *
+ * @param {_NAVStackInteger} stack - Integer stack instance
+ *
+ * @returns {integer} Maximum number of items the stack can hold
+ *
+ * @example
+ * stack_var _NAVStackInteger myStack
+ * stack_var integer capacity
+ * NAVStackInitInteger(myStack, 10)
+ * capacity = NAVStackIntegerGetCapacity(myStack)  // Returns 10
+ */
 define_function integer NAVStackIntegerGetCapacity(_NAVStackInteger stack) {
     return NAVStackGetCapacity(stack.Properties)
 }
 
 
-define_function integer NAVStackIntegerIsEmpty(_NAVStackInteger stack) {
+/**
+ * @function NAVStackIntegerIsEmpty
+ * @public
+ * @description Checks if an integer stack contains no items.
+ *
+ * @param {_NAVStackInteger} stack - Integer stack instance
+ *
+ * @returns {char} true if stack is empty, false if it contains items
+ *
+ * @example
+ * stack_var _NAVStackInteger myStack
+ * NAVStackInitInteger(myStack, 10)
+ * if (NAVStackIntegerIsEmpty(myStack)) {
+ *     // Stack is empty
+ * }
+ * NAVStackPushInteger(myStack, 42)
+ * if (!NAVStackIntegerIsEmpty(myStack)) {
+ *     // Stack now has items
+ * }
+ */
+define_function char NAVStackIntegerIsEmpty(_NAVStackInteger stack) {
     return NAVStackIsEmpty(stack.Properties)
 }
 

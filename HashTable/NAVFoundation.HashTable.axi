@@ -39,6 +39,21 @@ SOFTWARE.
 #include 'NAVFoundation.ErrorLogUtils.axi'
 
 
+/**
+ * @function NAVHashTableGetKeyHash
+ * @public
+ * @description Calculate polynomial rolling hash value for a given key using base 37.
+ *              This function implements a high-quality hash function that provides
+ *              good distribution across the hash table to minimize collisions.
+ *
+ * @param {char[]} key - The key string to hash
+ *
+ * @returns {integer} Hash value (0 to NAV_HASH_TABLE_SIZE-1), or 0 if key is empty
+ *
+ * @example
+ * stack_var integer hashValue
+ * hashValue = NAVHashTableGetKeyHash('user_session_123')
+ */
 define_function integer NAVHashTableGetKeyHash(char key[]) {
     stack_var integer length
     stack_var long value
@@ -56,75 +71,154 @@ define_function integer NAVHashTableGetKeyHash(char key[]) {
         return type_cast(value)
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_HASHTABLE__,
-                                'NAVHashTableGetKeyHash',
-                                "'Getting hash for key: ', key")
-
     for (x = 1; x <= length; x++) {
         value = value * 37 + key[x]
     }
 
     value = value % NAV_HASH_TABLE_SIZE
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_HASHTABLE__,
-                                'NAVHashTableGetKeyHash',
-                                "'Hash value for key "', key,'": ', format('%04d', type_cast(value))")
-
     return type_cast(value)
 }
 
 
-define_function NAVHashTableInit(_NAVHashTable hashTable) {
+/**
+ * @function NAVHashTableInit
+ * @public
+ * @description Initialize an empty hash table by clearing all slots and resetting counters.
+ *              This function must be called before using any other hash table operations.
+ *
+ * @param {_NAVHashTable} table - The hash table structure to initialize
+ *
+ * @example
+ * stack_var _NAVHashTable myTable
+ * NAVHashTableInit(myTable)
+ */
+define_function NAVHashTableInit(_NAVHashTable table) {
     stack_var integer x
 
-    for (x = 1; x <= max_length_array(hashTable.Items); x++) {
-        hashTable.Items[x].Key = "NAV_NULL"
-        hashTable.Items[x].Value = ''
+    for (x = 1; x <= max_length_array(table.Items); x++) {
+        table.Items[x].Key = "NAV_NULL"
+        table.Items[x].Value = ''
     }
 
-    hashTable.ItemCount = 0
+    table.ItemCount = 0
+    table.LastError = NAV_HASH_TABLE_ERROR_NONE
 }
 
 
-define_function NAVHashTableItemInit(_NAVKeyValuePair item, char key[], char value[]) {
+/**
+ * @function NAVHashTableItemInit
+ * @private
+ * @description Initialize a hash table key-value pair item with the specified key and value.
+ *
+ * @param {_NAVHashTableKeyValuePair} item - The item structure to initialize
+ * @param {char[]} key - The key string to assign
+ * @param {char[]} value - The value string to assign
+ */
+define_function NAVHashTableItemInit(_NAVHashTableKeyValuePair item, char key[], char value[]) {
     item.Key = key
     item.Value = value
 }
 
 
-define_function NAVHashTableItemUpdate(_NAVKeyValuePair item, char value[]) {
+/**
+ * @function NAVHashTableItemUpdate
+ * @private
+ * @description Update the value of an existing hash table key-value pair item.
+ *
+ * @param {_NAVHashTableKeyValuePair} item - The item structure to update
+ * @param {char[]} value - The new value string to assign
+ */
+define_function NAVHashTableItemUpdate(_NAVHashTableKeyValuePair item, char value[]) {
     item.Value = value
 }
 
 
-define_function NAVHashTableSetItem(_NAVHashTable hashTable, integer slot, _NAVKeyValuePair item) {
-    NAVHashTableItemInit(hashTable.Items[slot], item.Key, item.Value)
+/**
+ * @function NAVHashTableSetItem
+ * @private
+ * @description Set an item at a specific slot in the hash table (overwrites existing).
+ *
+ * @param {_NAVHashTable} table - The hash table to modify
+ * @param {integer} slot - The slot index (1-based)
+ * @param {_NAVHashTableKeyValuePair} item - The item to set at the slot
+ */
+define_function NAVHashTableSetItem(_NAVHashTable table, integer slot, _NAVHashTableKeyValuePair item) {
+    NAVHashTableItemInit(table.Items[slot], item.Key, item.Value)
 }
 
 
-define_function NAVHashTableItemNew(_NAVHashTable hashTable, integer slot, _NAVKeyValuePair item) {
-    hashTable.ItemCount++
-    NAVHashTableItemInit(hashTable.Items[slot], item.Key, item.Value)
+/**
+ * @function NAVHashTableItemNew
+ * @private
+ * @description Create a new item at a specific slot and increment the item count.
+ *
+ * @param {_NAVHashTable} table - The hash table to modify
+ * @param {integer} slot - The slot index (1-based)
+ * @param {_NAVHashTableKeyValuePair} item - The item to create at the slot
+ */
+define_function NAVHashTableItemNew(_NAVHashTable table, integer slot, _NAVHashTableKeyValuePair item) {
+    table.ItemCount++
+    NAVHashTableItemInit(table.Items[slot], item.Key, item.Value)
 }
 
 
-define_function NAVHashTableItemDispose(_NAVHashTable hashTable, integer slot) {
-    hashTable.ItemCount--
-    NAVHashTableItemInit(hashTable.Items[slot], "NAV_NULL", '')
+/**
+ * @function NAVHashTableItemDispose
+ * @private
+ * @description Remove an item from a specific slot and decrement the item count.
+ *
+ * @param {_NAVHashTable} table - The hash table to modify
+ * @param {integer} slot - The slot index (1-based) to clear
+ */
+define_function NAVHashTableItemDispose(_NAVHashTable table, integer slot) {
+    table.ItemCount--
+    NAVHashTableItemInit(table.Items[slot], "NAV_NULL", '')
 }
 
 
-define_function NAVHashTableGetItem(_NAVHashTable hashTable, integer slot, _NAVKeyValuePair item) {
-    item.Key = hashTable.Items[slot].Key
-    item.Value = hashTable.Items[slot].Value
+/**
+ * @function NAVHashTableGetItem
+ * @private
+ * @description Retrieve an item from a specific slot in the hash table.
+ *
+ * @param {_NAVHashTable} table - The hash table to read from
+ * @param {integer} slot - The slot index (1-based)
+ * @param {_NAVHashTableKeyValuePair} item - Output structure to store the retrieved item
+ */
+define_function NAVHashTableGetItem(_NAVHashTable table, integer slot, _NAVHashTableKeyValuePair item) {
+    item.Key = table.Items[slot].Key
+    item.Value = table.Items[slot].Value
 }
 
 
-define_function integer NAVHashTableAddItem(_NAVHashTable hashTable, char key[], char value[]) {
+/**
+ * @function NAVHashTableAddItem
+ * @public
+ * @description Add a new key-value pair to the hash table or update existing key.
+ *              Uses linear probing for collision resolution. If the table is full,
+ *              the operation will fail and set an error code.
+ *
+ * @param {_NAVHashTable} table - The hash table to modify
+ * @param {char[]} key - The key string (must not be empty, max 128 chars)
+ * @param {char[]} value - The value string (max 256 chars)
+ *
+ * @returns {integer} 1 on success, 0 on failure (check LastError for details)
+ *
+ * @example
+ * stack_var _NAVHashTable myTable
+ * NAVHashTableInit(myTable)
+ * if (NAVHashTableAddItem(myTable, 'username', 'admin')) {
+ *     // Successfully added
+ * }
+ */
+define_function integer NAVHashTableAddItem(_NAVHashTable table, char key[], char value[]) {
     stack_var integer slot
-    stack_var _NAVKeyValuePair item
+    stack_var _NAVHashTableKeyValuePair item
+    stack_var integer originalSlot
+    stack_var integer probeSlot
+
+    table.LastError = NAV_HASH_TABLE_ERROR_NONE
 
     if (!length_array(key)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
@@ -132,6 +226,7 @@ define_function integer NAVHashTableAddItem(_NAVHashTable hashTable, char key[],
                                     'NAVHashTableAddItem',
                                     'The argument "key" is an empty string')
 
+        table.LastError = NAV_HASH_TABLE_ERROR_EMPTY_KEY
         return 0
     }
 
@@ -143,153 +238,378 @@ define_function integer NAVHashTableAddItem(_NAVHashTable hashTable, char key[],
                                     'NAVHashTableAddItem',
                                     "'Hash value for key "', key, '" is invalid'")
 
+        table.LastError = NAV_HASH_TABLE_ERROR_INVALID_HASH
         return 0
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_HASHTABLE__,
-                                'NAVHashTableAddItem',
-                                "'Using slot: ', format('%04d', slot)")
+    NAVHashTableGetItem(table, slot, item)
 
-    NAVHashTableGetItem(hashTable, slot, item)
-
+    // If the slot is empty, add the item
     if (item.Key == "NAV_NULL") {
-        if (NAVHashTableGetItemCount(hashTable) >= NAV_MAX_HASH_TABLE_ITEMS) {
+        if (NAVHashTableGetItemCount(table) >= NAV_MAX_HASH_TABLE_ITEMS) {
             NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                         __NAV_FOUNDATION_HASHTABLE__,
                                         'NAVHashTableAddItem',
                                         'The hashtable is full')
 
+            table.LastError = NAV_HASH_TABLE_ERROR_FULL
             return 0
         }
 
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                    __NAV_FOUNDATION_HASHTABLE__,
-                                    'NAVHashTableAddItem',
-                                    "'Slot ', format('%04d', slot), ' is empty, adding item "', value, '"'")
-
         NAVHashTableItemInit(item, key, value)
-        NAVHashTableItemNew(hashTable, slot, item)
+        NAVHashTableItemNew(table, slot, item)
 
         return slot
     }
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_HASHTABLE__,
-                                'NAVHashTableAddItem',
-                                "'Slot ', format('%04d', slot), ' is in use'")
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_HASHTABLE__,
-                                'NAVHashTableAddItem',
-                                "'Current item in slot: ', format('%04d', slot)")
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
-                                __NAV_FOUNDATION_HASHTABLE__,
-                                'NAVHashTableAddItem',
-                                "'Item Key: ', item.Key, ' Item Value: ', item.Value")
+    // If the key already exists, update the value
+    if (item.Key == key) {
+        NAVHashTableItemUpdate(table.Items[slot], value)
+        return slot
+    }
+
+    // Collision occurred - use linear probing
+    originalSlot = slot
+    probeSlot = slot
+
+    while (true) {
+        probeSlot = (probeSlot % NAV_HASH_TABLE_SIZE) + 1
+
+        // No space left
+        if (probeSlot == originalSlot) {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                      __NAV_FOUNDATION_HASHTABLE__,
+                                      'NAVHashTableAddItem',
+                                      'Hash table is full (probing completed full cycle)')
+
+            table.LastError = NAV_HASH_TABLE_ERROR_FULL
+            return 0
+        }
+
+        NAVHashTableGetItem(table, probeSlot, item)
+
+        // Found an empty slot
+        if (item.Key == "NAV_NULL") {
+            if (NAVHashTableGetItemCount(table) >= NAV_MAX_HASH_TABLE_ITEMS) {
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                          __NAV_FOUNDATION_HASHTABLE__,
+                                          'NAVHashTableAddItem',
+                                          'The hashtable is full')
+
+                table.LastError = NAV_HASH_TABLE_ERROR_FULL
+                return 0
+            }
+
+            NAVHashTableItemInit(item, key, value)
+            NAVHashTableItemNew(table, probeSlot, item)
+            return probeSlot
+        }
+
+        // Found the same key in another slot
+        if (item.Key == key) {
+            NAVHashTableItemUpdate(table.Items[probeSlot], value)
+            return probeSlot
+        }
+
+        break
+    }
+}
+
+
+/**
+ * @function NAVHashTableGetItemValue
+ * @public
+ * @description Retrieve the value associated with a key from the hash table.
+ *              Uses linear probing to handle collisions when searching for the key.
+ *
+ * @param {_NAVHashTable} table - The hash table to search
+ * @param {char[]} key - The key string to look up (must not be empty)
+ *
+ * @returns {char[]} The value string if key exists, empty string if not found
+ *
+ * @example
+ * stack_var char username[NAV_HASH_TABLE_MAX_VALUE_LENGTH]
+ * username = NAVHashTableGetItemValue(myTable, 'current_user')
+ * if (length_array(username)) {
+ *     // Key found, use the value
+ * }
+ */
+define_function char[NAV_HASH_TABLE_MAX_VALUE_LENGTH] NAVHashTableGetItemValue(_NAVHashTable table, char key[]) {
+    stack_var integer slot
+    stack_var _NAVHashTableKeyValuePair item
+    stack_var integer originalSlot
+    stack_var integer probeSlot
+
+    table.LastError = NAV_HASH_TABLE_ERROR_NONE
+
+    if (!length_array(key)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableGetItemValue',
+                                    'The argument "key" is an empty string')
+
+        table.LastError = NAV_HASH_TABLE_ERROR_EMPTY_KEY
+        return ""
+    }
+
+    slot = NAVHashTableGetKeyHash(key)
+
+    if (slot <= 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableGetItemValue',
+                                    "'Hash value for key "', key, '" is invalid'")
+
+        table.LastError = NAV_HASH_TABLE_ERROR_INVALID_HASH
+        return ""
+    }
+
+    // Check initial slot
+    NAVHashTableGetItem(table, slot, item)
+    if (item.Key == key) {
+        return item.Value
+    }
+
+    // Key not found in initial slot, try linear probing
+    if (item.Key != "NAV_NULL") {
+        originalSlot = slot
+        probeSlot = slot
+
+        while (true) {
+            probeSlot = (probeSlot % NAV_HASH_TABLE_SIZE) + 1
+
+            // Completed full cycle without finding the key
+            if (probeSlot == originalSlot) {
+                table.LastError = NAV_HASH_TABLE_ERROR_KEY_NOT_FOUND
+                return ""
+            }
+
+            NAVHashTableGetItem(table, probeSlot, item)
+
+            // Found the key
+            if (item.Key == key) {
+                return item.Value
+            }
+
+            if (item.Key == "NAV_NULL") {
+                break
+            }
+        }
+    }
+
+    table.LastError = NAV_HASH_TABLE_ERROR_KEY_NOT_FOUND
+    return ""
+}
+
+
+/**
+ * @function NAVHashTableItemRemove
+ * @public
+ * @description Remove a key-value pair from the hash table.
+ *              Uses linear probing to locate the key, then removes it and decrements count.
+ *
+ * @param {_NAVHashTable} table - The hash table to modify
+ * @param {char[]} key - The key string to remove (must not be empty)
+ *
+ * @example
+ * NAVHashTableItemRemove(myTable, 'temporary_session')
+ * // Key is now removed from the table
+ */
+define_function NAVHashTableItemRemove(_NAVHashTable table, char key[]) {
+    stack_var integer slot
+    stack_var _NAVHashTableKeyValuePair item
+    stack_var integer originalSlot
+    stack_var integer probeSlot
+
+    table.LastError = NAV_HASH_TABLE_ERROR_NONE
+
+    if (!length_array(key)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableItemRemove',
+                                    'The argument "key" is an empty string')
+
+        table.LastError = NAV_HASH_TABLE_ERROR_EMPTY_KEY
+        return
+    }
+
+    slot = NAVHashTableGetKeyHash(key)
+
+    if (slot <= 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HASHTABLE__,
+                                    'NAVHashTableItemRemove',
+                                    "'Hash value for key "', key, '" is invalid'")
+
+        table.LastError = NAV_HASH_TABLE_ERROR_INVALID_HASH
+        return
+    }
+
+    // Check initial slot
+    NAVHashTableGetItem(table, slot, item)
 
     if (item.Key == key) {
-        NAVHashTableItemUpdate(hashTable.Items[slot], value)
-
-        return slot
-    }
-
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                __NAV_FOUNDATION_HASHTABLE__,
-                                'NAVHashTableAddItem',
-                                'Hashtable collision detected')
-
-    return 0
-}
-
-
-define_function char[NAV_MAX_BUFFER] NAVHashTableGetItemValue(_NAVHashTable hashTable, char key[]) {
-    stack_var integer slot
-    stack_var _NAVKeyValuePair item
-
-    if (!length_array(key)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_HASHTABLE__,
-                                    'NAVHashTableGetItemValue',
-                                    'The argument "key" is an empty string')
-
-        return ""
-    }
-
-    slot = NAVHashTableGetKeyHash(key)
-
-    if (slot <= 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_HASHTABLE__,
-                                    'NAVHashTableGetItemValue',
-                                    "'Hash value for key "', key, '" is invalid'")
-
-        return ""
-    }
-
-    NAVHashTableGetItem(hashTable, slot, item)
-
-    if (item.Key == "NAV_NULL") {
-        return ""
-    }
-
-    if (item.Key != key) {
-        return ""
-    }
-
-    return item.Value
-}
-
-
-define_function integer NAVHashTableGetItemCount(_NAVHashTable hashTable) {
-    return hashTable.ItemCount
-}
-
-
-define_function NAVHashTableItemRemove(_NAVHashTable hashTable, char key[]) {
-    stack_var integer slot
-    stack_var _NAVKeyValuePair item
-
-    if (!length_array(key)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_HASHTABLE__,
-                                    'NAVHashTableItemRemove',
-                                    'The argument "key" is an empty string')
-
+        NAVHashTableItemDispose(table, slot)
         return
     }
 
-    slot = NAVHashTableGetKeyHash(key)
+    // Key not found in initial slot, try linear probing
+    if (item.Key != "NAV_NULL") {
+        originalSlot = slot
+        probeSlot = slot
 
-    if (slot <= 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_HASHTABLE__,
-                                    'NAVHashTableItemRemove',
-                                    "'Hash value for key "', key, '" is invalid'")
+        while (true) {
+            probeSlot = (probeSlot % NAV_HASH_TABLE_SIZE) + 1
 
-        return
+            if (probeSlot == originalSlot) {
+                table.LastError = NAV_HASH_TABLE_ERROR_KEY_NOT_FOUND
+                return
+            }
+
+            NAVHashTableGetItem(table, probeSlot, item)
+
+            // Found the key, remove it
+            if (item.Key == key) {
+                NAVHashTableItemDispose(table, probeSlot)
+                return
+            }
+
+            if (item.Key == "NAV_NULL") {
+                break
+            }
+        }
     }
 
-    NAVHashTableGetItem(hashTable, slot, item)
-
-    if (item.Key == "NAV_NULL") {
-        return
-    }
-
-    if (item.Key != key) {
-        return
-    }
-
-    NAVHashTableItemDispose(hashTable, slot)
+    table.LastError = NAV_HASH_TABLE_ERROR_KEY_NOT_FOUND
 }
 
 
-define_function NAVHashTableDump(_NAVHashTable hashTable) {
+/**
+ * @function NAVHashTableContainsKey
+ * @public
+ * @description Check if a key exists in the hash table without retrieving the value.
+ *              More efficient than checking if GetItemValue returns an empty string.
+ *
+ * @param {_NAVHashTable} table - The hash table to search
+ * @param {char[]} key - The key string to check for
+ *
+ * @returns {integer} 1 if key exists, 0 if not found
+ *
+ * @example
+ * if (NAVHashTableContainsKey(myTable, 'user_preferences')) {
+ *     // Key exists, safe to retrieve or update
+ * }
+ */
+define_function integer NAVHashTableContainsKey(_NAVHashTable table, char key[]) {
+    stack_var char value[NAV_HASH_TABLE_MAX_VALUE_LENGTH]
+
+    value = NAVHashTableGetItemValue(table, key)
+
+    // If there was no error finding the key, it exists
+    return (table.LastError == NAV_HASH_TABLE_ERROR_NONE)
+}
+
+
+/**
+ * @function NAVHashTableClear
+ * @public
+ * @description Remove all items from the hash table and reset it to empty state.
+ *              Equivalent to calling NAVHashTableInit but more semantically clear.
+ *
+ * @param {_NAVHashTable} table - The hash table to clear
+ *
+ * @example
+ * NAVHashTableClear(myTable)
+ * // Table is now empty with ItemCount = 0
+ */
+define_function NAVHashTableClear(_NAVHashTable table) {
+    NAVHashTableInit(table)
+}
+
+
+/**
+ * @function NAVHashTableGetLoadFactor
+ * @public
+ * @description Calculate the current load factor of the hash table (percentage full).
+ *              Load factor = ItemCount / TableSize. Values above 0.7 may impact performance.
+ *
+ * @param {_NAVHashTable} table - The hash table to analyze
+ *
+ * @returns {float} Load factor as decimal (0.0 to 1.0)
+ *
+ * @example
+ * stack_var float loadFactor
+ * loadFactor = NAVHashTableGetLoadFactor(myTable)
+ * if (loadFactor > 0.7) {
+ *     // Consider increasing table size
+ * }
+ */
+define_function float NAVHashTableGetLoadFactor(_NAVHashTable table) {
+    return type_cast(NAVHashTableGetItemCount(table)) / type_cast(NAV_HASH_TABLE_SIZE)
+}
+
+
+/**
+ * @function NAVHashTableGetLastError
+ * @public
+ * @description Get the last error code from a hash table operation.
+ *              Useful for diagnosing why an operation failed.
+ *
+ * @param {_NAVHashTable} table - The hash table to check
+ *
+ * @returns {integer} Error code constant (see NAV_HASH_TABLE_ERROR_* constants)
+ *
+ * @example
+ * if (!NAVHashTableAddItem(myTable, 'key', 'value')) {
+ *     stack_var integer errorCode
+ *     errorCode = NAVHashTableGetLastError(myTable)
+ *     // Handle specific error types
+ * }
+ */
+define_function integer NAVHashTableGetLastError(_NAVHashTable table) {
+    return table.LastError
+}
+
+
+/**
+ * @function NAVHashTableGetItemCount
+ * @public
+ * @description Get the current number of key-value pairs stored in the hash table.
+ *
+ * @param {_NAVHashTable} table - The hash table to query
+ *
+ * @returns {integer} Number of items currently in the table
+ *
+ * @example
+ * stack_var integer count
+ * count = NAVHashTableGetItemCount(myTable)
+ * send_string 0, "'Table contains ', itoa(count), ' items'"
+ */
+define_function integer NAVHashTableGetItemCount(_NAVHashTable table) {
+    return table.ItemCount
+}
+
+
+/**
+ * @function NAVHashTableDump
+ * @public
+ * @description Print all key-value pairs in the hash table to the console for debugging.
+ *              Shows slot numbers, keys, and values for all occupied slots.
+ *
+ * @param {_NAVHashTable} table - The hash table to dump
+ *
+ * @example
+ * NAVHashTableDump(myTable)
+ * // Outputs: "Slot: 0042 Key: username Value: admin"
+ * //         "Slot: 0157 Key: timeout Value: 30"
+ */
+define_function NAVHashTableDump(_NAVHashTable table) {
     stack_var integer x
 
-    for (x = 1; x <= max_length_array(hashTable.Items); x++) {
-        stack_var _NAVKeyValuePair item
+    for (x = 1; x <= max_length_array(table.Items); x++) {
+        stack_var _NAVHashTableKeyValuePair item
 
-        NAVHashTableGetItem(hashTable, x, item)
+        NAVHashTableGetItem(table, x, item)
 
         if (item.Key == "NAV_NULL") {
             continue

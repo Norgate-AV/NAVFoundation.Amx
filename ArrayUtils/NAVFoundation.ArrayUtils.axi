@@ -571,7 +571,7 @@ define_function integer NAVFindInArraySTRING(char array[][], char value[]) {
  * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
  * stack_var char output[200]
  *
- * output = NAVFormatArrayString(names) // Returns "[ 'Alice', 'Bob', 'Charlie' ]"
+ * output = NAVFormatArrayString(names) // Returns "[Alice, Bob, Charlie]"
  */
 define_function char[NAV_MAX_BUFFER] NAVFormatArrayString(char array[][]) {
     stack_var integer x
@@ -592,7 +592,7 @@ define_function char[NAV_MAX_BUFFER] NAVFormatArrayString(char array[][]) {
         }
     }
 
-    return NAVFormatHex("'[ ''', result, ''' ]'")
+    return "'[', result, ']'"
 }
 
 
@@ -609,7 +609,7 @@ define_function char[NAV_MAX_BUFFER] NAVFormatArrayString(char array[][]) {
  * stack_var integer values[3] = {10, 20, 30}
  * stack_var char output[200]
  *
- * output = NAVFormatArrayInteger(values) // Returns "[ 10, 20, 30 ]"
+ * output = NAVFormatArrayInteger(values) // Returns "[10, 20, 30]"
  */
 define_function char[NAV_MAX_BUFFER] NAVFormatArrayInteger(integer array[]) {
     stack_var integer x
@@ -630,7 +630,7 @@ define_function char[NAV_MAX_BUFFER] NAVFormatArrayInteger(integer array[]) {
         }
     }
 
-    return "'[ ', result, ' ]'"
+    return "'[', result, ']'"
 }
 
 
@@ -645,7 +645,7 @@ define_function char[NAV_MAX_BUFFER] NAVFormatArrayInteger(integer array[]) {
  *
  * @example
  * stack_var integer values[3] = {10, 20, 30}
- * NAVPrintArrayInteger(values) // Logs "[ 10, 20, 30 ]" to the debug log
+ * NAVPrintArrayInteger(values) // Logs "[10, 20, 30]" to the debug log
  *
  * @see NAVFormatArrayInteger
  */
@@ -665,7 +665,7 @@ define_function NAVPrintArrayInteger(integer array[]) {
  *
  * @example
  * stack_var char names[3][20] = {'Alice', 'Bob', 'Charlie'}
- * NAVPrintArrayString(names) // Logs "[ 'Alice', 'Bob', 'Charlie' ]" to the debug log
+ * NAVPrintArrayString(names) // Logs "[Alice, Bob, Charlie]" to the debug log
  *
  * @see NAVFormatArrayString
  */
@@ -942,7 +942,10 @@ define_function NAVArrayInsertionSortInteger(integer array[]) {
         current = array[x]
         j = x - 1
 
-        while (j >= 1 && array[j] > current) {
+        while (j >= 1) {
+            if (array[j] <= current) {
+                break
+            }
             array[j + 1] = array[j]
             j--
         }
@@ -1071,8 +1074,8 @@ define_function NAVArrayMergeSortMergeInteger(integer left[], integer right[], i
 define_function NAVArrayMergeSortInteger(integer array[]) {
     stack_var integer middle
     stack_var integer arrayLength
-    stack_var integer left[1]
-    stack_var integer right[1]
+    stack_var integer left[100]
+    stack_var integer right[100]
     stack_var integer x
 
     arrayLength = length_array(array)
@@ -1088,7 +1091,7 @@ define_function NAVArrayMergeSortInteger(integer array[]) {
         left[x] = array[x]
     }
 
-    set_length_array(left, arrayLength - middle)
+    set_length_array(right, arrayLength - middle)
     for (x = (middle + 1); x <= arrayLength; x++) {
         right[x - middle] = array[x]
     }
@@ -1118,7 +1121,7 @@ define_function NAVArrayMergeSortInteger(integer array[]) {
  * @note Counting sort has O(n+k) time complexity where k is the range of values
  */
 define_function NAVArrayCountingSortInteger(integer array[], integer maxValue) {
-    stack_var integer counts[1]
+    stack_var integer counts[1000]
     stack_var integer x
     stack_var integer j
     stack_var integer k
@@ -1395,7 +1398,10 @@ define_function integer NAVArrayExponentialSearchInteger(integer array[], intege
 
     bound = 1
 
-    while (bound <= arrayLength && array[bound] < target) {
+    while (bound <= arrayLength) {
+        if (array[bound] >= target) {
+            break
+        }
         bound = bound * 2
     }
 
@@ -2270,9 +2276,10 @@ define_function NAVArrayCharSetInit(_NAVArrayCharSet set, integer capacity) {
 define_function char NAVArrayCharSetAdd(_NAVArrayCharSet set, char value) {
     stack_var integer index
 
-    index = NAVFindInArrayChar(set.data, value)
+    // Check if value already exists using NAVArrayCharSetFind
+    index = NAVArrayCharSetFind(set, value)
 
-    if (index && !set.free[index]) {
+    if (index > 0) {
         // Already in the set
         return false
     }
@@ -2287,7 +2294,7 @@ define_function char NAVArrayCharSetAdd(_NAVArrayCharSet set, char value) {
     // Get the first free index
     index = NAVFindInArrayChar(set.free, true)
 
-    if (!index) {
+    if (index == 0) {
         // No free index
         // Should never happen, but just in case
         return false
@@ -2319,9 +2326,9 @@ define_function char NAVArrayCharSetAdd(_NAVArrayCharSet set, char value) {
 define_function char NAVArrayCharSetRemove(_NAVArrayCharSet set, char value) {
     stack_var integer index
 
-    index = NAVFindInArrayChar(set.data, value)
+    index = NAVArrayCharSetFind(set, value)
 
-    if (!index || (index && set.free[index])) {
+    if (index == 0) {
         // Not in the set
         return false
     }
@@ -2471,9 +2478,10 @@ define_function NAVArrayIntegerSetInit(_NAVArrayIntegerSet set, integer capacity
 define_function char NAVArrayIntegerSetAdd(_NAVArrayIntegerSet set, integer value) {
     stack_var integer index
 
-    index = NAVFindInArrayInteger(set.data, value)
+    // Check if value already exists using NAVArrayIntegerSetFind
+    index = NAVArrayIntegerSetFind(set, value)
 
-    if (index && !set.free[index]) {
+    if (index > 0) {
         // Already in the set
         return false
     }
@@ -2488,7 +2496,7 @@ define_function char NAVArrayIntegerSetAdd(_NAVArrayIntegerSet set, integer valu
     // Get the first free index
     index = NAVFindInArrayChar(set.free, true)
 
-    if (!index) {
+    if (index == 0) {
         // No free index
         // Should never happen, but just in case
         return false
@@ -2520,9 +2528,9 @@ define_function char NAVArrayIntegerSetAdd(_NAVArrayIntegerSet set, integer valu
 define_function char NAVArrayIntegerSetRemove(_NAVArrayIntegerSet set, integer value) {
     stack_var integer index
 
-    index = NAVFindInArrayInteger(set.data, value)
+    index = NAVArrayIntegerSetFind(set, value)
 
-    if (!index || (index && set.free[index])) {
+    if (index == 0) {
         // Not in the set
         return false
     }

@@ -16,21 +16,6 @@ HTTP (Hypertext Transfer Protocol) is the foundation of data communication on th
 - **Status Code Handling**: Comprehensive set of HTTP status codes with proper messages
 - **Utility Functions**: Helper functions for common HTTP-related tasks
 
-## Installation
-
-1. Copy the `NAVFoundation.HttpUtils.axi` and `NAVFoundation.HttpUtils.h.axi` files to your includes directory
-2. Include the library in your code:
-
-```netlinx
-#include 'NAVFoundation.HttpUtils.axi'
-```
-
-## Requirements
-
-- NAVFoundation.Core.axi
-- NAVFoundation.ArrayUtils.axi
-- NAVFoundation.Url.axi
-
 ## Constants and Definitions
 
 ### HTTP Methods

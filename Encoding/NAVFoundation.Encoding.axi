@@ -294,13 +294,14 @@ define_function char[4] NAVLongToByteArrayBE(long value) {
 /**
  * @function NAVCharToLong
  * @public
- * @description Converts a byte array to an array of longs.
+ * @description Converts a byte array to an array of longs in little-endian order.
+ * Groups of 4 bytes are converted into 32-bit longs.
  *
- * @param {long[]} output - Output array for long values
+ * @param {long[]} output - Output array for long values (modified in place)
  * @param {char[]} input - Input byte array
  * @param {integer} length - Number of bytes to convert from the input
  *
- * @returns {void} - Output array is modified in place
+ * @returns {void}
  *
  * @example
  * stack_var char bytes[8]
@@ -311,6 +312,7 @@ define_function char[4] NAVLongToByteArrayBE(long value) {
  * // values becomes {$04030201, $08070605}
  *
  * @note Converts groups of 4 bytes into longs in little-endian order
+ * @note The output array length is automatically adjusted based on the number of bytes converted
  */
 define_function NAVCharToLong(long output[], char input[], integer length) {
     stack_var integer i
@@ -352,6 +354,7 @@ define_function char[NAV_MAX_BUFFER] NAVByteArrayToHexString(char array[]) {
  * @function NAVHexToString
  * @public
  * @description Converts a byte array to a hexadecimal string without any prefix or separator.
+ * This is an alias for NAVByteArrayToHexString.
  *
  * @param {char[]} array - Byte array to convert
  *
@@ -363,6 +366,8 @@ define_function char[NAV_MAX_BUFFER] NAVByteArrayToHexString(char array[]) {
  *
  * bytes = "$01, $23, $45"
  * hexString = NAVHexToString(bytes)  // Returns "012345"
+ *
+ * @see NAVByteArrayToHexString
  */
 define_function char[NAV_MAX_BUFFER] NAVHexToString(char array[]) {
     return NAVByteArrayToHexString(array)
@@ -454,11 +459,19 @@ define_function char[NAV_MAX_BUFFER] NAVByteArrayToHexStringWithOptions(char arr
 
 /**
  * @function NAVByteToHexString
- * @description Converts a single byte to its hexadecimal string representation
+ * @public
+ * @description Converts a single byte to its hexadecimal string representation.
  *
  * @param {char} byte - The byte value to convert
  *
- * @return {char[2]} Two-character hexadecimal string
+ * @returns {char[2]} Two-character hexadecimal string
+ *
+ * @example
+ * stack_var char byte
+ * stack_var char hexString[2]
+ *
+ * byte = $A5
+ * hexString = NAVByteToHexString(byte)  // Returns "a5"
  */
 define_function char[2] NAVByteToHexString(char byte) {
     stack_var char hexDigits[16]

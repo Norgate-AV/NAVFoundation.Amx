@@ -66,11 +66,6 @@ constant integer BUTTON_14 = 14
 // define_function NAVMcpKeypadLevelEventCallback(tlevel args) {}
 
 
-DEFINE_START {
-
-}
-
-
 DEFINE_EVENT
 
 data_event[5001:28:0] {

@@ -71,5 +71,4 @@ struct _NAVModulePassthruEvent {
 }
 
 
-
 #END_IF // __NAV_FOUNDATION_MODULEBASE_H__

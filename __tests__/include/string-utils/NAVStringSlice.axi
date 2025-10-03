@@ -38,7 +38,7 @@ constant char SLICE_EXPECTED[][NAV_MAX_BUFFER] = {
 define_function TestNAVStringSlice() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVGetStringSlice *****************'")
+    NAVLog("'***************** NAVGetStringSlice *****************'")
 
     for (x = 1; x <= length_array(SLICE_TEST); x++) {
         stack_var integer start

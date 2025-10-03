@@ -43,7 +43,7 @@ constant char STRING_REPLACE_EXPECTED[][NAV_MAX_BUFFER] = {
 define_function TestNAVStringReplace() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVStringReplace *****************'")
+    NAVLog("'***************** NAVStringReplace *****************'")
 
     for (x = 1; x <= length_array(STRING_REPLACE_TEST); x++) {
         stack_var char input[NAV_MAX_BUFFER]
@@ -65,9 +65,7 @@ define_function TestNAVStringReplace() {
         }
 
         if (!NAVAssertStringEqual('String Replace Test', expected, result)) {
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' failed. Input: "', input, '" Replace: "', match, '" with: "', replacement, '"'")
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected: "', expected, '"'")
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Actual  : "', result, '"'")
+            NAVLogTestFailed(x, expected, result)
             continue
         }
 

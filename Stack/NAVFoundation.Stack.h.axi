@@ -36,27 +36,71 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
+/**
+ * @constant NAV_MAX_STACK_SIZE
+ * @description Maximum size of a stack. This defines the maximum number of items
+ *              that can be stored in a stack instance.
+ * @default 500
+ */
 #IF_NOT_DEFINED NAV_MAX_STACK_SIZE
 constant integer NAV_MAX_STACK_SIZE = 500
 #END_IF
 
+/**
+ * @constant NAV_STACK_EMPTY
+ * @description Indicates an empty stack. When Top equals this value, the stack is empty.
+ * @default 0
+ */
 constant integer NAV_STACK_EMPTY = 0
 
 
 DEFINE_TYPE
 
+/**
+ * @struct _NAVStackProperties
+ * @description Internal structure that maintains the state of a stack.
+ *              Used by both string and integer stack implementations.
+ * @field {integer} Top - Current position of the top element (0 = empty)
+ * @field {integer} Capacity - Maximum number of items the stack can hold
+ */
 struct _NAVStackProperties {
     integer Top
     integer Capacity
 }
 
 
+/**
+ * @struct _NAVStackString
+ * @description Stack data structure for storing string values in LIFO order.
+ *              Implements a Last-In-First-Out (LIFO) data structure where the most
+ *              recently added item is the first one to be removed.
+ * @field {_NAVStackProperties} Properties - Stack state (top position and capacity)
+ * @field {char[][]} Items - Array of string items stored in the stack
+ *
+ * @example
+ * stack_var _NAVStackString myStack
+ * NAVStackInitString(myStack, 10)
+ * NAVStackPushString(myStack, 'Item1')
+ */
 struct _NAVStackString {
     _NAVStackProperties Properties
     char Items[NAV_MAX_STACK_SIZE][NAV_MAX_BUFFER]
 }
 
 
+/**
+ * @struct _NAVStackInteger
+ * @description Stack data structure for storing integer values in LIFO order.
+ *              Implements a Last-In-First-Out (LIFO) data structure where the most
+ *              recently added item is the first one to be removed.
+ * @field {_NAVStackProperties} Properties - Stack state (top position and capacity)
+ * @field {integer[]} Items - Array of integer items stored in the stack
+ *
+ * @example
+ * stack_var _NAVStackInteger myStack
+ * NAVStackInitInteger(myStack, 10)
+ * NAVStackPushInteger(myStack, 42)
+ */
 struct _NAVStackInteger {
     _NAVStackProperties Properties
     integer Items[NAV_MAX_STACK_SIZE]

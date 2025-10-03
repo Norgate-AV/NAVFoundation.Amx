@@ -86,8 +86,11 @@ For more detailed guides and documentation, please refer the `README.md` files i
 - [FileUtils](./FileUtils)
     - Provides utility functions for file operations and management.
 - [HashTable](./HashTable)
+    - Provides a hash table implementation for key-value storage.
 - [HttpUtils](./HttpUtils)
     - Provides functions for HTTP requests and responses.
+- [IniUtils](./IniUtils)
+    - Provides functions for parsing and working with INI configuration files.
 - [Int64](./Int64)
 - [InterModuleApi](./InterModuleApi)
 - [Jsmn](./Jsmn)
