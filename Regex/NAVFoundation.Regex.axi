@@ -165,6 +165,32 @@ define_function char NAVRegexMatchCompiled(_NAVRegexParser parser, char subject[
 }
 
 
+define_function char NAVRegexPatternHasMoreTokens(_NAVRegexParser parser) {
+    return parser.pattern.cursor < parser.pattern.length
+}
+
+
+define_function char NAVRegexPatternCursorIsOutOfBounds(_NAVRegexParser parser) {
+    return parser.pattern.cursor <= 0 || parser.pattern.cursor > parser.pattern.length
+}
+
+
+define_function char NAVRegexPatternAdvanceCursor(_NAVRegexParser parser) {
+    NAVRegexSetPatternCursor(parser, 'ParserInit', 0)
+
+    if (NAVRegexPatternCursorIsOutOfBounds(parser)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexPatternAdvanceCursor',
+                                    "'Parser pattern cursor out of bounds: ', itoa(parser.pattern.cursor)")
+        return false
+    }
+
+
+    return true
+}
+
+
 define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
     stack_var char c
 
@@ -172,24 +198,37 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
         return false
     }
 
-    parser.pattern.cursor = 0
+    // parser.pattern.cursor = 0
 
-    while ((parser.pattern.cursor + 1) <= parser.pattern.length && ((parser.count + 1) < MAX_REGEXP_OBJECTS)) {
-        c = NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1))
+    while (NAVRegexPatternHasMoreTokens(parser) && (parser.count < MAX_REGEXP_OBJECTS)) {
+        if (!NAVRegexPatternAdvanceCursor(parser)) {
+            return false
+        }
+
+        c = NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)
 
         #IF_DEFINED REGEX_DEBUG
         NAVLog("'[ Compile ]: cursor=', itoa(parser.pattern.cursor), ' char=', c, ' (', itoa(type_cast(c)), ')'")
         #END_IF
 
         switch (c) {
-            case '^': { parser.state[(parser.count + 1)].type = REGEX_TYPE_BEGIN }
-            case '$': { parser.state[(parser.count + 1)].type = REGEX_TYPE_END }
-            case '.': { parser.state[(parser.count + 1)].type = REGEX_TYPE_DOT }
+            case '^': {
+                parser.count++
+                parser.state[parser.count].type = REGEX_TYPE_BEGIN
+            }
+            case '$': {
+                parser.count++
+                parser.state[parser.count].type = REGEX_TYPE_END
+            }
+            case '.': {
+                parser.count++
+                parser.state[parser.count].type = REGEX_TYPE_DOT
+            }
 
             // Quantifiers. Should these be handled differently?
             case '*': {
                 // Check if the following character is '?'
-                if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 2)) == '?') {
+                if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1)) == '?') {
                     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                                 __NAV_FOUNDATION_REGEX__,
                                                 'NAVRegexCompile',
@@ -198,11 +237,12 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                     return false
                 }
 
-                parser.state[(parser.count + 1)].type = REGEX_TYPE_STAR
+                parser.count++
+                parser.state[parser.count].type = REGEX_TYPE_STAR
             }
             case '+': {
                 // Check if the following character is '?'
-                if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 2)) == '?') {
+                if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1)) == '?') {
                     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                                 __NAV_FOUNDATION_REGEX__,
                                                 'NAVRegexCompile',
@@ -211,11 +251,12 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                     return false
                 }
 
-                parser.state[(parser.count + 1)].type = REGEX_TYPE_PLUS
+                parser.count++
+                parser.state[parser.count].type = REGEX_TYPE_PLUS
             }
             case '?': {
                 // Check if the following character is '?'
-                if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 2)) == '?') {
+                if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1)) == '?') {
                     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                                 __NAV_FOUNDATION_REGEX__,
                                                 'NAVRegexCompile',
@@ -224,7 +265,8 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                     return false
                 }
 
-                parser.state[(parser.count + 1)].type = REGEX_TYPE_QUESTIONMARK
+                parser.count++
+                parser.state[parser.count].type = REGEX_TYPE_QUESTIONMARK
             }
 
             case '|': { // Not working properly
@@ -242,30 +284,70 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                 NAVLog("'[ Compile ]: Backslash case - cursor=', itoa(parser.pattern.cursor), ' checking (cursor+2) <= length: (', itoa(parser.pattern.cursor + 2), ') <= (', itoa(parser.pattern.length), ') = ', itoa((parser.pattern.cursor + 2) <= parser.pattern.length)")
                 #END_IF
 
-                if ((parser.pattern.cursor + 2) <= parser.pattern.length) {
+                if ((parser.pattern.cursor + 1) <= parser.pattern.length) {
                     // Increment cursor to look at the character after the backslash
-                    parser.pattern.cursor++
+                    // parser.pattern.cursor++
+                    if (!NAVRegexPatternAdvanceCursor(parser)) {
+                        return false
+                    }
 
                     #IF_DEFINED REGEX_DEBUG
-                    NAVLog("'[ Compile ]: Backslash processing - cursor now=', itoa(parser.pattern.cursor), ' next char at pos ', itoa(parser.pattern.cursor + 1), ' is: ', NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1))")
+                    NAVLog("'[ Compile ]: Backslash processing - cursor now=', itoa(parser.pattern.cursor), ' char is: ', NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)")
                     #END_IF
 
-                    switch (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1))) {
-                        case 'b': { parser.state[(parser.count + 1)].type = REGEX_TYPE_WORD_BOUNDARY }      // Not implemented
-                        case 'B': { parser.state[(parser.count + 1)].type = REGEX_TYPE_NOT_WORD_BOUNDARY }  // Not implemented
-                        case 'd': { parser.state[(parser.count + 1)].type = REGEX_TYPE_DIGIT }
-                        case 'D': { parser.state[(parser.count + 1)].type = REGEX_TYPE_NOT_DIGIT }
-                        case 'w': { parser.state[(parser.count + 1)].type = REGEX_TYPE_ALPHA }
-                        case 'W': { parser.state[(parser.count + 1)].type = REGEX_TYPE_NOT_ALPHA }
-                        case 's': { parser.state[(parser.count + 1)].type = REGEX_TYPE_WHITESPACE }
-                        case 'S': { parser.state[(parser.count + 1)].type = REGEX_TYPE_NOT_WHITESPACE }
-                        case 'x': { parser.state[(parser.count + 1)].type = REGEX_TYPE_HEX }                // Not implemented
-                        case 'n': { parser.state[(parser.count + 1)].type = REGEX_TYPE_NEWLINE }            // Not implemented
-                        case 'r': { parser.state[(parser.count + 1)].type = REGEX_TYPE_RETURN }             // Not implemented
-                        case 't': { parser.state[(parser.count + 1)].type = REGEX_TYPE_TAB }                // Not implemented
+                    switch (NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)) {
+                        case 'b': {
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_WORD_BOUNDARY
+                        }      // Not implemented
+                        case 'B': {
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_NOT_WORD_BOUNDARY
+                        }  // Not implemented
+                        case 'd': {
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_DIGIT
+                        }
+                        case 'D': {
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_NOT_DIGIT
+                        }
+                        case 'w': {
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_ALPHA
+                        }
+                        case 'W': {
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_NOT_ALPHA
+                        }
+                        case 's': {
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_WHITESPACE
+                        }
+                        case 'S': {
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_NOT_WHITESPACE
+                        }
+                        case 'x': {
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_HEX
+                        }                // Not implemented
+                        case 'n': {
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_NEWLINE
+                        }            // Not implemented
+                        case 'r': {
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_RETURN
+                        }             // Not implemented
+                        case 't': {
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_TAB
+                        }                // Not implemented
                         default: {
-                            parser.state[(parser.count + 1)].type = REGEX_TYPE_CHAR
-                            parser.state[(parser.count + 1)].value = NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1))
+                            parser.count++
+                            parser.state[parser.count].type = REGEX_TYPE_CHAR
+                            parser.state[parser.count].value = NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)
                         }
                     }
                     // Note: Main loop will increment cursor again, so \d sequence will advance by 2 total
@@ -295,12 +377,15 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                 length = 0
 
                 // Lookahead to see if this is a negated character class first
-                if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 2)) == '^') {
-                    parser.state[(parser.count + 1)].type = REGEX_TYPE_INV_CHAR_CLASS
+                if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1)) == '^') {
+                    parser.count++
+                    parser.state[parser.count].type = REGEX_TYPE_INV_CHAR_CLASS
 
-                    parser.pattern.cursor++
+                    if (!NAVRegexPatternAdvanceCursor(parser)) {
+                        return false
+                    }
 
-                    if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 2)) == 0) {
+                    if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1)) == 0) {
                         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                                     __NAV_FOUNDATION_REGEX__,
                                                     'NAVRegexCompile',
@@ -310,16 +395,25 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                     }
                 }
                 else {
-                    parser.state[(parser.count + 1)].type = REGEX_TYPE_CHAR_CLASS
+                    parser.count++
+                    parser.state[parser.count].type = REGEX_TYPE_CHAR_CLASS
                 }
 
-                parser.pattern.cursor++
+                // Advance to first character in the class
+                if (!NAVRegexPatternAdvanceCursor(parser)) {
+                    return false
+                }
 
-                while ((NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1)) != ']') &&
-                        ((parser.pattern.cursor + 1) <= parser.pattern.length)) {
+                // Build character class until we hit ']'
+                while (parser.pattern.cursor <= parser.pattern.length) {
                     stack_var char code
 
-                    code = NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1))
+                    code = NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)
+
+                    // Check if we've reached the closing bracket
+                    if (code == ']') {
+                        break
+                    }
 
                     if (code == '\') {
                         if (length > (MAX_CHAR_CLASS_LENGTH - 1)) {
@@ -330,7 +424,18 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                             return false
                         }
 
-                        if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 2)) == 0) {
+                        // Add the backslash
+                        charclass = "charclass, code"
+                        length = length_array(charclass)
+
+                        // Advance to the escaped character
+                        if (!NAVRegexPatternAdvanceCursor(parser)) {
+                            return false
+                        }
+
+                        code = NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)
+
+                        if (code == 0) {
                             NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                                         __NAV_FOUNDATION_REGEX__,
                                                         'NAVRegexCompile',
@@ -338,23 +443,28 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                             return false
                         }
 
+                        // Add the escaped character
                         charclass = "charclass, code"
-                        parser.pattern.cursor++
+                        length = length_array(charclass)
                     }
-                    else if (length > MAX_CHAR_CLASS_LENGTH) {
-                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                    __NAV_FOUNDATION_REGEX__,
-                                                    'NAVRegexCompile',
-                                                    "'Character class exceeded maximum length'")
+                    else {
+                        if (length > MAX_CHAR_CLASS_LENGTH) {
+                            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                        __NAV_FOUNDATION_REGEX__,
+                                                        'NAVRegexCompile',
+                                                        "'Character class exceeded maximum length'")
+                            return false
+                        }
+
+                        charclass = "charclass, code"
+                        length = length_array(charclass)
+                    }
+
+                    // Advance to next character in class
+                    if (!NAVRegexPatternAdvanceCursor(parser)) {
                         return false
                     }
-
-                    charclass = "charclass, code"
-                    length = length_array(charclass)
-                    parser.pattern.cursor++
-                }
-
-                if (length > MAX_CHAR_CLASS_LENGTH) {
+                }                if (length > MAX_CHAR_CLASS_LENGTH) {
                     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                                 __NAV_FOUNDATION_REGEX__,
                                                 'NAVRegexCompile',
@@ -362,14 +472,16 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                     return false
                 }
 
-                parser.state[(parser.count + 1)].charclass.value = charclass
-                parser.state[(parser.count + 1)].charclass.length = length
-                set_length_array(parser.state[(parser.count + 1)].charclass.value, length)
+                parser.count++
+                parser.state[parser.count].charclass.value = charclass
+                parser.state[parser.count].charclass.length = length
+                set_length_array(parser.state[parser.count].charclass.value, length)
             }
 
             default: {
-                parser.state[(parser.count + 1)].type = REGEX_TYPE_CHAR
-                parser.state[(parser.count + 1)].value = c
+                parser.count++
+                parser.state[parser.count].type = REGEX_TYPE_CHAR
+                parser.state[parser.count].value = c
             }
         }
 
@@ -377,18 +489,19 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
         NAVLog("'[ Compile ]: About to increment - cursor=', itoa(parser.pattern.cursor), ' count=', itoa(parser.count), ' length=', itoa(parser.pattern.length)")
         #END_IF
 
-        parser.pattern.cursor++
-        parser.count++
+        // parser.pattern.cursor++
+        // parser.count++
 
         #IF_DEFINED REGEX_DEBUG
         NAVLog("'[ Compile ]: After increment - cursor=', itoa(parser.pattern.cursor), ' count=', itoa(parser.count), ' condition=', itoa((parser.pattern.cursor + 1) <= parser.pattern.length)")
         #END_IF
     }
 
-    parser.state[(parser.count + 1)].type = REGEX_TYPE_UNUSED
-    set_length_array(parser.state, (parser.count + 1))
+    parser.count++
+    parser.state[parser.count].type = REGEX_TYPE_UNUSED
+    set_length_array(parser.state, parser.count)
 
-    // Reset the pattern cursor
+    // Reset the pattern cursor to 1 for matching phase
     parser.pattern.cursor = 1
 
     return true
@@ -1068,6 +1181,11 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
 define_function char NAVRegexParserInit(_NAVRegexParser parser, char pattern[]) {
     parser.pattern.value = NAVStringBetweenGreedy(NAVTrimString(pattern), '/', '/')
 
+    #IF_DEFINED REGEX_DEBUG
+    NAVLog("'[ ParserInit ]: Input pattern: "', pattern, '" (length=', itoa(length_array(pattern)), ')'")
+    NAVLog("'[ ParserInit ]: Extracted pattern: "', parser.pattern.value, '" (length=', itoa(length_array(parser.pattern.value)), ')'")
+    #END_IF
+
     if (!length_array(parser.pattern.value)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_REGEX__,
@@ -1078,7 +1196,7 @@ define_function char NAVRegexParserInit(_NAVRegexParser parser, char pattern[]) 
     }
 
     parser.pattern.length = length_array(parser.pattern.value)
-    NAVRegexSetPatternCursor(parser, 'ParserInit', 1)
+    NAVRegexSetPatternCursor(parser, 'ParserInit', 0)
 
     if (!NAVRegexParserParseOptions(parser, pattern)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
@@ -1091,7 +1209,7 @@ define_function char NAVRegexParserInit(_NAVRegexParser parser, char pattern[]) 
 
     parser.input.value = ''
     parser.input.length = 0
-    NAVRegexSetInputCursor(parser, 'ParserInit', 1)
+    NAVRegexSetInputCursor(parser, 'ParserInit', 0)
 
     parser.count = 0
 
@@ -1159,9 +1277,9 @@ define_function NAVRegexParserSetInput(_NAVRegexParser parser, char buffer[]) {
  *****************************************************************************/
 
 define_function NAVRegexSetInputCursor(_NAVRegexParser parser, char caller[], integer cursor) {
-    if (cursor < 1) {
-        cursor = 1
-    }
+    // if (cursor < 1) {
+    //     cursor = 1
+    // }
 
     #IF_DEFINED REGEX_DEBUG
     NAVRegexDebug(parser,
@@ -1174,9 +1292,9 @@ define_function NAVRegexSetInputCursor(_NAVRegexParser parser, char caller[], in
 
 
 define_function NAVRegexSetPatternCursor(_NAVRegexParser parser, char caller[], integer cursor) {
-    if (cursor < 1) {
-        cursor = 1
-    }
+    // if (cursor < 0) {
+    //     cursor =
+    // }
 
     #IF_DEFINED REGEX_DEBUG
     NAVRegexDebug(parser,
@@ -1189,9 +1307,9 @@ define_function NAVRegexSetPatternCursor(_NAVRegexParser parser, char caller[], 
 
 
 define_function NAVRegexSetPatternCharClassCursor(_NAVRegexParser parser, char caller[], integer cursor) {
-    if (cursor < 1) {
-        cursor = 1
-    }
+    // if (cursor < 1) {
+    //     cursor = 1
+    // }
 
     #IF_DEFINED REGEX_DEBUG
     NAVRegexDebug(parser,
