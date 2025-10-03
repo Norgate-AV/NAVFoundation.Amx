@@ -37,9 +37,9 @@ constant char MATCH_TEST[][][50] = {
 define_function TestNAVRegexMatch() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVRegexMatch *****************'")
+    NAVLog("'***************** NAVRegexMatch *****************'")
 
-    for (x = 1; x <= length_array(MATCH_TEST); x++) {
+    for (x = length_array(MATCH_TEST); x <= length_array(MATCH_TEST); x++) {
         stack_var char pattern[255]
         stack_var char text[255]
         stack_var char failed

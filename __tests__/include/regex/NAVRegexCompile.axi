@@ -27,8 +27,12 @@ constant char COMPILE_TEST[][255] = {
     // '/^\d{3}-\d{2}-\d{4}$/',
     '/^"[^"]*"/',
     // '/^([a-zA-Z_]\w*)\s*=\s*([^;#].*)/',
-    '/.*/',    // Match everything, including epsilon (empty string)
-    '/\d?\d?\d\.\d?\d?\d\.\d?\d?\d\.\d?\d?\d/'      // Match an IP address
+    '/.*/',
+    // Should be 27 tokens, not 23! Match everything, including epsilon (empty string)
+    '/\d?\d?\d\.\d?\d?\d\.\d?\d?\d\.\d?\d?\d/',      // Match an IP address (test 20)
+    '/\d?/',   // Simple single question mark (test 21)
+    '/\d?\d?/', // Two question marks in sequence (test 22)
+    '/\d?\d?\d/'  // Three question marks - minimal failing case (test 23)
 }
 
 
@@ -548,149 +552,202 @@ define_function RegexCompileSetupExpected(integer id, _NAVRegexParser parser) {
             // parser.state[2].charclass.value = 0
         }
         case 19: {
+            // /\d?\d?\d\.\d?\d?\d\.\d?\d?\d\.\d?\d?\d/ - IP address pattern with 27 tokens
             parser.pattern.value = '\d?\d?\d\.\d?\d?\d\.\d?\d?\d\.\d?\d?\d'
             parser.pattern.length = 38
             parser.pattern.cursor = 1
 
-            parser.count = 23
+            parser.count = 27
 
+            // First octet: \d?\d?\d (6 tokens)
             parser.state[1].type = REGEX_TYPE_DIGIT
-            // parser.state[1].value = 0
             parser.state[1].charclass.length = 0
             parser.state[1].charclass.cursor = 0
-            // parser.state[1].charclass.value = 0
 
             parser.state[2].type = REGEX_TYPE_QUESTIONMARK
-            // parser.state[2].value = 0
             parser.state[2].charclass.length = 0
             parser.state[2].charclass.cursor = 0
-            // parser.state[2].charclass.value = 0
 
             parser.state[3].type = REGEX_TYPE_DIGIT
-            // parser.state[3].value = 0
             parser.state[3].charclass.length = 0
             parser.state[3].charclass.cursor = 0
-            // parser.state[3].charclass.value = 0
 
             parser.state[4].type = REGEX_TYPE_QUESTIONMARK
-            // parser.state[4].value = 0
             parser.state[4].charclass.length = 0
             parser.state[4].charclass.cursor = 0
-            // parser.state[4].charclass.value = 0
 
             parser.state[5].type = REGEX_TYPE_DIGIT
-            // parser.state[5].value = 0
             parser.state[5].charclass.length = 0
             parser.state[5].charclass.cursor = 0
-            // parser.state[5].charclass.value = 0
 
-            parser.state[6].type = REGEX_TYPE_CHAR
-            parser.state[6].value = '.'
+            parser.state[6].type = REGEX_TYPE_QUESTIONMARK
             parser.state[6].charclass.length = 0
             parser.state[6].charclass.cursor = 0
-            // parser.state[6].charclass.value = 0
 
-            parser.state[7].type = REGEX_TYPE_DIGIT
-            // parser.state[7].value = 0
+            // Dot separator
+            parser.state[7].type = REGEX_TYPE_CHAR
+            parser.state[7].value = '.'
             parser.state[7].charclass.length = 0
             parser.state[7].charclass.cursor = 0
-            // parser.state[7].charclass.value = 0
 
-            parser.state[8].type = REGEX_TYPE_QUESTIONMARK
-            // parser.state[8].value = 0
+            // Second octet: \d?\d?\d (6 tokens)
+            parser.state[8].type = REGEX_TYPE_DIGIT
             parser.state[8].charclass.length = 0
             parser.state[8].charclass.cursor = 0
-            // parser.state[8].charclass.value = 0
 
-            parser.state[9].type = REGEX_TYPE_DIGIT
-            // parser.state[9].value = 0
+            parser.state[9].type = REGEX_TYPE_QUESTIONMARK
             parser.state[9].charclass.length = 0
             parser.state[9].charclass.cursor = 0
-            // parser.state[9].charclass.value = 0
 
-            parser.state[10].type = REGEX_TYPE_QUESTIONMARK
-            // parser.state[10].value = 0
+            parser.state[10].type = REGEX_TYPE_DIGIT
             parser.state[10].charclass.length = 0
             parser.state[10].charclass.cursor = 0
-            // parser.state[10].charclass.value = 0
 
-            parser.state[11].type = REGEX_TYPE_DIGIT
-            // parser.state[11].value = 0
+            parser.state[11].type = REGEX_TYPE_QUESTIONMARK
             parser.state[11].charclass.length = 0
             parser.state[11].charclass.cursor = 0
-            // parser.state[11].charclass.value = 0
 
-            parser.state[12].type = REGEX_TYPE_CHAR
-            parser.state[12].value = '.'
+            parser.state[12].type = REGEX_TYPE_DIGIT
             parser.state[12].charclass.length = 0
             parser.state[12].charclass.cursor = 0
-            // parser.state[12].charclass.value = 0
 
-            parser.state[13].type = REGEX_TYPE_DIGIT
-            // parser.state[13].value = 0
+            parser.state[13].type = REGEX_TYPE_QUESTIONMARK
             parser.state[13].charclass.length = 0
             parser.state[13].charclass.cursor = 0
-            // parser.state[13].charclass.value = 0
 
-            parser.state[14].type = REGEX_TYPE_QUESTIONMARK
-            // parser.state[14].value = 0
+            // Dot separator
+            parser.state[14].type = REGEX_TYPE_CHAR
+            parser.state[14].value = '.'
             parser.state[14].charclass.length = 0
             parser.state[14].charclass.cursor = 0
-            // parser.state[14].charclass.value = 0
 
+            // Third octet: \d?\d?\d (6 tokens)
             parser.state[15].type = REGEX_TYPE_DIGIT
-            // parser.state[15].value = 0
             parser.state[15].charclass.length = 0
             parser.state[15].charclass.cursor = 0
-            // parser.state[15].charclass.value = 0
 
             parser.state[16].type = REGEX_TYPE_QUESTIONMARK
-            // parser.state[16].value = 0
             parser.state[16].charclass.length = 0
             parser.state[16].charclass.cursor = 0
-            // parser.state[16].charclass.value = 0
 
             parser.state[17].type = REGEX_TYPE_DIGIT
-            // parser.state[17].value = 0
             parser.state[17].charclass.length = 0
             parser.state[17].charclass.cursor = 0
-            // parser.state[17].charclass.value = 0
 
-            parser.state[18].type = REGEX_TYPE_CHAR
-            parser.state[18].value = '.'
+            parser.state[18].type = REGEX_TYPE_QUESTIONMARK
             parser.state[18].charclass.length = 0
             parser.state[18].charclass.cursor = 0
-            // parser.state[18].charclass.value = 0
 
             parser.state[19].type = REGEX_TYPE_DIGIT
-            // parser.state[19].value = 0
             parser.state[19].charclass.length = 0
             parser.state[19].charclass.cursor = 0
-            // parser.state[19].charclass.value = 0
 
             parser.state[20].type = REGEX_TYPE_QUESTIONMARK
-            // parser.state[20].value = 0
             parser.state[20].charclass.length = 0
             parser.state[20].charclass.cursor = 0
-            // parser.state[20].charclass.value = 0
 
-            parser.state[21].type = REGEX_TYPE_DIGIT
-            // parser.state[21].value = 0
+            // Dot separator
+            parser.state[21].type = REGEX_TYPE_CHAR
+            parser.state[21].value = '.'
             parser.state[21].charclass.length = 0
             parser.state[21].charclass.cursor = 0
-            // parser.state[21].charclass.value = 0
 
-            parser.state[22].type = REGEX_TYPE_QUESTIONMARK
-            // parser.state[22].value = 0
+            // Fourth octet: \d?\d?\d (6 tokens)
+            parser.state[22].type = REGEX_TYPE_DIGIT
             parser.state[22].charclass.length = 0
             parser.state[22].charclass.cursor = 0
-            // parser.state[22].charclass.value = 0
 
-            parser.state[23].type = REGEX_TYPE_DIGIT
-            // parser.state[23].value = 0
+            parser.state[23].type = REGEX_TYPE_QUESTIONMARK
             parser.state[23].charclass.length = 0
             parser.state[23].charclass.cursor = 0
-            // parser.state[23].charclass.value = 0
+
+            parser.state[24].type = REGEX_TYPE_DIGIT
+            parser.state[24].charclass.length = 0
+            parser.state[24].charclass.cursor = 0
+
+            parser.state[25].type = REGEX_TYPE_QUESTIONMARK
+            parser.state[25].charclass.length = 0
+            parser.state[25].charclass.cursor = 0
+
+            parser.state[26].type = REGEX_TYPE_DIGIT
+            parser.state[26].charclass.length = 0
+            parser.state[26].charclass.cursor = 0
+
+            parser.state[27].type = REGEX_TYPE_QUESTIONMARK
+            parser.state[27].charclass.length = 0
+            parser.state[27].charclass.cursor = 0
+        }
+        case 20: {
+            // /\d?/ - Simple single question mark
+            parser.pattern.value = '\d?'
+            parser.pattern.length = 3
+            parser.pattern.cursor = 1
+
+            parser.count = 2
+
+            parser.state[1].type = REGEX_TYPE_DIGIT
+            parser.state[1].charclass.length = 0
+            parser.state[1].charclass.cursor = 0
+
+            parser.state[2].type = REGEX_TYPE_QUESTIONMARK
+            parser.state[2].charclass.length = 0
+            parser.state[2].charclass.cursor = 0
+        }
+        case 21: {
+            // /\d?\d?/ - Two question marks in sequence
+            parser.pattern.value = '\d?\d?'
+            parser.pattern.length = 6
+            parser.pattern.cursor = 1
+
+            parser.count = 4
+
+            parser.state[1].type = REGEX_TYPE_DIGIT
+            parser.state[1].charclass.length = 0
+            parser.state[1].charclass.cursor = 0
+
+            parser.state[2].type = REGEX_TYPE_QUESTIONMARK
+            parser.state[2].charclass.length = 0
+            parser.state[2].charclass.cursor = 0
+
+            parser.state[3].type = REGEX_TYPE_DIGIT
+            parser.state[3].charclass.length = 0
+            parser.state[3].charclass.cursor = 0
+
+            parser.state[4].type = REGEX_TYPE_QUESTIONMARK
+            parser.state[4].charclass.length = 0
+            parser.state[4].charclass.cursor = 0
+        }
+        case 22: {
+            // /\d?\d?\d/ - Three question marks - minimal failing case
+            parser.pattern.value = '\d?\d?\d'
+            parser.pattern.length = 9
+            parser.pattern.cursor = 1
+
+            parser.count = 6
+
+            parser.state[1].type = REGEX_TYPE_DIGIT
+            parser.state[1].charclass.length = 0
+            parser.state[1].charclass.cursor = 0
+
+            parser.state[2].type = REGEX_TYPE_QUESTIONMARK
+            parser.state[2].charclass.length = 0
+            parser.state[2].charclass.cursor = 0
+
+            parser.state[3].type = REGEX_TYPE_DIGIT
+            parser.state[3].charclass.length = 0
+            parser.state[3].charclass.cursor = 0
+
+            parser.state[4].type = REGEX_TYPE_QUESTIONMARK
+            parser.state[4].charclass.length = 0
+            parser.state[4].charclass.cursor = 0
+
+            parser.state[5].type = REGEX_TYPE_DIGIT
+            parser.state[5].charclass.length = 0
+            parser.state[5].charclass.cursor = 0
+
+            parser.state[6].type = REGEX_TYPE_QUESTIONMARK
+            parser.state[6].charclass.length = 0
+            parser.state[6].charclass.cursor = 0
         }
     }
 }
@@ -720,7 +777,7 @@ define_function TestNAVRegexCompile() {
         }
 
         NAVLogTestPassed(x)
-        NAVRegexPrintState(parser)
+        // NAVRegexPrintState(parser)
     }
 }
 
