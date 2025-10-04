@@ -151,725 +151,132 @@ constant integer REGEX_COMPILE_EXPECTED_TOKENS[][] = {
         REGEX_TYPE_ALPHA,
         REGEX_TYPE_QUESTIONMARK,
         REGEX_TYPE_WHITESPACE
+    },
+    {
+        // Test 8: /\d\w\s+/ -> DIGIT, WORD, WHITESPACE, PLUS
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_ALPHA,
+        REGEX_TYPE_WHITESPACE,
+        REGEX_TYPE_PLUS
+    },
+    {
+        // Test 9: /\d?\w\s*/ -> DIGIT, QUESTIONMARK, WORD, WHITESPACE, STAR
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_ALPHA,
+        REGEX_TYPE_WHITESPACE,
+        REGEX_TYPE_STAR
+    },
+    {
+        // Test 10: /\D+/ -> NOT_DIGIT, PLUS
+        REGEX_TYPE_NOT_DIGIT,
+        REGEX_TYPE_PLUS
+    },
+    {
+        // Test 11: /\D*/ -> NOT_DIGIT, STAR
+        REGEX_TYPE_NOT_DIGIT,
+        REGEX_TYPE_STAR
+    },
+    {
+        // Test 12: /\D\s/ -> NOT_DIGIT, WHITESPACE
+        REGEX_TYPE_NOT_DIGIT,
+        REGEX_TYPE_WHITESPACE
+    },
+    {
+        // Test 13: /\W+/ -> NOT_WORD, PLUS
+        REGEX_TYPE_NOT_ALPHA,
+        REGEX_TYPE_PLUS
+    },
+    {
+        // Test 14: /\S*/ -> NOT_WHITESPACE, STAR
+        REGEX_TYPE_NOT_WHITESPACE,
+        REGEX_TYPE_STAR
+    },
+    {
+        // Test 15: /^[a-zA-Z0-9_]+$/ -> BEGIN, CHAR_CLASS, PLUS, END
+        REGEX_TYPE_BEGIN,
+        REGEX_TYPE_CHAR_CLASS,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_END
+    },
+    {
+        // Test 16: /^[Hh]ello,\s[Ww]orld!$/ -> BEGIN, CHAR_CLASS, 'e', 'l', 'l', 'o', ',', WHITESPACE, CHAR_CLASS, 'o', 'r', 'l', 'd', '!', END
+        REGEX_TYPE_BEGIN,
+        REGEX_TYPE_CHAR_CLASS,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_WHITESPACE,
+        REGEX_TYPE_CHAR_CLASS,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_END
+    },
+    {
+        // Test 17: /^"[^"]*"/ -> BEGIN, CHAR, INV_CHAR_CLASS, STAR, CHAR
+        REGEX_TYPE_BEGIN,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_INV_CHAR_CLASS,
+        REGEX_TYPE_STAR,
+        REGEX_TYPE_CHAR
+    },
+    {
+        // Test 18: /.*/ -> DOT, STAR
+        REGEX_TYPE_DOT,
+        REGEX_TYPE_STAR
+    },
+    {
+        // Test 19: /\d?\d?\d\.\d?\d?\d\.\d?\d?\d\.\d?\d?\d/ -> 23 tokens
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_DOT,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_DOT,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_DOT,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_DIGIT
+    },
+    {
+        // Test 20: /\d?/ -> DIGIT, QUESTIONMARK
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK
+    },
+    {
+        // Test 21: /\d?\d?/ -> DIGIT, QUESTIONMARK, DIGIT, QUESTIONMARK
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK
+    },
+    {
+        // Test 22: /\d?\d?\d/ -> DIGIT, QUESTIONMARK, DIGIT, QUESTIONMARK, DIGIT
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_DIGIT
     }
 }
-
-
-// define_function RegexCompileSetupExpected(integer id, _NAVRegexParser parser) {
-//     switch (id) {
-//         case 1: {
-//             parser.pattern.value = '\d+'
-//             parser.pattern.length = 3
-//             parser.pattern.cursor = 1
-
-//             parser.count = 2
-
-//             parser.state[1].type = REGEX_TYPE_DIGIT
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_PLUS
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-//         }
-//         case 2: {
-//             parser.pattern.value = '\w+'
-//             parser.pattern.length = 3
-//             parser.pattern.cursor = 1
-
-//             parser.count = 2
-
-//             parser.state[1].type = REGEX_TYPE_ALPHA
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_PLUS
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-//         }
-//         case 3: {
-//             parser.pattern.value = '\w*'
-//             parser.pattern.length = 3
-//             parser.pattern.cursor = 1
-
-//             parser.count = 2
-
-//             parser.state[1].type = REGEX_TYPE_ALPHA
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_STAR
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-//         }
-//         case 4: {
-//             parser.pattern.value = '\s'
-//             parser.pattern.length = 2
-//             parser.pattern.cursor = 1
-
-//             parser.count = 1
-
-//             parser.state[1].type = REGEX_TYPE_WHITESPACE
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-//         }
-//         case 5: {
-//             parser.pattern.value = '\s+'
-//             parser.pattern.length = 3
-//             parser.pattern.cursor = 1
-
-//             parser.count = 2
-
-//             parser.state[1].type = REGEX_TYPE_WHITESPACE
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_PLUS
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-//         }
-//         case 6: {
-//             parser.pattern.value = '\s*'
-//             parser.pattern.length = 3
-//             parser.pattern.cursor = 1
-
-//             parser.count = 2
-
-//             parser.state[1].type = REGEX_TYPE_WHITESPACE
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_STAR
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-//         }
-//         case 7: {
-//             parser.pattern.value = '\d\w?\s'
-//             parser.pattern.length = 7
-//             parser.pattern.cursor = 1
-
-//             parser.count = 4
-
-//             parser.state[1].type = REGEX_TYPE_DIGIT
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_ALPHA
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-
-//             parser.state[3].type = REGEX_TYPE_QUESTIONMARK
-//             // parser.state[3].value = 0
-//             parser.state[3].charclass.length = 0
-//             parser.state[3].charclass.cursor = 0
-//             // parser.state[3].charclass.value = 0
-
-//             parser.state[4].type = REGEX_TYPE_WHITESPACE
-//             // parser.state[4].value = 0
-//             parser.state[4].charclass.length = 0
-//             parser.state[4].charclass.cursor = 0
-//             // parser.state[4].charclass.value = 0
-//         }
-//         case 8: {
-//             parser.pattern.value = '\d\w\s+'
-//             parser.pattern.length = 7
-//             parser.pattern.cursor = 1
-
-//             parser.count = 4
-
-//             parser.state[1].type = REGEX_TYPE_DIGIT
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_ALPHA
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-
-//             parser.state[3].type = REGEX_TYPE_WHITESPACE
-//             // parser.state[3].value = 0
-//             parser.state[3].charclass.length = 0
-//             parser.state[3].charclass.cursor = 0
-//             // parser.state[3].charclass.value = 0
-
-//             parser.state[4].type = REGEX_TYPE_PLUS
-//             // parser.state[4].value = 0
-//             parser.state[4].charclass.length = 0
-//             parser.state[4].charclass.cursor = 0
-//             // parser.state[4].charclass.value = 0
-//         }
-//         case 9: {
-//             parser.pattern.value = '\d?\w\s*'
-//             parser.pattern.length = 8
-//             parser.pattern.cursor = 1
-
-//             parser.count = 5
-
-//             parser.state[1].type = REGEX_TYPE_DIGIT
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_QUESTIONMARK
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-
-//             parser.state[3].type = REGEX_TYPE_ALPHA
-//             // parser.state[3].value = 0
-//             parser.state[3].charclass.length = 0
-//             parser.state[3].charclass.cursor = 0
-//             // parser.state[3].charclass.value = 0
-
-//             parser.state[4].type = REGEX_TYPE_WHITESPACE
-//             // parser.state[4].value = 0
-//             parser.state[4].charclass.length = 0
-//             parser.state[4].charclass.cursor = 0
-//             // parser.state[4].charclass.value = 0
-
-//             parser.state[5].type = REGEX_TYPE_STAR
-//             // parser.state[5].value = 0
-//             parser.state[5].charclass.length = 0
-//             parser.state[5].charclass.cursor = 0
-//             // parser.state[5].charclass.value = 0
-//         }
-//         case 10: {
-//             parser.pattern.value = '\D+'
-//             parser.pattern.length = 3
-//             parser.pattern.cursor = 1
-
-//             parser.count = 2
-
-//             parser.state[1].type = REGEX_TYPE_NOT_DIGIT
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_PLUS
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-//         }
-//         case 11: {
-//             parser.pattern.value = '\D*'
-//             parser.pattern.length = 3
-//             parser.pattern.cursor = 1
-
-//             parser.count = 2
-
-//             parser.state[1].type = REGEX_TYPE_NOT_DIGIT
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_STAR
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-//         }
-//         case 12: {
-//             parser.pattern.value = '\D\s'
-//             parser.pattern.length = 4
-//             parser.pattern.cursor = 1
-
-//             parser.count = 2
-
-//             parser.state[1].type = REGEX_TYPE_NOT_DIGIT
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_WHITESPACE
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-//         }
-//         case 13: {
-//             parser.pattern.value = '\W+'
-//             parser.pattern.length = 3
-//             parser.pattern.cursor = 1
-
-//             parser.count = 2
-
-//             parser.state[1].type = REGEX_TYPE_NOT_ALPHA
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_PLUS
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-//         }
-//         case 14: {
-//             parser.pattern.value = '\S*'
-//             parser.pattern.length = 3
-//             parser.pattern.cursor = 1
-
-//             parser.count = 2
-
-//             parser.state[1].type = REGEX_TYPE_NOT_WHITESPACE
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_STAR
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-//         }
-//         case 15: {
-//             parser.pattern.value = '^[a-zA-Z0-9_]+$'
-//             parser.pattern.length = 15
-//             parser.pattern.cursor = 1
-
-//             parser.count = 4
-
-//             parser.state[1].type = REGEX_TYPE_BEGIN
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_CHAR_CLASS
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 10
-//             parser.state[2].charclass.cursor = 0
-//             parser.state[2].charclass.value = 'a-zA-Z0-9_'
-
-//             parser.state[3].type = REGEX_TYPE_PLUS
-//             // parser.state[3].value = 0
-//             parser.state[3].charclass.length = 0
-//             parser.state[3].charclass.cursor = 0
-//             // parser.state[3].charclass.value = 0
-
-//             parser.state[4].type = REGEX_TYPE_END
-//             // parser.state[4].value = 0
-//             parser.state[4].charclass.length = 0
-//             parser.state[4].charclass.cursor = 0
-//             // parser.state[4].charclass.value = 0
-//         }
-//         case 16: {
-//             parser.pattern.value = '^[Hh]ello,\s[Ww]orld!$'
-//             parser.pattern.length = 22
-//             parser.pattern.cursor = 1
-
-//             parser.count = 15
-
-//             parser.state[1].type = REGEX_TYPE_BEGIN
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_CHAR_CLASS
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 2
-//             parser.state[2].charclass.cursor = 0
-//             parser.state[2].charclass.value = 'Hh'
-
-//             parser.state[3].type = REGEX_TYPE_CHAR
-//             parser.state[3].value = 'e'
-//             parser.state[3].charclass.length = 0
-//             parser.state[3].charclass.cursor = 0
-//             // parser.state[3].charclass.value = 0
-
-//             parser.state[4].type = REGEX_TYPE_CHAR
-//             parser.state[4].value = 'l'
-//             parser.state[4].charclass.length = 0
-//             parser.state[4].charclass.cursor = 0
-//             // parser.state[4].charclass.value = 0
-
-//             parser.state[5].type = REGEX_TYPE_CHAR
-//             parser.state[5].value = 'l'
-//             parser.state[5].charclass.length = 0
-//             parser.state[5].charclass.cursor = 0
-//             // parser.state[5].charclass.value = 0
-
-//             parser.state[6].type = REGEX_TYPE_CHAR
-//             parser.state[6].value = 'o'
-//             parser.state[6].charclass.length = 0
-//             parser.state[6].charclass.cursor = 0
-//             // parser.state[6].charclass.value = 0
-
-//             parser.state[7].type = REGEX_TYPE_CHAR
-//             parser.state[7].value = ','
-//             parser.state[7].charclass.length = 0
-//             parser.state[7].charclass.cursor = 0
-//             // parser.state[7].charclass.value = 0
-
-//             parser.state[8].type = REGEX_TYPE_WHITESPACE
-//             // parser.state[8].value = 0
-//             parser.state[8].charclass.length = 0
-//             parser.state[8].charclass.cursor = 0
-//             // parser.state[8].charclass.value = 0
-
-//             parser.state[9].type = REGEX_TYPE_CHAR_CLASS
-//             // parser.state[9].value = 0
-//             parser.state[9].charclass.length = 2
-//             parser.state[9].charclass.cursor = 0
-//             parser.state[9].charclass.value = 'Ww'
-
-//             parser.state[10].type = REGEX_TYPE_CHAR
-//             parser.state[10].value = 'o'
-//             parser.state[10].charclass.length = 0
-//             parser.state[10].charclass.cursor = 0
-//             // parser.state[10].charclass.value = 0
-
-//             parser.state[11].type = REGEX_TYPE_CHAR
-//             parser.state[11].value = 'r'
-//             parser.state[11].charclass.length = 0
-//             parser.state[11].charclass.cursor = 0
-//             // parser.state[11].charclass.value = 0
-
-//             parser.state[12].type = REGEX_TYPE_CHAR
-//             parser.state[12].value = 'l'
-//             parser.state[12].charclass.length = 0
-//             parser.state[12].charclass.cursor = 0
-//             // parser.state[12].charclass.value = 0
-
-//             parser.state[13].type = REGEX_TYPE_CHAR
-//             parser.state[13].value = 'd'
-//             parser.state[13].charclass.length = 0
-//             parser.state[13].charclass.cursor = 0
-//             // parser.state[13].charclass.value = 0
-
-//             parser.state[14].type = REGEX_TYPE_CHAR
-//             parser.state[14].value = '!'
-//             parser.state[14].charclass.length = 0
-//             parser.state[14].charclass.cursor = 0
-//             // parser.state[14].charclass.value = 0
-
-//             parser.state[15].type = REGEX_TYPE_END
-//             // parser.state[15].value = 0
-//             parser.state[15].charclass.length = 0
-//             parser.state[15].charclass.cursor = 0
-//             // parser.state[15].charclass.value = 0
-//         }
-//         case 17: {
-//             parser.pattern.value = '^"[^"]*"'
-//             parser.pattern.length = 8
-//             parser.pattern.cursor = 1
-
-//             parser.count = 5
-
-//             parser.state[1].type = REGEX_TYPE_BEGIN
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_CHAR
-//             parser.state[2].value = '"'
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-
-//             parser.state[3].type = REGEX_TYPE_INV_CHAR_CLASS
-//             // parser.state[3].value = 0
-//             parser.state[3].charclass.length = 1
-//             parser.state[3].charclass.cursor = 0
-//             parser.state[3].charclass.value = '"'
-
-//             parser.state[4].type = REGEX_TYPE_STAR
-//             // parser.state[4].value = 0
-//             parser.state[4].charclass.length = 0
-//             parser.state[4].charclass.cursor = 0
-//             // parser.state[4].charclass.value = 0
-
-//             parser.state[5].type = REGEX_TYPE_CHAR
-//             parser.state[5].value = '"'
-//             parser.state[5].charclass.length = 0
-//             parser.state[5].charclass.cursor = 0
-//             // parser.state[5].charclass.value = 0
-//         }
-//         // case 18: {
-//         //     parser.pattern.value = '^([a-zA-Z_]\w*)\s*=\s*([^;#].*)'
-//         //     parser.pattern.length = 31
-//         //     parser.pattern.cursor = 1
-
-//         //     parser.count = 17
-
-//         //     parser.state[1].type = REGEX_TYPE_BEGIN
-//         //     // parser.state[1].value = 0
-//         //     parser.state[1].charclass.length = 0
-//         //     parser.state[1].charclass.cursor = 0
-//         //     // parser.state[1].charclass.value = 0
-
-//         //     parser.state[2].type = REGEX_TYPE_GROUP
-//         //     // parser.state[2].value = 0
-//         //     parser.state[2].charclass.length = 0
-//         //     parser.state[2].charclass.cursor = 0
-//         //     // parser.state[2].charclass.value = 0
-
-//         //     parser.state[2].type = REGEX_TYPE_CHAR_CLASS
-//         //     // parser.state[2].value = 0
-//         //     parser.state[2].charclass.length = 7
-//         //     parser.state[2].charclass.cursor = 0
-//         //     parser.state[2].charclass.value = 'a-zA-Z_'
-
-//         //     parser.state[3].type = REGEX_TYPE_CHAR_CLASS
-//         // }
-//         case 18: {
-//             parser.pattern.value = '.*'
-//             parser.pattern.length = 2
-//             parser.pattern.cursor = 1
-
-//             parser.count = 2
-
-//             parser.state[1].type = REGEX_TYPE_DOT
-//             // parser.state[1].value = 0
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-//             // parser.state[1].charclass.value = 0
-
-//             parser.state[2].type = REGEX_TYPE_STAR
-//             // parser.state[2].value = 0
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//             // parser.state[2].charclass.value = 0
-//         }
-//         case 19: {
-//             // /\d?\d?\d\.\d?\d?\d\.\d?\d?\d\.\d?\d?\d/ - IP address pattern with 27 tokens
-//             parser.pattern.value = '\d?\d?\d\.\d?\d?\d\.\d?\d?\d\.\d?\d?\d'
-//             parser.pattern.length = 38
-//             parser.pattern.cursor = 1
-
-//             parser.count = 27
-
-//             // First octet: \d?\d?\d (6 tokens)
-//             parser.state[1].type = REGEX_TYPE_DIGIT
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-
-//             parser.state[2].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-
-//             parser.state[3].type = REGEX_TYPE_DIGIT
-//             parser.state[3].charclass.length = 0
-//             parser.state[3].charclass.cursor = 0
-
-//             parser.state[4].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[4].charclass.length = 0
-//             parser.state[4].charclass.cursor = 0
-
-//             parser.state[5].type = REGEX_TYPE_DIGIT
-//             parser.state[5].charclass.length = 0
-//             parser.state[5].charclass.cursor = 0
-
-//             parser.state[6].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[6].charclass.length = 0
-//             parser.state[6].charclass.cursor = 0
-
-//             // Dot separator
-//             parser.state[7].type = REGEX_TYPE_CHAR
-//             parser.state[7].value = '.'
-//             parser.state[7].charclass.length = 0
-//             parser.state[7].charclass.cursor = 0
-
-//             // Second octet: \d?\d?\d (6 tokens)
-//             parser.state[8].type = REGEX_TYPE_DIGIT
-//             parser.state[8].charclass.length = 0
-//             parser.state[8].charclass.cursor = 0
-
-//             parser.state[9].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[9].charclass.length = 0
-//             parser.state[9].charclass.cursor = 0
-
-//             parser.state[10].type = REGEX_TYPE_DIGIT
-//             parser.state[10].charclass.length = 0
-//             parser.state[10].charclass.cursor = 0
-
-//             parser.state[11].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[11].charclass.length = 0
-//             parser.state[11].charclass.cursor = 0
-
-//             parser.state[12].type = REGEX_TYPE_DIGIT
-//             parser.state[12].charclass.length = 0
-//             parser.state[12].charclass.cursor = 0
-
-//             parser.state[13].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[13].charclass.length = 0
-//             parser.state[13].charclass.cursor = 0
-
-//             // Dot separator
-//             parser.state[14].type = REGEX_TYPE_CHAR
-//             parser.state[14].value = '.'
-//             parser.state[14].charclass.length = 0
-//             parser.state[14].charclass.cursor = 0
-
-//             // Third octet: \d?\d?\d (6 tokens)
-//             parser.state[15].type = REGEX_TYPE_DIGIT
-//             parser.state[15].charclass.length = 0
-//             parser.state[15].charclass.cursor = 0
-
-//             parser.state[16].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[16].charclass.length = 0
-//             parser.state[16].charclass.cursor = 0
-
-//             parser.state[17].type = REGEX_TYPE_DIGIT
-//             parser.state[17].charclass.length = 0
-//             parser.state[17].charclass.cursor = 0
-
-//             parser.state[18].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[18].charclass.length = 0
-//             parser.state[18].charclass.cursor = 0
-
-//             parser.state[19].type = REGEX_TYPE_DIGIT
-//             parser.state[19].charclass.length = 0
-//             parser.state[19].charclass.cursor = 0
-
-//             parser.state[20].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[20].charclass.length = 0
-//             parser.state[20].charclass.cursor = 0
-
-//             // Dot separator
-//             parser.state[21].type = REGEX_TYPE_CHAR
-//             parser.state[21].value = '.'
-//             parser.state[21].charclass.length = 0
-//             parser.state[21].charclass.cursor = 0
-
-//             // Fourth octet: \d?\d?\d (6 tokens)
-//             parser.state[22].type = REGEX_TYPE_DIGIT
-//             parser.state[22].charclass.length = 0
-//             parser.state[22].charclass.cursor = 0
-
-//             parser.state[23].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[23].charclass.length = 0
-//             parser.state[23].charclass.cursor = 0
-
-//             parser.state[24].type = REGEX_TYPE_DIGIT
-//             parser.state[24].charclass.length = 0
-//             parser.state[24].charclass.cursor = 0
-
-//             parser.state[25].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[25].charclass.length = 0
-//             parser.state[25].charclass.cursor = 0
-
-//             parser.state[26].type = REGEX_TYPE_DIGIT
-//             parser.state[26].charclass.length = 0
-//             parser.state[26].charclass.cursor = 0
-
-//             parser.state[27].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[27].charclass.length = 0
-//             parser.state[27].charclass.cursor = 0
-//         }
-//         case 20: {
-//             // /\d?/ - Simple single question mark
-//             parser.pattern.value = '\d?'
-//             parser.pattern.length = 3
-//             parser.pattern.cursor = 1
-
-//             parser.count = 2
-
-//             parser.state[1].type = REGEX_TYPE_DIGIT
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-
-//             parser.state[2].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-//         }
-//         case 21: {
-//             // /\d?\d?/ - Two question marks in sequence
-//             parser.pattern.value = '\d?\d?'
-//             parser.pattern.length = 6
-//             parser.pattern.cursor = 1
-
-//             parser.count = 4
-
-//             parser.state[1].type = REGEX_TYPE_DIGIT
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-
-//             parser.state[2].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-
-//             parser.state[3].type = REGEX_TYPE_DIGIT
-//             parser.state[3].charclass.length = 0
-//             parser.state[3].charclass.cursor = 0
-
-//             parser.state[4].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[4].charclass.length = 0
-//             parser.state[4].charclass.cursor = 0
-//         }
-//         case 22: {
-//             // /\d?\d?\d/ - Three question marks - minimal failing case
-//             parser.pattern.value = '\d?\d?\d'
-//             parser.pattern.length = 9
-//             parser.pattern.cursor = 1
-
-//             parser.count = 6
-
-//             parser.state[1].type = REGEX_TYPE_DIGIT
-//             parser.state[1].charclass.length = 0
-//             parser.state[1].charclass.cursor = 0
-
-//             parser.state[2].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[2].charclass.length = 0
-//             parser.state[2].charclass.cursor = 0
-
-//             parser.state[3].type = REGEX_TYPE_DIGIT
-//             parser.state[3].charclass.length = 0
-//             parser.state[3].charclass.cursor = 0
-
-//             parser.state[4].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[4].charclass.length = 0
-//             parser.state[4].charclass.cursor = 0
-
-//             parser.state[5].type = REGEX_TYPE_DIGIT
-//             parser.state[5].charclass.length = 0
-//             parser.state[5].charclass.cursor = 0
-
-//             parser.state[6].type = REGEX_TYPE_QUESTIONMARK
-//             parser.state[6].charclass.length = 0
-//             parser.state[6].charclass.cursor = 0
-//         }
-//     }
-// }
 
 
 define_function TestNAVRegexCompile() {
@@ -917,35 +324,6 @@ define_function TestNAVRegexCompile() {
         NAVLogTestPassed(x)
     }
 }
-
-// Alternative: Detailed test function using full parser state (kept for backward compatibility)
-// define_function TestNAVRegexCompileDetailed() {
-//     stack_var integer x
-
-//     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'***************** NAVRegexCompile (Detailed) *****************'")
-
-//     for (x = 1; x <= length_array(REGEX_COMPILE_PATTERN_TEST); x++) {
-//         stack_var _NAVRegexParser parser
-//         stack_var _NAVRegexParser expected
-
-//         // RegexCompileSetupExpected(x, expected)
-
-//         if (!NAVRegexCompile(REGEX_COMPILE_PATTERN_TEST[x], parser)) {
-//             NAVLog("'Test ', itoa(x), ' failed'")
-//             NAVLog("'Failed to compile pattern: "', REGEX_COMPILE_PATTERN_TEST[x], '"'")
-//             continue
-//         }
-
-//         if (!AssertRegexParserDeepEqual(parser, expected)) {
-//             NAVLog("'Test ', itoa(x), ' failed'")
-//             NAVLog("'The compiled parser did not deep match the expected parser'")
-//             continue
-//         }
-
-//         NAVLogTestPassed(x)
-//         // NAVRegexPrintState(parser)
-//     }
-// }
 
 
 // Simpler assertion: just check token count and token type sequence
