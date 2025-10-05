@@ -38,7 +38,35 @@ constant char REGEX_MATCH_COMPLEX_TEST[][][255] = {
     // Edge cases with positioning
     { '/\d+/', 'abc123def', '3', '4', '7', '123', 'false' },  // Not at start
     { '/\w+/', '  test', '4', '3', '7', 'test', 'false' },  // After whitespace
-    { '/[a-z]+/', '123abc', '3', '4', '7', 'abc', 'false' }  // After digits
+    { '/[a-z]+/', '123abc', '3', '4', '7', 'abc', 'false' },  // After digits
+
+    // Literal text matching
+    { '/test/', 'test', '4', '1', '5', 'test', 'false' },
+    { '/hello/', 'hello world', '5', '1', '6', 'hello', 'false' },
+    { '/123/', 'abc123def', '3', '4', '7', '123', 'false' },
+
+    // Metacharacter combinations
+    { '/\d\w\d/', '1a2', '3', '1', '4', '1a2', 'false' },
+    { '/\w\d\w/', 'a1b', '3', '1', '4', 'a1b', 'false' },
+    { '/\s\w\s/', ' x ', '3', '1', '4', ' x ', 'false' },
+
+    // Dot wildcard patterns
+    { '/./', 'x', '1', '1', '2', 'x', 'false' },
+    { '/.../', 'abc', '3', '1', '4', 'abc', 'false' },
+    { '/.\d./', 'a1b', '3', '1', '4', 'a1b', 'false' },
+    { '/.+\.txt/', 'file.txt', '8', '1', '9', 'file.txt', 'false' },
+
+    // Path-like patterns
+    { '/\w+\/\w+/', 'path/file', '9', '1', '10', 'path/file', 'false' },
+    { '/[a-z]+\.[a-z]+/', 'file.txt', '8', '1', '9', 'file.txt', 'false' },
+
+    // URL-like patterns
+    { '/http:\/\//', 'http://', '7', '1', '8', 'http://', 'false' },
+    { '/\w+:\/\/\w+/', 'http://test', '11', '1', '12', 'http://test', 'false' },
+
+    // Version numbers
+    { '/\d+\.\d+/', '1.0', '3', '1', '4', '1.0', 'false' },
+    { '/\d+\.\d+\.\d+/', '1.2.3', '5', '1', '6', '1.2.3', 'false' }
 }
 
 constant char REGEX_MATCH_COMPLEX_EXPECTED_RESULT[] = {
@@ -60,7 +88,23 @@ constant char REGEX_MATCH_COMPLEX_EXPECTED_RESULT[] = {
     true,  // 16
     true,  // 17
     true,  // 18
-    true   // 19
+    true,  // 19
+    true,  // 20 - Literal text
+    true,  // 21 - Literal text
+    true,  // 22 - Literal text
+    true,  // 23 - Metacharacter combos
+    true,  // 24 - Metacharacter combos
+    true,  // 25 - Metacharacter combos
+    true,  // 26 - Dot wildcard
+    true,  // 27 - Dot wildcard
+    true,  // 28 - Dot wildcard
+    true,  // 29 - Dot wildcard
+    true,  // 30 - Path patterns
+    true,  // 31 - Path patterns
+    true,  // 32 - URL patterns
+    true,  // 33 - URL patterns
+    true,  // 34 - Version numbers
+    true   // 35 - Version numbers
 }
 
 define_function TestNAVRegexMatchComplex() {

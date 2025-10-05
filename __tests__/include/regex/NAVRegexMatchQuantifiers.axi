@@ -35,7 +35,25 @@ constant char REGEX_MATCH_QUANTIFIERS_TEST[][][255] = {
     { '/\d?\w\s*/', 'a ', '2', '1', '3', 'a ', 'false' },
     { '/\s/', ' ', '1', '1', '2', ' ', 'false' },
     { '/\s+/', ' ', '1', '1', '2', ' ', 'false' },
-    { '/\D\s/', 'abc ', '2', '3', '5', 'c ', 'false' }
+    { '/\D\s/', 'abc ', '2', '3', '5', 'c ', 'false' },
+
+    // Greedy vs minimal matching (greedy by default)
+    { '/\d+\d/', '12345', '5', '1', '6', '12345', 'false' },  // Greedy: \d+ takes 4, last \d takes 1
+    { '/\w+\w/', 'test', '4', '1', '5', 'test', 'false' },  // Greedy: \w+ takes 3, last \w takes 1
+
+    // Multiple consecutive quantifiers
+    { '/\d+\s*\w+/', '123 abc', '7', '1', '8', '123 abc', 'false' },
+    { '/\w*\d+/', 'abc123', '6', '1', '7', 'abc123', 'false' },
+    { '/\s*\w+\s*/', '  test  ', '8', '1', '9', '  test  ', 'false' },
+
+    // Quantifiers with dot
+    { '/.+/', 'anything', '8', '1', '9', 'anything', 'false' },
+    { '/.*/', 'test', '4', '1', '5', 'test', 'false' },
+    { '/.?/', 'x', '1', '1', '2', 'x', 'false' },
+
+    // Zero-length matches with *
+    { '/\d*/', 'abc', '0', '1', '1', '', 'false' },  // \d* matches zero digits
+    { '/\w*/', '', '0', '1', '1', '', 'false' }  // \w* matches epsilon
 }
 
 constant char REGEX_MATCH_QUANTIFIERS_EXPECTED_RESULT[] = {
@@ -56,7 +74,17 @@ constant char REGEX_MATCH_QUANTIFIERS_EXPECTED_RESULT[] = {
     true,  // 15
     true,  // 16
     true,  // 17
-    true   // 18
+    true,  // 18
+    true,  // 19 - Greedy quantifier test
+    true,  // 20 - Greedy quantifier test
+    true,  // 21 - Multiple consecutive quantifiers
+    true,  // 22 - Multiple consecutive quantifiers
+    true,  // 23 - Multiple consecutive quantifiers
+    true,  // 24 - Quantifiers with dot
+    true,  // 25 - Quantifiers with dot
+    true,  // 26 - Quantifiers with dot
+    true,  // 27 - Zero-length match
+    true   // 28 - Zero-length match
 }
 
 define_function TestNAVRegexMatchQuantifiers() {

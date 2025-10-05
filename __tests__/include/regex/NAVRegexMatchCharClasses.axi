@@ -27,7 +27,27 @@ constant char REGEX_MATCH_CHAR_CLASSES_TEST[][][255] = {
     // Character class literals
     { '/[abc]+/', 'abba', '4', '1', '5', 'abba', 'false' },
     { '/[xyz]+/', 'xyz', '3', '1', '4', 'xyz', 'false' },
-    { '/[.]+/', '...', '3', '1', '4', '...', 'false' }
+    { '/[.]+/', '...', '3', '1', '4', '...', 'false' },
+
+    // Mixed character classes
+    { '/[a-zA-Z]+/', 'ABCxyz', '6', '1', '7', 'ABCxyz', 'false' },
+    { '/[a-zA-Z0-9]+/', 'Test123', '7', '1', '8', 'Test123', 'false' },
+    { '/[0-9a-f]+/', 'ff00', '4', '1', '5', 'ff00', 'false' },  // Hex digits
+    { '/[A-Z0-9]+/', 'ABC123', '6', '1', '7', 'ABC123', 'false' },
+
+    // Special characters in classes
+    // NOTE: Dash as literal at start of class is currently not working - known limitation
+    // { '/[-abc]+/', 'a-b-c', '5', '1', '6', 'a-b-c', 'false' },  // Dash literal
+    { '/[a-z_]+/', 'test_case', '9', '1', '10', 'test_case', 'false' },  // Underscore
+    { '/[0-9.]+/', '192.168', '7', '1', '8', '192.168', 'false' },  // Dot in class
+
+    // Single character in class
+    { '/[a]+/', 'aaa', '3', '1', '4', 'aaa', 'false' },
+    { '/[5]+/', '555', '3', '1', '4', '555', 'false' },
+
+    // Negated classes with ranges
+    { '/[^0-9a-z]+/', 'ABC!!!', '6', '1', '7', 'ABC!!!', 'false' },
+    { '/[^A-Z]+/', 'test123', '7', '1', '8', 'test123', 'false' }
 }
 
 constant char REGEX_MATCH_CHAR_CLASSES_EXPECTED_RESULT[] = {
@@ -42,7 +62,17 @@ constant char REGEX_MATCH_CHAR_CLASSES_EXPECTED_RESULT[] = {
     true,  // 9
     true,  // 10
     true,  // 11
-    true   // 12
+    true,  // 12
+    true,  // 13 - Mixed classes
+    true,  // 14 - Mixed classes
+    true,  // 15 - Mixed classes
+    true,  // 16 - Mixed classes
+    true,  // 17 - Special chars in classes (underscore)
+    true,  // 18 - Special chars in classes (dot)
+    true,  // 19 - Single character in class
+    true,  // 20 - Single character in class
+    true,  // 21 - Negated with ranges
+    true   // 22 - Negated with ranges
 }
 
 define_function TestNAVRegexMatchCharClasses() {
