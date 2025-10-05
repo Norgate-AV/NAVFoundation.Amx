@@ -162,6 +162,118 @@ define_function char NAVRegexParserParseOptions(_NAVRegexParser parser, char pat
 }
 
 
+define_function char NAVRegexCompileBoundedQuantifier(_NAVRegexParser parser) {
+    stack_var char buffer[20]
+    stack_var integer length
+    stack_var integer commaPos
+    stack_var char minStr[10]
+    stack_var char maxStr[10]
+    stack_var sinteger minVal
+    stack_var sinteger maxVal
+
+    // Start after the opening '{'
+    if (!NAVRegexPatternAdvanceCursor(parser)) {
+        return false
+    }
+
+    // Collect digits and comma until we hit '}'
+    length = 0
+    while (parser.pattern.cursor <= parser.pattern.length) {
+        stack_var char c
+
+        c = NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)
+
+        if (c == '}') {
+            break
+        }
+
+        if ((c >= '0' && c <= '9') || c == ',' || c == ' ') {
+            if (c != ' ') {  // Skip spaces
+                length++
+                buffer = "buffer, c"
+            }
+
+            if (!NAVRegexPatternAdvanceCursor(parser)) {
+                return false
+            }
+        }
+        else {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_REGEX__,
+                                        'NAVRegexCompileBoundedQuantifier',
+                                        "'Invalid character in bounded quantifier: ', c")
+            return false
+        }
+    }
+
+    if (NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor) != '}') {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompileBoundedQuantifier',
+                                    "'Missing closing brace in bounded quantifier'")
+        return false
+    }
+
+    if (length == 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompileBoundedQuantifier',
+                                    "'Empty bounded quantifier'")
+        return false
+    }
+
+    // Parse the quantifier: {n}, {n,}, or {n,m}
+    commaPos = NAVIndexOf(buffer, ',', 1)
+
+    if (commaPos == 0) {
+        // No comma, just {n}
+        minVal = atoi(buffer)
+        maxVal = minVal
+    }
+    else if (commaPos == length) {
+        // Ends with comma: {n,} means n or more (unlimited)
+        minStr = left_string(buffer, commaPos - 1)
+        minVal = atoi(minStr)
+        maxVal = -1  // -1 means unlimited
+    }
+    else {
+        // Has comma in middle: {n,m}
+        minStr = left_string(buffer, commaPos - 1)
+        maxStr = right_string(buffer, length - commaPos)
+        minVal = atoi(minStr)
+        maxVal = atoi(maxStr)
+
+        if (maxVal < minVal) {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_REGEX__,
+                                        'NAVRegexCompileBoundedQuantifier',
+                                        "'Maximum must be >= minimum in bounded quantifier'")
+            return false
+        }
+    }
+
+    if (minVal < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompileBoundedQuantifier',
+                                    "'Minimum must be >= 0 in bounded quantifier'")
+        return false
+    }
+
+    // Add the quantifier token
+    parser.count++
+    parser.state[parser.count].type = REGEX_TYPE_QUANTIFIER
+    parser.state[parser.count].quantifierMin = minVal
+    parser.state[parser.count].quantifierMax = maxVal
+
+    #IF_DEFINED REGEX_COMPILE_DEBUG
+    NAVLog("'[ Compile ]: Bounded quantifier {', itoa(minVal), ',', itoa(maxVal), '}'")
+    #END_IF
+
+    return true
+}
+
+
 define_function char NAVRegexCompileCharacterClass(_NAVRegexParser parser) {
     stack_var char charclass[MAX_CHAR_CLASS_LENGTH]
     stack_var integer length
@@ -437,12 +549,9 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
             }
 
             case '{': {
-                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                            __NAV_FOUNDATION_REGEX__,
-                                            'NAVRegexCompile',
-                                            "'Don`t support specific quantifiers yet'")
-
-                return false
+                if (!NAVRegexCompileBoundedQuantifier(parser)) {
+                    return false
+                }
             }
             case '(': {
                 NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,

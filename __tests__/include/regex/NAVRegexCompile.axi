@@ -123,7 +123,40 @@ constant char REGEX_COMPILE_PATTERN_TEST[][255] = {
     '/\r/',
 
     // Test 50: Mixed special characters
-    '/\t\n\r/'
+    '/\t\n\r/',
+
+    // Test 51: Bounded quantifier - exact count
+    '/a{3}/',
+
+    // Test 52: Bounded quantifier - exact count with metacharacter
+    '/\d{5}/',
+
+    // Test 53: Bounded quantifier - range
+    '/b{2,4}/',
+
+    // Test 54: Bounded quantifier - range with metacharacter
+    '/\w{1,10}/',
+
+    // Test 55: Bounded quantifier - unlimited (one or more)
+    '/c{1,}/',
+
+    // Test 56: Bounded quantifier - unlimited (zero or more)
+    '/\s{0,}/',
+
+    // Test 57: Bounded quantifier - zero occurrences
+    '/d{0}/',
+
+    // Test 58: Bounded quantifier - large count
+    '/e{100}/',
+
+    // Test 59: Bounded quantifier with literal character
+    '/\d{3}\.\d{3}/',
+
+    // Test 60: Bounded quantifier with character class
+    '/[a-z]{2,5}/',
+
+    // Test 61: Bounded quantifier with anchors
+    '/^\w{3,}$/'
 }
 
 constant integer REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[] = {
@@ -186,7 +219,18 @@ constant integer REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[] = {
     2,   // 47: /\t/ -> length 2
     2,   // 48: /\n/ -> length 2
     2,   // 49: /\r/ -> length 2
-    6    // 50: /\t\n\r/ -> length 6
+    6,   // 50: /\t\n\r/ -> length 6
+    4,   // 51: /a{3}/ -> length 4 (a{3})
+    5,   // 52: /\d{5}/ -> length 5 (\d{5})
+    6,   // 53: /b{2,4}/ -> length 6 (b{2,4})
+    8,   // 54: /\w{1,10}/ -> length 8 (\w{1,10})
+    5,   // 55: /c{1,}/ -> length 5 (c{1,})
+    6,   // 56: /\s{0,}/ -> length 6 (\s{0,})
+    4,   // 57: /d{0}/ -> length 4 (d{0})
+    6,   // 58: /e{100}/ -> length 6 (e{100})
+    12,  // 59: /\d{3}\.\d{3}/ -> length 12 (\d{3}\.\d{3})
+    10,  // 60: /[a-z]{2,5}/ -> length 10 ([a-z]{2,5})
+    8    // 61: /^\w{3,}$/ -> length 8 (^\w{3,}$)
 }
 
 // Expected token counts for each test - simpler than defining full parser state
@@ -242,7 +286,18 @@ constant integer REGEX_COMPILE_EXPECTED_TOKEN_COUNT[] = {
     1,   // 47: /\t/ -> TAB
     1,   // 48: /\n/ -> NEWLINE
     1,   // 49: /\r/ -> RETURN
-    3    // 50: /\t\n\r/ -> TAB, NEWLINE, RETURN
+    3,   // 50: /\t\n\r/ -> TAB, NEWLINE, RETURN
+    2,   // 51: /a{3}/ -> CHAR, QUANTIFIER
+    2,   // 52: /\d{5}/ -> DIGIT, QUANTIFIER
+    2,   // 53: /b{2,4}/ -> CHAR, QUANTIFIER
+    2,   // 54: /\w{1,10}/ -> WORD, QUANTIFIER
+    2,   // 55: /c{1,}/ -> CHAR, QUANTIFIER
+    2,   // 56: /\s{0,}/ -> WHITESPACE, QUANTIFIER
+    2,   // 57: /d{0}/ -> CHAR, QUANTIFIER
+    2,   // 58: /e{100}/ -> CHAR, QUANTIFIER
+    5,   // 59: /\d{3}\.\d{3}/ -> DIGIT, QUANTIFIER, CHAR(.), DIGIT, QUANTIFIER
+    2,   // 60: /[a-z]{2,5}/ -> CHAR_CLASS, QUANTIFIER
+    4    // 61: /^\w{3,}$/ -> BEGIN, WORD, QUANTIFIER, END
 }
 
 constant integer REGEX_COMPILE_EXPECTED_TOKENS[][] = {
@@ -579,6 +634,66 @@ constant integer REGEX_COMPILE_EXPECTED_TOKENS[][] = {
         REGEX_TYPE_TAB,
         REGEX_TYPE_NEWLINE,
         REGEX_TYPE_RETURN
+    },
+    {
+        // Test 51: /a{3}/ -> CHAR, QUANTIFIER
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_QUANTIFIER
+    },
+    {
+        // Test 52: /\d{5}/ -> DIGIT, QUANTIFIER
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUANTIFIER
+    },
+    {
+        // Test 53: /b{2,4}/ -> CHAR, QUANTIFIER
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_QUANTIFIER
+    },
+    {
+        // Test 54: /\w{1,10}/ -> WORD, QUANTIFIER
+        REGEX_TYPE_ALPHA,
+        REGEX_TYPE_QUANTIFIER
+    },
+    {
+        // Test 55: /c{1,}/ -> CHAR, QUANTIFIER
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_QUANTIFIER
+    },
+    {
+        // Test 56: /\s{0,}/ -> WHITESPACE, QUANTIFIER
+        REGEX_TYPE_WHITESPACE,
+        REGEX_TYPE_QUANTIFIER
+    },
+    {
+        // Test 57: /d{0}/ -> CHAR, QUANTIFIER
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_QUANTIFIER
+    },
+    {
+        // Test 58: /e{100}/ -> CHAR, QUANTIFIER
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_QUANTIFIER
+    },
+    {
+        // Test 59: /\d{3}\.\d{3}/ -> DIGIT, QUANTIFIER, CHAR(.), DIGIT, QUANTIFIER
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUANTIFIER,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUANTIFIER
+    },
+    {
+        // Test 60: /[a-z]{2,5}/ -> CHAR_CLASS, QUANTIFIER
+        REGEX_TYPE_CHAR_CLASS,
+        REGEX_TYPE_QUANTIFIER
+    },
+    {
+        // Test 61: /^\w{3,}$/ -> BEGIN, WORD, QUANTIFIER, END
+        REGEX_TYPE_BEGIN,
+        REGEX_TYPE_ALPHA,
+        REGEX_TYPE_QUANTIFIER,
+        REGEX_TYPE_END
     }
 }
 

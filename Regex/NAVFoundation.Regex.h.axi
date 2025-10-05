@@ -189,10 +189,12 @@ struct _NAVRegexState {
 
     integer quantifier
 
+    // For bounded quantifiers {n}, {n,}, {n,m}
+    sinteger quantifierMin
+    sinteger quantifierMax  // -1 means unlimited (for {n,})
+
     // integer next[255]
 }
-
-
 struct _NAVRegexGroups {
     integer count
     integer current

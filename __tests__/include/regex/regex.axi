@@ -11,6 +11,7 @@
 
 #IF_DEFINED TESTING_REGEX_MATCH
 #include 'NAVRegexMatchQuantifiers.axi'
+#include 'NAVRegexMatchBoundedQuantifiers.axi'
 #include 'NAVRegexMatchCharClasses.axi'
 #include 'NAVRegexMatchAnchors.axi'
 #include 'NAVRegexMatchBoundaries.axi'
@@ -31,6 +32,7 @@ define_function RunRegexTests() {
 
     #IF_DEFINED TESTING_REGEX_MATCH
     TestNAVRegexMatchQuantifiers()
+    TestNAVRegexMatchBoundedQuantifiers()
     TestNAVRegexMatchCharClasses()
     TestNAVRegexMatchAnchors()
     TestNAVRegexMatchBoundaries()
