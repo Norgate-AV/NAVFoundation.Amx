@@ -3,7 +3,9 @@
 // #DEFINE TESTING_REGEX_MATCH_COMPILED
 #include 'NAVFoundation.Core.axi'
 
-#DEFINE REGEX_MATCHER_DEBUG
+// #DEFINE REGEX_COMPILE_DEBUG
+// #DEFINE REGEX_DEBUG
+// #DEFINE REGEX_MATCHER_DEBUG
 #include 'NAVFoundation.Regex.axi'
 #include 'NAVFoundation.Testing.axi'
 

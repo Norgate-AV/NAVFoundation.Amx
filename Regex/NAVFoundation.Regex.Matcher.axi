@@ -454,16 +454,20 @@ define_function char NAVRegexMatchPlus(_NAVRegexParser parser, _NAVRegexMatchRes
 
 define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatchResult match) {
     // ? matches the previous token between zero and one times
-    // In tiny-regex-c, this is NON-GREEDY (despite the comment saying greedy in your code)
-    // The C implementation tries ZERO first, then ONE
+    // This implementation tries ONE first (greedy), then ZERO
+    // However, we need to ensure we don't accept a shorter match when a longer one exists
 
     // p = pattern[0], pattern = &pattern[2], text unchanged, matchlength passed through
     // Pattern cursor has been advanced by 2, so the token to match is at cursor - 2
 
     stack_var integer saved_pattern_cursor
+    stack_var integer saved_input_cursor
+    stack_var integer saved_match_length
 
-    // Save the current pattern cursor (points to rest of pattern after ?)
+    // Save the current state
     saved_pattern_cursor = parser.pattern.cursor
+    saved_input_cursor = parser.input.cursor
+    saved_match_length = match.matches[match.current].length
 
     // Check if pattern type is UNUSED (end of pattern)
     if (parser.state[parser.pattern.cursor].type == REGEX_TYPE_UNUSED) {
@@ -476,19 +480,7 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
         return true
     }
 
-    // Try matching the rest of the pattern WITHOUT consuming input (match zero)
-    // In C: if (matchpattern(pattern, text, matchlength)) return 1;
-    if (NAVRegexMatchPattern(parser, match)) {
-        #IF_DEFINED REGEX_MATCHER_DEBUG
-        NAVRegexDebug(parser,
-                        'MatchQuestion',
-                        'Matched zero instances (rest of pattern matched without consuming)')
-        #END_IF
-
-        return true
-    }
-
-    // Try matching one character then the rest of the pattern
+    // Try matching ONE character first (GREEDY behavior)
     // Need to check the token at cursor - 2 (the token before the ?)
     // In C: if (*text && matchone(p, *text++))
 
@@ -522,6 +514,25 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
 
             return true
         }
+
+        // Matching one character failed, restore state completely
+        NAVRegexSetInputCursor(parser, 'MatchQuestion', saved_input_cursor)
+        NAVRegexMatchSetLength(parser, 'MatchQuestion', match, saved_match_length)
+    }
+
+    // Try matching ZERO instances (rest of pattern without consuming input)
+    // Restore pattern cursor
+    NAVRegexSetPatternCursor(parser, 'MatchQuestion', saved_pattern_cursor)
+
+    // In C: if (matchpattern(pattern, text, matchlength)) return 1;
+    if (NAVRegexMatchPattern(parser, match)) {
+        #IF_DEFINED REGEX_MATCHER_DEBUG
+        NAVRegexDebug(parser,
+                            'MatchQuestion',
+                            'Matched zero instances (rest of pattern matched without consuming)')
+        #END_IF
+
+        return true
     }
 
     #IF_DEFINED REGEX_MATCHER_DEBUG
@@ -532,7 +543,6 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
 
     return false
 }
-
 
 define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatchResult match) {
     stack_var integer pre

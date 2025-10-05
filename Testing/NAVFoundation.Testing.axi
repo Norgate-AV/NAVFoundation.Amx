@@ -208,7 +208,22 @@ define_function NAVLogTestPassed(integer test) {
 
 
 define_function NAVLogTestFailed(integer test, char expected[], char result[]) {
-    NAVLog("'Test ', itoa(test), ' failed. Expected "', expected, '" but got "', result, '"'")
+    stack_var char message[NAV_MAX_BUFFER]
+
+    message = "'Test ', itoa(test), ' failed'"
+
+    // Show comparison if expected has content OR if result has content
+    // This covers cases where:
+    // - expected='abc', result='xyz' → Show both
+    // - expected='abc', result='' → Show expected, got empty
+    // - expected='', result='xyz' → Show expected empty, got xyz
+    // - expected='', result='' → Show expected empty, got empty
+    if (length_array(expected) || length_array(result)) {
+        message = "message, '. Expected: "', expected, '"'"
+        message = "message, ', but got: "', result, '".'"
+    }
+
+    NAVLog(message)
 }
 
 
