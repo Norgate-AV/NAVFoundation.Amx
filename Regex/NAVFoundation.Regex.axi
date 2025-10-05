@@ -42,8 +42,6 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_REGEX__
 #DEFINE __NAV_FOUNDATION_REGEX__ 'NAVFoundation.Regex'
 
-#DEFINE REGEX_DEBUG 1
-
 #include 'NAVFoundation.Core.h.axi'
 #include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.ErrorLogUtils.axi'
@@ -72,7 +70,7 @@ define_function char NAVRegexMatch(char pattern[], char subject[], _NAVRegexMatc
         return false
     }
 
-    #IF_DEFINED REGEX_DEBUG
+    #IF_DEFINED REGEX_MATCHER_DEBUG
     NAVLog("'[ Match ]: Pattern compiled with ', itoa(parser.count), ' tokens'")
     NAVRegexPrintState(parser)
     #END_IF

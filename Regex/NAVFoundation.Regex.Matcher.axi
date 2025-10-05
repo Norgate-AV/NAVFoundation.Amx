@@ -148,7 +148,7 @@ define_function char NAVRegexMatchCharClass(_NAVRegexParser parser) {
         return false
     }
 
-    #IF_DEFINED REGEX_DEBUG
+    #IF_DEFINED REGEX_MATCHER_DEBUG
     NAVRegexDebug(parser,
                     'MatchCharClass',
                     "'Matching character class => "', charclass, '"'")
@@ -160,7 +160,7 @@ define_function char NAVRegexMatchCharClass(_NAVRegexParser parser) {
         c = NAVCharCodeAt(parser.input.value, parser.input.cursor)
 
         if (NAVRegexMatchRange(parser)) {
-            #IF_DEFINED REGEX_DEBUG
+            #IF_DEFINED REGEX_MATCHER_DEBUG
             NAVRegexDebug(parser,
                             'MatchCharClass',
                             'Matched range')
@@ -170,7 +170,7 @@ define_function char NAVRegexMatchCharClass(_NAVRegexParser parser) {
         }
 
         if (NAVCharCodeAt(charclass, parser.state[parser.pattern.cursor].charclass.cursor) == '\') {
-            #IF_DEFINED REGEX_DEBUG
+            #IF_DEFINED REGEX_MATCHER_DEBUG
             NAVRegexDebug(parser,
                             'MatchCharClass',
                             'Escaped character')
@@ -179,7 +179,7 @@ define_function char NAVRegexMatchCharClass(_NAVRegexParser parser) {
             NAVRegexAdvancePatternCharClassCursor(parser, 'MatchCharClass', 1)
 
             if (NAVRegexMatchCharClassMetaChar(c, charclass)) {
-                #IF_DEFINED REGEX_DEBUG
+                #IF_DEFINED REGEX_MATCHER_DEBUG
                 NAVRegexDebug(parser,
                                 'MatchCharClass',
                                 "'Matched meta character => "', c, '"'")
@@ -189,7 +189,7 @@ define_function char NAVRegexMatchCharClass(_NAVRegexParser parser) {
             }
 
             if ((NAVCharCodeAt(charclass, parser.state[parser.pattern.cursor].charclass.cursor) == c) && !NAVRegexIsCharClassMetaChar(c)) {
-                #IF_DEFINED REGEX_DEBUG
+                #IF_DEFINED REGEX_MATCHER_DEBUG
                 NAVRegexDebug(parser,
                                 'MatchCharClass',
                                 "'Yes. Matched character => "', c, '"'")
@@ -200,7 +200,7 @@ define_function char NAVRegexMatchCharClass(_NAVRegexParser parser) {
         }
 
         if (NAVCharCodeAt(charclass, parser.state[parser.pattern.cursor].charclass.cursor) == c) {
-            #IF_DEFINED REGEX_DEBUG
+            #IF_DEFINED REGEX_MATCHER_DEBUG
             NAVRegexDebug(parser,
                             'MatchCharClass',
                             "'Yes. Matched character => "', c, '"'")
@@ -223,7 +223,7 @@ define_function char NAVRegexMatchCharClass(_NAVRegexParser parser) {
         break
     }
 
-    #IF_DEFINED REGEX_DEBUG
+    #IF_DEFINED REGEX_MATCHER_DEBUG
     NAVRegexDebug(parser,
                     'MatchCharClass',
                     'No. It doesn`t match')
@@ -239,7 +239,7 @@ define_function char NAVRegexMatchOne(_NAVRegexParser parser) {
     stack_var char c
 
     if (parser.input.cursor > parser.input.length) {
-        #IF_DEFINED REGEX_DEBUG
+        #IF_DEFINED REGEX_MATCHER_DEBUG
         NAVRegexDebug(parser,
                         'MatchOne',
                         'Input cursor is greater than input length')
@@ -249,7 +249,7 @@ define_function char NAVRegexMatchOne(_NAVRegexParser parser) {
     }
 
     if (parser.pattern.cursor > parser.count) {
-        #IF_DEFINED REGEX_DEBUG
+        #IF_DEFINED REGEX_MATCHER_DEBUG
         NAVRegexDebug(parser,
                         'MatchOne',
                         'Pattern cursor is greater than pattern count')
@@ -264,7 +264,7 @@ define_function char NAVRegexMatchOne(_NAVRegexParser parser) {
     c = NAVCharCodeAt(parser.input.value, parser.input.cursor)
 
     if (!c) {
-        #IF_DEFINED REGEX_DEBUG
+        #IF_DEFINED REGEX_MATCHER_DEBUG
         NAVRegexDebug(parser,
                         'MatchOne',
                         'The current character is null')
@@ -308,7 +308,7 @@ define_function char NAVRegexMatchStar(_NAVRegexParser parser, _NAVRegexMatchRes
     // Save the pattern cursor (already at &pattern[2])
     saved_pattern_cursor = parser.pattern.cursor
 
-    #IF_DEFINED REGEX_DEBUG
+    #IF_DEFINED REGEX_MATCHER_DEBUG
     NAVRegexDebug(parser,
                     'MatchStar',
                     "'Attempting to match token type ', REGEX_TYPES[parser.state[saved_pattern_cursor - 2].type], ' zero or more times'")
@@ -319,7 +319,7 @@ define_function char NAVRegexMatchStar(_NAVRegexParser parser, _NAVRegexMatchRes
     NAVRegexSetPatternCursor(parser, 'MatchStar', saved_pattern_cursor - 2)
 
     while (parser.input.cursor <= parser.input.length && NAVRegexMatchOne(parser)) {
-        #IF_DEFINED REGEX_DEBUG
+        #IF_DEFINED REGEX_MATCHER_DEBUG
         NAVRegexDebug(parser,
                         'MatchStar',
                         "'Yes. Matched 1 character => "',
@@ -330,7 +330,7 @@ define_function char NAVRegexMatchStar(_NAVRegexParser parser, _NAVRegexMatchRes
         NAVRegexAdvanceInputCursor(parser, 'MatchStar', 1)
     }
 
-    #IF_DEFINED REGEX_DEBUG
+    #IF_DEFINED REGEX_MATCHER_DEBUG
     NAVRegexDebug(parser,
                     'MatchStar',
                     "'Total Matched: ', itoa(count), ' characters'")
@@ -345,7 +345,7 @@ define_function char NAVRegexMatchStar(_NAVRegexParser parser, _NAVRegexMatchRes
     // In C: while (text >= prepoint)
     while (parser.input.cursor >= prepoint) {
         if (NAVRegexMatchPattern(parser, match)) {
-            #IF_DEFINED REGEX_DEBUG
+            #IF_DEFINED REGEX_MATCHER_DEBUG
             NAVRegexDebug(parser,
                             'MatchStar',
                             'Yes. It matches')
@@ -362,7 +362,7 @@ define_function char NAVRegexMatchStar(_NAVRegexParser parser, _NAVRegexMatchRes
         NAVRegexSetPatternCursor(parser, 'MatchStar', saved_pattern_cursor)
     }
 
-    #IF_DEFINED REGEX_DEBUG
+    #IF_DEFINED REGEX_MATCHER_DEBUG
     NAVRegexDebug(parser,
                     'MatchStar',
                     'No. It doesn`t match')
@@ -388,7 +388,7 @@ define_function char NAVRegexMatchPlus(_NAVRegexParser parser, _NAVRegexMatchRes
     // Save the pattern cursor (already at &pattern[2])
     saved_pattern_cursor = parser.pattern.cursor
 
-    #IF_DEFINED REGEX_DEBUG
+    #IF_DEFINED REGEX_MATCHER_DEBUG
     NAVRegexDebug(parser,
                     'MatchPlus',
                     "'Attempting to match token type ', REGEX_TYPES[parser.state[saved_pattern_cursor - 2].type], ' one or more times'")
@@ -399,7 +399,7 @@ define_function char NAVRegexMatchPlus(_NAVRegexParser parser, _NAVRegexMatchRes
     NAVRegexSetPatternCursor(parser, 'MatchPlus', saved_pattern_cursor - 2)
 
     while (parser.input.cursor <= parser.input.length && NAVRegexMatchOne(parser)) {
-        #IF_DEFINED REGEX_DEBUG
+        #IF_DEFINED REGEX_MATCHER_DEBUG
         NAVRegexDebug(parser,
                         'MatchPlus',
                         "'Yes. Matched 1 character => "',
@@ -410,7 +410,7 @@ define_function char NAVRegexMatchPlus(_NAVRegexParser parser, _NAVRegexMatchRes
         NAVRegexAdvanceInputCursor(parser, 'MatchPlus', 1)
     }
 
-    #IF_DEFINED REGEX_DEBUG
+    #IF_DEFINED REGEX_MATCHER_DEBUG
     NAVRegexDebug(parser,
                     'MatchPlus',
                     "'Total Matched: ', itoa(count), ' characters'")
@@ -425,7 +425,7 @@ define_function char NAVRegexMatchPlus(_NAVRegexParser parser, _NAVRegexMatchRes
     // In C: while (text > prepoint) - note the > not >=, because + requires at least one match
     while (parser.input.cursor > prepoint) {
         if (NAVRegexMatchPattern(parser, match)) {
-            #IF_DEFINED REGEX_DEBUG
+            #IF_DEFINED REGEX_MATCHER_DEBUG
             NAVRegexDebug(parser,
                             'MatchPlus',
                             'Yes. It matches')
@@ -442,7 +442,7 @@ define_function char NAVRegexMatchPlus(_NAVRegexParser parser, _NAVRegexMatchRes
         NAVRegexSetPatternCursor(parser, 'MatchPlus', saved_pattern_cursor)
     }
 
-    #IF_DEFINED REGEX_DEBUG
+    #IF_DEFINED REGEX_MATCHER_DEBUG
     NAVRegexDebug(parser,
                     'MatchPlus',
                     'No. It doesn`t match')
@@ -467,7 +467,7 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
 
     // Check if pattern type is UNUSED (end of pattern)
     if (parser.state[parser.pattern.cursor].type == REGEX_TYPE_UNUSED) {
-        #IF_DEFINED REGEX_DEBUG
+        #IF_DEFINED REGEX_MATCHER_DEBUG
         NAVRegexDebug(parser,
                         'MatchQuestion',
                         'Pattern type is UNUSED - returning true')
@@ -479,7 +479,7 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
     // Try matching the rest of the pattern WITHOUT consuming input (match zero)
     // In C: if (matchpattern(pattern, text, matchlength)) return 1;
     if (NAVRegexMatchPattern(parser, match)) {
-        #IF_DEFINED REGEX_DEBUG
+        #IF_DEFINED REGEX_MATCHER_DEBUG
         NAVRegexDebug(parser,
                         'MatchQuestion',
                         'Matched zero instances (rest of pattern matched without consuming)')
@@ -496,7 +496,7 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
     NAVRegexSetPatternCursor(parser, 'MatchQuestion', saved_pattern_cursor - 2)
 
     if (parser.input.cursor <= parser.input.length && NAVRegexMatchOne(parser)) {
-        #IF_DEFINED REGEX_DEBUG
+        #IF_DEFINED REGEX_MATCHER_DEBUG
         NAVRegexDebug(parser,
                         'MatchQuestion',
                         "'Matched one character => "',
@@ -514,7 +514,7 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
             // Increase match length by 1 for the character we just matched
             NAVRegexMatchIncreaseLength(parser, 'MatchQuestion', match, 1)
 
-            #IF_DEFINED REGEX_DEBUG
+            #IF_DEFINED REGEX_MATCHER_DEBUG
             NAVRegexDebug(parser,
                             'MatchQuestion',
                             'Yes. It matches (with one character)')
@@ -524,7 +524,7 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
         }
     }
 
-    #IF_DEFINED REGEX_DEBUG
+    #IF_DEFINED REGEX_MATCHER_DEBUG
     NAVRegexDebug(parser,
                     'MatchQuestion',
                     'No. It doesn`t match')
@@ -544,7 +544,7 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
     while (true) {
         // Check if pattern[0].type == UNUSED (end of pattern)
         if (parser.state[parser.pattern.cursor].type == REGEX_TYPE_UNUSED) {
-            #IF_DEFINED REGEX_DEBUG
+            #IF_DEFINED REGEX_MATCHER_DEBUG
             NAVRegexDebug(parser,
                             'MatchPattern',
                             'Pattern UNUSED - match successful')
@@ -580,7 +580,7 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
         // Check if pattern[0].type == END and pattern[1].type == UNUSED
         if (parser.state[parser.pattern.cursor].type == REGEX_TYPE_END &&
             parser.state[parser.pattern.cursor + 1].type == REGEX_TYPE_UNUSED) {
-            #IF_DEFINED REGEX_DEBUG
+            #IF_DEFINED REGEX_MATCHER_DEBUG
             NAVRegexDebug(parser,
                             'MatchPattern',
                             'END anchor - checking if at end of text')
@@ -598,13 +598,13 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
             break
         }
 
-        #IF_DEFINED REGEX_DEBUG
+        #IF_DEFINED REGEX_MATCHER_DEBUG
         NAVRegexPrintCurrentState(parser, 'MatchPattern')
         #END_IF
 
         // Try to match current character with current pattern
         if (NAVRegexMatchOne(parser)) {
-            #IF_DEFINED REGEX_DEBUG
+            #IF_DEFINED REGEX_MATCHER_DEBUG
             NAVRegexDebug(parser,
                             'MatchPattern',
                             "'Yes. Matched 1 character => "',
@@ -624,7 +624,7 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
     }
 
     // Restore match length and return false
-    #IF_DEFINED REGEX_DEBUG
+    #IF_DEFINED REGEX_MATCHER_DEBUG
     NAVRegexDebug(parser,
                     'MatchPattern',
                     'No. It doesn`t match')
