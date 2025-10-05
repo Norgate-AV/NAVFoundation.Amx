@@ -70,7 +70,7 @@ define_function char NAVRegexMatch(char pattern[], char subject[], _NAVRegexMatc
         return false
     }
 
-    #IF_DEFINED REGEX_MATCHER_DEBUG
+    #IF_DEFINED REGEX_COMPILE_DEBUG
     NAVLog("'[ Match ]: Pattern compiled with ', itoa(parser.count), ' tokens'")
     NAVRegexPrintState(parser)
     #END_IF

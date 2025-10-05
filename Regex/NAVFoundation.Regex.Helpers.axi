@@ -103,45 +103,27 @@ define_function NAVRegexParserSetInput(_NAVRegexParser parser, char buffer[]) {
  *****************************************************************************/
 
 define_function NAVRegexSetInputCursor(_NAVRegexParser parser, char caller[], integer cursor) {
-    // if (cursor < 1) {
-    //     cursor = 1
-    // }
-
-    #IF_DEFINED REGEX_DEBUG
     NAVRegexDebug(parser,
                     caller,
                     "'Setting input cursor to position => ', itoa(cursor)")
-    #END_IF
 
     parser.input.cursor = cursor
 }
 
 
 define_function NAVRegexSetPatternCursor(_NAVRegexParser parser, char caller[], integer cursor) {
-    // if (cursor < 0) {
-    //     cursor = 0
-    // }
-
-    #IF_DEFINED REGEX_DEBUG
     NAVRegexDebug(parser,
                     caller,
                     "'Setting pattern cursor to position => ', itoa(cursor)")
-    #END_IF
 
     parser.pattern.cursor = cursor
 }
 
 
 define_function NAVRegexSetPatternCharClassCursor(_NAVRegexParser parser, char caller[], integer cursor) {
-    // if (cursor < 1) {
-    //     cursor = 1
-    // }
-
-    #IF_DEFINED REGEX_DEBUG
     NAVRegexDebug(parser,
                     caller,
                     "'Setting pattern charclass cursor to position => ', itoa(cursor)")
-    #END_IF
 
     parser.state[parser.pattern.cursor].charclass.cursor = cursor
 }
@@ -205,11 +187,9 @@ define_function char NAVRegexMatchResultInit(_NAVRegexMatchResult match) {
 
 
 define_function NAVRegexMatchSetLength(_NAVRegexParser parser, char caller[], _NAVRegexMatchResult match, integer length) {
-    #IF_DEFINED REGEX_DEBUG
     NAVRegexDebug(parser,
                     caller,
                     "'Setting match length to => ', itoa(length)")
-    #END_IF
 
     match.matches[match.current].length = length
 }
@@ -231,11 +211,9 @@ define_function integer NAVRegexMatchGetLength(_NAVRegexMatchResult match) {
 
 
 define_function NAVRegexMatchSetStart(_NAVRegexParser parser, char caller[], _NAVRegexMatchResult match, integer start) {
-    #IF_DEFINED REGEX_DEBUG
     NAVRegexDebug(parser,
                     caller,
                     "'Setting match start to => ', itoa(start)")
-    #END_IF
 
     match.matches[match.current].start = start
 }
@@ -262,11 +240,9 @@ define_function integer NAVRegexMatchGetEnd(_NAVRegexMatchResult match) {
 
 
 define_function NAVRegexMatchSetEnd(_NAVRegexParser parser, char caller[], _NAVRegexMatchResult match, integer end) {
-    #IF_DEFINED REGEX_DEBUG
     NAVRegexDebug(parser,
                     caller,
                     "'Setting match end to => ', itoa(end)")
-    #END_IF
 
     match.matches[match.current].end = end
 }
@@ -283,11 +259,9 @@ define_function char[NAV_MAX_BUFFER] NAVRegexMatchGetTextFromParser(_NAVRegexMat
 
 
 define_function NAVRegexMatchSetText(_NAVRegexParser parser, char caller[], _NAVRegexMatchResult match, char text[]) {
-    #IF_DEFINED REGEX_DEBUG
     NAVRegexDebug(parser,
                     caller,
                     "'Setting match text to => "', text, '"'")
-    #END_IF
 
     match.matches[match.current].text = text
 }
@@ -319,11 +293,9 @@ define_function NAVRegexSaveState(_NAVRegexParser parser, _NAVRegexMatchResult m
 
 
 define_function NAVRegexRestoreState(_NAVRegexParser parser, char caller[], _NAVRegexMatchResult match, _NAVRegexBacktrackState state) {
-    #IF_DEFINED REGEX_DEBUG
     NAVRegexDebug(parser,
                     caller,
                     "'Backtracking to previous state'")
-    #END_IF
 
     NAVRegexSetInputCursor(parser, caller, state.input.cursor)
     NAVRegexSetPatternCursor(parser, caller, state.pattern.cursor)
@@ -401,9 +373,7 @@ define_function NAVRegexPrintCurrentState(_NAVRegexParser parser, char caller[])
         default:                        { pattern = REGEX_TYPES[type] }
     }
 
-    #IF_DEFINED REGEX_DEBUG
     NAVRegexDebug(parser, caller, "'Current state => Does "', c, '" match "', pattern, '"?'")
-    #END_IF
 }
 
 
