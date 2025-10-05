@@ -420,4 +420,13 @@ define_function NAVRegexDebug(_NAVRegexParser parser, char caller[], char messag
 }
 
 
+define_function char[NAV_MAX_CHARS] NAVRegexGetTokenType(integer type) {
+    if (type < 1 || type > REGEX_TYPE_TAB) {
+        return "'UNKNOWN (', itoa(type), ')'"
+    }
+
+    return REGEX_TYPES[type]
+}
+
+
 #END_IF // __NAV_FOUNDATION_REGEX_HELPERS__

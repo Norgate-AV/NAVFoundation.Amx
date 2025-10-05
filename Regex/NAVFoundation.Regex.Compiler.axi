@@ -162,14 +162,126 @@ define_function char NAVRegexParserParseOptions(_NAVRegexParser parser, char pat
 }
 
 
+define_function char NAVRegexCompileCharacterClass(_NAVRegexParser parser) {
+    stack_var char charclass[MAX_CHAR_CLASS_LENGTH]
+    stack_var integer length
+
+    length = 0
+
+    // Increment count and set type
+    parser.count++
+
+    // Lookahead to see if this is a negated character class first
+    if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1)) == '^') {
+        parser.state[parser.count].type = REGEX_TYPE_INV_CHAR_CLASS
+
+        if (!NAVRegexPatternAdvanceCursor(parser)) {
+            return false
+        }
+
+        if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1)) == 0) {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_REGEX__,
+                                        'NAVRegexCompileCharacterClass',
+                                        "'Incomplete pattern. Missing non-zero character after ^'")
+
+            return false
+        }
+    }
+    else {
+        parser.state[parser.count].type = REGEX_TYPE_CHAR_CLASS
+    }
+
+    // Advance to first character in the class
+    if (!NAVRegexPatternAdvanceCursor(parser)) {
+        return false
+    }
+
+    // Build character class until we hit ']'
+    while (parser.pattern.cursor <= parser.pattern.length) {
+        stack_var char code
+
+        code = NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)
+
+        // Check if we've reached the closing bracket
+        if (code == ']') {
+            break
+        }
+
+        if (code == '\') {
+            if (length > (MAX_CHAR_CLASS_LENGTH - 1)) {
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                            __NAV_FOUNDATION_REGEX__,
+                                            'NAVRegexCompileCharacterClass',
+                                            "'Character class exceeded maximum length'")
+                return false
+            }
+
+            // Add the backslash
+            charclass = "charclass, code"
+            length = length_array(charclass)
+
+            // Advance to the escaped character
+            if (!NAVRegexPatternAdvanceCursor(parser)) {
+                return false
+            }
+
+            code = NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)
+
+            if (code == 0) {
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                            __NAV_FOUNDATION_REGEX__,
+                                            'NAVRegexCompileCharacterClass',
+                                            "'Incomplete pattern. Missing non-zero character after \'")
+                return false
+            }
+
+            // Add the escaped character
+            charclass = "charclass, code"
+            length = length_array(charclass)
+        }
+        else {
+            if (length > MAX_CHAR_CLASS_LENGTH) {
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                            __NAV_FOUNDATION_REGEX__,
+                                            'NAVRegexCompileCharacterClass',
+                                            "'Character class exceeded maximum length'")
+                return false
+            }
+
+            charclass = "charclass, code"
+            length = length_array(charclass)
+        }
+
+        // Advance to next character in class
+        if (!NAVRegexPatternAdvanceCursor(parser)) {
+            return false
+        }
+    }
+
+    if (length > MAX_CHAR_CLASS_LENGTH) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompileCharacterClass',
+                                    "'Character class exceeded maximum length'")
+        return false
+    }
+
+    // Set character class value (count was already incremented above)
+    parser.state[parser.count].charclass.value = charclass
+    parser.state[parser.count].charclass.length = length
+    set_length_array(parser.state[parser.count].charclass.value, length)
+
+    return true
+}
+
+
 define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
     stack_var char c
 
     if (!NAVRegexParserInit(parser, pattern)) {
         return false
     }
-
-    // parser.pattern.cursor = 0
 
     while (NAVRegexPatternHasMoreTokens(parser) && (parser.count < MAX_REGEXP_OBJECTS)) {
         if (!NAVRegexPatternAdvanceCursor(parser)) {
@@ -257,7 +369,6 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
 
                 if ((parser.pattern.cursor + 1) <= parser.pattern.length) {
                     // Increment cursor to look at the character after the backslash
-                    // parser.pattern.cursor++
                     if (!NAVRegexPatternAdvanceCursor(parser)) {
                         return false
                     }
@@ -342,114 +453,9 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                 return false
             }
             case '[': {
-                stack_var char charclass[MAX_CHAR_CLASS_LENGTH]
-                stack_var integer length
-
-                length = 0
-
-                // Increment count and set type
-                parser.count++
-
-                // Lookahead to see if this is a negated character class first
-                if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1)) == '^') {
-                    parser.state[parser.count].type = REGEX_TYPE_INV_CHAR_CLASS
-
-                    if (!NAVRegexPatternAdvanceCursor(parser)) {
-                        return false
-                    }
-
-                    if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1)) == 0) {
-                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                    __NAV_FOUNDATION_REGEX__,
-                                                    'NAVRegexCompile',
-                                                    "'Incomplete pattern. Missing non-zero character after ^'")
-
-                        return false
-                    }
-                }
-                else {
-                    parser.state[parser.count].type = REGEX_TYPE_CHAR_CLASS
-                }
-
-                // Advance to first character in the class
-                if (!NAVRegexPatternAdvanceCursor(parser)) {
+                if (!NAVRegexCompileCharacterClass(parser)) {
                     return false
                 }
-
-                // Build character class until we hit ']'
-                while (parser.pattern.cursor <= parser.pattern.length) {
-                    stack_var char code
-
-                    code = NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)
-
-                    // Check if we've reached the closing bracket
-                    if (code == ']') {
-                        break
-                    }
-
-                    if (code == '\') {
-                        if (length > (MAX_CHAR_CLASS_LENGTH - 1)) {
-                            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                        __NAV_FOUNDATION_REGEX__,
-                                                        'NAVRegexCompile',
-                                                        "'Character class exceeded maximum length'")
-                            return false
-                        }
-
-                        // Add the backslash
-                        charclass = "charclass, code"
-                        length = length_array(charclass)
-
-                        // Advance to the escaped character
-                        if (!NAVRegexPatternAdvanceCursor(parser)) {
-                            return false
-                        }
-
-                        code = NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)
-
-                        if (code == 0) {
-                            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                        __NAV_FOUNDATION_REGEX__,
-                                                        'NAVRegexCompile',
-                                                        "'Incomplete pattern. Missing non-zero character after \'")
-                            return false
-                        }
-
-                        // Add the escaped character
-                        charclass = "charclass, code"
-                        length = length_array(charclass)
-                    }
-                    else {
-                        if (length > MAX_CHAR_CLASS_LENGTH) {
-                            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                        __NAV_FOUNDATION_REGEX__,
-                                                        'NAVRegexCompile',
-                                                        "'Character class exceeded maximum length'")
-                            return false
-                        }
-
-                        charclass = "charclass, code"
-                        length = length_array(charclass)
-                    }
-
-                    // Advance to next character in class
-                    if (!NAVRegexPatternAdvanceCursor(parser)) {
-                        return false
-                    }
-                }
-
-                if (length > MAX_CHAR_CLASS_LENGTH) {
-                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                __NAV_FOUNDATION_REGEX__,
-                                                'NAVRegexCompile',
-                                                "'Character class exceeded maximum length'")
-                    return false
-                }
-
-                // Set character class value (count was already incremented above)
-                parser.state[parser.count].charclass.value = charclass
-                parser.state[parser.count].charclass.length = length
-                set_length_array(parser.state[parser.count].charclass.value, length)
             }
 
             default: {
@@ -458,17 +464,6 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                 parser.state[parser.count].value = c
             }
         }
-
-        #IF_DEFINED REGEX_DEBUG
-        NAVLog("'[ Compile ]: About to increment - cursor=', itoa(parser.pattern.cursor), ' count=', itoa(parser.count), ' length=', itoa(parser.pattern.length)")
-        #END_IF
-
-        // parser.pattern.cursor++
-        // parser.count++
-
-        #IF_DEFINED REGEX_DEBUG
-        NAVLog("'[ Compile ]: After increment - cursor=', itoa(parser.pattern.cursor), ' count=', itoa(parser.count), ' condition=', itoa((parser.pattern.cursor + 1) <= parser.pattern.length)")
-        #END_IF
     }
 
     // Add UNUSED marker after last token
@@ -476,9 +471,7 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
     set_length_array(parser.state, parser.count + 1)
 
     // Reset the pattern cursor to 1 for matching phase
-    // parser.pattern.cursor = 0
     NAVRegexSetPatternCursor(parser, 'Compile', 0)
-
 
     return true
 }
