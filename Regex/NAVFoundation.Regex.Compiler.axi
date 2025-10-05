@@ -78,7 +78,7 @@ define_function char NAVRegexPatternAdvanceCursor(_NAVRegexParser parser) {
 define_function char NAVRegexParserInit(_NAVRegexParser parser, char pattern[]) {
     parser.pattern.value = NAVStringBetweenGreedy(NAVTrimString(pattern), '/', '/')
 
-    #IF_DEFINED REGEX_DEBUG
+    #IF_DEFINED REGEX_COMPILE_DEBUG
     NAVLog("'[ ParserInit ]: Input pattern: "', pattern, '" (length=', itoa(length_array(pattern)), ')'")
     NAVLog("'[ ParserInit ]: Extracted pattern: "', parser.pattern.value, '" (length=', itoa(length_array(parser.pattern.value)), ')'")
     #END_IF
@@ -290,7 +290,7 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
 
         c = NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)
 
-        #IF_DEFINED REGEX_DEBUG
+        #IF_DEFINED REGEX_COMPILE_DEBUG
         NAVLog("'[ Compile ]: cursor=', itoa(parser.pattern.cursor), ' char=', c, ' (', itoa(type_cast(c)), ')'")
         #END_IF
 
@@ -363,7 +363,7 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
             }
 
             case '\': {
-                #IF_DEFINED REGEX_DEBUG
+                #IF_DEFINED REGEX_COMPILE_DEBUG
                 NAVLog("'[ Compile ]: Backslash case - cursor=', itoa(parser.pattern.cursor), ' checking (cursor+1) <= length: (', itoa(parser.pattern.cursor + 1), ') <= (', itoa(parser.pattern.length), ') = ', itoa((parser.pattern.cursor + 1) <= parser.pattern.length)")
                 #END_IF
 
@@ -373,7 +373,7 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                         return false
                     }
 
-                    #IF_DEFINED REGEX_DEBUG
+                    #IF_DEFINED REGEX_COMPILE_DEBUG
                     NAVLog("'[ Compile ]: Backslash processing - cursor now=', itoa(parser.pattern.cursor), ' char is: ', NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)")
                     #END_IF
 

@@ -108,7 +108,22 @@ constant char REGEX_COMPILE_PATTERN_TEST[][255] = {
     '/hello/',
 
     // Test 45: Quantifiers on character classes
-    '/[a-z]+[0-9]*/'
+    '/[a-z]+[0-9]*/',
+
+    // Test 46: NOT word boundary
+    '/\Btest\B/',
+
+    // Test 47: Tab character
+    '/\t/',
+
+    // Test 48: Newline character
+    '/\n/',
+
+    // Test 49: Return character
+    '/\r/',
+
+    // Test 50: Mixed special characters
+    '/\t\n\r/'
 }
 
 constant integer REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[] = {
@@ -146,27 +161,32 @@ constant integer REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[] = {
     // Additional test cases
     5,   // 23: /^...$/ -> length 5
     6,   // 24: /\d\w\s/ -> length 6
-    8,   // 25: /a?b*c+/ -> length 8
+    6,   // 25: /a?b*c+/ -> length 6 (FIXED: was 8)
     8,   // 26: /\.\*\+\?/ -> length 8
-    7,   // 27: /[a-zA-Z]/ -> length 7
+    8,   // 27: /[a-zA-Z]/ -> length 8 (FIXED: was 7)
     6,   // 28: /[^0-9]/ -> length 6
-    9,   // 29: /[abc123]/ -> length 9
+    8,   // 29: /[abc123]/ -> length 8 (FIXED: was 9)
     5,   // 30: /^\d+$/ -> length 5
-    10,  // 31: /\bword\b/ -> length 10
-    13,  // 32: /\w+@\w+\.\w+/ -> length 13
-    11,  // 33: /\d*\w+\s*/ -> length 11
+    8,   // 31: /\bword\b/ -> length 8 (FIXED: was 10)
+    12,  // 32: /\w+@\w+\.\w+/ -> length 12 (FIXED: was 13)
+    9,   // 33: /\d*\w+\s*/ -> length 9 (FIXED: was 11)
     6,   // 34: /\D\W\S/ -> length 6
-    7,   // 35: /[a-z-]/ -> length 7
-    9,   // 36: /.*\..*/ -> length 9
+    6,   // 35: /[a-z-]/ -> length 6 (FIXED: was 7)
+    6,   // 36: /.*\..*/ -> length 6 (FIXED: was 9)
     15,  // 37: /[abc][def][ghi]/ -> length 15
-    9,   // 38: /\d\d?\d?/ -> length 9
-    6,   // 39: /^test/ -> length 6
-    6,   // 40: /test$/ -> length 6
-    9,   // 41: /[\d\w\s]/ -> length 9
+    8,   // 38: /\d\d?\d?/ -> length 8 (FIXED: was 9)
+    5,   // 39: /^test/ -> length 5 (FIXED: was 6)
+    5,   // 40: /test$/ -> length 5 (FIXED: was 6)
+    8,   // 41: /[\d\w\s]/ -> length 8 (FIXED: was 9)
     2,   // 42: /[]/ -> length 2
     1,   // 43: /x/ -> length 1
     5,   // 44: /hello/ -> length 5
-    15   // 45: /[a-z]+[0-9]*/ -> length 15
+    12,  // 45: /[a-z]+[0-9]*/ -> length 12 (FIXED: was 15)
+    8,   // 46: /\Btest\B/ -> length 8
+    2,   // 47: /\t/ -> length 2
+    2,   // 48: /\n/ -> length 2
+    2,   // 49: /\r/ -> length 2
+    6    // 50: /\t\n\r/ -> length 6
 }
 
 // Expected token counts for each test - simpler than defining full parser state
@@ -195,7 +215,7 @@ constant integer REGEX_COMPILE_EXPECTED_TOKEN_COUNT[] = {
     5,   // 22: /\d?\d?\d/ -> DIGIT, QUESTIONMARK, DIGIT, QUESTIONMARK, DIGIT
 
     // Additional test cases
-    4,   // 23: /^...$/ -> BEGIN, DOT, DOT, DOT, END
+    5,   // 23: /^...$/ -> BEGIN, DOT, DOT, DOT, END (FIXED: was 4)
     3,   // 24: /\d\w\s/ -> DIGIT, WORD, WHITESPACE
     6,   // 25: /a?b*c+/ -> CHAR, QUESTIONMARK, CHAR, STAR, CHAR, PLUS
     4,   // 26: /\.\*\+\?/ -> CHAR(.), CHAR(*), CHAR(+), CHAR(?)
@@ -217,7 +237,12 @@ constant integer REGEX_COMPILE_EXPECTED_TOKEN_COUNT[] = {
     1,   // 42: /[]/ -> CHAR_CLASS (empty)
     1,   // 43: /x/ -> CHAR
     5,   // 44: /hello/ -> CHAR(h), CHAR(e), CHAR(l), CHAR(l), CHAR(o)
-    4    // 45: /[a-z]+[0-9]*/ -> CHAR_CLASS, PLUS, CHAR_CLASS, STAR
+    4,   // 45: /[a-z]+[0-9]*/ -> CHAR_CLASS, PLUS, CHAR_CLASS, STAR
+    6,   // 46: /\Btest\B/ -> NOT_WORD_BOUNDARY, CHAR(t), CHAR(e), CHAR(s), CHAR(t), NOT_WORD_BOUNDARY
+    1,   // 47: /\t/ -> TAB
+    1,   // 48: /\n/ -> NEWLINE
+    1,   // 49: /\r/ -> RETURN
+    3    // 50: /\t\n\r/ -> TAB, NEWLINE, RETURN
 }
 
 constant integer REGEX_COMPILE_EXPECTED_TOKENS[][] = {
@@ -330,24 +355,25 @@ constant integer REGEX_COMPILE_EXPECTED_TOKENS[][] = {
     },
     {
         // Test 19: /\d?\d?\d\.\d?\d?\d\.\d?\d?\d\.\d?\d?\d/ -> 23 tokens
+        // Note: \. is escaped, so it becomes CHAR (literal dot), not DOT (wildcard)
         REGEX_TYPE_DIGIT,
         REGEX_TYPE_QUESTIONMARK,
         REGEX_TYPE_DIGIT,
         REGEX_TYPE_QUESTIONMARK,
         REGEX_TYPE_DIGIT,
-        REGEX_TYPE_DOT,
+        REGEX_TYPE_CHAR,  // Escaped dot \.
         REGEX_TYPE_DIGIT,
         REGEX_TYPE_QUESTIONMARK,
         REGEX_TYPE_DIGIT,
         REGEX_TYPE_QUESTIONMARK,
         REGEX_TYPE_DIGIT,
-        REGEX_TYPE_DOT,
+        REGEX_TYPE_CHAR,  // Escaped dot \.
         REGEX_TYPE_DIGIT,
         REGEX_TYPE_QUESTIONMARK,
         REGEX_TYPE_DIGIT,
         REGEX_TYPE_QUESTIONMARK,
         REGEX_TYPE_DIGIT,
-        REGEX_TYPE_DOT,
+        REGEX_TYPE_CHAR,  // Escaped dot \.
         REGEX_TYPE_DIGIT,
         REGEX_TYPE_QUESTIONMARK,
         REGEX_TYPE_DIGIT,
@@ -526,6 +552,33 @@ constant integer REGEX_COMPILE_EXPECTED_TOKENS[][] = {
         REGEX_TYPE_PLUS,
         REGEX_TYPE_CHAR_CLASS,
         REGEX_TYPE_STAR
+    },
+    {
+        // Test 46: /\Btest\B/ -> NOT_WORD_BOUNDARY, CHAR(t), CHAR(e), CHAR(s), CHAR(t), NOT_WORD_BOUNDARY
+        REGEX_TYPE_NOT_WORD_BOUNDARY,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_NOT_WORD_BOUNDARY
+    },
+    {
+        // Test 47: /\t/ -> TAB
+        REGEX_TYPE_TAB
+    },
+    {
+        // Test 48: /\n/ -> NEWLINE
+        REGEX_TYPE_NEWLINE
+    },
+    {
+        // Test 49: /\r/ -> RETURN
+        REGEX_TYPE_RETURN
+    },
+    {
+        // Test 50: /\t\n\r/ -> TAB, NEWLINE, RETURN
+        REGEX_TYPE_TAB,
+        REGEX_TYPE_NEWLINE,
+        REGEX_TYPE_RETURN
     }
 }
 
