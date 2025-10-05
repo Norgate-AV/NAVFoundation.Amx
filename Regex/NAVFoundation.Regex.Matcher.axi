@@ -545,6 +545,107 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
     return false
 }
 
+define_function char NAVRegexMatchBoundedQuantifier(_NAVRegexParser parser, _NAVRegexMatchResult match) {
+    // Bounded quantifiers: {n}, {n,}, {n,m}
+    // Matches the previous token between min and max times (greedy)
+    // NOTE: Pattern cursor is already pointing to &pattern[2] when this is called
+    // NOTE: We need to look back at pattern[cursor-2] to get the token to match
+    // NOTE: quantifierMin and quantifierMax are stored at pattern[cursor-1]
+
+    stack_var integer prepoint
+    stack_var integer count
+    stack_var sinteger minCount
+    stack_var sinteger maxCount
+    stack_var integer saved_pattern_cursor
+
+    prepoint = parser.input.cursor
+
+    // Save the pattern cursor (already at &pattern[2])
+    saved_pattern_cursor = parser.pattern.cursor
+
+    // Get the min and max counts from the quantifier token at cursor-1
+    minCount = parser.state[saved_pattern_cursor - 1].quantifierMin
+    maxCount = parser.state[saved_pattern_cursor - 1].quantifierMax
+
+    NAVRegexDebug(parser,
+                    'MatchBoundedQuantifier',
+                    "'Attempting to match token type ', REGEX_TYPES[parser.state[saved_pattern_cursor - 2].type],
+                     ' between ', itoa(minCount), ' and ',
+                     itoa(maxCount), ' times (', itoa(maxCount == -1), ' = unlimited)'")
+
+    // Match as many as possible (greedy), up to maxCount (or unlimited if maxCount == -1)
+    // Temporarily point to the token we're matching for matchone
+    NAVRegexSetPatternCursor(parser, 'MatchBoundedQuantifier', saved_pattern_cursor - 2)
+
+    count = 0
+    while (parser.input.cursor <= parser.input.length &&
+           (maxCount == -1 || count < type_cast(maxCount)) &&
+           NAVRegexMatchOne(parser)) {
+        NAVRegexDebug(parser,
+                        'MatchBoundedQuantifier',
+                        "'Yes. Matched character ', itoa(count + 1), ' => "',
+                            NAVCharCodeAt(parser.input.value, parser.input.cursor), '" P(', itoa(parser.input.cursor), ')'")
+
+        count++
+        NAVRegexAdvanceInputCursor(parser, 'MatchBoundedQuantifier', 1)
+    }
+
+    NAVRegexDebug(parser,
+                    'MatchBoundedQuantifier',
+                    "'Total Matched: ', itoa(count), ' characters (min=', itoa(minCount), ', max=', itoa(maxCount), ')'")
+
+    // Check if we matched at least minCount
+    if (count < type_cast(minCount)) {
+        NAVRegexDebug(parser,
+                        'MatchBoundedQuantifier',
+                        "'Failed: matched only ', itoa(count), ' but need at least ', itoa(minCount)")
+
+        return false
+    }
+
+    NAVRegexMatchIncreaseLength(parser, 'MatchBoundedQuantifier', match, count)
+
+    // Restore pattern cursor to &pattern[2] for the recursive matchpattern calls
+    NAVRegexSetPatternCursor(parser, 'MatchBoundedQuantifier', saved_pattern_cursor)
+
+    // Backtrack: try matching the rest of the pattern from each position
+    // Start from current position (greedy: matched as many as possible)
+    // Go down to minCount (the minimum required)
+    while (count >= type_cast(minCount)) {
+        NAVRegexDebug(parser,
+                        'MatchBoundedQuantifier',
+                        "'Trying to match rest of pattern with ', itoa(count), ' characters consumed'")
+
+        if (NAVRegexMatchPattern(parser, match)) {
+            NAVRegexDebug(parser,
+                            'MatchBoundedQuantifier',
+                            "'Yes. It matches with ', itoa(count), ' repetitions'")
+
+            return true
+        }
+
+        // Backtrack one character (if we haven't reached minCount yet)
+        if (count > type_cast(minCount)) {
+            NAVRegexMatchDecreaseLength(parser, 'MatchBoundedQuantifier', match, 1)
+            NAVRegexBacktrackInputCursor(parser, 'MatchBoundedQuantifier', 1)
+            count--
+
+            // Reset pattern cursor for next attempt
+            NAVRegexSetPatternCursor(parser, 'MatchBoundedQuantifier', saved_pattern_cursor)
+        }
+        else {
+            // Reached minCount, can't backtrack further
+            break
+        }
+    }
+
+    NAVRegexDebug(parser,
+                    'MatchBoundedQuantifier',
+                    'No. It doesn`t match')
+
+    return false
+}
+
 define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatchResult match) {
     stack_var integer pre
 
@@ -584,6 +685,14 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
             // Advance pattern cursor by 2 to point to &pattern[2] before calling
             NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 2)
             return NAVRegexMatchPlus(parser, match)
+        }
+
+        // Check if pattern[1].type == QUANTIFIER (bounded quantifiers {n}, {n,}, {n,m})
+        // Call matchboundedquantifier with p=pattern[0], pattern=&pattern[2]
+        if (parser.state[parser.pattern.cursor + 1].type == REGEX_TYPE_QUANTIFIER) {
+            // Advance pattern cursor by 2 to point to &pattern[2] before calling
+            NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 2)
+            return NAVRegexMatchBoundedQuantifier(parser, match)
         }
 
         // Check if pattern[0].type == END and pattern[1].type == UNUSED
