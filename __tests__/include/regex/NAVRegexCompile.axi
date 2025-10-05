@@ -156,7 +156,40 @@ constant char REGEX_COMPILE_PATTERN_TEST[][255] = {
     '/[a-z]{2,5}/',
 
     // Test 61: Bounded quantifier with anchors
-    '/^\w{3,}$/'
+    '/^\w{3,}$/',
+
+    // Test 62: Single capturing group
+    '/(\d+)/',
+
+    // Test 63: Multiple capturing groups
+    '/(\d+)-(\w+)/',
+
+    // Test 64: Group with quantifier inside
+    '/(\d{3})/',
+
+    // Test 65: Group with character class
+    '/([a-z]+)/',
+
+    // Test 66: Multiple groups with metacharacters
+    '/(\w+)@(\w+)\.(\w+)/',
+
+    // Test 67: Group at start
+    '/(abc)def/',
+
+    // Test 68: Group at end
+    '/abc(def)/',
+
+    // Test 69: Group in middle
+    '/abc(\d+)def/',
+
+    // Test 70: Empty group
+    '/()/)',
+
+    // Test 71: Group with anchor
+    '/^(\d+)$/',
+
+    // Test 72: Multiple adjacent groups
+    '/(\d)(\w)(\s)/'
 }
 
 constant integer REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[] = {
@@ -230,7 +263,18 @@ constant integer REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[] = {
     6,   // 58: /e{100}/ -> length 6 (e{100})
     12,  // 59: /\d{3}\.\d{3}/ -> length 12 (\d{3}\.\d{3})
     10,  // 60: /[a-z]{2,5}/ -> length 10 ([a-z]{2,5})
-    8    // 61: /^\w{3,}$/ -> length 8 (^\w{3,}$)
+    8,   // 61: /^\w{3,}$/ -> length 8 (^\w{3,}$)
+    6,   // 62: /(\d+)/ -> length 6 ((\d+))
+    12,  // 63: /(\d+)-(\w+)/ -> length 12 ((\d+)-(\w+))
+    8,   // 64: /(\d{3})/ -> length 8 ((\d{3}))
+    9,   // 65: /([a-z]+)/ -> length 9 (([a-z]+))
+    19,  // 66: /(\w+)@(\w+)\.(\w+)/ -> length 19
+    10,  // 67: /(abc)def/ -> length 10
+    10,  // 68: /abc(def)/ -> length 10
+    13,  // 69: /abc(\d+)def/ -> length 13
+    4,   // 70: /()/ -> length 4 (())
+    8,   // 71: /^(\d+)$/ -> length 8
+    12   // 72: /(\d)(\w)(\s)/ -> length 12
 }
 
 // Expected token counts for each test - simpler than defining full parser state
@@ -297,7 +341,18 @@ constant integer REGEX_COMPILE_EXPECTED_TOKEN_COUNT[] = {
     2,   // 58: /e{100}/ -> CHAR, QUANTIFIER
     5,   // 59: /\d{3}\.\d{3}/ -> DIGIT, QUANTIFIER, CHAR(.), DIGIT, QUANTIFIER
     2,   // 60: /[a-z]{2,5}/ -> CHAR_CLASS, QUANTIFIER
-    4    // 61: /^\w{3,}$/ -> BEGIN, WORD, QUANTIFIER, END
+    4,   // 61: /^\w{3,}$/ -> BEGIN, WORD, QUANTIFIER, END
+    4,   // 62: /(\d+)/ -> GROUP_START, DIGIT, PLUS, GROUP_END
+    8,   // 63: /(\d+)-(\w+)/ -> GROUP_START, DIGIT, PLUS, GROUP_END, CHAR(-), GROUP_START, WORD, PLUS, GROUP_END (9 tokens)
+    5,   // 64: /(\d{3})/ -> GROUP_START, DIGIT, QUANTIFIER, GROUP_END (4 tokens? Let me recalculate)
+    4,   // 65: /([a-z]+)/ -> GROUP_START, CHAR_CLASS, PLUS, GROUP_END
+    11,  // 66: /(\w+)@(\w+)\.(\w+)/ -> GROUP_START, WORD, PLUS, GROUP_END, CHAR(@), GROUP_START, WORD, PLUS, GROUP_END, CHAR(.), GROUP_START, WORD, PLUS, GROUP_END (14 tokens)
+    7,   // 67: /(abc)def/ -> GROUP_START, CHAR(a), CHAR(b), CHAR(c), GROUP_END, CHAR(d), CHAR(e), CHAR(f) (8 tokens)
+    7,   // 68: /abc(def)/ -> CHAR(a), CHAR(b), CHAR(c), GROUP_START, CHAR(d), CHAR(e), CHAR(f), GROUP_END (8 tokens)
+    8,   // 69: /abc(\d+)def/ -> CHAR(a), CHAR(b), CHAR(c), GROUP_START, DIGIT, PLUS, GROUP_END, CHAR(d), CHAR(e), CHAR(f) (10 tokens)
+    2,   // 70: /()/ -> GROUP_START, GROUP_END
+    6,   // 71: /^(\d+)$/ -> BEGIN, GROUP_START, DIGIT, PLUS, GROUP_END, END
+    9    // 72: /(\d)(\w)(\s)/ -> GROUP_START, DIGIT, GROUP_END, GROUP_START, WORD, GROUP_END, GROUP_START, WHITESPACE, GROUP_END
 }
 
 constant integer REGEX_COMPILE_EXPECTED_TOKENS[][] = {
@@ -694,6 +749,117 @@ constant integer REGEX_COMPILE_EXPECTED_TOKENS[][] = {
         REGEX_TYPE_ALPHA,
         REGEX_TYPE_QUANTIFIER,
         REGEX_TYPE_END
+    },
+    {
+        // Test 62: /(\d+)/ -> GROUP_START, DIGIT, PLUS, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 63: /(\d+)-(\w+)/ -> GROUP_START, DIGIT, PLUS, GROUP_END, CHAR(-), GROUP_START, WORD, PLUS, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_ALPHA,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 64: /(\d{3})/ -> GROUP_START, DIGIT, QUANTIFIER, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUANTIFIER,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 65: /([a-z]+)/ -> GROUP_START, CHAR_CLASS, PLUS, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR_CLASS,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 66: /(\w+)@(\w+)\.(\w+)/ -> GROUP_START, WORD, PLUS, GROUP_END, CHAR(@), GROUP_START, WORD, PLUS, GROUP_END, CHAR(.), GROUP_START, WORD, PLUS, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_ALPHA,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_ALPHA,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_ALPHA,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 67: /(abc)def/ -> GROUP_START, CHAR(a), CHAR(b), CHAR(c), GROUP_END, CHAR(d), CHAR(e), CHAR(f)
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR
+    },
+    {
+        // Test 68: /abc(def)/ -> CHAR(a), CHAR(b), CHAR(c), GROUP_START, CHAR(d), CHAR(e), CHAR(f), GROUP_END
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 69: /abc(\d+)def/ -> CHAR(a), CHAR(b), CHAR(c), GROUP_START, DIGIT, PLUS, GROUP_END, CHAR(d), CHAR(e), CHAR(f)
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR
+    },
+    {
+        // Test 70: /()/ -> GROUP_START, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 71: /^(\d+)$/ -> BEGIN, GROUP_START, DIGIT, PLUS, GROUP_END, END
+        REGEX_TYPE_BEGIN,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_END
+    },
+    {
+        // Test 72: /(\d)(\w)(\s)/ -> GROUP_START, DIGIT, GROUP_END, GROUP_START, WORD, GROUP_END, GROUP_START, WHITESPACE, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_ALPHA,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_WHITESPACE,
+        REGEX_TYPE_GROUP_END
     }
 }
 

@@ -554,12 +554,53 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                 }
             }
             case '(': {
-                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                            __NAV_FOUNDATION_REGEX__,
-                                            'NAVRegexCompile',
-                                            "'Don`t support group constructs yet'")
+                // Start of capturing group
+                parser.groupCount++
 
-                return false
+                // Check if we've exceeded max groups
+                if (parser.groupCount > NAV_REGEX_MAX_GROUPS) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_REGEX__,
+                                                'NAVRegexCompile',
+                                                "'Too many capturing groups (max: ', itoa(NAV_REGEX_MAX_GROUPS), ')'")
+                    return false
+                }
+
+                // Push group number onto stack for validation
+                parser.groupDepth++
+                parser.groupStack[parser.groupDepth] = parser.groupCount
+
+                parser.count++
+                parser.state[parser.count].type = REGEX_TYPE_GROUP_START
+                // parser.state[parser.count].value = parser.groupCount
+
+                #IF_DEFINED REGEX_COMPILE_DEBUG
+                NAVLog("'[ Compile ]: GROUP_START - Group #', itoa(parser.groupCount), ' at depth ', itoa(parser.groupDepth)")
+                #END_IF
+            }
+            case ')': {
+                // End of capturing group
+
+                // Check if we have a matching opening parenthesis
+                if (parser.groupDepth == 0) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_REGEX__,
+                                                'NAVRegexCompile',
+                                                "'Unmatched closing parenthesis `)` in pattern'")
+                    return false
+                }
+
+                // Get the group number from the stack
+                parser.count++
+                parser.state[parser.count].type = REGEX_TYPE_GROUP_END
+                // parser.state[parser.count].value = parser.groupStack[parser.groupDepth]
+
+                #IF_DEFINED REGEX_COMPILE_DEBUG
+                NAVLog("'[ Compile ]: GROUP_END - Group #', itoa(parser.groupStack[parser.groupDepth]), ' at depth ', itoa(parser.groupDepth)")
+                #END_IF
+
+                // Pop from stack
+                parser.groupDepth--
             }
             case '[': {
                 if (!NAVRegexCompileCharacterClass(parser)) {
@@ -575,12 +616,27 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
         }
     }
 
+    // Validate that all groups are closed
+    if (parser.groupDepth != 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompile',
+                                    "'Unclosed capturing group - missing `)` in pattern'")
+        return false
+    }
+
     // Add UNUSED marker after last token
     parser.state[parser.count + 1].type = REGEX_TYPE_UNUSED
     set_length_array(parser.state, parser.count + 1)
 
     // Reset the pattern cursor to 1 for matching phase
     NAVRegexSetPatternCursor(parser, 'Compile', 0)
+
+    #IF_DEFINED REGEX_COMPILE_DEBUG
+    if (parser.groupCount > 0) {
+        NAVLog("'[ Compile ]: Pattern contains ', itoa(parser.groupCount), ' capturing group(s)'")
+    }
+    #END_IF
 
     return true
 }

@@ -92,6 +92,8 @@ constant integer REGEX_TYPE_HEX                    = 24
 constant integer REGEX_TYPE_NEWLINE                = 25
 constant integer REGEX_TYPE_RETURN                 = 26
 constant integer REGEX_TYPE_TAB                    = 27
+constant integer REGEX_TYPE_GROUP_START            = 28
+constant integer REGEX_TYPE_GROUP_END              = 29
 
 constant integer NAV_REGEX_TYPE_WILDCARD        = REGEX_TYPE_DOT
 constant integer NAV_REGEX_TYPE_CHARACTER       = REGEX_TYPE_CHAR
@@ -133,17 +135,19 @@ constant char REGEX_TYPES[][NAV_MAX_CHARS]  =   {
                                                     'HEX',
                                                     'NEWLINE',
                                                     'RETURN',
-                                                    'TAB'
+                                                    'TAB',
+                                                    'GROUP_START',
+                                                    'GROUP_END'
                                                 }
 
-constant integer NAV_REGEX_QUANTIFIER_EXACTLY_ONE  = 1  // '1'
-constant integer NAV_REGEX_QUANTIFIER_ZERO_OR_MORE = 2  // '*'
-constant integer NAV_REGEX_QUANTIFIER_ONE_OR_MORE  = 3  // '+'
-constant integer NAV_REGEX_QUANTIFIER_ZERO_OR_ONE  = 4  // '?'
+// constant integer NAV_REGEX_QUANTIFIER_EXACTLY_ONE  = 1  // '1'
+// constant integer NAV_REGEX_QUANTIFIER_ZERO_OR_MORE = 2  // '*'
+// constant integer NAV_REGEX_QUANTIFIER_ONE_OR_MORE  = 3  // '+'
+// constant integer NAV_REGEX_QUANTIFIER_ZERO_OR_ONE  = 4  // '?'
 
-constant sinteger NAV_REGEX_ERROR_INVALID_QUANTIFIER    = -1
-constant sinteger NAV_REGEX_ERROR_INVALID_ESCAPE        = -2
-constant sinteger NAV_REGEX_ERROR_INVALID_PATTERN       = -3
+// constant sinteger NAV_REGEX_ERROR_INVALID_QUANTIFIER    = -1
+// constant sinteger NAV_REGEX_ERROR_INVALID_ESCAPE        = -2
+// constant sinteger NAV_REGEX_ERROR_INVALID_PATTERN       = -3
 
 constant char REGEX_CHAR_DOT            = 46    // '.'
 constant char REGEX_CHAR_BEGIN          = 94    // '^'
@@ -265,6 +269,11 @@ struct _NAVRegexParser {
     _NAVRegexGroups groups
 
     _NAVRegexInput input
+
+    // Track capturing groups
+    integer groupCount
+    integer groupStack[NAV_REGEX_MAX_GROUPS]  // Stack of open group numbers for validation
+    integer groupDepth                         // Current nesting depth
 
     // Should the options live here or on the pattern?
     _NAVRegexOptions options
