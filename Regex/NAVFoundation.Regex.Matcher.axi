@@ -245,14 +245,6 @@ define_function char NAVRegexMatchOne(_NAVRegexParser parser) {
     stack_var char value
     stack_var char c
 
-    if (parser.input.cursor > parser.input.length) {
-        NAVRegexDebug(parser,
-                        'MatchOne',
-                        'Input cursor is greater than input length')
-
-        return false
-    }
-
     if (parser.pattern.cursor > parser.count) {
         NAVRegexDebug(parser,
                         'MatchOne',
@@ -262,8 +254,22 @@ define_function char NAVRegexMatchOne(_NAVRegexParser parser) {
     }
 
     type = parser.state[parser.pattern.cursor].type
-    value = parser.state[parser.pattern.cursor].value
 
+    // Check for zero-width assertions first (they don't require a character or valid input position)
+    switch (type) {
+        case REGEX_TYPE_WORD_BOUNDARY:      { return  NAVRegexMatchWordBoundary(parser) }
+        case REGEX_TYPE_NOT_WORD_BOUNDARY:  { return !NAVRegexMatchWordBoundary(parser) }
+    }
+
+    if (parser.input.cursor > parser.input.length) {
+        NAVRegexDebug(parser,
+                        'MatchOne',
+                        'Input cursor is greater than input length')
+
+        return false
+    }
+
+    value = parser.state[parser.pattern.cursor].value
     c = NAVCharCodeAt(parser.input.value, parser.input.cursor)
 
     if (!c) {
@@ -284,8 +290,6 @@ define_function char NAVRegexMatchOne(_NAVRegexParser parser) {
         case REGEX_TYPE_NOT_ALPHA:          { return !NAVRegexMatchAlphaNumeric(c) }
         case REGEX_TYPE_WHITESPACE:         { return  NAVRegexMatchWhitespace(c) }
         case REGEX_TYPE_NOT_WHITESPACE:     { return !NAVRegexMatchWhitespace(c) }
-        case REGEX_TYPE_WORD_BOUNDARY:      { return  NAVRegexMatchWordBoundary(parser) }
-        case REGEX_TYPE_NOT_WORD_BOUNDARY:  { return !NAVRegexMatchWordBoundary(parser) }
         case REGEX_TYPE_HEX:                { return  NAVRegexMatchHex(parser) }
         case REGEX_TYPE_TAB:                { return  (c == NAV_TAB) }
         case REGEX_TYPE_NEWLINE:            { return  (c == NAV_LF) }
@@ -587,8 +591,15 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
         // In C: while ((text[0] != '\0') && matchone(*pattern++, *text++))
 
         // Check if we've reached end of text
+        // BUT: Allow zero-width assertions (word boundaries) to be checked even at end of input
         if (parser.input.cursor > parser.input.length) {
-            break
+            stack_var integer nextType
+            nextType = parser.state[parser.pattern.cursor].type
+
+            // Only continue if next token is a zero-width assertion
+            if (nextType != REGEX_TYPE_WORD_BOUNDARY && nextType != REGEX_TYPE_NOT_WORD_BOUNDARY) {
+                break
+            }
         }
 
         #IF_DEFINED REGEX_MATCHER_DEBUG

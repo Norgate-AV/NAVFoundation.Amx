@@ -26,8 +26,8 @@ constant char REGEX_MATCH_TEST[][][255] = {
     { '/.*/', '', '0', '1', '1', '', 'false' },  // Should match epsilon
 
     // Basic quantifiers: ? (zero or one)
-    { '/\d?/', '1', '1', '1', '2', '1', 'true' },
-    { '/\w?/', 'x', '1', '1', '2', 'x', 'true' },
+    { '/\d?/', '1', '1', '1', '2', '1', 'false' },
+    { '/\w?/', 'x', '1', '1', '2', 'x', 'false' },
 
     // Mixed quantifiers
     { '/\d\w?\s/', '1a ', '3', '1', '4', '1a ', 'false' },
@@ -145,7 +145,7 @@ constant char REGEX_MATCH_TEST[][][255] = {
     { '/test\s+case/', 'testcase', '0', '0', '0', '', 'false' }  // Missing required space
 }
 
-constant char REGEX_MATCH_EXPECTED_RESULT[85] = {
+constant char REGEX_MATCH_EXPECTED_RESULT[] = {
     // Tests 1-43: Should all match (true)
     true,  // 1
     true,  // 2
@@ -201,7 +201,7 @@ constant char REGEX_MATCH_EXPECTED_RESULT[85] = {
     // true,  // 50 - Newline \n - COMMENTED OUT
     // true,  // 51 - Carriage return \r - COMMENTED OUT
 
-    // Tests 50-67: Should match (true)
+    // Tests 50-63: Should match (true)
     true,  // 50
     true,  // 51
     true,  // 52
@@ -216,28 +216,24 @@ constant char REGEX_MATCH_EXPECTED_RESULT[85] = {
     true,  // 61
     true,  // 62
     true,  // 63
-    true,  // 64
-    true,  // 65
-    true,  // 66
-    true,  // 67
 
-    // Tests 68-83: Should NOT match (false) - Negative tests
-    false, // 68 - Begin anchor failure (^abc vs xabc)
-    false, // 69 - Begin anchor failure (^\d+ vs abc123)
-    false, // 70 - Begin anchor failure (^[A-Z] vs test)
-    false, // 71 - End anchor failure (abc$ vs abcx)
-    false, // 72 - End anchor failure (\d+$ vs 123abc)
-    false, // 73 - Full string match failure (^abc$ vs abcd)
-    false, // 74 - Full string match failure (^\d+$ vs 123abc)
-    false, // 75 - Full string match failure (^[a-z]+$ vs Test)
-    false, // 76 - Required quantifier failure (\d+ vs abc)
-    false, // 77 - Required quantifier failure ([A-Z]+ vs test)
-    false, // 78 - Character class mismatch ([0-9]+ vs abc)
-    false, // 79 - Character class mismatch ([a-z]+ vs 123)
-    false, // 80 - Word boundary failure (\btest\b vs testing)
-    false, // 81 - Word boundary failure (\btest\b vs atest)
-    false, // 82 - Pattern too specific (\d\d\d vs 12)
-    false  // 83 - Pattern too specific (test\s+case vs testcase)
+    // Tests 64-83: Should NOT match (false) - Negative tests
+    false, // 64 - Begin anchor failure (^abc vs xabc)
+    false, // 65 - Begin anchor failure (^\d+ vs abc123)
+    false, // 66 - Begin anchor failure (^[A-Z] vs test)
+    false, // 67 - End anchor failure (abc$ vs abcx)
+    false, // 68 - End anchor failure (\d+$ vs 123abc)
+    false, // 69 - Full string match failure (^abc$ vs abcd)
+    false, // 70 - Full string match failure (^\d+$ vs 123abc)
+    false, // 71 - Full string match failure (^[a-z]+$ vs Test)
+    false, // 72 - Required quantifier failure (\d+ vs abc)
+    false, // 73 - Required quantifier failure ([A-Z]+ vs test)
+    false, // 74 - Character class mismatch ([0-9]+ vs abc)
+    false, // 75 - Character class mismatch ([a-z]+ vs 123)
+    false, // 76 - Word boundary failure (\btest\b vs testing)
+    false, // 77 - Word boundary failure (\btest\b vs atest)
+    false, // 78 - Pattern too specific (\d\d\d vs 12)
+    false  // 79 - Pattern too specific (test\s+case vs testcase)
 }
 
 define_function TestNAVRegexMatch() {
@@ -245,7 +241,7 @@ define_function TestNAVRegexMatch() {
 
     NAVLog("'***************** NAVRegexMatch *****************'")
 
-    for (x = 11; x <= 12; x++) {
+    for (x = 1; x <= length_array(REGEX_MATCH_TEST); x++) {
         stack_var char pattern[255]
         stack_var char text[255]
         stack_var char result
