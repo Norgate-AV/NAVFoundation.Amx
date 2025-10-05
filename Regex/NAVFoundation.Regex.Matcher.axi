@@ -127,10 +127,15 @@ define_function char NAVRegexMatchCharClassMetaChar(char c, char buffer[]) {
         case 'W':   { return !NAVRegexMatchAlphaNumeric(c) }
         case 's':   { return  NAVRegexMatchWhitespace(c) }
         case 'S':   { return !NAVRegexMatchWhitespace(c) }
-        // case 'x':   { return  NAVRegexMatchHex(c) }
-        // case 'n':   { return NAVRegexMatchNewline(c) }
-        // case 'r':   { return NAVRegexMatchReturn(c) }
-        // case 't':   { return NAVRegexMatchTab(c) }
+        case 'x':   {
+            // Match hex digit: 0-9, A-F, a-f
+            return (NAVIsDigit(c) ||
+                    (c >= 'A' && c <= 'F') ||
+                    (c >= 'a' && c <= 'f'))
+        }
+        case 'n':   { return (c == NAV_LF) }
+        case 'r':   { return (c == NAV_CR) }
+        case 't':   { return (c == NAV_TAB) }
         default:    { return (c == NAVCharCodeAt(buffer, 1)) }
     }
 }
@@ -187,13 +192,18 @@ define_function char NAVRegexMatchCharClass(_NAVRegexParser parser) {
         }
 
         if (NAVCharCodeAt(charclass, parser.state[parser.pattern.cursor].charclass.cursor) == '\') {
+            stack_var char buffer[MAX_CHAR_CLASS_LENGTH]
+
             NAVRegexDebug(parser,
                             'MatchCharClass',
                             'Escaped character')
 
             NAVRegexAdvancePatternCharClassCursor(parser, 'MatchCharClass', 1)
 
-            if (NAVRegexMatchCharClassMetaChar(c, charclass)) {
+            // Extract substring from current cursor position for meta character matching
+            buffer = right_string(charclass, length_array(charclass) - parser.state[parser.pattern.cursor].charclass.cursor + 1)
+
+            if (NAVRegexMatchCharClassMetaChar(c, buffer)) {
                 NAVRegexDebug(parser,
                                 'MatchCharClass',
                                 "'Matched meta character => "', c, '"'")

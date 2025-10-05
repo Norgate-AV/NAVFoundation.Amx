@@ -16,6 +16,7 @@
 #include 'NAVRegexMatchBoundaries.axi'
 #include 'NAVRegexMatchComplex.axi'
 #include 'NAVRegexMatchNegative.axi'
+#include 'NAVRegexMatchEscapedChars.axi'
 #END_IF
 
 #IF_DEFINED TESTING_REGEX_MATCH_COMPILED
@@ -35,6 +36,7 @@ define_function RunRegexTests() {
     TestNAVRegexMatchBoundaries()
     TestNAVRegexMatchComplex()
     TestNAVRegexMatchNegative()
+    TestNAVRegexMatchEscapedChars()
     #END_IF
 
     #IF_DEFINED TESTING_REGEX_MATCH_COMPILED
