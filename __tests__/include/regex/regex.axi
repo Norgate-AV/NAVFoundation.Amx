@@ -1,11 +1,7 @@
-// #DEFINE TESTING_REGEX_COMPILE
+#DEFINE TESTING_REGEX_COMPILE
 #DEFINE TESTING_REGEX_MATCH
 // #DEFINE TESTING_REGEX_MATCH_COMPILED
 #include 'NAVFoundation.Core.axi'
-
-// #DEFINE REGEX_COMPILE_DEBUG
-// #DEFINE REGEX_DEBUG
-// #DEFINE REGEX_MATCHER_DEBUG
 #include 'NAVFoundation.Regex.axi'
 #include 'NAVFoundation.Testing.axi'
 
@@ -14,7 +10,12 @@
 #END_IF
 
 #IF_DEFINED TESTING_REGEX_MATCH
-#include 'NAVRegexMatch.axi'
+#include 'NAVRegexMatchQuantifiers.axi'
+#include 'NAVRegexMatchCharClasses.axi'
+#include 'NAVRegexMatchAnchors.axi'
+#include 'NAVRegexMatchBoundaries.axi'
+#include 'NAVRegexMatchComplex.axi'
+#include 'NAVRegexMatchNegative.axi'
 #END_IF
 
 #IF_DEFINED TESTING_REGEX_MATCH_COMPILED
@@ -28,7 +29,12 @@ define_function RunRegexTests() {
     #END_IF
 
     #IF_DEFINED TESTING_REGEX_MATCH
-    TestNAVRegexMatch()
+    TestNAVRegexMatchQuantifiers()
+    TestNAVRegexMatchCharClasses()
+    TestNAVRegexMatchAnchors()
+    TestNAVRegexMatchBoundaries()
+    TestNAVRegexMatchComplex()
+    TestNAVRegexMatchNegative()
     #END_IF
 
     #IF_DEFINED TESTING_REGEX_MATCH_COMPILED
