@@ -6,7 +6,10 @@
 #include 'NAVFoundation.Testing.axi'
 
 #IF_DEFINED TESTING_REGEX_COMPILE
-#include 'NAVRegexCompile.axi'
+#include 'NAVRegexCompileBasic.axi'
+#include 'NAVRegexCompileCharClasses.axi'
+#include 'NAVRegexCompileBoundedQuantifiers.axi'
+#include 'NAVRegexCompileGroups.axi'
 #END_IF
 
 #IF_DEFINED TESTING_REGEX_MATCH
@@ -27,7 +30,10 @@
 
 define_function RunRegexTests() {
     #IF_DEFINED TESTING_REGEX_COMPILE
-    TestNAVRegexCompile()
+    TestNAVRegexCompileBasic()
+    TestNAVRegexCompileCharClasses()
+    TestNAVRegexCompileBoundedQuantifiers()
+    TestNAVRegexCompileGroups()
     #END_IF
 
     #IF_DEFINED TESTING_REGEX_MATCH
