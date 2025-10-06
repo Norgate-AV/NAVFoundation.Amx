@@ -105,7 +105,6 @@ constant integer REGEX_COMPILE_BASIC_EXPECTED_TOKENS[][] = {
     {
         REGEX_TYPE_BEGIN,
         REGEX_TYPE_CHAR_CLASS,
-        REGEX_TYPE_ALPHA,
         REGEX_TYPE_CHAR,
         REGEX_TYPE_CHAR,
         REGEX_TYPE_CHAR,
@@ -113,7 +112,6 @@ constant integer REGEX_COMPILE_BASIC_EXPECTED_TOKENS[][] = {
         REGEX_TYPE_CHAR,
         REGEX_TYPE_WHITESPACE,
         REGEX_TYPE_CHAR_CLASS,
-        REGEX_TYPE_ALPHA,
         REGEX_TYPE_CHAR,
         REGEX_TYPE_CHAR,
         REGEX_TYPE_CHAR,
@@ -124,7 +122,7 @@ constant integer REGEX_COMPILE_BASIC_EXPECTED_TOKENS[][] = {
     {
         REGEX_TYPE_BEGIN,
         REGEX_TYPE_CHAR,
-        REGEX_TYPE_CHAR_CLASS,
+        REGEX_TYPE_INV_CHAR_CLASS,
         REGEX_TYPE_STAR,
         REGEX_TYPE_CHAR
     },
