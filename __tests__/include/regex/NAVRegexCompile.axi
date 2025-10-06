@@ -183,7 +183,7 @@ constant char REGEX_COMPILE_PATTERN_TEST[][255] = {
     '/abc(\d+)def/',
 
     // Test 70: Empty group
-    '/()/)',
+    '/()/',
 
     // Test 71: Group with anchor
     '/^(\d+)$/',
