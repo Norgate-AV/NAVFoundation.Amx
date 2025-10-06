@@ -264,16 +264,16 @@ constant integer REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[] = {
     12,  // 59: /\d{3}\.\d{3}/ -> length 12 (\d{3}\.\d{3})
     10,  // 60: /[a-z]{2,5}/ -> length 10 ([a-z]{2,5})
     8,   // 61: /^\w{3,}$/ -> length 8 (^\w{3,}$)
-    6,   // 62: /(\d+)/ -> length 6 ((\d+))
-    12,  // 63: /(\d+)-(\w+)/ -> length 12 ((\d+)-(\w+))
-    8,   // 64: /(\d{3})/ -> length 8 ((\d{3}))
-    9,   // 65: /([a-z]+)/ -> length 9 (([a-z]+))
-    19,  // 66: /(\w+)@(\w+)\.(\w+)/ -> length 19
-    10,  // 67: /(abc)def/ -> length 10
-    10,  // 68: /abc(def)/ -> length 10
-    13,  // 69: /abc(\d+)def/ -> length 13
-    4,   // 70: /()/ -> length 4 (())
-    8,   // 71: /^(\d+)$/ -> length 8
+    5,   // 62: /(\d+)/ -> length 5 ((\d+))
+    11,  // 63: /(\d+)-(\w+)/ -> length 11 ((\d+)-(\w+))
+    7,   // 64: /(\d{3})/ -> length 7 ((\d{3}))
+    8,   // 65: /([a-z]+)/ -> length 8 (([a-z]+))
+    18,  // 66: /(\w+)@(\w+)\.(\w+)/ -> length 18
+    8,  // 67: /(abc)def/ -> length 8
+    8,  // 68: /abc(def)/ -> length 8
+    11,  // 69: /abc(\d+)def/ -> length 11
+    2,   // 70: /()/ -> length 2 (())
+    7,   // 71: /^(\d+)$/ -> length 7 (actual compiler output)
     12   // 72: /(\d)(\w)(\s)/ -> length 12
 }
 
@@ -342,14 +342,16 @@ constant integer REGEX_COMPILE_EXPECTED_TOKEN_COUNT[] = {
     5,   // 59: /\d{3}\.\d{3}/ -> DIGIT, QUANTIFIER, CHAR(.), DIGIT, QUANTIFIER
     2,   // 60: /[a-z]{2,5}/ -> CHAR_CLASS, QUANTIFIER
     4,   // 61: /^\w{3,}$/ -> BEGIN, WORD, QUANTIFIER, END
+
+    // Capturing groups
     4,   // 62: /(\d+)/ -> GROUP_START, DIGIT, PLUS, GROUP_END
-    8,   // 63: /(\d+)-(\w+)/ -> GROUP_START, DIGIT, PLUS, GROUP_END, CHAR(-), GROUP_START, WORD, PLUS, GROUP_END (9 tokens)
-    5,   // 64: /(\d{3})/ -> GROUP_START, DIGIT, QUANTIFIER, GROUP_END (4 tokens? Let me recalculate)
+    9,   // 63: /(\d+)-(\w+)/ -> GROUP_START, DIGIT, PLUS, GROUP_END, CHAR(-), GROUP_START, WORD, PLUS, GROUP_END
+    4,   // 64: /(\d{3})/ -> GROUP_START, DIGIT, QUANTIFIER, GROUP_END
     4,   // 65: /([a-z]+)/ -> GROUP_START, CHAR_CLASS, PLUS, GROUP_END
-    11,  // 66: /(\w+)@(\w+)\.(\w+)/ -> GROUP_START, WORD, PLUS, GROUP_END, CHAR(@), GROUP_START, WORD, PLUS, GROUP_END, CHAR(.), GROUP_START, WORD, PLUS, GROUP_END (14 tokens)
-    7,   // 67: /(abc)def/ -> GROUP_START, CHAR(a), CHAR(b), CHAR(c), GROUP_END, CHAR(d), CHAR(e), CHAR(f) (8 tokens)
-    7,   // 68: /abc(def)/ -> CHAR(a), CHAR(b), CHAR(c), GROUP_START, CHAR(d), CHAR(e), CHAR(f), GROUP_END (8 tokens)
-    8,   // 69: /abc(\d+)def/ -> CHAR(a), CHAR(b), CHAR(c), GROUP_START, DIGIT, PLUS, GROUP_END, CHAR(d), CHAR(e), CHAR(f) (10 tokens)
+    14,  // 66: /(\w+)@(\w+)\.(\w+)/ -> GROUP_START, WORD, PLUS, GROUP_END, CHAR(@), GROUP_START, WORD, PLUS, GROUP_END, CHAR(.), GROUP_START, WORD, PLUS, GROUP_END
+    8,   // 67: /(abc)def/ -> GROUP_START, CHAR(a), CHAR(b), CHAR(c), GROUP_END, CHAR(d), CHAR(e), CHAR(f)
+    8,   // 68: /abc(def)/ -> CHAR(a), CHAR(b), CHAR(c), GROUP_START, CHAR(d), CHAR(e), CHAR(f), GROUP_END
+    10,   // 69: /abc(\d+)def/ -> CHAR(a), CHAR(b), CHAR(c), GROUP_START, DIGIT, PLUS, GROUP_END, CHAR(d), CHAR(e), CHAR(f)
     2,   // 70: /()/ -> GROUP_START, GROUP_END
     6,   // 71: /^(\d+)$/ -> BEGIN, GROUP_START, DIGIT, PLUS, GROUP_END, END
     9    // 72: /(\d)(\w)(\s)/ -> GROUP_START, DIGIT, GROUP_END, GROUP_START, WORD, GROUP_END, GROUP_START, WHITESPACE, GROUP_END
@@ -877,13 +879,13 @@ define_function TestNAVRegexCompile() {
             continue
         }
 
-        if (!NAVAssertIntegerEqual('Should have correct pattern length', parser.pattern.length, REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[x])) {
+        if (!NAVAssertIntegerEqual('Should have correct pattern length', REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[x], parser.pattern.length)) {
             NAVLogTestFailed(x, itoa(REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[x]), itoa(parser.pattern.length))
             continue
         }
 
         // Simple token count assertion - much easier to maintain
-        if (!NAVAssertIntegerEqual('Should compile to correct amount of tokens', parser.count, REGEX_COMPILE_EXPECTED_TOKEN_COUNT[x])) {
+        if (!NAVAssertIntegerEqual('Should compile to correct amount of tokens', REGEX_COMPILE_EXPECTED_TOKEN_COUNT[x], parser.count)) {
             NAVLogTestFailed(x, itoa(REGEX_COMPILE_EXPECTED_TOKEN_COUNT[x]), itoa(parser.count))
             continue
         }
@@ -894,7 +896,7 @@ define_function TestNAVRegexCompile() {
             stack_var char failed
 
             for (y = 1; y <= parser.count; y++) {
-                if (!NAVAssertIntegerEqual("'Token ', itoa(y), ' should be correct'", parser.state[y].type, REGEX_COMPILE_EXPECTED_TOKENS[x][y])) {
+                if (!NAVAssertIntegerEqual("'Token ', itoa(y), ' should be correct'", REGEX_COMPILE_EXPECTED_TOKENS[x][y], parser.state[y].type)) {
                     NAVLogTestFailed(x, NAVRegexGetTokenType(REGEX_COMPILE_EXPECTED_TOKENS[x][y]), NAVRegexGetTokenType(parser.state[y].type))
                     failed = true
                     break
