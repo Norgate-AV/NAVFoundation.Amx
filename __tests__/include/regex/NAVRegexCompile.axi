@@ -189,172 +189,79 @@ constant char REGEX_COMPILE_PATTERN_TEST[][255] = {
     '/^(\d+)$/',
 
     // Test 72: Multiple adjacent groups
-    '/(\d)(\w)(\s)/'
-}
+    '/(\d)(\w)(\s)/',
 
-constant integer REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[] = {
-    3,   // 1:  /\d+/ -> length 3
-    3,   // 2:  /\w+/ -> length 3
-    3,   // 3:  /\w*/ -> length 3
-    2,   // 4:  /\s/ -> length 2
-    3,   // 5:  /\s+/ -> length 3
-    3,   // 6:  /\s*/ -> length 3
-    7,   // 7:  /\d\w?\s/ -> length 7
-    7,   // 8:  /\d\w\s+/ -> length 7
-    8,   // 9:  /\d?\w\s*/ -> length 8
-    3,   // 10: /\D+/ -> length 3
-    3,   // 11: /\D*/ -> length 3
-    4,   // 12: /\D\s/ -> length 4
-    3,   // 13: /\W+/ -> length 3
-    3,   // 14: /\S*/ -> length 3
-    15,  // 15: /^[a-zA-Z0-9_]+$/ -> length 15
-    22,  // 16: /^[Hh]ello,\s[Ww]orld!$/ -> length 22
-    8,  // 17: /^"[^"]*"/ -> length 8
-    2,   // 18: /.*/ -> length 2
+    // Test 73: Group with dot wildcard
+    '/(.+)/',
 
-    // Test 19: IP address pattern -> length 38
-    38,
+    // Test 74: Group with star quantifier
+    '/(a*)b/',
 
-    // Test 20: Single question mark - should compile to length = 3
-    3,
+    // Test 75: Multiple groups with literals between
+    '/(hello)-(world)/',
 
-    // Test 21: Two question marks - should compile to length = 6
-    6,
+    // Test 76: Group with word boundary
+    '/\b(\w+)\b/',
 
-    // Test 22: Three question marks - should compile to length = 8
-    8,
+    // Test 77: Group at beginning with anchor
+    '/^(test)/',
 
-    // Additional test cases
-    5,   // 23: /^...$/ -> length 5
-    6,   // 24: /\d\w\s/ -> length 6
-    6,   // 25: /a?b*c+/ -> length 6 (FIXED: was 8)
-    8,   // 26: /\.\*\+\?/ -> length 8
-    8,   // 27: /[a-zA-Z]/ -> length 8 (FIXED: was 7)
-    6,   // 28: /[^0-9]/ -> length 6
-    8,   // 29: /[abc123]/ -> length 8 (FIXED: was 9)
-    5,   // 30: /^\d+$/ -> length 5
-    8,   // 31: /\bword\b/ -> length 8 (FIXED: was 10)
-    12,  // 32: /\w+@\w+\.\w+/ -> length 12 (FIXED: was 13)
-    9,   // 33: /\d*\w+\s*/ -> length 9 (FIXED: was 11)
-    6,   // 34: /\D\W\S/ -> length 6
-    6,   // 35: /[a-z-]/ -> length 6 (FIXED: was 7)
-    6,   // 36: /.*\..*/ -> length 6 (FIXED: was 9)
-    15,  // 37: /[abc][def][ghi]/ -> length 15
-    8,   // 38: /\d\d?\d?/ -> length 8 (FIXED: was 9)
-    5,   // 39: /^test/ -> length 5 (FIXED: was 6)
-    5,   // 40: /test$/ -> length 5 (FIXED: was 6)
-    8,   // 41: /[\d\w\s]/ -> length 8 (FIXED: was 9)
-    2,   // 42: /[]/ -> length 2
-    1,   // 43: /x/ -> length 1
-    5,   // 44: /hello/ -> length 5
-    12,  // 45: /[a-z]+[0-9]*/ -> length 12 (FIXED: was 15)
-    8,   // 46: /\Btest\B/ -> length 8
-    2,   // 47: /\t/ -> length 2
-    2,   // 48: /\n/ -> length 2
-    2,   // 49: /\r/ -> length 2
-    6,   // 50: /\t\n\r/ -> length 6
-    4,   // 51: /a{3}/ -> length 4 (a{3})
-    5,   // 52: /\d{5}/ -> length 5 (\d{5})
-    6,   // 53: /b{2,4}/ -> length 6 (b{2,4})
-    8,   // 54: /\w{1,10}/ -> length 8 (\w{1,10})
-    5,   // 55: /c{1,}/ -> length 5 (c{1,})
-    6,   // 56: /\s{0,}/ -> length 6 (\s{0,})
-    4,   // 57: /d{0}/ -> length 4 (d{0})
-    6,   // 58: /e{100}/ -> length 6 (e{100})
-    12,  // 59: /\d{3}\.\d{3}/ -> length 12 (\d{3}\.\d{3})
-    10,  // 60: /[a-z]{2,5}/ -> length 10 ([a-z]{2,5})
-    8,   // 61: /^\w{3,}$/ -> length 8 (^\w{3,}$)
-    5,   // 62: /(\d+)/ -> length 5 ((\d+))
-    11,  // 63: /(\d+)-(\w+)/ -> length 11 ((\d+)-(\w+))
-    7,   // 64: /(\d{3})/ -> length 7 ((\d{3}))
-    8,   // 65: /([a-z]+)/ -> length 8 (([a-z]+))
-    18,  // 66: /(\w+)@(\w+)\.(\w+)/ -> length 18
-    8,  // 67: /(abc)def/ -> length 8
-    8,  // 68: /abc(def)/ -> length 8
-    11,  // 69: /abc(\d+)def/ -> length 11
-    2,   // 70: /()/ -> length 2 (())
-    7,   // 71: /^(\d+)$/ -> length 7 (actual compiler output)
-    12   // 72: /(\d)(\w)(\s)/ -> length 12
-}
+    // Test 78: Group at end with anchor
+    '/(test)$/',
 
-// Expected token counts for each test - simpler than defining full parser state
-constant integer REGEX_COMPILE_EXPECTED_TOKEN_COUNT[] = {
-    2,   // 1:  /\d+/ -> DIGIT, PLUS
-    2,   // 2:  /\w+/ -> WORD, PLUS
-    2,   // 3:  /\w*/ -> WORD, STAR
-    1,   // 4:  /\s/ -> WHITESPACE
-    2,   // 5:  /\s+/ -> WHITESPACE, PLUS
-    2,   // 6:  /\s*/ -> WHITESPACE, STAR
-    4,   // 7:  /\d\w?\s/ -> DIGIT, WORD, QUESTIONMARK, WHITESPACE
-    4,   // 8:  /\d\w\s+/ -> DIGIT, WORD, WHITESPACE, PLUS
-    5,   // 9:  /\d?\w\s*/ -> DIGIT, QUESTIONMARK, WORD, WHITESPACE, STAR
-    2,   // 10: /\D+/ -> NOT_DIGIT, PLUS
-    2,   // 11: /\D*/ -> NOT_DIGIT, STAR
-    2,   // 12: /\D\s/ -> NOT_DIGIT, WHITESPACE
-    2,   // 13: /\W+/ -> NOT_WORD, PLUS
-    2,   // 14: /\S*/ -> NOT_WHITESPACE, STAR
-    4,   // 15: /^[a-zA-Z0-9_]+$/ -> BEGIN, CHAR_CLASS, PLUS, END
-    15,  // 16: /^[Hh]ello,\s[Ww]orld!$/ -> BEGIN + chars + END
-    5,   // 17: /^"[^"]*"/ -> BEGIN, CHAR, INV_CHAR_CLASS, STAR, CHAR
-    2,   // 18: /.*/ -> DOT, STAR
-    23,  // 19: /\d?\d?\d\.\d?\d?\d\.\d?\d?\d\.\d?\d?\d/ -> IP address (4 octets × 6 tokens + 3 dots)
-    2,   // 20: /\d?/ -> DIGIT, QUESTIONMARK
-    4,   // 21: /\d?\d?/ -> DIGIT, QUESTIONMARK, DIGIT, QUESTIONMARK
-    5,   // 22: /\d?\d?\d/ -> DIGIT, QUESTIONMARK, DIGIT, QUESTIONMARK, DIGIT
+    // Test 79: Group with escaped dot
+    '/(\.)/',
 
-    // Additional test cases
-    5,   // 23: /^...$/ -> BEGIN, DOT, DOT, DOT, END (FIXED: was 4)
-    3,   // 24: /\d\w\s/ -> DIGIT, WORD, WHITESPACE
-    6,   // 25: /a?b*c+/ -> CHAR, QUESTIONMARK, CHAR, STAR, CHAR, PLUS
-    4,   // 26: /\.\*\+\?/ -> CHAR(.), CHAR(*), CHAR(+), CHAR(?)
-    1,   // 27: /[a-zA-Z]/ -> CHAR_CLASS
-    1,   // 28: /[^0-9]/ -> INV_CHAR_CLASS
-    1,   // 29: /[abc123]/ -> CHAR_CLASS
-    4,   // 30: /^\d+$/ -> BEGIN, DIGIT, PLUS, END
-    6,   // 31: /\bword\b/ -> WORD_BOUNDARY, CHAR(w), CHAR(o), CHAR(r), CHAR(d), WORD_BOUNDARY
-    8,   // 32: /\w+@\w+\.\w+/ -> WORD, PLUS, CHAR(@), WORD, PLUS, CHAR(.), WORD, PLUS
-    6,   // 33: /\d*\w+\s*/ -> DIGIT, STAR, WORD, PLUS, WHITESPACE, STAR
-    3,   // 34: /\D\W\S/ -> NOT_DIGIT, NOT_WORD, NOT_WHITESPACE
-    1,   // 35: /[a-z-]/ -> CHAR_CLASS
-    5,   // 36: /.*\..*/ -> DOT, STAR, CHAR(.), DOT, STAR
-    3,   // 37: /[abc][def][ghi]/ -> CHAR_CLASS, CHAR_CLASS, CHAR_CLASS
-    5,   // 38: /\d\d?\d?/ -> DIGIT, DIGIT, QUESTIONMARK, DIGIT, QUESTIONMARK
-    5,   // 39: /^test/ -> BEGIN, CHAR(t), CHAR(e), CHAR(s), CHAR(t)
-    5,   // 40: /test$/ -> CHAR(t), CHAR(e), CHAR(s), CHAR(t), END
-    1,   // 41: /[\d\w\s]/ -> CHAR_CLASS
-    1,   // 42: /[]/ -> CHAR_CLASS (empty)
-    1,   // 43: /x/ -> CHAR
-    5,   // 44: /hello/ -> CHAR(h), CHAR(e), CHAR(l), CHAR(l), CHAR(o)
-    4,   // 45: /[a-z]+[0-9]*/ -> CHAR_CLASS, PLUS, CHAR_CLASS, STAR
-    6,   // 46: /\Btest\B/ -> NOT_WORD_BOUNDARY, CHAR(t), CHAR(e), CHAR(s), CHAR(t), NOT_WORD_BOUNDARY
-    1,   // 47: /\t/ -> TAB
-    1,   // 48: /\n/ -> NEWLINE
-    1,   // 49: /\r/ -> RETURN
-    3,   // 50: /\t\n\r/ -> TAB, NEWLINE, RETURN
-    2,   // 51: /a{3}/ -> CHAR, QUANTIFIER
-    2,   // 52: /\d{5}/ -> DIGIT, QUANTIFIER
-    2,   // 53: /b{2,4}/ -> CHAR, QUANTIFIER
-    2,   // 54: /\w{1,10}/ -> WORD, QUANTIFIER
-    2,   // 55: /c{1,}/ -> CHAR, QUANTIFIER
-    2,   // 56: /\s{0,}/ -> WHITESPACE, QUANTIFIER
-    2,   // 57: /d{0}/ -> CHAR, QUANTIFIER
-    2,   // 58: /e{100}/ -> CHAR, QUANTIFIER
-    5,   // 59: /\d{3}\.\d{3}/ -> DIGIT, QUANTIFIER, CHAR(.), DIGIT, QUANTIFIER
-    2,   // 60: /[a-z]{2,5}/ -> CHAR_CLASS, QUANTIFIER
-    4,   // 61: /^\w{3,}$/ -> BEGIN, WORD, QUANTIFIER, END
+    // Test 80: Group with plus on character class
+    '/([0-9]+)/',
 
-    // Capturing groups
-    4,   // 62: /(\d+)/ -> GROUP_START, DIGIT, PLUS, GROUP_END
-    9,   // 63: /(\d+)-(\w+)/ -> GROUP_START, DIGIT, PLUS, GROUP_END, CHAR(-), GROUP_START, WORD, PLUS, GROUP_END
-    4,   // 64: /(\d{3})/ -> GROUP_START, DIGIT, QUANTIFIER, GROUP_END
-    4,   // 65: /([a-z]+)/ -> GROUP_START, CHAR_CLASS, PLUS, GROUP_END
-    14,  // 66: /(\w+)@(\w+)\.(\w+)/ -> GROUP_START, WORD, PLUS, GROUP_END, CHAR(@), GROUP_START, WORD, PLUS, GROUP_END, CHAR(.), GROUP_START, WORD, PLUS, GROUP_END
-    8,   // 67: /(abc)def/ -> GROUP_START, CHAR(a), CHAR(b), CHAR(c), GROUP_END, CHAR(d), CHAR(e), CHAR(f)
-    8,   // 68: /abc(def)/ -> CHAR(a), CHAR(b), CHAR(c), GROUP_START, CHAR(d), CHAR(e), CHAR(f), GROUP_END
-    10,   // 69: /abc(\d+)def/ -> CHAR(a), CHAR(b), CHAR(c), GROUP_START, DIGIT, PLUS, GROUP_END, CHAR(d), CHAR(e), CHAR(f)
-    2,   // 70: /()/ -> GROUP_START, GROUP_END
-    6,   // 71: /^(\d+)$/ -> BEGIN, GROUP_START, DIGIT, PLUS, GROUP_END, END
-    9    // 72: /(\d)(\w)(\s)/ -> GROUP_START, DIGIT, GROUP_END, GROUP_START, WORD, GROUP_END, GROUP_START, WHITESPACE, GROUP_END
+    // Test 81: Multiple groups with different quantifiers
+    '/(\d+)\.(\d*)/',
+
+    // Test 82: Group with question mark
+    '/(https?)/',
+
+    // Test 83: Empty group at start
+    '/()abc/',
+
+    // Test 84: Empty group at end
+    '/abc()/',
+
+    // Test 85: Group with negated character class
+    '/([^a-z]+)/',
+
+    // Test 86: Multiple groups with anchors
+    '/^(\w+):(\d+)$/',
+
+    // Test 87: Group with optional quantifier
+    '/(\d)?/',
+
+    // Test 88: Complex email-like pattern
+    '/([a-zA-Z0-9]+)@([a-zA-Z0-9]+)\.([a-z]{2,})/',
+
+    // Test 89: Group with multiple character classes
+    '/([\d\w]+)/',
+
+    // Test 90: Group with escaped parenthesis inside
+    '/(\\\()/',
+
+    // Test 91: IPv4-like pattern with groups
+    '/(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/',
+
+    // Test 92: URL-like pattern
+    '/(https?):\/\/(\w+)/',
+
+    // Test 93: Group with whitespace
+    '/(\s+)/',
+
+    // Test 94: Multiple empty groups
+    '/()()()/',
+
+    // Test 95: Group with boundaries
+    '/\b(\d+)\b/',
+
+    // Test 96: Group with begin and end
+    '/^(.*)$/'
 }
 
 constant integer REGEX_COMPILE_EXPECTED_TOKENS[][] = {
@@ -862,6 +769,253 @@ constant integer REGEX_COMPILE_EXPECTED_TOKENS[][] = {
         REGEX_TYPE_GROUP_START,
         REGEX_TYPE_WHITESPACE,
         REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 73: /(.+)/ -> GROUP_START, DOT, PLUS, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DOT,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 74: /(a*)b/ -> GROUP_START, CHAR, STAR, GROUP_END, CHAR
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_STAR,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR
+    },
+    {
+        // Test 75: /(hello)-(world)/ -> GROUP_START, 5xCHAR, GROUP_END, CHAR(-), GROUP_START, 5xCHAR, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 76: /\b(\w+)\b/ -> WORD_BOUNDARY, GROUP_START, WORD, PLUS, GROUP_END, WORD_BOUNDARY
+        REGEX_TYPE_WORD_BOUNDARY,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_ALPHA,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_WORD_BOUNDARY
+    },
+    {
+        // Test 77: /^(test)/ -> BEGIN, GROUP_START, 4xCHAR, GROUP_END
+        REGEX_TYPE_BEGIN,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 78: /(test)$/ -> GROUP_START, 4xCHAR, GROUP_END, END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_END
+    },
+    {
+        // Test 79: /(\.)/ -> GROUP_START, CHAR(.), GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 80: /([0-9]+)/ -> GROUP_START, CHAR_CLASS, PLUS, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR_CLASS,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 81: /(\d+)\.(\d*)/ -> GROUP_START, DIGIT, PLUS, GROUP_END, CHAR(.), GROUP_START, DIGIT, STAR, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_STAR,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 82: /(https?)/ -> GROUP_START, 5xCHAR(https), QUESTIONMARK, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 83: /()abc/ -> GROUP_START, GROUP_END, 3xCHAR
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR
+    },
+    {
+        // Test 84: /abc()/ -> 3xCHAR, GROUP_START, GROUP_END
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 85: /([^a-z]+)/ -> GROUP_START, INV_CHAR_CLASS, PLUS, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_INV_CHAR_CLASS,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 86: /^(\w+):(\d+)$/ -> BEGIN, GROUP_START, WORD, PLUS, GROUP_END, CHAR(:), GROUP_START, DIGIT, PLUS, GROUP_END, END
+        REGEX_TYPE_BEGIN,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_ALPHA,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_END
+    },
+    {
+        // Test 87: /(\d)?/ -> GROUP_START, DIGIT, GROUP_END, QUESTION
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_QUESTIONMARK
+    },
+    {
+        // Test 88: /([a-zA-Z0-9]+)@([a-zA-Z0-9]+)\.([a-z]{2,})/ -> GROUP_START, CHAR_CLASS, PLUS, GROUP_END, CHAR(@), GROUP_START, CHAR_CLASS, PLUS, GROUP_END, CHAR(.), GROUP_START, CHAR_CLASS, QUANTIFIER, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR_CLASS,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR_CLASS,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR_CLASS,
+        REGEX_TYPE_QUANTIFIER,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 89: /([\d\w]+)/ -> GROUP_START, CHAR_CLASS, PLUS, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR_CLASS,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 90: /(\\\()/ -> GROUP_START, CHAR(\\), CHAR(\(), GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 91: /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/ -> 4x(GROUP_START, DIGIT, QUANTIFIER, GROUP_END) + 3xCHAR(.)
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUANTIFIER,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUANTIFIER,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUANTIFIER,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_QUANTIFIER,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 92: /(https?):\/\/(\w+)/ -> GROUP_START, 5xCHAR(https), QUESTIONMARK, GROUP_END, CHAR(:), 2xCHAR(/), GROUP_START, WORD, PLUS, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_QUESTIONMARK,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_CHAR,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_ALPHA,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 93: /(\s+)/ -> GROUP_START, WHITESPACE, PLUS, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_WHITESPACE,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 94: /()()()/ -> GROUP_START, GROUP_END, GROUP_START, GROUP_END, GROUP_START, GROUP_END
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_GROUP_END
+    },
+    {
+        // Test 95: /\b(\d+)\b/ -> WORD_BOUNDARY, GROUP_START, DIGIT, PLUS, GROUP_END, WORD_BOUNDARY
+        REGEX_TYPE_WORD_BOUNDARY,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DIGIT,
+        REGEX_TYPE_PLUS,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_WORD_BOUNDARY
+    },
+    {
+        // Test 96: /^(.*)$/ -> BEGIN, GROUP_START, DOT, STAR, GROUP_END, END
+        REGEX_TYPE_BEGIN,
+        REGEX_TYPE_GROUP_START,
+        REGEX_TYPE_DOT,
+        REGEX_TYPE_STAR,
+        REGEX_TYPE_GROUP_END,
+        REGEX_TYPE_END
     }
 }
 
@@ -873,20 +1027,17 @@ define_function TestNAVRegexCompile() {
 
     for (x = 1; x <= length_array(REGEX_COMPILE_PATTERN_TEST); x++) {
         stack_var _NAVRegexParser parser
+        stack_var integer expectedTokenCount
 
         if (!NAVAssertTrue('Should compile successfully', NAVRegexCompile(REGEX_COMPILE_PATTERN_TEST[x], parser))) {
             NAVLogTestFailed(x, 'true', 'false')
             continue
         }
 
-        if (!NAVAssertIntegerEqual('Should have correct pattern length', REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[x], parser.pattern.length)) {
-            NAVLogTestFailed(x, itoa(REGEX_COMPILE_EXPECTED_PATTERN_LENGTH[x]), itoa(parser.pattern.length))
-            continue
-        }
-
-        // Simple token count assertion - much easier to maintain
-        if (!NAVAssertIntegerEqual('Should compile to correct amount of tokens', REGEX_COMPILE_EXPECTED_TOKEN_COUNT[x], parser.count)) {
-            NAVLogTestFailed(x, itoa(REGEX_COMPILE_EXPECTED_TOKEN_COUNT[x]), itoa(parser.count))
+        // Verify the correct number of tokens were generated
+        expectedTokenCount = length_array(REGEX_COMPILE_EXPECTED_TOKENS[x])
+        if (!NAVAssertIntegerEqual('Should compile to correct amount of tokens', expectedTokenCount, parser.count)) {
+            NAVLogTestFailed(x, itoa(expectedTokenCount), itoa(parser.count))
             continue
         }
 
