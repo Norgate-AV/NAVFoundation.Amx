@@ -162,6 +162,32 @@ define_function char NAVRegexParserParseOptions(_NAVRegexParser parser, char pat
 }
 
 
+// define_function char NAVRegexCompilerCanQuantify(_NAVRegexParser parser) {
+//     // Check if there's a previous token that can be quantified
+//     if (parser.count == 0) {
+//         return false  // No previous token
+//     }
+
+//     // Check if previous token is already a quantifier
+//     switch (parser.state[parser.count].type) {
+//         case REGEX_TYPE_STAR:
+//         case REGEX_TYPE_PLUS:
+//         case REGEX_TYPE_QUESTIONMARK:
+//         case REGEX_TYPE_EXACT:
+//         case REGEX_TYPE_ATLEAST:
+//         case REGEX_TYPE_BETWEEN: {
+//             return false  // Can't quantify a quantifier
+//         }
+//         case REGEX_TYPE_BEGIN:
+//         case REGEX_TYPE_END: {
+//             return false  // Can't quantify anchors
+//         }
+//     }
+
+//     return true
+// }
+
+
 define_function char NAVRegexCompileBoundedQuantifier(_NAVRegexParser parser) {
     stack_var char buffer[20]
     stack_var integer length
@@ -229,6 +255,14 @@ define_function char NAVRegexCompileBoundedQuantifier(_NAVRegexParser parser) {
         // No comma, just {n}
         minVal = atoi(buffer)
         maxVal = minVal
+    }
+    else if (commaPos == 1) {
+        // Starts with comma: {,m} is invalid (missing minimum)
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompileBoundedQuantifier',
+                                    "'Missing minimum value in bounded quantifier'")
+        return false
     }
     else if (commaPos == length) {
         // Ends with comma: {n,} means n or more (unlimited)
@@ -555,19 +589,38 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
             }
             case '(': {
                 // Start of capturing group
-                parser.groupCount++
 
-                // Check if we've exceeded max groups
-                if (parser.groupCount > NAV_REGEX_MAX_GROUPS) {
-                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                __NAV_FOUNDATION_REGEX__,
-                                                'NAVRegexCompile',
-                                                "'Too many capturing groups (max: ', itoa(NAV_REGEX_MAX_GROUPS), ')'")
+                // Check if we've exceeded max groups BEFORE incrementing
+                // if (parser.groupCount >= NAV_REGEX_MAX_GROUPS) {
+                //     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                //                                 __NAV_FOUNDATION_REGEX__,
+                //                                 'NAVRegexCompile',
+                //                                 "'Too many capturing groups (max: ', itoa(NAV_REGEX_MAX_GROUPS), ')'")
+                //     return false
+                // }
+
+                // parser.groupCount++
+
+                if (!NAVRegexCompileIncrementGroupCount(parser)) {
                     return false
                 }
 
+                // Check depth before using as array index
+                // if (parser.groupDepth >= NAV_REGEX_MAX_GROUPS) {
+                //     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                //                                 __NAV_FOUNDATION_REGEX__,
+                //                                 'NAVRegexCompile',
+                //                                 "'Group nesting too deep (max: ', itoa(NAV_REGEX_MAX_GROUPS), ')'")
+                //     return false
+                // }
+
                 // Push group number onto stack for validation
-                parser.groupDepth++
+                // parser.groupDepth++
+
+                if (!NAVRegexCompilerIncrementGroupDepth(parser)) {
+                    return false
+                }
+
                 parser.groupStack[parser.groupDepth] = parser.groupCount
 
                 parser.count++
@@ -581,15 +634,6 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
             case ')': {
                 // End of capturing group
 
-                // Check if we have a matching opening parenthesis
-                if (parser.groupDepth == 0) {
-                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                __NAV_FOUNDATION_REGEX__,
-                                                'NAVRegexCompile',
-                                                "'Unmatched closing parenthesis `)` in pattern'")
-                    return false
-                }
-
                 // Get the group number from the stack
                 parser.count++
                 parser.state[parser.count].type = REGEX_TYPE_GROUP_END
@@ -599,8 +643,10 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                 NAVLog("'[ Compile ]: GROUP_END - Group #', itoa(parser.groupStack[parser.groupDepth]), ' at depth ', itoa(parser.groupDepth)")
                 #END_IF
 
-                // Pop from stack
-                parser.groupDepth--
+                // Validate and pop from stack
+                if (!NAVRegexCompilerDecrementGroupDepth(parser)) {
+                    return false
+                }
             }
             case '[': {
                 if (!NAVRegexCompileCharacterClass(parser)) {
@@ -622,6 +668,14 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                                     __NAV_FOUNDATION_REGEX__,
                                     'NAVRegexCompile',
                                     "'Unclosed capturing group - missing `)` in pattern'")
+        return false
+    }
+
+    if (parser.count >= MAX_REGEXP_OBJECTS) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompile',
+                                    "'Pattern too complex - exceeded maximum number of tokens (', itoa(MAX_REGEXP_OBJECTS), ')'")
         return false
     }
 
@@ -685,6 +739,58 @@ define_function NAVRegexPrintState(_NAVRegexParser parser) {
     }
 
     NAVLog("'[ End Pattern Tokens ]'")
+}
+
+
+define_function char NAVRegexCompileIncrementGroupCount(_NAVRegexParser parser) {
+    // Check if we've exceeded max groups BEFORE incrementing
+    if (parser.groupCount >= NAV_REGEX_MAX_GROUPS) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompileIncrementGroupCount',
+                                    "'Too many capturing groups (max: ', itoa(NAV_REGEX_MAX_GROUPS), ')'")
+        return false
+    }
+
+    parser.groupCount++
+
+    return true
+}
+
+
+define_function char NAVRegexCompilerIncrementGroupDepth(_NAVRegexParser parser) {
+    // Check depth before using as array index
+    if (parser.groupDepth >= NAV_REGEX_MAX_GROUPS) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompilerIncrementGroupDepth',
+                                    "'Group nesting too deep (max: ', itoa(NAV_REGEX_MAX_GROUPS), ')'")
+        return false
+    }
+
+    parser.groupDepth++
+
+    // Push group number onto stack for validation
+    // parser.groupStack[parser.groupDepth] = parser.groupCount
+
+    return true
+}
+
+
+define_function char NAVRegexCompilerDecrementGroupDepth(_NAVRegexParser parser) {
+    // Check if we have a matching opening parenthesis
+    if (parser.groupDepth <= 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompileDecreaseGroupDepth',
+                                    "'Unmatched closing parenthesis `)` in pattern'")
+        return false
+    }
+
+    // Pop from stack
+    parser.groupDepth--
+
+    return true
 }
 
 
