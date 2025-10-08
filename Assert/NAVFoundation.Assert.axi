@@ -239,6 +239,22 @@ define_function char NAVAssertDoubleEqual(char testName[], double expected, doub
 
 
 /**
+ * @function NAVAssertBooleanEqual
+ * @description Test if two boolean values are equal and log the result.
+ *              This is an alias for NAVAssertCharEqual for better readability.
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {char} expected - Expected boolean value (0 or 1)
+ * @param {char} actual - Actual boolean value (0 or 1)
+ *
+ * @returns {char} true if equal, false otherwise
+ */
+define_function char NAVAssertBooleanEqual(char testName[], char expected, char actual) {
+    return NAVAssertCharEqual(testName, expected, actual)
+}
+
+
+/**
  * @function NAVAssertStringEqual
  * @description Test if two string values are equal and log the result
  *
