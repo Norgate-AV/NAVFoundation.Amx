@@ -345,4 +345,96 @@ define_function NAVParseQueryString(char buffer[], _NAVKeyStringValuePair querie
 }
 
 
+/**
+ * @function NAVValidateUrl
+ * @description Validates a URL string according to specified criteria.
+ *
+ * This function performs validation checks on a URL to ensure it meets
+ * the requirements for a valid URL. It can optionally check that the
+ * scheme matches one from a list of allowed schemes, validate port ranges,
+ * and ensure required components are present.
+ *
+ * @param {char[]} buffer - The URL string to validate
+ * @param {char[][]} allowedSchemes - Array of allowed schemes (e.g., 'http', 'https').
+ *                                     Pass an empty array to skip scheme validation.
+ * @param {integer} requireScheme - If true, URL must have a scheme (default: false)
+ * @param {integer} requireHost - If true, URL must have a non-empty host (default: true)
+ *
+ * @returns {integer} - Returns true if the URL is valid, false otherwise
+ *
+ * @example
+ * stack_var char url[255]
+ * stack_var char schemes[2][10]
+ * stack_var integer result
+ *
+ * // Validate HTTP/HTTPS URL
+ * url = 'https://example.com:8080/path'
+ * schemes[1] = 'http'
+ * schemes[2] = 'https'
+ * set_length_array(schemes, 2)
+ * result = NAVValidateUrl(url, schemes, true, true)
+ * // Returns true - valid HTTPS URL with proper port
+ *
+ * @example
+ * // Invalid port range
+ * url = 'http://example.com:99999/path'
+ * result = NAVValidateUrl(url, schemes, true, true)
+ * // Returns false - port exceeds 65535
+ *
+ * @example
+ * // Invalid scheme
+ * url = 'ftp://example.com/file'
+ * result = NAVValidateUrl(url, schemes, true, true)
+ * // Returns false - 'ftp' not in allowed schemes
+ *
+ * @note This function uses NAVParseUrl internally, so the URL must be parseable
+ * @note Port validation checks that port is in range 1-65535 if specified
+ * @note Scheme validation is case-insensitive
+ * @see NAVParseUrl
+ */
+define_function integer NAVValidateUrl(char buffer[], char allowedSchemes[][], integer requireScheme, integer requireHost) {
+    stack_var _NAVUrl url
+    stack_var integer x
+    stack_var integer schemeValid
+
+    // First, try to parse the URL
+    if (!NAVParseUrl(buffer, url)) {
+        return false
+    }
+
+    // Check if scheme is required
+    if (requireScheme && !length_array(url.Scheme)) {
+        return false
+    }
+
+    // Check if scheme is in allowed list (if provided)
+    if (max_length_array(allowedSchemes) > 0 && length_array(url.Scheme)) {
+        schemeValid = false
+
+        for (x = 1; x <= max_length_array(allowedSchemes); x++) {
+            if (lower_string(url.Scheme) == lower_string(allowedSchemes[x])) {
+                schemeValid = true
+                break
+            }
+        }
+
+        if (!schemeValid) {
+            return false
+        }
+    }
+
+    // Check if host is required and present
+    if (requireHost && !length_array(url.Host)) {
+        return false
+    }
+
+    // Validate port range if port is specified
+    if (url.Port > 0 && (url.Port < 1 || url.Port > 65535)) {
+        return false
+    }
+
+    return true
+}
+
+
 #END_IF // __NAV_FOUNDATION_URL__
