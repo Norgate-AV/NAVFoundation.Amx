@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.5.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.4.3...v3.5.0) (2025-10-09)
+
+### 🌟 Features
+
+- **assert:** add NAVAssertBooleanEqual ([92b7e13](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/92b7e13df0e05dae34d5112065ae2e2a1090360b))
+- **url:** add NAVValidateUrl function ([697595c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/697595cd9f4c2a5008c2a365acc29d2dd86ac1cc))
+
+### 🐛 Bug Fixes
+
+- **url:** various fixes and improvements ([2c2f32a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/2c2f32a94ea4449011e5633f681a0873229d18fc))
+
 ## [3.4.3](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.4.2...v3.4.3) (2025-10-02)
 
 ### 🐛 Bug Fixes
