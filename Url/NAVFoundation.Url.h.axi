@@ -73,6 +73,28 @@ constant char NAV_URL_QUERY_TOKEN[]      = '?'
 constant char NAV_URL_FRAGMENT_TOKEN[]   = '#'
 
 /**
+ * @constant NAV_MAX_URL_SCHEME
+ * @description Maximum length for URL scheme strings.
+ * This matches the size of the Scheme field in _NAVUrl structure.
+ */
+constant integer NAV_MAX_URL_SCHEME      = 16
+
+/**
+ * @constant NAV_URL_DEFAULT_PORT_*
+ * @description Default ports for standard URL schemes per RFC 3986 Section 6.2.3.
+ * When a URL uses the default port for its scheme, the port should be omitted
+ * during normalization for canonical form.
+ */
+constant integer NAV_URL_DEFAULT_PORT_HTTP       = 80
+constant integer NAV_URL_DEFAULT_PORT_HTTPS      = 443
+constant integer NAV_URL_DEFAULT_PORT_FTP        = 21
+constant integer NAV_URL_DEFAULT_PORT_SFTP       = 22
+constant integer NAV_URL_DEFAULT_PORT_RTSP       = 554
+constant integer NAV_URL_DEFAULT_PORT_RTSPS      = 322
+constant integer NAV_URL_DEFAULT_PORT_WS         = 80
+constant integer NAV_URL_DEFAULT_PORT_WSS        = 443
+
+/**
  * @constant NAV_URL_MAX_QUERIES
  * @description Maximum number of query parameters supported in a URL.
  */
@@ -82,6 +104,28 @@ constant integer NAV_URL_MAX_QUERIES      = 30
 DEFINE_TYPE
 
 /**
+ * @struct _NAVUrlUserInfo
+ * @description Structure for holding URL userinfo (username and password).
+ *
+ * This structure stores the username and password extracted from URL userinfo
+ * component (e.g., "username:password@" in "http://username:password@example.com").
+ *
+ * @warning Per RFC 2396, passing authentication information in clear text URLs
+ *          is NOT RECOMMENDED as it poses security risks. This functionality
+ *          should only be used with legacy systems.
+ *
+ * @property {char[128]} Username - The username portion of userinfo
+ * @property {char[128]} Password - The password portion of userinfo
+ *
+ * @see _NAVUrl
+ * @see NAVParseUrl
+ */
+struct _NAVUrlUserInfo {
+    char Username[128];
+    char Password[128];
+}
+
+/**
  * @struct _NAVUrl
  * @description Structure for holding parsed URL components.
  *
@@ -89,6 +133,8 @@ DEFINE_TYPE
  * path, query parameters, and fragment.
  *
  * @property {char[16]} Scheme - The URL scheme (http, https, etc.)
+ * @property {_NAVUrlUserInfo} UserInfo - The username and password from URL
+ * @property {char} HasUserInfo - Boolean flag indicating if userinfo is present
  * @property {char[512]} Host - The hostname or IP address
  * @property {integer} Port - The port number, or 0 if not specified
  * @property {char[256]} Path - The URL path without query or fragment
@@ -101,6 +147,8 @@ DEFINE_TYPE
  */
 struct _NAVUrl {
     char Scheme[16];
+    _NAVUrlUserInfo UserInfo;
+    char HasUserInfo;
     char Host[512];
     integer Port;
     char Path[256];
