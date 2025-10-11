@@ -62,3 +62,4 @@ build:
       - ./__tests__/include/array-utils
       - ./__tests__/include/stack
       - ./__tests__/include/encoding
+      - ./__tests__/include/tui
