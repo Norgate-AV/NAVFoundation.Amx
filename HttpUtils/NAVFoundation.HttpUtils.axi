@@ -44,7 +44,7 @@ SOFTWARE.
  */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_HTTPUTILS__
-#DEFINE __NAV_FOUNDATION_HTTPUTILS__ 'NAVFoundation.HttpUtils'
+#DEFINE __NAV_FOUNDATION_HTTPUTILS__ 'NAVFoundation.Http.Utils'
 
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.HttpUtils.h.axi'
@@ -83,6 +83,31 @@ define_function char NAVHttpRequestInit(_NAVHttpRequest req,
                                         char method[],
                                         _NAVUrl url,
                                         char body[]) {
+    stack_var char scheme[10]
+
+    // Validate URL for HTTP/HTTPS requirements:
+    // - Scheme MUST be present and must be 'http' or 'https'
+    // - Host must be present and not empty
+    // Note: Port validation has limitations due to integer overflow in atoi()
+    //       Ports > 65535 will wrap around and appear valid
+
+    // HTTP requests MUST have a scheme
+    if (!length_array(url.Scheme)) {
+        return false
+    }
+
+    // Scheme must be http or https (case-insensitive)
+    scheme = lower_string(url.Scheme)
+
+    if (scheme != 'http' && scheme != 'https') {
+        return false
+    }
+
+    // Check if host is present and not empty
+    if (!length_array(url.Host)) {
+        return false
+    }
+
     req.Version = NAV_HTTP_VERSION_1_1
 
     req.Method = method
@@ -105,7 +130,6 @@ define_function char NAVHttpRequestInit(_NAVHttpRequest req,
 
     return true
 }
-
 
 /**
  * @function NAVHttpStatusInit
@@ -150,7 +174,7 @@ define_function NAVHttpResponseInit(_NAVHttpResponse res) {
  *
  * This converts the header name to train case (capitalized words separated by hyphens).
  *
- * @param {_NAVKeyStringValuePair} header - The header structure to initialize
+ * @param {_NAVHttpHeader} header - The header structure to initialize
  * @param {char[]} key - Header name
  * @param {char[]} value - Header value
  *
@@ -158,7 +182,7 @@ define_function NAVHttpResponseInit(_NAVHttpResponse res) {
  *
  * @see NAVStringTrainCase
  */
-define_function NAVHttpHeaderInit(_NAVKeyStringValuePair header,
+define_function NAVHttpHeaderInit(_NAVHttpHeader header,
                                     char key[],
                                     char value[]) {
     header.Key = NAVStringTrainCase(key)
@@ -236,7 +260,7 @@ define_function char NAVHttpParseUrl(char buffer[], _NAVUrl url) {
             NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
                                         __NAV_FOUNDATION_HTTPUTILS__,
                                         'NAVHttpParseUrl',
-                                        "'Invalid scheme "', url.Scheme,'" specified. Defaulting to ', NAV_URL_SCHEME_HTTP")
+                                        "'Invalid scheme "', url.Scheme, '" specified. Defaulting to ', NAV_URL_SCHEME_HTTP")
 
             url.Scheme = NAV_URL_SCHEME_HTTP
         }
@@ -271,7 +295,16 @@ define_function char NAVHttpParseUrl(char buffer[], _NAVUrl url) {
 define_function char NAVHttpRequestAddHeader(_NAVHttpRequest req,
                                             char key[],
                                             char value[]) {
-    _NAVKeyStringValuePair header
+    _NAVHttpHeader header
+
+    if (req.Headers.Count >= NAV_HTTP_MAX_HEADERS) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpRequestAddHeader',
+                                    "'Maximum number of headers (', NAV_HTTP_MAX_HEADERS, ') reached'")
+
+        return false
+    }
 
     if (!length_array(key)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -292,12 +325,20 @@ define_function char NAVHttpRequestAddHeader(_NAVHttpRequest req,
     }
 
     if (!NAVFindInArrayString(NAV_HTTP_HEADERS, key)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_HTTPUTILS__,
-                                    'NAVHttpRequestAddHeader',
-                                    "'Key ', key, ' is not a valid HTTP header'")
+        // Allow custom headers that start with letter or digit
+        stack_var char firstChar
+        firstChar = key[1]
 
-        return false
+        if (!((firstChar >= 'A' && firstChar <= 'Z') ||
+              (firstChar >= 'a' && firstChar <= 'z') ||
+              (firstChar >= '0' && firstChar <= '9'))) {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_HTTPUTILS__,
+                                        'NAVHttpRequestAddHeader',
+                                        "'Key ', key, ' is not a valid HTTP header'")
+
+            return false
+        }
     }
 
     if (NAVHttpHeaderKeyExists(req.Headers, key)) {
@@ -356,7 +397,7 @@ define_function char NAVHttpRequestUpdateHeader(_NAVHttpRequest req,
         return false
     }
 
-    if (!NAVFindInArrayString(NAV_HTTP_HEADERS, key)) {
+    if (!NAVFindInArrayString(NAV_HTTP_HEADERS, key) && !NAVStringStartsWith(key, 'X')) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
                                     __NAV_FOUNDATION_HTTPUTILS__,
                                     'NAVHttpRequestUpdateHeader',
@@ -404,7 +445,7 @@ define_function char NAVHttpRequestUpdateHeader(_NAVHttpRequest req,
 define_function char NAVHttpResponseAddHeader(_NAVHttpResponse res,
                                                 char key[],
                                                 char value[]) {
-    _NAVKeyStringValuePair header
+    _NAVHttpHeader header
 
     if (!length_array(key)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -489,7 +530,7 @@ define_function char NAVHttpResponseUpdateHeader(_NAVHttpResponse res,
         return false
     }
 
-    if (!NAVFindInArrayString(NAV_HTTP_HEADERS, key)) {
+    if (!NAVFindInArrayString(NAV_HTTP_HEADERS, key) && !NAVStringStartsWith(key, 'X')) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
                                     __NAV_FOUNDATION_HTTPUTILS__,
                                     'NAVHttpResponseUpdateHeader',
@@ -535,7 +576,7 @@ define_function char NAVHttpResponseUpdateHeader(_NAVHttpResponse res,
  * // Assume headers are already populated
  * headerString = NAVHttpBuildHeaders(headers)
  */
-define_function char[NAV_MAX_BUFFER] NAVHttpBuildHeaders(_NAVHttpHeader headers) {
+define_function char[NAV_MAX_BUFFER] NAVHttpBuildHeaders(_NAVHttpHeaderCollection headers) {
     stack_var char result[NAV_MAX_BUFFER]
     stack_var integer x
 
@@ -596,7 +637,7 @@ define_function char[NAV_MAX_BUFFER] NAVHttpBuildResponse(_NAVHttpResponse res) 
  *
  * @see NAVHttpHeaderKeyExists
  */
-define_function integer NAVHttpFindHeader(_NAVHttpHeader headers, char key[]) {
+define_function integer NAVHttpFindHeader(_NAVHttpHeaderCollection headers, char key[]) {
     stack_var integer x
 
     for (x = 1; x <= headers.Count; x++) {
@@ -623,7 +664,7 @@ define_function integer NAVHttpFindHeader(_NAVHttpHeader headers, char key[]) {
  *
  * @see NAVHttpFindHeader
  */
-define_function char NAVHttpHeaderKeyExists(_NAVHttpHeader headers, char key[]) {
+define_function char NAVHttpHeaderKeyExists(_NAVHttpHeaderCollection headers, char key[]) {
     return NAVHttpFindHeader(headers, key) > 0
 }
 
@@ -636,11 +677,11 @@ define_function char NAVHttpHeaderKeyExists(_NAVHttpHeader headers, char key[]) 
  * @param {_NAVHttpHeader} headers - The headers to search
  * @param {char[]} key - The header name to find
  *
- * @returns {char[256]} The header value, or an empty string if not found
+ * @returns {char[1024]} The header value, or an empty string if not found
  *
  * @see NAVHttpHeaderKeyExists
  */
-define_function char[256] NAVHttpGetHeaderValue(_NAVHttpHeader headers, char key[]) {
+define_function char[1024] NAVHttpGetHeaderValue(_NAVHttpHeadercollection headers, char key[]) {
     stack_var integer x
 
     if (!NAVHttpHeaderKeyExists(headers, key)) {
@@ -671,7 +712,7 @@ define_function char[256] NAVHttpGetHeaderValue(_NAVHttpHeader headers, char key
  *
  * @see NAVHttpHeaderKeyExists
  */
-define_function char NAVHttpValidateHeaders(_NAVHttpHeader headers) {
+define_function char NAVHttpValidateHeaders(_NAVHttpHeaderCollection headers) {
     stack_var integer x
 
     if (headers.Count <= 0) {
@@ -697,7 +738,7 @@ define_function char NAVHttpValidateHeaders(_NAVHttpHeader headers) {
             return false
         }
 
-        if (!NAVFindInArrayString(NAV_HTTP_HEADERS, headers.Headers[x].Key)) {
+        if (!NAVFindInArrayString(NAV_HTTP_HEADERS, headers.Headers[x].Key) && !NAVStringStartsWith(headers.Headers[x].Key, 'X')) {
             NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                         __NAV_FOUNDATION_HTTPUTILS__,
                                         'NAVHttpValidateHeaders',
@@ -905,46 +946,422 @@ define_function char[NAV_MAX_CHARS] NAVHttpGetStatusMessage(integer status) {
 }
 
 
-// define_function char NAVHttpParseResponse(char buffer[], _NAVHttpResponse res) {
-//     stack_var integer x
-//     stack_var char status[NAV_MAX_CHARS]
-//     stack_var char message[NAV_MAX_CHARS]
-//     stack_var char headers[NAV_MAX_BUFFER]
-//     stack_var char body[NAV_MAX_BUFFER]
+/**
+ * @function NAVHttpParseStatusLine
+ * @public
+ * @description Parses an HTTP status line into a status structure.
+ *
+ * Extracts the HTTP version, status code, and status message from a status line.
+ * Expected format: "HTTP/1.1 200 OK"
+ *
+ * @param {char[]} statusLine - The status line to parse
+ * @param {_NAVHttpStatus} status - The status structure to populate
+ *
+ * @returns {char} TRUE if parsing succeeded, FALSE otherwise
+ *
+ * @example
+ * stack_var _NAVHttpStatus status
+ * stack_var char statusLine[256]
+ * stack_var char result
+ *
+ * statusLine = 'HTTP/1.1 200 OK'
+ * result = NAVHttpParseStatusLine(statusLine, status)
+ * // status.Code = 200, status.Message = 'OK'
+ *
+ * @see NAVHttpParseResponse
+ */
+define_function char NAVHttpParseStatusLine(char statusLine[], _NAVHttpStatus status) {
+    stack_var char parts[10][512]
+    stack_var integer count
 
-//     if (!length_array(buffer)) {
-//         return false
-//     }
+    if (!length_array(statusLine)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpParseStatusLine',
+                                    "'Status line is empty'")
+        return false
+    }
 
-//     if (!NAVHttpParseStatus(buffer, res.Status)) {
-//         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-//                                     __NAV_FOUNDATION_HTTPUTILS__,
-//                                     'NAVHttpParseResponse',
-//                                     "'Failed to parse status line'")
+    count = NAVSplitString(statusLine, ' ', parts)
 
-//         return false
-//     }
+    if (count < 2) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpParseStatusLine',
+                                    "'Invalid status line format'")
+        return false
+    }
 
-//     if (!NAVHttpParseHeaders(buffer, res.Headers)) {
-//         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-//                                     __NAV_FOUNDATION_HTTPUTILS__,
-//                                     'NAVHttpParseResponse',
-//                                     "'Failed to parse headers'")
+    // Trim parts extra whitespace
+    NAVTrimStringArray(parts)
 
-//         return false
-//     }
+    // Validate and convert status code
+    status.Code = atoi(parts[2])
+    if (status.Code < 100 || status.Code > 599) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpParseStatusLine',
+                                    "'Invalid status code: ', parts[2]")
+        return false
+    }
 
-//     if (!NAVHttpParseBody(buffer, res.Body)) {
-//         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-//                                     __NAV_FOUNDATION_HTTPUTILS__,
-//                                     'NAVHttpParseResponse',
-//                                     "'Failed to parse body'")
+    if (count < 3) {
+        status.Message = ''
+        return true
+    }
 
-//         return false
-//     }
+    {
+        // Extract message preserving spaces
+        stack_var char prefix[NAV_MAX_BUFFER]
 
-//     return true
-// }
+        prefix = "parts[1], ' ', parts[2], ' '"
+        status.Message = NAVGetStringAfter(statusLine, prefix)
+    }
+
+    return true
+}
+
+
+/**
+ * @function NAVHttpParseHeaders
+ * @public
+ * @description Parses HTTP header lines into a header collection.
+ *
+ * Parses multiple header lines in "Key: Value" format. Handles headers with
+ * colons in the value and trims whitespace around keys and values.
+ *
+ * @param {char[]} headerBlock - Block of header lines separated by CRLF
+ * @param {_NAVHttpHeaderCollection} headers - The header collection to populate
+ *
+ * @returns {char} TRUE if parsing succeeded, FALSE otherwise
+ *
+ * @example
+ * stack_var _NAVHttpHeaderCollection headers
+ * stack_var char headerBlock[NAV_MAX_BUFFER]
+ * stack_var char result
+ *
+ * headerBlock = "'Content-Type: application/json', NAV_CR, NAV_LF,
+ *                'Content-Length: 123', NAV_CR, NAV_LF"
+ * result = NAVHttpParseHeaders(headerBlock, headers)
+ *
+ * @see NAVHttpParseResponse
+ */
+define_function char NAVHttpParseHeaders(char headerBlock[], _NAVHttpHeaderCollection headers) {
+    stack_var char line[1024]
+    stack_var integer lineEnd
+    stack_var integer colonPos
+    stack_var char key[256]
+    stack_var char value[1024]
+    stack_var char remaining[NAV_MAX_BUFFER]
+    stack_var _NAVHttpHeader header
+
+    if (!length_array(headerBlock)) {
+        // Empty header block is valid (no headers)
+        return true
+    }
+
+    remaining = headerBlock
+    headers.Count = 0
+
+    while (length_array(remaining)) {
+        // Find end of line
+        lineEnd = NAVIndexOf(remaining, "NAV_CR, NAV_LF", 1)
+
+        if (!lineEnd) {
+            // Last line without CRLF
+            line = remaining
+            remaining = ''
+        }
+        else {
+            line = left_string(remaining, lineEnd - 1)
+            remaining = right_string(remaining, length_array(remaining) - lineEnd - 1)
+        }
+
+        // Skip empty lines
+        // Stop at empty lines (header terminator)
+        if (!length_array(line)) {
+            break
+        }
+
+        // Find colon separator
+        colonPos = NAVIndexOf(line, ':', 1)
+        if (!colonPos) {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                        __NAV_FOUNDATION_HTTPUTILS__,
+                                        'NAVHttpParseHeaders',
+                                        "'Invalid header line (no colon): ', line")
+            continue
+        }
+
+        // Extract key and value
+        key = left_string(line, colonPos - 1)
+        key = NAVTrimString(key)  // Remove leading/trailing spaces
+
+        if (colonPos < length_array(line)) {
+            value = right_string(line, length_array(line) - colonPos)
+            value = NAVTrimString(value)  // Remove leading/trailing spaces
+        }
+        else {
+            value = ''
+        }
+
+        // Check if we've hit the header limit
+        if (headers.Count >= NAV_HTTP_MAX_HEADERS) {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                        __NAV_FOUNDATION_HTTPUTILS__,
+                                        'NAVHttpParseHeaders',
+                                        "'Maximum header limit reached, ignoring additional headers'")
+            break
+        }
+
+        // Add header to collection
+        NAVHttpHeaderInit(header, key, value)
+        headers.Count++
+        headers.Headers[headers.Count] = header
+    }
+
+    return true
+}
+
+
+/**
+ * @function NAVHttpParseResponseHeaders
+ * @public
+ * @description Parses HTTP response status line and headers.
+ *
+ * This function is designed for real-world NetLinx device communication where
+ * the response arrives in chunks. Use NAVStringGather to extract data up to and
+ * including the double CRLF (13,10,13,10), then parse the headers. The body can
+ * be processed separately once Content-Length bytes have been received.
+ *
+ * @param {char[]} buffer - Response buffer containing status line and headers (up to double CRLF)
+ * @param {_NAVHttpResponse} res - The response structure to populate
+ *
+ * @returns {char} TRUE if parsing succeeded, FALSE otherwise
+ *
+ * @example
+ * stack_var _NAVHttpResponse response
+ * stack_var char headers[NAV_MAX_BUFFER]
+ * stack_var char result
+ *
+ * // Use NAVStringGather to extract headers from device buffer
+ * headers = NAVStringGather(deviceBuffer, "13,10,13,10", true)
+ * result = NAVHttpParseResponseHeaders(headers, response)
+ *
+ * // Now you have response.Status and response.Headers
+ * // Body can be extracted separately based on Content-Length
+ *
+ * @see NAVHttpParseResponseBody
+ * @see NAVHttpParseResponse
+ * @see NAVHttpParseStatusLine
+ * @see NAVHttpParseHeaders
+ */
+define_function char NAVHttpParseResponseHeaders(char buffer[], _NAVHttpResponse res) {
+    stack_var integer firstLineEnd
+    stack_var char statusLine[NAV_MAX_BUFFER]
+    stack_var char headerBlock[NAV_MAX_BUFFER]
+    stack_var char remaining[NAV_MAX_BUFFER]
+
+    if (!length_array(buffer)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpParseResponseHeaders',
+                                    "'Response buffer is empty'")
+        return false
+    }
+
+    // Extract status line (first line)
+    firstLineEnd = NAVIndexOf(buffer, "NAV_CR, NAV_LF", 1)
+    if (!firstLineEnd) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpParseResponseHeaders',
+                                    "'No CRLF found - invalid response format'")
+        return false
+    }
+
+    statusLine = left_string(buffer, firstLineEnd - 1)
+    remaining = right_string(buffer, length_array(buffer) - firstLineEnd - 1)
+
+    // Parse status line
+    if (!NAVHttpParseStatusLine(statusLine, res.Status)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpParseResponseHeaders',
+                                    "'Failed to parse status line'")
+        return false
+    }
+
+    // The remaining buffer contains headers, potentially ending with double CRLF
+    // Parse headers (NAVHttpParseHeaders handles empty lines gracefully)
+    if (!NAVHttpParseHeaders(remaining, res.Headers)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpParseResponseHeaders',
+                                    "'Failed to parse headers'")
+        return false
+    }
+
+    return true
+}
+
+
+/**
+ * @function NAVHttpParseResponseBody
+ * @public
+ * @description Extracts and validates the HTTP response body.
+ *
+ * This function is designed to be called after NAVHttpParseResponseHeaders once
+ * the body data has been received from the device. If Content-Length header is
+ * present, it validates that the body matches the expected length.
+ *
+ * @param {char[]} buffer - Buffer containing the response body
+ * @param {_NAVHttpResponse} res - The response structure to populate with body
+ *
+ * @returns {char} TRUE if body extraction succeeded, FALSE otherwise
+ *
+ * @example
+ * stack_var _NAVHttpResponse response
+ * stack_var char buffer[NAV_MAX_BUFFER]
+ * stack_var integer length
+ * stack_var char result
+ *
+ * // After parsing headers, get Content-Length
+ * length = atoi(NAVHttpGetHeaderValue(response.Headers, 'Content-Length'))
+ *
+ * // Wait until we have enough data in device buffer
+ * if (length_array(deviceBuffer) >= length) {
+ *     buffer = get_buffer_string(deviceBuffer, length)
+ *     result = NAVHttpParseResponseBody(buffer, response)
+ * }
+ *
+ * @see NAVHttpParseResponseHeaders
+ * @see NAVHttpParseResponse
+ */
+define_function char NAVHttpParseResponseBody(char buffer[], _NAVHttpResponse res) {
+    stack_var integer length
+
+    // Validate against Content-Length if present
+    if (!NAVHttpHeaderKeyExists(res.Headers, NAV_HTTP_HEADER_CONTENT_LENGTH)) {
+        res.Body = ''
+        return true
+    }
+
+    length = atoi(NAVHttpGetHeaderValue(res.Headers, NAV_HTTP_HEADER_CONTENT_LENGTH))
+
+    if (length < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpParseResponseBody',
+                                    "'Invalid Content-Length header value'")
+        return false
+    }
+
+    if (length_array(buffer) < length) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpParseResponseBody',
+                                    "'Buffer length ', itoa(length_array(buffer)), ' is less than Content-Length ', itoa(length)")
+        return false
+    }
+
+    if (length == 0) {
+        res.Body = ''
+        return true
+    }
+
+    res.Body = NAVRemoveStringByLength(buffer, length)
+
+    return true
+}
+
+
+/**
+ * @function NAVHttpParseResponse
+ * @public
+ * @description Parses a complete HTTP response into a response structure.
+ *
+ * This is a convenience function that parses the status line, headers, and body
+ * from a complete HTTP response string. For real-world device communication where
+ * responses arrive in chunks, use NAVHttpParseResponseHeaders followed by
+ * NAVHttpParseResponseBody instead.
+ *
+ * @param {char[]} buffer - Complete raw HTTP response string
+ * @param {_NAVHttpResponse} res - The response structure to populate
+ *
+ * @returns {char} TRUE if parsing succeeded, FALSE otherwise
+ *
+ * @example
+ * stack_var _NAVHttpResponse response
+ * stack_var char buffer[NAV_MAX_BUFFER]
+ * stack_var char result
+ *
+ * buffer = "'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
+ *           'Content-Type: application/json', NAV_CR, NAV_LF,
+ *           NAV_CR, NAV_LF,
+ *           '{"status":"ok"}'"
+ * result = NAVHttpParseResponse(buffer, response)
+ *
+ * @see NAVHttpParseResponseHeaders
+ * @see NAVHttpParseResponseBody
+ * @see NAVHttpParseStatusLine
+ * @see NAVHttpParseHeaders
+ */
+define_function char NAVHttpParseResponse(char buffer[], _NAVHttpResponse res) {
+    stack_var integer headerEnd
+    stack_var char headerBuffer[NAV_MAX_BUFFER]
+    stack_var char bodyBuffer[NAV_MAX_BUFFER]
+
+    if (!length_array(buffer)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpParseResponse',
+                                    "'Response buffer is empty'")
+        return false
+    }
+
+    // Find end of headers (double CRLF)
+    headerEnd = NAVIndexOf(buffer, "NAV_CR, NAV_LF, NAV_CR, NAV_LF", 1)
+
+    if (!headerEnd) {
+        // No double CRLF found - might just be headers without body
+        headerBuffer = buffer
+        bodyBuffer = ''
+    }
+    else {
+        // Split into headers and body
+        headerBuffer = left_string(buffer, headerEnd + 3)  // Include double CRLF
+
+        if (headerEnd + 3 < length_array(buffer)) {
+            bodyBuffer = right_string(buffer, length_array(buffer) - headerEnd - 3)
+        }
+        else {
+            bodyBuffer = ''
+        }
+    }
+
+    // Parse headers first
+    if (!NAVHttpParseResponseHeaders(headerBuffer, res)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpParseResponse',
+                                    "'Failed to parse headers'")
+        return false
+    }
+
+    // Parse body if present
+    if (length_array(bodyBuffer)) {
+        if (!NAVHttpParseResponseBody(bodyBuffer, res)) {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_HTTPUTILS__,
+                                        'NAVHttpParseResponse',
+                                        "'Failed to parse body'")
+            return false
+        }
+    }
+
+    return true
+}
 
 
 #END_IF // __NAV_FOUNDATION_HTTPUTILS__
