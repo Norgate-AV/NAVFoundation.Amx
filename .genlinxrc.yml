@@ -55,10 +55,11 @@ build:
       - ./__tests__/include/md5
       - ./__tests__/include/base64
       - ./__tests__/include/base32
-      - ./__tests__/include/http
+      - ./__tests__/include/http-utils
       - ./__tests__/include/url
       - ./__tests__/include/jsmn
       - ./__tests__/include/queue
       - ./__tests__/include/array-utils
       - ./__tests__/include/stack
       - ./__tests__/include/encoding
+      - ./__tests__/include/tui

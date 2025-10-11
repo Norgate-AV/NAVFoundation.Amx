@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.7.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.6.0...v3.7.0) (2025-10-11)
+
+### 🌟 Features
+
+- **http-utils:** add response parsing and other improvements ([b305616](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b305616c6565670d2598392c83b9bc7c8c900acb))
+
+## [3.6.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.5.0...v3.6.0) (2025-10-11)
+
+### 🌟 Features
+
+- **tui:** add various new helper functions ([1c94b6c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/1c94b6cefcf6716798e32ca64c3874ade8e84d35))
+
 ## [3.5.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.4.3...v3.5.0) (2025-10-09)
 
 ### 🌟 Features

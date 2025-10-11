@@ -1,7 +1,7 @@
-PROGRAM_NAME='http'
+PROGRAM_NAME='tui'
 
 #DEFINE __MAIN__
-#include 'http.axi'
+#include 'tui.axi'
 
 DEFINE_DEVICE
 
@@ -12,6 +12,6 @@ DEFINE_EVENT
 button_event[dvTP, 1] {
     push: {
         set_log_level(NAV_LOG_LEVEL_DEBUG)
-        RunHttpTests()
+        RunTuiTests()
     }
 }

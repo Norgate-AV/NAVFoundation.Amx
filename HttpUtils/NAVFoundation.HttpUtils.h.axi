@@ -810,12 +810,20 @@ constant integer NAV_HTTP_MAX_HEADER_SIZE           = 8192
 constant integer NAV_HTTP_MAX_URL_LENGTH            = 2048
 constant integer NAV_HTTP_MAX_PATH_LENGTH           = 1024
 constant integer NAV_HTTP_MAX_QUERY_LENGTH          = 1024
-constant integer NAV_HTTP_MAX_HEADERS              = 50
+constant integer NAV_HTTP_MAX_HEADERS              = 20
 constant integer NAV_HTTP_MAX_COOKIES              = 20
 
 // Websocket Related
 constant char NAV_HTTP_WEBSOCKET_VERSION[]          = '13'
 constant char NAV_HTTP_WEBSOCKET_PROTOCOL[]         = 'websocket'
+
+/**
+ * Maximum number of HTTP headers allowed in a request or response.
+ * Can be overridden before including this file if a different limit is needed.
+ */
+#IF_NOT_DEFINED NAV_HTTP_MAX_HEADERS
+constant integer NAV_HTTP_MAX_HEADERS = 20
+#END_IF
 
 
 DEFINE_TYPE
@@ -834,19 +842,34 @@ struct _NAVHttpStatus {
     char Message[256];
 }
 
+
 /**
  * @struct _NAVHttpHeader
+ * @description Structure for storing a key-value pair of strings.
+ *
+ * @property {char[256]} Key - The key string
+ * @property {char[1024]} Value - The value string
+ *
+ * @see NAVHttpHeaderAdd
+ */
+struct _NAVHttpHeader {
+    char Key[256];
+    char Value[1024];
+}
+
+/**
+ * @struct _NAVHttpHeaderCollection
  * @description Structure for storing HTTP headers as key-value pairs.
  *
  * @property {integer} Count - Number of headers
- * @property {_NAVKeyStringValuePair[10]} Headers - Array of header key-value pairs
+ * @property {_NAVHttpHeader[NAV_HTTP_MAX_HEADERS]} Headers - Array of header key-value pairs
  *
  * @see NAVHttpRequestAddHeader
  * @see NAVHttpResponseAddHeader
  */
-struct _NAVHttpHeader {
+struct _NAVHttpHeaderCollection {
     integer Count;
-    _NAVKeyStringValuePair Headers[10];
+    _NAVHttpHeader Headers[NAV_HTTP_MAX_HEADERS];
 }
 
 /**
@@ -871,23 +894,7 @@ struct _NAVHttpRequest {
     integer Port;
     char Body[2048];
 
-    _NAVHttpHeader Headers;
-}
-
-/**
- * @struct _NAVHttpRequestObject
- * @description Extended request structure with tracking ID.
- *
- * @property {long} Id - Unique request identifier
- * @property {char[256]} Host - Target host
- * @property {integer} Port - Target port
- * @property {_NAVHttpRequest} Request - The HTTP request details
- */
-struct _NAVHttpRequestObject {
-    long Id
-    char Host[256];
-    integer Port;
-    _NAVHttpRequest Request
+    _NAVHttpHeaderCollection Headers;
 }
 
 /**
@@ -904,34 +911,10 @@ struct _NAVHttpRequestObject {
  */
 struct _NAVHttpResponse {
     _NAVHttpStatus Status;
-    _NAVHttpHeader Headers;
+    _NAVHttpHeaderCollection Headers;
     char Body[16384];
     char ContentType[256];
     long ContentLength;
-}
-
-/**
- * @struct _NAVHttpRequestConfig
- * @description Configuration options for HTTP requests.
- *
- * @property {integer} Timeout - Request timeout in seconds
- * @property {char[32]} AuthScheme - Authentication scheme (Basic, Bearer, etc.)
- * @property {char[1024]} AuthToken - Authentication token or credentials
- * @property {char[256]} CacheControl - Cache control directives
- * @property {integer} MaxRedirects - Maximum number of redirects to follow
- * @property {integer} ValidateCertificates - Whether to validate SSL certificates
- * @property {integer} FollowRedirects - Whether to automatically follow redirects
- * @property {integer} UseCompression - Whether to request compressed responses
- */
-struct _NAVHttpRequestConfig {
-    integer Timeout;
-    char AuthScheme[32];
-    char AuthToken[1024];
-    char CacheControl[256];
-    integer MaxRedirects;
-    integer ValidateCertificates;
-    integer FollowRedirects;
-    integer UseCompression;
 }
 
 #END_IF // __NAV_FOUNDATION_HTTPUTILS_H__

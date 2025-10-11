@@ -9,11 +9,12 @@ HTTP (Hypertext Transfer Protocol) is the foundation of data communication on th
 ## Features
 
 - **HTTP Request Building**: Create properly formatted HTTP requests with methods, headers, and body content
-- **HTTP Response Handling**: Parse and process HTTP responses including status codes and headers
+- **HTTP Response Parsing**: Parse HTTP responses including status codes, headers, and body content
 - **Headers Management**: Add, update, and validate HTTP headers
 - **Content Type Handling**: Automatic content type inference based on request body
 - **URL Parsing**: Parse URLs into components (scheme, host, path, port, etc.)
 - **Status Code Handling**: Comprehensive set of HTTP status codes with proper messages
+- **Response Processing**: Parse complete responses or handle responses in chunks for streaming
 - **Utility Functions**: Helper functions for common HTTP-related tasks
 
 ## Constants and Definitions
@@ -46,7 +47,7 @@ NAV_HTTP_VERSION_2_0     = 'HTTP/2.0'
 // Information responses (100-199)
 NAV_HTTP_STATUS_CODE_INFO_CONTINUE             = 100
 NAV_HTTP_STATUS_CODE_INFO_SWITCHING_PROTOCOLS  = 101
-// ...
+// ... 
 
 // Successful responses (200-299)
 NAV_HTTP_STATUS_CODE_SUCCESS_OK                = 200
@@ -69,17 +70,18 @@ NAV_HTTP_STATUS_CODE_SERVER_ERROR_NOT_IMPLEMENTED = 501
 // ...
 ```
 
+**Note:** The library includes comprehensive HTTP status code support with constants for all standard codes and their corresponding message strings. See the header file for the complete list of `NAV_HTTP_STATUS_CODE_*` and `NAV_HTTP_STATUS_MESSAGE_*` constants.
+
 ### Common Content Types
 
 ```netlinx
 NAV_HTTP_CONTENT_TYPE_TEXT_PLAIN        = 'text/plain'
 NAV_HTTP_CONTENT_TYPE_TEXT_HTML         = 'text/html'
-NAV_HTTP_CONTENT_TYPE_TEXT_XML          = 'text/xml'
-NAV_HTTP_CONTENT_TYPE_TEXT_CSS          = 'text/css'
 NAV_HTTP_CONTENT_TYPE_APPLICATION_JSON  = 'application/json'
-NAV_HTTP_CONTENT_TYPE_APPLICATION_XML   = 'application/xml'
-// ...
+// ... and many more (over 50 content types supported)
 ```
+
+**Note:** The library includes comprehensive MIME type support for text, application, image, audio, video, and font content types. See the header file for the complete list of `NAV_HTTP_CONTENT_TYPE_*` constants.
 
 ### HTTP Headers
 
@@ -89,8 +91,10 @@ NAV_HTTP_HEADER_USER_AGENT              = 'User-Agent'
 NAV_HTTP_HEADER_CONTENT_TYPE            = 'Content-Type'
 NAV_HTTP_HEADER_CONTENT_LENGTH          = 'Content-Length'
 NAV_HTTP_HEADER_AUTHORIZATION           = 'Authorization'
-// ...
+// ... and many more (over 150 standard headers supported)
 ```
+
+**Note:** The library includes comprehensive support for HTTP headers, including standard headers, security headers, CORS headers, and custom headers. See the header file for the complete list of `NAV_HTTP_HEADER_*` constants.
 
 ### Ports and Defaults
 
@@ -103,6 +107,20 @@ NAV_HTTPS_ALT_PORT                      = 8443
 NAV_HTTP_HOST_DEFAULT                   = 'localhost'
 NAV_HTTP_PATH_DEFAULT                   = '/'
 ```
+
+### Additional Constants
+
+The library provides many additional constants for:
+
+- **Authentication schemes**: `NAV_HTTP_AUTH_SCHEME_BASIC`, `NAV_HTTP_AUTH_SCHEME_BEARER`, etc.
+- **Cache control directives**: `NAV_HTTP_CACHE_CONTROL_NO_CACHE`, `NAV_HTTP_CACHE_CONTROL_PUBLIC`, etc.
+- **Content encodings**: `NAV_HTTP_ENCODING_GZIP`, `NAV_HTTP_ENCODING_DEFLATE`, etc.
+- **Transfer encodings**: `NAV_HTTP_TRANSFER_ENCODING_CHUNKED`, etc.
+- **Connection types**: `NAV_HTTP_CONNECTION_KEEP_ALIVE`, etc.
+- **Timeouts**: `NAV_HTTP_TIMEOUT_DEFAULT = 30` seconds
+- **Size limits**: `NAV_HTTP_MAX_HEADERS = 20`, `NAV_HTTP_MAX_BUFFER`, etc.
+
+See the header file for the complete list of available constants.
 
 ## Data Structures
 
@@ -119,12 +137,23 @@ struct _NAVHttpStatus {
 
 ### \_NAVHttpHeader
 
-Structure for storing HTTP headers as key-value pairs.
+Structure for storing a key-value pair of strings.
 
 ```netlinx
 struct _NAVHttpHeader {
+    char Key[256];
+    char Value[1024];
+}
+```
+
+### \_NAVHttpHeaderCollection
+
+Structure for storing HTTP headers as key-value pairs.
+
+```netlinx
+struct _NAVHttpHeaderCollection {
     integer Count;
-    _NAVKeyStringValuePair Headers[10];
+    _NAVHttpHeader Headers[NAV_HTTP_MAX_HEADERS];
 }
 ```
 
@@ -140,7 +169,7 @@ struct _NAVHttpRequest {
     char Host[256];
     integer Port;
     char Body[2048];
-    _NAVHttpHeader Headers;
+    _NAVHttpHeaderCollection Headers;
 }
 ```
 
@@ -151,7 +180,7 @@ Structure representing an HTTP response.
 ```netlinx
 struct _NAVHttpResponse {
     _NAVHttpStatus Status;
-    _NAVHttpHeader Headers;
+    _NAVHttpHeaderCollection Headers;
     char Body[16384];
     char ContentType[256];
     long ContentLength;
@@ -633,17 +662,20 @@ DATA_EVENT[vdvTCPClient] {
         // Initialize response
         NAVHttpResponseInit(response)
 
-        // In a real implementation, you would parse the response here
-        // This would involve parsing the status line, headers, and body
-
-        // Check status code
-        if (response.Status.Code >= 200 && response.Status.Code < 300) {
-            // Success - process the response body
-            NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Request successful: ', response.Body")
+        // Parse the complete response
+        if (NAVHttpParseResponse(data.text, response)) {
+            // Check status code
+            if (response.Status.Code >= 200 && response.Status.Code < 300) {
+                // Success - process the response body
+                NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Request successful: ', response.Body")
+            }
+            else {
+                // Error handling
+                NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Request failed with code ', itoa(response.Status.Code), ': ', response.Status.Message")
+            }
         }
         else {
-            // Error handling
-            NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Request failed with code ', itoa(response.Status.Code), ': ', response.Status.Message")
+            NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Failed to parse HTTP response'")
         }
     }
     OFFLINE: {
@@ -652,33 +684,30 @@ DATA_EVENT[vdvTCPClient] {
 }
 ```
 
-### Creating a Simple Server Response
+### Parsing Responses in Chunks
+
+For real-world applications where responses arrive in chunks:
 
 ```netlinx
-DEFINE_FUNCTION SendHttpResponse(dev socket, integer statusCode, char contentType[], char body[]) {
+DEFINE_FUNCTION HandleHttpResponse(char data[]) {
     stack_var _NAVHttpResponse response
-    stack_var char responseString[NAV_MAX_BUFFER]
+    stack_var char headerBuffer[NAV_MAX_BUFFER]
+    stack_var char bodyBuffer[NAV_MAX_BUFFER]
 
-    // Initialize response
     NAVHttpResponseInit(response)
 
-    // Set status and content
-    response.Status.Code = statusCode
-    response.Status.Message = NAVHttpGetStatusMessage(statusCode)
-    response.Body = body
-    response.ContentType = contentType
-    response.ContentLength = length_array(body)
+    // First, try to parse headers only
+    if (NAVHttpParseResponseHeaders(data, response)) {
+        // Headers parsed successfully
+        // Now extract body based on Content-Length
+        stack_var integer contentLength
+        contentLength = atoi(NAVHttpGetHeaderValue(response.Headers, 'Content-Length'))
 
-    // Add headers
-    NAVHttpResponseAddHeader(response, 'Content-Type', contentType)
-    NAVHttpResponseAddHeader(response, 'Content-Length', itoa(length_array(body)))
-    NAVHttpResponseAddHeader(response, 'Server', 'AMX NetLinx/1.0')
-
-    // Build response string
-    responseString = NAVHttpBuildResponse(response)
-
-    // Send response
-    send_string socket, responseString
+        if (contentLength > 0) {
+            // Wait for body data and parse it separately
+            // NAVHttpParseResponseBody(bodyData, response)
+        }
+    }
 }
 ```
 
@@ -710,31 +739,7 @@ if (!NAVHttpRequestInit(request, 'GET', url, '')) {
 }
 ```
 
-### Request Timeouts
-
-Implement timeouts for network requests to prevent hanging:
-
-```netlinx
-// Set a timeout for the request
-timeline_create(TL_HTTP_TIMEOUT, NAV_HTTP_TIMEOUT_DEFAULT * 1000, 1, TIMELINE_ABSOLUTE, TIMELINE_ONCE)
-
-DEFINE_EVENT
-TIMELINE_EVENT[TL_HTTP_TIMEOUT] {
-    NAVErrorLog(NAV_LOG_LEVEL_WARNING, "'HTTP request timed out'")
-    ip_client_close(vdvTCPClient.Port)
-}
-```
-
 ## Security Considerations
-
-### Use HTTPS When Possible
-
-For secure communications, always use HTTPS when available:
-
-```netlinx
-url.Scheme = 'https'
-url.Port = NAV_HTTPS_PORT_DEFAULT
-```
 
 ### Handle Authentication Properly
 
@@ -748,15 +753,6 @@ NAVHttpRequestAddHeader(request, 'Authorization', authValue)
 
 // Bearer Token
 NAVHttpRequestAddHeader(request, 'Authorization', "'Bearer ', token")
-```
-
-### Validate SSL Certificates
-
-When implementing HTTPS, ensure certificate validation is enabled:
-
-```netlinx
-stack_var _NAVHttpRequestConfig config
-config.ValidateCertificates = true
 ```
 
 ## Contributing
