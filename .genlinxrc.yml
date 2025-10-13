@@ -7,6 +7,7 @@ build:
       - ./Console
       - ./Core
       - ./Cryptography
+      - ./CsvUtils
       - ./DateTimeUtils
       - ./ErrorLogUtils
       - ./Encoding
@@ -63,3 +64,4 @@ build:
       - ./__tests__/include/stack
       - ./__tests__/include/encoding
       - ./__tests__/include/tui
+      - ./__tests__/include/csv-utils
