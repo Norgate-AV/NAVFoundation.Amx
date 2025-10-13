@@ -54,7 +54,7 @@ SOFTWARE.
  *
  * @example
  * stack_var char data[2048]
- * stack_var char csv[100][100]  // Adjust size as needed
+ * stack_var char csv[100][100][255]  // Adjust size as needed
  *
  * data = ReadFile('data.csv')  // However you read the file
  * if (NAVCsvFileParse(data, csv)) {
@@ -62,7 +62,7 @@ SOFTWARE.
  *     csv[2][3]  // Access second row, third column
  * }
  */
-define_function char NAVCsvFileParse(char data[], char csv[][]) {
+define_function char NAVCsvFileParse(char data[], char csv[][][]) {
     stack_var _NAVCsvLexer lexer
     // stack_var _NAVCsvParser parser
 
@@ -99,7 +99,7 @@ define_function char NAVCsvFileParse(char data[], char csv[][]) {
  * @public
  * @description Serializes a 2D array of strings into CSV format.
  *
- * @param {char[][]} data - The 2D array of strings to serialize
+ * @param {char[][][]} data - The 2D array of strings to serialize
  * @param {char[]} result - The output string to hold the serialized CSV data
  *
  * @returns {char} True (1) if serialization succeeded, False (0) if failed
@@ -122,7 +122,7 @@ define_function char NAVCsvFileParse(char data[], char csv[][]) {
  *     WriteFile('output.csv', result)  // However you write the file
  * }
  */
-define_function char NAVCsvSerialize(char data[][], char result[]) {
+define_function char NAVCsvSerialize(char data[][][], char result[]) {
     stack_var integer i
 
     if (!length_array(data)) {
