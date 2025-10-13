@@ -174,8 +174,8 @@ define_function char NAVCsvLexerTokenize(_NAVCsvLexer lexer) {
             }
             case NAV_TAB:
             case ' ': {
-                // Ignore whitespace
-                // NAVLog("'Ignoring whitespace'")
+                // NAVLog("'Encountered whitespace'")
+                NAVCsvLexerConsumeWhitespace(lexer)
             }
             case '"': {
                 // NAVLog("'Encountered string'")
@@ -333,6 +333,38 @@ define_function NAVCsvLexerConsumeString(_NAVCsvLexer lexer) {
 
     lexer.tokenCount++
     lexer.tokens[lexer.tokenCount].type = NAV_CSV_TOKEN_TYPE_STRING
+    lexer.tokens[lexer.tokenCount].value = value
+}
+
+
+define_function NAVCsvLexerConsumeWhitespace(_NAVCsvLexer lexer) {
+    stack_var char value[NAV_CSV_LEXER_MAX_TOKEN_LENGTH]
+
+    // NAVLog("'Consuming whitespace starting with: ', lexer.source[lexer.cursor]")
+
+    value = "lexer.source[lexer.cursor]"
+
+    while (NAVCsvLexerHasMoreTokens(lexer) &&
+            (lexer.source[lexer.cursor + 1] == ' ' ||
+             lexer.source[lexer.cursor + 1] == NAV_TAB)) {
+        if (!NAVCsvLexerAdvanceCursor(lexer)) {
+            return
+        }
+
+        // NAVLog("'Appending to whitespace: ', lexer.source[lexer.cursor]")
+        value = "value, lexer.source[lexer.cursor]"
+    }
+
+    if (lexer.tokenCount >= NAV_CSV_LEXER_MAX_TOKENS) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_CSV_LEXER__,
+                                    'NAVCsvLexerConsumeWhitespace',
+                                    "'Exceeded maximum token limit'")
+        return
+    }
+
+    lexer.tokenCount++
+    lexer.tokens[lexer.tokenCount].type = NAV_CSV_TOKEN_TYPE_WHITESPACE
     lexer.tokens[lexer.tokenCount].value = value
 }
 

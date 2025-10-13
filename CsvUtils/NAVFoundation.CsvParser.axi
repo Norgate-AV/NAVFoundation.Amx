@@ -142,6 +142,25 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][]) {
                     return false
                 }
             }
+            case NAV_CSV_TOKEN_TYPE_WHITESPACE: {
+                if (NAVCsvParserHasMoreTokens(parser)) {
+                    stack_var _NAVCsvToken next
+
+                    next = parser.tokens[parser.cursor + 1]
+
+                    switch (next.type) {
+                        case NAV_CSV_TOKEN_TYPE_IDENTIFIER: {
+                            if (!NAVCsvParserParseIdentifier(parser, data)) {
+                                return false
+                            }
+                        }
+                        case NAV_CSV_TOKEN_TYPE_STRING: {
+                            // Ignore whitespace before quoted identifier
+                            continue
+                        }
+                    }
+                }
+            }
             case NAV_CSV_TOKEN_TYPE_NEWLINE: {
                 // If we encounter a newline token then we increment the row count
                 parser.rowCount++
@@ -174,7 +193,7 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][]) {
 define_function char NAVCsvParserParseIdentifier(_NAVCsvParser parser, char data[][][]) {
     stack_var char value[2048]
 
-    // Consume all tokens until newline
+    // Consume all tokens until newline or comma
     while (NAVCsvParserHasMoreTokens(parser)) {
         stack_var _NAVCsvToken token
 
@@ -184,17 +203,23 @@ define_function char NAVCsvParserParseIdentifier(_NAVCsvParser parser, char data
 
         token = parser.tokens[parser.cursor]
 
-        if (token.type == NAV_CSV_TOKEN_TYPE_NEWLINE) {
+        if (token.type == NAV_CSV_TOKEN_TYPE_NEWLINE ||
+            token.type == NAV_CSV_TOKEN_TYPE_COMMA) {
             break
         }
 
-        if (token.type == NAV_CSV_TOKEN_TYPE_IDENTIFIER) {
-            if (length_array(value) > 0) {
-                value = "value, ' ', token.value"  // Add space between tokens
-                continue
+        switch (token.type) {
+            case NAV_CSV_TOKEN_TYPE_IDENTIFIER:
+            case NAV_CSV_TOKEN_TYPE_WHITESPACE: {
+                value = "value, token.value"
             }
-
-            value = token.value
+            default: {
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                            __NAV_FOUNDATION_CSV_PARSER__,
+                                            'NAVCsvParserParseIdentifier',
+                                            "'Unexpected token type: ', itoa(token.type), ' with value: ', token.value, ' at position ', itoa(parser.cursor)")
+                return false
+            }
         }
     }
 
@@ -217,17 +242,56 @@ define_function char NAVCsvParserParseIdentifier(_NAVCsvParser parser, char data
  * @returns {char} True (1) if property was parsed successfully, False (0) on error
  */
 define_function char NAVCsvParserParseQuoatedIdentifier(_NAVCsvParser parser, char data[][][]) {
-    stack_var _NAVCsvToken token
+    stack_var char value[2048]
+    stack_var integer count
 
-    if (!NAVCsvParserAdvanceCursor(parser)) {
-        return false
+    while (NAVCsvParserHasMoreTokens(parser)) {
+        stack_var _NAVCsvToken token
+
+        if (!NAVCsvParserAdvanceCursor(parser)) {
+            return false
+        }
+
+        token = parser.tokens[parser.cursor]
+
+        if (token.type == NAV_CSV_TOKEN_TYPE_NEWLINE ||
+            token.type == NAV_CSV_TOKEN_TYPE_COMMA) {
+            break
+        }
+
+        switch (token.type) {
+            case NAV_CSV_TOKEN_TYPE_STRING: {
+                count++
+
+                if (count > 1) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_CSV_PARSER__,
+                                                'NAVCsvParserParseIdentifier',
+                                                "'Multiple quoted strings found in a single CSV field at position ', itoa(parser.cursor)")
+                    return false
+                }
+
+                value = token.value
+            }
+            case NAV_CSV_TOKEN_TYPE_WHITESPACE: {
+                // Ignore whitespace after quoted identifier
+                continue
+            }
+            default: {
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                            __NAV_FOUNDATION_CSV_PARSER__,
+                                            'NAVCsvParserParseIdentifier',
+                                            "'Unexpected token type: ', itoa(token.type), ' with value: ', token.value, ' at position ', itoa(parser.cursor)")
+                return false
+            }
+        }
     }
 
-    token = parser.tokens[parser.cursor]
-
     parser.columnCount++
-    data[parser.rowCount][parser.columnCount] = token.value
+    data[parser.rowCount][parser.columnCount] = value
     set_length_array(data[parser.rowCount], parser.columnCount)
+
+    return true
 }
 
 
