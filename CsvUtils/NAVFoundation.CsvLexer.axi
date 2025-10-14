@@ -320,6 +320,15 @@ define_function NAVCsvLexerConsumeString(_NAVCsvLexer lexer) {
 }
 
 
+/**
+ * @function NAVCsvLexerConsumeWhitespace
+ * @private
+ * @description Consume whitespace tokens (spaces and tabs) from the lexer input.
+ *
+ * @param {_NAVCsvLexer} lexer - The lexer instance
+ *
+ * @returns {void}
+ */
 define_function NAVCsvLexerConsumeWhitespace(_NAVCsvLexer lexer) {
     stack_var char value[NAV_CSV_LEXER_MAX_TOKEN_LENGTH]
 
