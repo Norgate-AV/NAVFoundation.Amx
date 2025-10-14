@@ -1,4 +1,5 @@
-#DEFINE TESTING_NAVCSVLEXER
+// #DEFINE TESTING_NAVCSVLEXER
+#DEFINE TESTING_NAVCSVPARSER
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.CsvUtils.axi'
 #include 'NAVFoundation.Assert.axi'
@@ -7,6 +8,10 @@
 
 #IF_DEFINED TESTING_NAVCSVLEXER
 #include 'NAVCsvLexer.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVCSVPARSER
+#include 'NAVCsvParser.axi'
 #END_IF
 
 define_function RunCsvUtilsTests() {
@@ -19,5 +24,15 @@ define_function RunCsvUtilsTests() {
     TestNAVCsvLexerEdgeCases()
     TestNAVCsvLexerEpsilonFields()
     TestNAVCsvLexerSpecialCharsInQuotes()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVCSVPARSER
+    TestNAVCsvParserInit()
+    TestNAVCsvParserParse()
+    TestNAVCsvParserWhitespaceHandling()
+    TestNAVCsvParserEdgeCases()
+    TestNAVCsvParserComplexScenarios()
+    TestNAVCsvParserSpecialCharacters()
+    TestNAVCsvParserRFC4180Compliance()
     #END_IF
 }

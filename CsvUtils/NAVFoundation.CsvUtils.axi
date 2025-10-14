@@ -35,7 +35,7 @@ SOFTWARE.
 #DEFINE __NAV_FOUNDATION_CSVUTILS__ 'NAVFoundation.CsvUtils'
 
 #include 'NAVFoundation.CsvLexer.axi'
-// #include 'NAVFoundation.IniFileParser.axi'
+#include 'NAVFoundation.CsvParser.axi'
 
 
 (***********************************************************)
@@ -64,7 +64,7 @@ SOFTWARE.
  */
 define_function char NAVCsvFileParse(char data[], char csv[][][]) {
     stack_var _NAVCsvLexer lexer
-    // stack_var _NAVCsvParser parser
+    stack_var _NAVCsvParser parser
 
     // Initialize the lexer with the input data
     NAVCsvLexerInit(lexer, data)
@@ -74,21 +74,21 @@ define_function char NAVCsvFileParse(char data[], char csv[][][]) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_CSVUTILS__,
                                     'NAVCsvFileParse',
-                                    "'Error tokenizing INI data'")
+                                    "'Error tokenizing CSV data'")
         return false
     }
 
     // Initialize the parser with the tokens
-    // NAVCsvParserInit(parser, lexer.tokens)
+    NAVCsvParserInit(parser, lexer.tokens)
 
-    // // Parse the tokens
-    // if (!NAVCsvParserParse(parser, csv)) {
-    //     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-    //                                 __NAV_FOUNDATION_CSVUTILS__,
-    //                                 'NAVCsvFileParse',
-    //                                 "'Error parsing CSV data'")
-    //     return false
-    // }
+    // Parse the tokens
+    if (!NAVCsvParserParse(parser, csv)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_CSVUTILS__,
+                                    'NAVCsvFileParse',
+                                    "'Error parsing CSV data'")
+        return false
+    }
 
     return true
 }
@@ -105,7 +105,7 @@ define_function char NAVCsvFileParse(char data[], char csv[][][]) {
  * @returns {char} True (1) if serialization succeeded, False (0) if failed
  *
  * @example
- * stack_var char data[3][3]
+ * stack_var char data[3][3][255]
  * stack_var char result[2048]
  *
  * data[1][1] = 'Name'
