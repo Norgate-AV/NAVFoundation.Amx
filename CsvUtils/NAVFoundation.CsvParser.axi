@@ -132,6 +132,7 @@ define_function char NAVCsvParserIsEmptyFieldComma(_NAVCsvParser parser) {
     }
 
     // Previous token was also a comma (consecutive commas)
+    // BUT only if the next token is also a delimiter (not a value)
     if (parser.cursor > 1) {
         prev = parser.tokens[parser.cursor - 1]
 
@@ -140,6 +141,20 @@ define_function char NAVCsvParserIsEmptyFieldComma(_NAVCsvParser parser) {
         #END_IF
 
         if (prev.type == NAV_CSV_TOKEN_TYPE_COMMA) {
+            // Check if next token is also a delimiter or if we're at EOF
+            if (parser.cursor + 1 <= parser.tokenCount) {
+                stack_var _NAVCsvToken next
+                next = parser.tokens[parser.cursor + 1]
+
+                // If next is a value (IDENTIFIER/STRING), this comma is just a separator
+                if (next.type == NAV_CSV_TOKEN_TYPE_IDENTIFIER || next.type == NAV_CSV_TOKEN_TYPE_STRING) {
+                    #IF_DEFINED CSV_PARSER_DEBUG
+                    NAVLog("'[DEBUG] IsEmptyFieldComma: FALSE - prev was COMMA but next is a value'")
+                    #END_IF
+                    return false
+                }
+            }
+
             #IF_DEFINED CSV_PARSER_DEBUG
             NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - previous token was COMMA'")
             #END_IF
@@ -237,10 +252,14 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][]) {
                 }
             }
             case NAV_CSV_TOKEN_TYPE_COMMA: {
+                stack_var char isEmptyField
+                isEmptyField = NAVCsvParserIsEmptyFieldComma(parser)
+
                 #IF_DEFINED CSV_PARSER_DEBUG
-                NAVLog("'[DEBUG] Processing COMMA, IsEmptyField=', itoa(NAVCsvParserIsEmptyFieldComma(parser))")
+                NAVLog("'[DEBUG] Processing COMMA, IsEmptyField=', itoa(isEmptyField)")
                 #END_IF
-                if (NAVCsvParserIsEmptyFieldComma(parser)) {
+
+                if (isEmptyField) {
                     NAVCsvParserAddEmptyField(parser, data)
                 }
             }
