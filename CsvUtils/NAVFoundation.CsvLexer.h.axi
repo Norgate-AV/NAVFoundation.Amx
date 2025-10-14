@@ -52,10 +52,10 @@ constant long NAV_CSV_LEXER_MAX_SOURCE              = 127500  // 125 KB
 constant integer NAV_CSV_TOKEN_TYPE_COMMA       = 1     // ,
 constant integer NAV_CSV_TOKEN_TYPE_IDENTIFIER  = 2     // Alphanumeric strings
 constant integer NAV_CSV_TOKEN_TYPE_STRING      = 3     // Quoted strings or unquoted values
-constant integer NAV_CSV_TOKEN_TYPE_NEWLINE     = 5     // Newline characters
-constant integer NAV_CSV_TOKEN_TYPE_EOF         = 6     // End of file/input
-constant integer NAV_CSV_TOKEN_TYPE_WHITESPACE  = 7     // Spaces or tabs
-constant integer NAV_CSV_TOKEN_TYPE_ERROR       = 8     // Error token for unrecognized characters
+constant integer NAV_CSV_TOKEN_TYPE_NEWLINE     = 4     // Newline characters
+constant integer NAV_CSV_TOKEN_TYPE_EOF         = 5     // End of file/input
+constant integer NAV_CSV_TOKEN_TYPE_WHITESPACE  = 6     // Spaces or tabs
+constant integer NAV_CSV_TOKEN_TYPE_ERROR       = 7     // Error token for unrecognized characters
 
 
 DEFINE_TYPE
