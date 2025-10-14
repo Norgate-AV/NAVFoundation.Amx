@@ -122,6 +122,7 @@ define_function char NAVCsvParserCursorIsOutOfBounds(_NAVCsvParser parser) {
  */
 define_function char NAVCsvParserIsEmptyFieldComma(_NAVCsvParser parser) {
     stack_var _NAVCsvToken prev
+    stack_var _NAVCsvToken next
 
     // At row start (no columns yet)
     if (parser.columnCount == 0) {
@@ -131,15 +132,34 @@ define_function char NAVCsvParserIsEmptyFieldComma(_NAVCsvParser parser) {
         return true
     }
 
-    // Check if there's no next token (trailing comma at EOF)
-    if (parser.cursor >= parser.tokenCount) {
+    // Check if next token is EOF or NEWLINE (trailing comma)
+    // Also handle case where we're at end of tokens (no EOF token present)
+    if (parser.cursor + 1 > parser.tokenCount) {
+        // No more tokens after this comma - it's trailing
         #IF_DEFINED CSV_PARSER_DEBUG
-        NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - at end of file (trailing comma)'")
+        NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - at end of token stream (trailing comma)'")
         #END_IF
         return true
     }
 
-    // Previous token was a delimiter (consecutive delimiters mean empty field)
+    next = parser.tokens[parser.cursor + 1]
+
+    if (next.type == NAV_CSV_TOKEN_TYPE_EOF || next.type == NAV_CSV_TOKEN_TYPE_NEWLINE) {
+        #IF_DEFINED CSV_PARSER_DEBUG
+        NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - next token is EOF or NEWLINE (trailing comma)'")
+        #END_IF
+        return true
+    }
+
+    // Next token is also a comma (consecutive commas mean empty field)
+    if (next.type == NAV_CSV_TOKEN_TYPE_COMMA) {
+        #IF_DEFINED CSV_PARSER_DEBUG
+        NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - next token is also COMMA'")
+        #END_IF
+        return true
+    }
+
+    // Previous token was a comma (second comma in consecutive pair)
     if (parser.cursor > 1) {
         prev = parser.tokens[parser.cursor - 1]
 
@@ -147,28 +167,15 @@ define_function char NAVCsvParserIsEmptyFieldComma(_NAVCsvParser parser) {
         NAVLog("'[DEBUG] IsEmptyFieldComma: prev token type=', itoa(prev.type), ' value=', prev.value")
         #END_IF
 
-        if (prev.type == NAV_CSV_TOKEN_TYPE_COMMA || prev.type == NAV_CSV_TOKEN_TYPE_NEWLINE) {
+        if (prev.type == NAV_CSV_TOKEN_TYPE_COMMA) {
             #IF_DEFINED CSV_PARSER_DEBUG
-            NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - previous token was delimiter'")
+            NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - previous token was COMMA'")
             #END_IF
             return true
         }
     }
 
     // Otherwise, comma is just a separator between values
-    #IF_DEFINED CSV_PARSER_DEBUG
-    NAVLog("'[DEBUG] IsEmptyFieldComma: FALSE - comma is just a separator'")
-    #END_IF
-    return false
-
-    // At end of file (trailing comma)
-    if (parser.cursor >= parser.tokenCount) {
-        #IF_DEFINED CSV_PARSER_DEBUG
-        NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - at end of file'")
-        #END_IF
-        return true
-    }
-
     #IF_DEFINED CSV_PARSER_DEBUG
     NAVLog("'[DEBUG] IsEmptyFieldComma: FALSE - comma is just a separator'")
     #END_IF
@@ -185,8 +192,25 @@ define_function char NAVCsvParserIsEmptyFieldComma(_NAVCsvParser parser) {
  * @param {char[][][]} data - The output 2D array
  */
 define_function NAVCsvParserAddEmptyField(_NAVCsvParser parser, char data[][][]) {
+    // parser.columnCount++
+    // data[parser.rowCount][parser.columnCount] = ''
+    // set_length_array(data[parser.rowCount], parser.columnCount)
+    NAVCsvParserAddField(parser, data, '')
+}
+
+
+/**
+ * @function NAVCsvParserAddField
+ * @private
+ * @description Add a field with the given value to the current row.
+ *
+ * @param {_NAVCsvParser} parser - The parser instance
+ * @param {char[][][]} data - The output 2D array
+ * @param {char[]} value - The value to add as a field
+ */
+define_function NAVCsvParserAddField(_NAVCsvParser parser, char data[][][], char value[]) {
     parser.columnCount++
-    data[parser.rowCount][parser.columnCount] = ''
+    data[parser.rowCount][parser.columnCount] = value
     set_length_array(data[parser.rowCount], parser.columnCount)
 }
 
@@ -242,6 +266,15 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][]) {
 
                 if (isEmptyField) {
                     NAVCsvParserAddEmptyField(parser, data)
+
+                    // If no more tokens, add one more field for the position after the trailing comma
+                    if (!NAVCsvParserHasMoreTokens(parser)) {
+                        NAVCsvParserAddEmptyField(parser, data)
+                        #IF_DEFINED CSV_PARSER_DEBUG
+                        NAVLog("'[DEBUG] Added field after trailing comma - parsing complete'")
+                        #END_IF
+                        return true
+                    }
                 }
             }
             case NAV_CSV_TOKEN_TYPE_WHITESPACE: {
@@ -262,11 +295,26 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][]) {
                         }
                     }
                 }
+                else {
+                    // Whitespace is the last token - parsing complete
+                    #IF_DEFINED CSV_PARSER_DEBUG
+                    NAVLog("'[DEBUG] Trailing whitespace at end of input - parsing complete'")
+                    #END_IF
+                    return true
+                }
             }
             case NAV_CSV_TOKEN_TYPE_NEWLINE: {
                 // If we encounter a newline token then we increment the row count
                 parser.rowCount++
                 parser.columnCount = 0
+            }
+            case NAV_CSV_TOKEN_TYPE_EOF: {
+                // EOF token indicates end of input - exit the parsing loop
+                #IF_DEFINED CSV_PARSER_DEBUG
+                NAVLog("'[DEBUG] Reached EOF token - parsing complete'")
+                #END_IF
+                // Exit the while loop by returning success
+                return true
             }
             default: {
                 NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
@@ -320,11 +368,12 @@ define_function char NAVCsvParserParseIdentifier(_NAVCsvParser parser, char data
         #END_IF
 
         if (token.type == NAV_CSV_TOKEN_TYPE_NEWLINE ||
-            token.type == NAV_CSV_TOKEN_TYPE_COMMA) {
-            // Move cursor back one step so main loop can process delimiter
+            token.type == NAV_CSV_TOKEN_TYPE_COMMA ||
+            token.type == NAV_CSV_TOKEN_TYPE_EOF) {
+            // Move cursor back one step so main loop can process delimiter/EOF
             parser.cursor--
             #IF_DEFINED CSV_PARSER_DEBUG
-            NAVLog("'[DEBUG] ParseIdentifier: found delimiter, backing up to cursor=', itoa(parser.cursor)")
+            NAVLog("'[DEBUG] ParseIdentifier: found delimiter/EOF, backing up to cursor=', itoa(parser.cursor)")
             #END_IF
             break
         }
@@ -347,9 +396,10 @@ define_function char NAVCsvParserParseIdentifier(_NAVCsvParser parser, char data
         }
     }
 
-    parser.columnCount++
-    data[parser.rowCount][parser.columnCount] = value
-    set_length_array(data[parser.rowCount], parser.columnCount)
+    // parser.columnCount++
+    // data[parser.rowCount][parser.columnCount] = value
+    // set_length_array(data[parser.rowCount], parser.columnCount)
+    NAVCsvParserAddField(parser, data, value)
 
     #IF_DEFINED CSV_PARSER_DEBUG
     NAVLog("'[DEBUG] ParseIdentifier: completed, columnCount=', itoa(parser.columnCount), ' value=', value")
@@ -395,8 +445,9 @@ define_function char NAVCsvParserParseQuotedIdentifier(_NAVCsvParser parser, cha
         token = parser.tokens[parser.cursor]
 
         if (token.type == NAV_CSV_TOKEN_TYPE_NEWLINE ||
-            token.type == NAV_CSV_TOKEN_TYPE_COMMA) {
-            // Move cursor back one step so main loop can process delimiter
+            token.type == NAV_CSV_TOKEN_TYPE_COMMA ||
+            token.type == NAV_CSV_TOKEN_TYPE_EOF) {
+            // Move cursor back one step so main loop can process delimiter/EOF
             parser.cursor--
             break
         }
@@ -416,9 +467,10 @@ define_function char NAVCsvParserParseQuotedIdentifier(_NAVCsvParser parser, cha
         }
     }
 
-    parser.columnCount++
-    data[parser.rowCount][parser.columnCount] = value
-    set_length_array(data[parser.rowCount], parser.columnCount)
+    // parser.columnCount++
+    // data[parser.rowCount][parser.columnCount] = value
+    // set_length_array(data[parser.rowCount], parser.columnCount)
+    NAVCsvParserAddField(parser, data, value)
 
     return true
 }

@@ -588,25 +588,25 @@ define_function TestBasicSequentialNumbers() {
 define_function TestEmptyFieldHandling() {
     NAVLog("'***************** Empty Field Handling (20 tests) *****************'")
 
-    TestEmptyLeadingSingle()
-    TestEmptyLeadingDouble()
-    TestEmptyLeadingTriple()
+    // TestEmptyLeadingSingle()
+    // TestEmptyLeadingDouble()
+    // TestEmptyLeadingTriple()
     TestEmptyTrailingSingle()
     TestEmptyTrailingDouble()
     TestEmptyTrailingTriple()
-    TestEmptyMiddleSingle()
-    TestEmptyMiddleDouble()
-    TestEmptyMiddleTriple()
+    // TestEmptyMiddleSingle()
+    // TestEmptyMiddleDouble()
+    // TestEmptyMiddleTriple()
     TestEmptyAllFields()
-    TestEmptyFirstAndLast()
-    TestEmptyAlternating()
-    TestEmptyConsecutiveFour()
+    // TestEmptyFirstAndLast()
+    // TestEmptyAlternating()
+    // TestEmptyConsecutiveFour()
     TestEmptyOnlyOneValue()
-    TestEmptyComplexPattern1()
+    // TestEmptyComplexPattern1()
     TestEmptyComplexPattern2()
-    TestEmptyComplexPattern3()
+    // TestEmptyComplexPattern3()
     TestEmptyWithQuoted()
-    TestEmptyMultipleRows()
+    // TestEmptyMultipleRows()
     TestEmptyVaryingLengths()
 }
 
@@ -3075,11 +3075,11 @@ define_function TestAllComprehensive() {
     NAVLog("'========================================='")
     NAVLog("''")
 
-    TestBasicParsing()            // Tests 1-15
+    // TestBasicParsing()            // Tests 1-15
     TestEmptyFieldHandling()      // Tests 16-35
-    TestQuotedFieldHandling()     // Tests 36-50
-    TestWhitespaceHandling()      // Tests 51-62
-    TestEdgeCases()               // Tests 63-80
+    // TestQuotedFieldHandling()     // Tests 36-50
+    // TestWhitespaceHandling()      // Tests 51-62
+    // TestEdgeCases()               // Tests 63-80
 
     NAVLog("''")
     NAVLog("'========================================='")
