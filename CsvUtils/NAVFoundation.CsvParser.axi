@@ -131,8 +131,7 @@ define_function char NAVCsvParserIsEmptyFieldComma(_NAVCsvParser parser) {
         return true
     }
 
-    // Previous token was also a comma (consecutive commas)
-    // BUT only if the next token is also a delimiter (not a value)
+    // Previous token was a delimiter (consecutive delimiters mean empty field)
     if (parser.cursor > 1) {
         prev = parser.tokens[parser.cursor - 1]
 
@@ -140,45 +139,19 @@ define_function char NAVCsvParserIsEmptyFieldComma(_NAVCsvParser parser) {
         NAVLog("'[DEBUG] IsEmptyFieldComma: prev token type=', itoa(prev.type), ' value=', prev.value")
         #END_IF
 
-        if (prev.type == NAV_CSV_TOKEN_TYPE_COMMA) {
-            // Check if next token is also a delimiter or if we're at EOF
-            if (parser.cursor + 1 <= parser.tokenCount) {
-                stack_var _NAVCsvToken next
-                next = parser.tokens[parser.cursor + 1]
-
-                // If next is a value (IDENTIFIER/STRING), this comma is just a separator
-                if (next.type == NAV_CSV_TOKEN_TYPE_IDENTIFIER || next.type == NAV_CSV_TOKEN_TYPE_STRING) {
-                    #IF_DEFINED CSV_PARSER_DEBUG
-                    NAVLog("'[DEBUG] IsEmptyFieldComma: FALSE - prev was COMMA but next is a value'")
-                    #END_IF
-                    return false
-                }
-            }
-
+        if (prev.type == NAV_CSV_TOKEN_TYPE_COMMA || prev.type == NAV_CSV_TOKEN_TYPE_NEWLINE) {
             #IF_DEFINED CSV_PARSER_DEBUG
-            NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - previous token was COMMA'")
+            NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - previous token was delimiter'")
             #END_IF
             return true
         }
     }
 
-    // Next token is comma or newline (trailing empty before delimiter)
-    if (parser.cursor + 1 <= parser.tokenCount) {
-        stack_var _NAVCsvToken next
-
-        next = parser.tokens[parser.cursor + 1]
-
-        #IF_DEFINED CSV_PARSER_DEBUG
-        NAVLog("'[DEBUG] IsEmptyFieldComma: next token type=', itoa(next.type), ' value=', next.value")
-        #END_IF
-
-        if (next.type == NAV_CSV_TOKEN_TYPE_COMMA || next.type == NAV_CSV_TOKEN_TYPE_NEWLINE) {
-            #IF_DEFINED CSV_PARSER_DEBUG
-            NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - next token is COMMA or NEWLINE'")
-            #END_IF
-            return true
-        }
-    }
+    // Otherwise, comma is just a separator between values
+    #IF_DEFINED CSV_PARSER_DEBUG
+    NAVLog("'[DEBUG] IsEmptyFieldComma: FALSE - comma is just a separator'")
+    #END_IF
+    return false
 
     // At end of file (trailing comma)
     if (parser.cursor >= parser.tokenCount) {
