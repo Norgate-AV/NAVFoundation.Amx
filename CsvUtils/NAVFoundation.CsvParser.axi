@@ -131,6 +131,14 @@ define_function char NAVCsvParserIsEmptyFieldComma(_NAVCsvParser parser) {
         return true
     }
 
+    // Check if there's no next token (trailing comma at EOF)
+    if (parser.cursor >= parser.tokenCount) {
+        #IF_DEFINED CSV_PARSER_DEBUG
+        NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - at end of file (trailing comma)'")
+        #END_IF
+        return true
+    }
+
     // Previous token was a delimiter (consecutive delimiters mean empty field)
     if (parser.cursor > 1) {
         prev = parser.tokens[parser.cursor - 1]
