@@ -266,15 +266,6 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][]) {
 
                 if (isEmptyField) {
                     NAVCsvParserAddEmptyField(parser, data)
-
-                    // If no more tokens, add one more field for the position after the trailing comma
-                    if (!NAVCsvParserHasMoreTokens(parser)) {
-                        NAVCsvParserAddEmptyField(parser, data)
-                        #IF_DEFINED CSV_PARSER_DEBUG
-                        NAVLog("'[DEBUG] Added field after trailing comma - parsing complete'")
-                        #END_IF
-                        return true
-                    }
                 }
             }
             case NAV_CSV_TOKEN_TYPE_WHITESPACE: {
