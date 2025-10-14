@@ -56,43 +56,43 @@ constant char IDENTIFIER_CHAR_EXPECTED[] = {
 
 
 constant integer LEXER_TOKEN_EXPECTED_COUNTS[] = {
-    5, // a,b,c -> IDENTIFIER, COMMA, IDENTIFIER, COMMA, IDENTIFIER
-    3, // "hello,world",test -> STRING, COMMA, IDENTIFIER
-    3, // "He said ""Hello""",normal -> STRING, COMMA, IDENTIFIER
-    7, // field1,field2\nfield3,field4 -> IDENTIFIER, COMMA, IDENTIFIER, NEWLINE, IDENTIFIER, COMMA, IDENTIFIER
-    4, // a,,c -> IDENTIFIER, COMMA, COMMA, IDENTIFIER
-    3, // "line1\nline2",end -> STRING, COMMA, IDENTIFIER
-    9, // x,y,z,a,b -> IDENTIFIER, COMMA, IDENTIFIER, COMMA, IDENTIFIER, COMMA, IDENTIFIER, COMMA, IDENTIFIER
-    6, // "test",,"empty",end -> STRING, COMMA, COMMA, IDENTIFIER, COMMA, IDENTIFIER
-    11, // header1,header2\nval1,val2\nval3,val4 -> IDENTIFIER, COMMA, IDENTIFIER, NEWLINE, IDENTIFIER, COMMA, IDENTIFIER, NEWLINE, IDENTIFIER, COMMA, IDENTIFIER
-    3, // "field with\nnewline",normal -> STRING, COMMA, IDENTIFIER
-    1, // "" -> STRING
-    3, // ,,, -> COMMA, COMMA, COMMA
-    4, // a,b, -> IDENTIFIER, COMMA, IDENTIFIER, COMMA
-    4, // ,a,b -> COMMA, IDENTIFIER, COMMA, IDENTIFIER
-    3, // "quote","another" -> STRING, COMMA, STRING
-    7, //  field1 , field2  -> WHITESPACE, IDENTIFIER, WHITESPACE, COMMA, WHITESPACE, IDENTIFIER, WHITESPACE
-    4, // " quoted ",normal -> WHITESPACE, STRING, COMMA, IDENTIFIER
-    7, //  " spaced " , " another "  -> WHITESPACE, STRING, WHITESPACE, COMMA, WHITESPACE, STRING, WHITESPACE
+    6, // a,b,c -> IDENTIFIER, COMMA, IDENTIFIER, COMMA, IDENTIFIER, EOF
+    4, // "hello,world",test -> STRING, COMMA, IDENTIFIER, EOF
+    4, // "He said ""Hello""",normal -> STRING, COMMA, IDENTIFIER, EOF
+    8, // field1,field2\nfield3,field4 -> IDENTIFIER, COMMA, IDENTIFIER, NEWLINE, IDENTIFIER, COMMA, IDENTIFIER, EOF
+    5, // a,,c -> IDENTIFIER, COMMA, COMMA, IDENTIFIER, EOF
+    4, // "line1\nline2",end -> STRING, COMMA, IDENTIFIER, EOF
+    10, // x,y,z,a,b -> IDENTIFIER, COMMA, IDENTIFIER, COMMA, IDENTIFIER, COMMA, IDENTIFIER, COMMA, IDENTIFIER, EOF
+    7, // "test",,"empty",end -> STRING, COMMA, COMMA, STRING, COMMA, IDENTIFIER, EOF
+    12, // header1,header2\nval1,val2\nval3,val4 -> IDENTIFIER, COMMA, IDENTIFIER, NEWLINE, IDENTIFIER, COMMA, IDENTIFIER, NEWLINE, IDENTIFIER, COMMA, IDENTIFIER, EOF
+    4, // "field with\nnewline",normal -> STRING, COMMA, IDENTIFIER, EOF
+    2, // "" -> STRING, EOF
+    4, // ,,, -> COMMA, COMMA, COMMA, EOF
+    5, // a,b, -> IDENTIFIER, COMMA, IDENTIFIER, COMMA, EOF
+    5, // ,a,b -> COMMA, IDENTIFIER, COMMA, IDENTIFIER, EOF
+    4, // "quote","another" -> STRING, COMMA, STRING, EOF
+    8, //  field1 , field2  -> WHITESPACE, IDENTIFIER, WHITESPACE, COMMA, WHITESPACE, IDENTIFIER, WHITESPACE, EOF
+    5, // " quoted ",normal -> WHITESPACE, STRING, COMMA, IDENTIFIER, EOF
+    8, //  " spaced " , " another "  -> WHITESPACE, STRING, WHITESPACE, COMMA, WHITESPACE, STRING, WHITESPACE, EOF
     // Edge cases
-    1, // a -> IDENTIFIER (single field)
-    2, // ,, -> COMMA, COMMA (just commas at start)
-    5, // ,,,,, -> COMMA, COMMA, COMMA, COMMA, COMMA (many consecutive commas)
-    1, // """" -> STRING (just one escaped quote)
-    3, // "","" -> STRING, COMMA, STRING (empty quoted strings)
-    1, // "a""b""c" -> STRING (multiple escaped quotes in one field)
-    1, // \n -> NEWLINE (just newline)
-    2, // \n\n -> NEWLINE, NEWLINE (consecutive newlines)
-    6, // a,\nb,c -> IDENTIFIER, COMMA, NEWLINE, IDENTIFIER, COMMA, IDENTIFIER (newline in middle)
-    4, // \t\r\n,normal -> WHITESPACE, NEWLINE, COMMA, IDENTIFIER (special chars unquoted)
-    1, // test-123.value@domain -> IDENTIFIER (complex identifier with valid special chars)
-    3, //    field    -> WHITESPACE, IDENTIFIER, WHITESPACE (multiple spaces before/after)
+    2, // a -> IDENTIFIER, EOF (single field)
+    3, // ,, -> COMMA, COMMA, EOF (just commas at start)
+    6, // ,,,,, -> COMMA, COMMA, COMMA, COMMA, COMMA, EOF (many consecutive commas)
+    2, // """" -> STRING, EOF (just one escaped quote)
+    4, // "","" -> STRING, COMMA, STRING, EOF (empty quoted strings)
+    2, // "a""b""c" -> STRING, EOF (multiple escaped quotes in one field)
+    2, // \n -> NEWLINE, EOF (just newline)
+    3, // \n\n -> NEWLINE, NEWLINE, EOF (consecutive newlines)
+    7, // a,\nb,c -> IDENTIFIER, COMMA, NEWLINE, IDENTIFIER, COMMA, IDENTIFIER, EOF (newline in middle)
+    5, // \t\r\n,normal -> WHITESPACE, NEWLINE, COMMA, IDENTIFIER, EOF (special chars unquoted)
+    2, // test-123.value@domain -> IDENTIFIER, EOF (complex identifier with valid special chars)
+    4, //    field    -> WHITESPACE, IDENTIFIER, WHITESPACE, EOF (multiple spaces before/after)
     // Epsilon/empty field tests
-    7, // some,,empty,,fields -> IDENTIFIER, COMMA, COMMA, IDENTIFIER, COMMA, COMMA, IDENTIFIER
-    5, // ,,a,, -> COMMA, COMMA, IDENTIFIER, COMMA, COMMA
-    9, // a,,,b,,,c -> IDENTIFIER, COMMA, COMMA, COMMA, IDENTIFIER, COMMA, COMMA, COMMA, IDENTIFIER
-    4, // "filled",,"empty" -> STRING, COMMA, COMMA, STRING
-    6  // ,,"middle",,end -> COMMA, COMMA, STRING, COMMA, COMMA, IDENTIFIER
+    8, // some,,empty,,fields -> IDENTIFIER, COMMA, COMMA, IDENTIFIER, COMMA, COMMA, IDENTIFIER, EOF
+    6, // ,,a,, -> COMMA, COMMA, IDENTIFIER, COMMA, COMMA, EOF
+    10, // a,,,b,,,c -> IDENTIFIER, COMMA, COMMA, COMMA, IDENTIFIER, COMMA, COMMA, COMMA, IDENTIFIER, EOF
+    5, // "filled",,"empty" -> STRING, COMMA, COMMA, STRING, EOF
+    7  // ,,"middle",,end -> COMMA, COMMA, STRING, COMMA, COMMA, IDENTIFIER, EOF
 }
 
 
@@ -332,8 +332,8 @@ define_function TestNAVCsvLexerWhitespaceHandling() {
 
     if (!result) {
         NAVLogTestFailed(1, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 7) {
-        NAVLogTestFailed(1, '7 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 8) {
+        NAVLogTestFailed(1, '8 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_WHITESPACE ||
                lexer.tokens[1].value != ' ') {
         NAVLogTestFailed(1, 'first token should be whitespace', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -354,6 +354,8 @@ define_function TestNAVCsvLexerWhitespaceHandling() {
     } else if (lexer.tokens[7].type != NAV_CSV_TOKEN_TYPE_WHITESPACE ||
                lexer.tokens[7].value != ' ') {
         NAVLogTestFailed(1, 'seventh token should be whitespace', NAVCsvLexerTokenSerialize(lexer.tokens[7]))
+    } else if (lexer.tokens[8].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(1, 'eighth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[8]))
     } else {
         NAVLogTestPassed(1)
     }
@@ -364,8 +366,8 @@ define_function TestNAVCsvLexerWhitespaceHandling() {
 
     if (!result) {
         NAVLogTestFailed(2, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 4) {
-        NAVLogTestFailed(2, '4 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 5) {
+        NAVLogTestFailed(2, '5 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_WHITESPACE ||
                lexer.tokens[1].value != ' ') {
         NAVLogTestFailed(2, 'first token should be whitespace', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -377,6 +379,8 @@ define_function TestNAVCsvLexerWhitespaceHandling() {
     } else if (lexer.tokens[4].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[4].value != 'normal') {
         NAVLogTestFailed(2, 'fourth token should be identifier normal', NAVCsvLexerTokenSerialize(lexer.tokens[4]))
+    } else if (lexer.tokens[5].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(2, 'fifth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[5]))
     } else {
         NAVLogTestPassed(2)
     }
@@ -387,8 +391,8 @@ define_function TestNAVCsvLexerWhitespaceHandling() {
 
     if (!result) {
         NAVLogTestFailed(3, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 7) {
-        NAVLogTestFailed(3, '7 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 8) {
+        NAVLogTestFailed(3, '8 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_WHITESPACE ||
                lexer.tokens[1].value != '  ') {
         NAVLogTestFailed(3, 'first token should be whitespace "  "', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -409,6 +413,8 @@ define_function TestNAVCsvLexerWhitespaceHandling() {
     } else if (lexer.tokens[7].type != NAV_CSV_TOKEN_TYPE_WHITESPACE ||
                lexer.tokens[7].value != '  ') {
         NAVLogTestFailed(3, 'seventh token should be whitespace "  "', NAVCsvLexerTokenSerialize(lexer.tokens[7]))
+    } else if (lexer.tokens[8].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(3, 'eighth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[8]))
     } else {
         NAVLogTestPassed(3)
     }
@@ -419,8 +425,8 @@ define_function TestNAVCsvLexerWhitespaceHandling() {
 
     if (!result) {
         NAVLogTestFailed(4, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 3) {
-        NAVLogTestFailed(4, '3 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 4) {
+        NAVLogTestFailed(4, '4 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_WHITESPACE) {
         NAVLogTestFailed(4, 'first token should be whitespace (tab)', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
     } else if (lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
@@ -428,6 +434,8 @@ define_function TestNAVCsvLexerWhitespaceHandling() {
         NAVLogTestFailed(4, 'second token should be identifier field', NAVCsvLexerTokenSerialize(lexer.tokens[2]))
     } else if (lexer.tokens[3].type != NAV_CSV_TOKEN_TYPE_WHITESPACE) {
         NAVLogTestFailed(4, 'third token should be whitespace (tab)', NAVCsvLexerTokenSerialize(lexer.tokens[3]))
+    } else if (lexer.tokens[4].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(4, 'fourth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[4]))
     } else {
         NAVLogTestPassed(4)
     }
@@ -438,8 +446,8 @@ define_function TestNAVCsvLexerWhitespaceHandling() {
 
     if (!result) {
         NAVLogTestFailed(5, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 3) {
-        NAVLogTestFailed(5, '3 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 4) {
+        NAVLogTestFailed(5, '4 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_WHITESPACE ||
                lexer.tokens[1].value != '  ') {
         NAVLogTestFailed(5, 'first token should be whitespace', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -448,6 +456,8 @@ define_function TestNAVCsvLexerWhitespaceHandling() {
     } else if (lexer.tokens[3].type != NAV_CSV_TOKEN_TYPE_WHITESPACE ||
                lexer.tokens[3].value != '  ') {
         NAVLogTestFailed(5, 'third token should be whitespace', NAVCsvLexerTokenSerialize(lexer.tokens[3]))
+    } else if (lexer.tokens[4].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(5, 'fourth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[4]))
     } else {
         NAVLogTestPassed(5)
     }
@@ -465,8 +475,10 @@ define_function TestNAVCsvLexerEdgeCases() {
 
     if (!result) {
         NAVLogTestFailed(1, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 0) {
-        NAVLogTestFailed(1, '0 tokens expected for empty string', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 1) {
+        NAVLogTestFailed(1, '1 token expected for empty string (EOF)', itoa(lexer.tokenCount))
+    } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(1, 'token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
     } else {
         NAVLogTestPassed(1)
     }
@@ -477,10 +489,12 @@ define_function TestNAVCsvLexerEdgeCases() {
 
     if (!result) {
         NAVLogTestFailed(2, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 1) {
-        NAVLogTestFailed(2, '1 token expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 2) {
+        NAVLogTestFailed(2, '2 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_WHITESPACE) {
-        NAVLogTestFailed(2, 'token should be whitespace', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
+        NAVLogTestFailed(2, 'first token should be whitespace', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
+    } else if (lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(2, 'second token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[2]))
     } else {
         NAVLogTestPassed(2)
     }
@@ -491,12 +505,14 @@ define_function TestNAVCsvLexerEdgeCases() {
 
     if (!result) {
         NAVLogTestFailed(3, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 3) {
-        NAVLogTestFailed(3, '3 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 4) {
+        NAVLogTestFailed(3, '4 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_COMMA ||
                lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_COMMA ||
                lexer.tokens[3].type != NAV_CSV_TOKEN_TYPE_COMMA) {
-        NAVLogTestFailed(3, 'all tokens should be commas', 'failed')
+        NAVLogTestFailed(3, 'first three tokens should be commas', 'failed')
+    } else if (lexer.tokens[4].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(3, 'fourth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[4]))
     } else {
         NAVLogTestPassed(3)
     }
@@ -520,10 +536,12 @@ define_function TestNAVCsvLexerEdgeCases() {
 
     if (!result) {
         NAVLogTestFailed(5, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 1) {
-        NAVLogTestFailed(5, '1 token expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 2) {
+        NAVLogTestFailed(5, '2 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER) {
-        NAVLogTestFailed(5, 'token should be identifier', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
+        NAVLogTestFailed(5, 'first token should be identifier', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
+    } else if (lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(5, 'second token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[2]))
     } else {
         NAVLogTestPassed(5)
     }
@@ -541,8 +559,8 @@ define_function TestNAVCsvLexerEpsilonFields() {
 
     if (!result) {
         NAVLogTestFailed(1, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 4) {
-        NAVLogTestFailed(1, '4 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 5) {
+        NAVLogTestFailed(1, '5 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[1].value != 'a') {
         NAVLogTestFailed(1, 'first token should be identifier a', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -553,6 +571,8 @@ define_function TestNAVCsvLexerEpsilonFields() {
     } else if (lexer.tokens[4].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[4].value != 'c') {
         NAVLogTestFailed(1, 'fourth token should be identifier c', NAVCsvLexerTokenSerialize(lexer.tokens[4]))
+    } else if (lexer.tokens[5].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(1, 'fifth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[5]))
     } else {
         NAVLogTestPassed(1)
     }
@@ -563,8 +583,8 @@ define_function TestNAVCsvLexerEpsilonFields() {
 
     if (!result) {
         NAVLogTestFailed(2, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 7) {
-        NAVLogTestFailed(2, '7 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 8) {
+        NAVLogTestFailed(2, '8 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[1].value != 'some') {
         NAVLogTestFailed(2, 'first token should be identifier some', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -580,8 +600,8 @@ define_function TestNAVCsvLexerEpsilonFields() {
     } else if (lexer.tokens[7].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[7].value != 'fields') {
         NAVLogTestFailed(2, 'seventh token should be identifier fields', NAVCsvLexerTokenSerialize(lexer.tokens[7]))
-    } else if (lexer.tokens[7].value != 'fields') {
-        NAVLogTestFailed(2, 'seventh token should be identifier fields', NAVCsvLexerTokenSerialize(lexer.tokens[7]))
+    } else if (lexer.tokens[8].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(2, 'eighth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[8]))
     } else {
         NAVLogTestPassed(2)
     }
@@ -592,8 +612,8 @@ define_function TestNAVCsvLexerEpsilonFields() {
 
     if (!result) {
         NAVLogTestFailed(3, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 5) {
-        NAVLogTestFailed(3, '5 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 6) {
+        NAVLogTestFailed(3, '6 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_COMMA ||
                lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_COMMA) {
         NAVLogTestFailed(3, 'first two tokens should be COMMAs', 'failed')
@@ -602,7 +622,9 @@ define_function TestNAVCsvLexerEpsilonFields() {
         NAVLogTestFailed(3, 'third token should be identifier a', NAVCsvLexerTokenSerialize(lexer.tokens[3]))
     } else if (lexer.tokens[4].type != NAV_CSV_TOKEN_TYPE_COMMA ||
                lexer.tokens[5].type != NAV_CSV_TOKEN_TYPE_COMMA) {
-        NAVLogTestFailed(3, 'last two tokens should be COMMAs', 'failed')
+        NAVLogTestFailed(3, 'tokens 4-5 should be COMMAs', 'failed')
+    } else if (lexer.tokens[6].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(3, 'sixth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[6]))
     } else {
         NAVLogTestPassed(3)
     }
@@ -613,8 +635,8 @@ define_function TestNAVCsvLexerEpsilonFields() {
 
     if (!result) {
         NAVLogTestFailed(4, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 5) {
-        NAVLogTestFailed(4, '5 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 6) {
+        NAVLogTestFailed(4, '6 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[1].value != 'a') {
         NAVLogTestFailed(4, 'first token should be identifier a', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -624,7 +646,9 @@ define_function TestNAVCsvLexerEpsilonFields() {
         NAVLogTestFailed(4, 'middle tokens should be three COMMAs', 'failed')
     } else if (lexer.tokens[5].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[5].value != 'b') {
-        NAVLogTestFailed(4, 'last token should be identifier b', NAVCsvLexerTokenSerialize(lexer.tokens[5]))
+        NAVLogTestFailed(4, 'fifth token should be identifier b', NAVCsvLexerTokenSerialize(lexer.tokens[5]))
+    } else if (lexer.tokens[6].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(4, 'sixth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[6]))
     } else {
         NAVLogTestPassed(4)
     }
@@ -635,8 +659,8 @@ define_function TestNAVCsvLexerEpsilonFields() {
 
     if (!result) {
         NAVLogTestFailed(5, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 4) {
-        NAVLogTestFailed(5, '4 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 5) {
+        NAVLogTestFailed(5, '5 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_STRING ||
                lexer.tokens[1].value != 'filled') {
         NAVLogTestFailed(5, 'first token should be STRING filled', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -645,7 +669,9 @@ define_function TestNAVCsvLexerEpsilonFields() {
         NAVLogTestFailed(5, 'middle tokens should be two COMMAs (empty field)', 'failed')
     } else if (lexer.tokens[4].type != NAV_CSV_TOKEN_TYPE_STRING ||
                lexer.tokens[4].value != 'empty') {
-        NAVLogTestFailed(5, 'last token should be STRING empty', NAVCsvLexerTokenSerialize(lexer.tokens[4]))
+        NAVLogTestFailed(5, 'fourth token should be STRING empty', NAVCsvLexerTokenSerialize(lexer.tokens[4]))
+    } else if (lexer.tokens[5].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(5, 'fifth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[5]))
     } else {
         NAVLogTestPassed(5)
     }
@@ -656,8 +682,8 @@ define_function TestNAVCsvLexerEpsilonFields() {
 
     if (!result) {
         NAVLogTestFailed(6, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 3) {
-        NAVLogTestFailed(6, '3 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 4) {
+        NAVLogTestFailed(6, '4 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_STRING ||
                length_string(lexer.tokens[1].value) != 0) {
         NAVLogTestFailed(6, 'first token should be empty STRING', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -666,6 +692,8 @@ define_function TestNAVCsvLexerEpsilonFields() {
     } else if (lexer.tokens[3].type != NAV_CSV_TOKEN_TYPE_STRING ||
                length_string(lexer.tokens[3].value) != 0) {
         NAVLogTestFailed(6, 'third token should be empty STRING', NAVCsvLexerTokenSerialize(lexer.tokens[3]))
+    } else if (lexer.tokens[4].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(6, 'fourth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[4]))
     } else {
         NAVLogTestPassed(6)
     }
@@ -676,13 +704,15 @@ define_function TestNAVCsvLexerEpsilonFields() {
 
     if (!result) {
         NAVLogTestFailed(7, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 4) {
-        NAVLogTestFailed(7, '4 tokens expected (all COMMAs)', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 5) {
+        NAVLogTestFailed(7, '5 tokens expected (4 COMMAs + EOF)', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_COMMA ||
                lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_COMMA ||
                lexer.tokens[3].type != NAV_CSV_TOKEN_TYPE_COMMA ||
                lexer.tokens[4].type != NAV_CSV_TOKEN_TYPE_COMMA) {
-        NAVLogTestFailed(7, 'all tokens should be COMMAs', 'failed')
+        NAVLogTestFailed(7, 'first four tokens should be COMMAs', 'failed')
+    } else if (lexer.tokens[5].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(7, 'fifth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[5]))
     } else {
         NAVLogTestPassed(7)
     }
@@ -693,8 +723,8 @@ define_function TestNAVCsvLexerEpsilonFields() {
 
     if (!result) {
         NAVLogTestFailed(8, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 7) {
-        NAVLogTestFailed(8, '7 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 8) {
+        NAVLogTestFailed(8, '8 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[1].value != 'a') {
         NAVLogTestFailed(8, 'first token should be identifier a', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -726,13 +756,15 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
 
     if (!result) {
         NAVLogTestFailed(1, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 1) {
-        NAVLogTestFailed(1, '1 token expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 2) {
+        NAVLogTestFailed(1, '2 tokens expected (STRING + EOF)', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_STRING) {
         NAVLogTestFailed(1, 'token should be STRING', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
     } else if (find_string(lexer.tokens[1].value, "'field'", 1) == 0 ||
                find_string(lexer.tokens[1].value, "'value'", 1) == 0) {
         NAVLogTestFailed(1, 'value should contain tab between field and value', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
+    } else if (lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(1, 'second token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[2]))
     } else {
         NAVLogTestPassed(1)
     }
@@ -743,13 +775,15 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
 
     if (!result) {
         NAVLogTestFailed(2, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 1) {
-        NAVLogTestFailed(2, '1 token expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 2) {
+        NAVLogTestFailed(2, '2 tokens expected (STRING + EOF)', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_STRING) {
         NAVLogTestFailed(2, 'token should be STRING', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
     } else if (find_string(lexer.tokens[1].value, "'line1'", 1) == 0 ||
                find_string(lexer.tokens[1].value, "'line2'", 1) == 0) {
         NAVLogTestFailed(2, 'value should contain CR between lines', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
+    } else if (lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(2, 'second token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[2]))
     } else {
         NAVLogTestPassed(2)
     }
@@ -760,13 +794,15 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
 
     if (!result) {
         NAVLogTestFailed(3, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 1) {
-        NAVLogTestFailed(3, '1 token expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 2) {
+        NAVLogTestFailed(3, '2 tokens expected (STRING + EOF)', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_STRING) {
         NAVLogTestFailed(3, 'token should be STRING', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
     } else if (find_string(lexer.tokens[1].value, "'line1'", 1) == 0 ||
                find_string(lexer.tokens[1].value, "'line2'", 1) == 0) {
         NAVLogTestFailed(3, 'value should contain LF between lines', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
+    } else if (lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(3, 'second token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[2]))
     } else {
         NAVLogTestPassed(3)
     }
@@ -777,13 +813,15 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
 
     if (!result) {
         NAVLogTestFailed(4, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 1) {
-        NAVLogTestFailed(4, '1 token expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 2) {
+        NAVLogTestFailed(4, '2 tokens expected (STRING + EOF)', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_STRING) {
         NAVLogTestFailed(4, 'token should be STRING', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
     } else if (find_string(lexer.tokens[1].value, "'line1'", 1) == 0 ||
                find_string(lexer.tokens[1].value, "'line2'", 1) == 0) {
         NAVLogTestFailed(4, 'value should contain CRLF between lines', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
+    } else if (lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(4, 'second token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[2]))
     } else {
         NAVLogTestPassed(4)
     }
@@ -794,14 +832,16 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
 
     if (!result) {
         NAVLogTestFailed(5, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 1) {
-        NAVLogTestFailed(5, '1 token expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 2) {
+        NAVLogTestFailed(5, '2 tokens expected (STRING + EOF)', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_STRING) {
         NAVLogTestFailed(5, 'token should be STRING', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
     } else if (find_string(lexer.tokens[1].value, 'tab:', 1) == 0 ||
                find_string(lexer.tokens[1].value, 'cr:', 1) == 0 ||
                find_string(lexer.tokens[1].value, 'lf:', 1) == 0) {
         NAVLogTestFailed(5, 'value should contain all special chars', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
+    } else if (lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(5, 'second token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[2]))
     } else {
         NAVLogTestPassed(5)
     }
@@ -812,8 +852,8 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
 
     if (!result) {
         NAVLogTestFailed(6, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 3) {
-        NAVLogTestFailed(6, '3 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 4) {
+        NAVLogTestFailed(6, '4 tokens expected (STRING,COMMA,IDENT,EOF)', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_STRING ||
                lexer.tokens[1].value != 'field,with,commas') {
         NAVLogTestFailed(6, 'first token should be STRING with commas', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -822,6 +862,8 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
     } else if (lexer.tokens[3].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[3].value != 'normal') {
         NAVLogTestFailed(6, 'third token should be identifier', NAVCsvLexerTokenSerialize(lexer.tokens[3]))
+    } else if (lexer.tokens[4].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(6, 'fourth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[4]))
     } else {
         NAVLogTestPassed(6)
     }
@@ -832,8 +874,8 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
 
     if (!result) {
         NAVLogTestFailed(7, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 5) {
-        NAVLogTestFailed(7, '5 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 6) {
+        NAVLogTestFailed(7, '6 tokens expected (IDENT,COMMA,STRING,COMMA,IDENT,EOF)', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[1].value != 'field1') {
         NAVLogTestFailed(7, 'first token should be identifier field1', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -846,6 +888,8 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
     } else if (lexer.tokens[5].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[5].value != 'field3') {
         NAVLogTestFailed(7, 'fifth token should be identifier field3', NAVCsvLexerTokenSerialize(lexer.tokens[5]))
+    } else if (lexer.tokens[6].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(7, 'sixth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[6]))
     } else {
         NAVLogTestPassed(7)
     }
@@ -856,10 +900,12 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
 
     if (!result) {
         NAVLogTestFailed(8, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 1) {
-        NAVLogTestFailed(8, '1 token expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 2) {
+        NAVLogTestFailed(8, '2 tokens expected (STRING + EOF)', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_STRING) {
         NAVLogTestFailed(8, 'token should be STRING', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
+    } else if (lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(8, 'second token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[2]))
     } else {
         NAVLogTestPassed(8)
     }
@@ -870,8 +916,8 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
 
     if (!result) {
         NAVLogTestFailed(9, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 3) {
-        NAVLogTestFailed(9, '3 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 4) {
+        NAVLogTestFailed(9, '4 tokens expected (IDENT,WS,IDENT,EOF)', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[1].value != 'field1') {
         NAVLogTestFailed(9, 'first token should be identifier field1', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
@@ -880,6 +926,8 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
     } else if (lexer.tokens[3].type != NAV_CSV_TOKEN_TYPE_IDENTIFIER ||
                lexer.tokens[3].value != 'field2') {
         NAVLogTestFailed(9, 'third token should be identifier field2', NAVCsvLexerTokenSerialize(lexer.tokens[3]))
+    } else if (lexer.tokens[4].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(9, 'fourth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[4]))
     } else {
         NAVLogTestPassed(9)
     }
@@ -890,8 +938,10 @@ define_function TestNAVCsvLexerSpecialCharsInQuotes() {
 
     if (!result) {
         NAVLogTestFailed(10, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 11) {
-        NAVLogTestFailed(10, '11 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 12) {
+        NAVLogTestFailed(10, '12 tokens expected (11 tokens + EOF)', itoa(lexer.tokenCount))
+    } else if (lexer.tokens[12].type != NAV_CSV_TOKEN_TYPE_EOF) {
+        NAVLogTestFailed(10, 'last token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[12]))
     } else {
         NAVLogTestPassed(10)
     }

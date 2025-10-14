@@ -182,6 +182,19 @@ define_function char NAVCsvLexerTokenize(_NAVCsvLexer lexer) {
         }
     }
 
+    // Add EOF token to mark end of token stream
+    if (lexer.tokenCount >= NAV_CSV_LEXER_MAX_TOKENS) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_CSV_LEXER__,
+                                    'NAVCsvLexerTokenize',
+                                    "'Cannot add EOF token: maximum token limit reached'")
+        return false
+    }
+
+    lexer.tokenCount++
+    lexer.tokens[lexer.tokenCount].type = NAV_CSV_TOKEN_TYPE_EOF
+    lexer.tokens[lexer.tokenCount].value = ''
+
     set_length_array(lexer.tokens, lexer.tokenCount)
 
     return true
