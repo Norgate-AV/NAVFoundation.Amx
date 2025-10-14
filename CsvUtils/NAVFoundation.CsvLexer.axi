@@ -135,17 +135,14 @@ define_function char NAVCsvLexerTokenize(_NAVCsvLexer lexer) {
         }
 
         ch = lexer.source[lexer.cursor]
-        // NAVLog("'[', itoa(lexer.cursor), '] ', ch")
 
         switch (ch) {
             case ',': {
-                // NAVLog("'Encountered comma'")
                 lexer.tokenCount++
                 lexer.tokens[lexer.tokenCount].type = NAV_CSV_TOKEN_TYPE_COMMA
                 lexer.tokens[lexer.tokenCount].value = "ch"
             }
             case NAV_LF: {
-                // NAVLog("'Encountered newline LF'")
                 // Unix style newline \n
                 lexer.tokenCount++
                 lexer.tokens[lexer.tokenCount].type = NAV_CSV_TOKEN_TYPE_NEWLINE
@@ -166,24 +163,19 @@ define_function char NAVCsvLexerTokenize(_NAVCsvLexer lexer) {
                     value = "value, lexer.source[lexer.cursor]"
                 }
 
-                // NAVLog("'Encountered newline CR or CRLF'")
-
                 lexer.tokenCount++
                 lexer.tokens[lexer.tokenCount].type = NAV_CSV_TOKEN_TYPE_NEWLINE
                 lexer.tokens[lexer.tokenCount].value = value
             }
             case NAV_TAB:
             case ' ': {
-                // NAVLog("'Encountered whitespace'")
                 NAVCsvLexerConsumeWhitespace(lexer)
             }
             case '"': {
-                // NAVLog("'Encountered string'")
                 NAVCsvLexerConsumeString(lexer)
             }
             default: {
                 if (NAVCsvLexerIsIdentifierChar(ch)) {
-                    // NAVLog("'Encountered identifier'")
                     NAVCsvLexerConsumeIdentifier(lexer)
                 }
             }
@@ -232,8 +224,6 @@ define_function char NAVCsvLexerIsIdentifierChar(char value) {
 define_function NAVCsvLexerConsumeIdentifier(_NAVCsvLexer lexer) {
     stack_var char value[NAV_CSV_LEXER_MAX_TOKEN_LENGTH]
 
-    // NAVLog("'Consuming identifier starting with: ', lexer.source[lexer.cursor]")
-
     value = "lexer.source[lexer.cursor]"
 
     while (NAVCsvLexerHasMoreTokens(lexer) &&
@@ -242,7 +232,6 @@ define_function NAVCsvLexerConsumeIdentifier(_NAVCsvLexer lexer) {
             return
         }
 
-        // NAVLog("'Appending to identifier: ', lexer.source[lexer.cursor]")
         value = "value, lexer.source[lexer.cursor]"
     }
 
@@ -272,8 +261,6 @@ define_function NAVCsvLexerConsumeIdentifier(_NAVCsvLexer lexer) {
 define_function NAVCsvLexerConsumeString(_NAVCsvLexer lexer) {
     stack_var char value[NAV_CSV_LEXER_MAX_TOKEN_LENGTH]
 
-    // NAVLog("'Consuming string'")
-
     while (NAVCsvLexerHasMoreTokens(lexer)) {
         stack_var char ch
 
@@ -283,12 +270,10 @@ define_function NAVCsvLexerConsumeString(_NAVCsvLexer lexer) {
         }
 
         ch = lexer.source[lexer.cursor]
-        // NAVLog("'Processing string char: ', ch")
 
         switch (ch) {
             case '"': {
-                // NAVLog("'Encountered double quote'")
-
+                // Handle escaped quote
                 if (NAVCsvLexerHasMoreTokens(lexer)) {
                     stack_var char next
 
@@ -301,14 +286,12 @@ define_function NAVCsvLexerConsumeString(_NAVCsvLexer lexer) {
                             }
 
                             value = "value, ch"
-                            // NAVLog("'Escaped quote found, appending to string'")
                             continue
                         }
                     }
                 }
 
                 // Closing quote
-                // NAVLog("'Closing quote found, ending string consumption'")
                 break
             }
             default: {
@@ -340,8 +323,6 @@ define_function NAVCsvLexerConsumeString(_NAVCsvLexer lexer) {
 define_function NAVCsvLexerConsumeWhitespace(_NAVCsvLexer lexer) {
     stack_var char value[NAV_CSV_LEXER_MAX_TOKEN_LENGTH]
 
-    // NAVLog("'Consuming whitespace starting with: ', lexer.source[lexer.cursor]")
-
     value = "lexer.source[lexer.cursor]"
 
     while (NAVCsvLexerHasMoreTokens(lexer) &&
@@ -351,7 +332,6 @@ define_function NAVCsvLexerConsumeWhitespace(_NAVCsvLexer lexer) {
             return
         }
 
-        // NAVLog("'Appending to whitespace: ', lexer.source[lexer.cursor]")
         value = "value, lexer.source[lexer.cursor]"
     }
 

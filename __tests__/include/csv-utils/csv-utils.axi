@@ -15,5 +15,9 @@ define_function RunCsvUtilsTests() {
     TestNAVCsvLexerTokenize()
     TestNAVCsvLexerIsIdentifierChar()
     TestNAVCsvLexerTokenTypes()
+    TestNAVCsvLexerWhitespaceHandling()
+    TestNAVCsvLexerEdgeCases()
+    TestNAVCsvLexerEpsilonFields()
+    TestNAVCsvLexerSpecialCharsInQuotes()
     #END_IF
 }
