@@ -283,6 +283,7 @@ define_function char[NAV_MAX_BUFFER] NAVFindAndReplace(char buffer[], char match
     stack_var integer index
     stack_var char result[NAV_MAX_BUFFER]
     stack_var integer matchLength
+    stack_var integer searchPos
 
     matchLength = length_array(match)
 
@@ -291,20 +292,30 @@ define_function char[NAV_MAX_BUFFER] NAVFindAndReplace(char buffer[], char match
     }
 
     result = buffer
+    searchPos = 1  // Start searching from position 1
 
     if (!NAVContains(result, match)) {
         return result
     }
 
-    while (NAVContains(result, match)) {
-        index = NAVIndexOf(result, match, 1)
+    while (true) {
+        index = NAVIndexOf(result, match, searchPos)
+
+        if (index == 0) {
+            // No more matches found
+            break
+        }
 
         if (index == 1) {
             result = "value, right_string(result, length_array(result) - matchLength)"
+            // Move search position past the replacement
+            searchPos = length_array(value) + 1
             continue
         }
 
         result = "left_string(result, index - 1), value, right_string(result, (length_array(result) - (index + matchLength)) + 1)"
+        // Move search position past the replacement - search from AFTER the replacement in the result string
+        searchPos = (index - 1) + length_array(value) + 1
     }
 
     return result

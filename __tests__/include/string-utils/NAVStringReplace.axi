@@ -27,7 +27,7 @@ constant char STRING_REPLACE_EXPECTED[][NAV_MAX_BUFFER] = {
     'hellX wXrld',                    // o -> X
     'heLLo worLd',                    // l -> L
     'the quick brown fox',            // - -> space
-    'test string',                    // multiple spaces -> single
+    'test  string',                   // multiple spaces -> double space (non-overlapping replacement)
     'CAMELCaseText',                  // camel -> CAMEL
     'no matches here',                // xyz -> 123 (no change)
     '',                              // empty string

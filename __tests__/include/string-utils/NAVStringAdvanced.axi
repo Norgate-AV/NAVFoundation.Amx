@@ -103,6 +103,8 @@ constant char GREEDY_EXPECTED[][NAV_MAX_BUFFER] = {
 }
 
 // Test data for NAVFindAndReplace
+// Tests 1-8: Basic replacement scenarios
+// Tests 9-13: Edge cases where replacement contains search string (critical for CSV quote escaping)
 constant char FIND_REPLACE_TEST[][3][NAV_MAX_BUFFER] = {
     { 'Hello World Hello', 'Hello', 'Hi' },
     { 'test test test', 'test', 'exam' },
@@ -111,7 +113,13 @@ constant char FIND_REPLACE_TEST[][3][NAV_MAX_BUFFER] = {
     { 'Multiple   spaces', '  ', ' ' },
     { 'dots...everywhere...', '...', '.' },
     { '', 'any', 'thing' },
-    { 'Replace all a', 'a', 'X' }
+    { 'Replace all a', 'a', 'X' },
+    // Edge cases: Replacement contains search string (prevents infinite loops)
+    { 'say "hello"', '"', '""' },           // CSV quote escaping pattern
+    { 'test', 't', 'tt' },                  // Character doubling at start/end
+    { 'a b a', 'a', 'aaa' },                // Character tripling with multiple instances
+    { 'go go go', 'go', 'going' },          // Expansion with overlap potential
+    { 'start here', 's', 'ss' }             // Doubling at start position
 }
 
 constant char FIND_REPLACE_EXPECTED[][NAV_MAX_BUFFER] = {
@@ -119,10 +127,16 @@ constant char FIND_REPLACE_EXPECTED[][NAV_MAX_BUFFER] = {
     'exam exam exam',
     'No matches here',
     'CaseSensitive',
-    'Multiple spaces',
+    'Multiple  spaces',                    // First double-space becomes single (one replacement only due to overlap)
     'dots.everywhere.',
     '',
-    'ReplXce Xll X'
+    'ReplXce Xll X',
+    // Edge case expectations
+    'say ""hello""',                        // Quotes properly escaped
+    'ttestt',                               // Both 't' chars doubled
+    'aaa b aaa',                            // Both 'a' chars tripled
+    'going going going',                    // All 'go' expanded to 'going'
+    'sstart here'                          // Leading 's' doubled
 }
 
 // Test data for NAVStringNormalizeAndReplace
