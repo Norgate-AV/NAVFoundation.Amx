@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.8.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.7.0...v3.8.0) (2025-10-15)
+
+### 🌟 Features
+
+- add CsvUtils library ([c7c17af](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c7c17af16daa2b50b8102c8e73ee66a3bd60f46a))
+
+### 🐛 Bug Fixes
+
+- **string-utils:** fix edge case with FindAndReplace function ([3e1b6c1](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3e1b6c1ff89246f82553ce714672fb259b7d75b7))
+
 ## [3.7.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.6.0...v3.7.0) (2025-10-11)
 
 ### 🌟 Features
