@@ -307,7 +307,7 @@ define_function NAVCsvLexerConsumeString(_NAVCsvLexer lexer) {
                 // Closing quote
                 break
             }
-            // Potential extension to handle some basic \ escape sequences
+            // Potential extension to the RFC to handle some basic \ escape sequences
             // case '\': {
             //     if (NAVCsvLexerHasMoreTokens(lexer)) {
             //         stack_var char next

@@ -23,7 +23,7 @@ define_function TestNAVCsvParserInit() {
     NAVCsvParserInit(parser, tokens)
 
     // Verify initialization
-    if (parser.tokenCount == 5 && parser.cursor == 0 && parser.rowCount == 1 && parser.columnCount == 0) {
+    if (parser.tokenCount == 5 && parser.cursor == 0 && parser.rowCount == 0 && parser.columnCount == 0) {
         NAVLogTestPassed(1)
     }
     else {
@@ -80,7 +80,8 @@ define_function TestParseSingleRow() {
     tokens[4].value = ','
     tokens[5].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[5].value = 'city'
-    set_length_array(tokens, 5)
+    tokens[6].type = NAV_CSV_TOKEN_TYPE_EOF
+    set_length_array(tokens, 6)
 
     NAVCsvParserInit(parser, tokens)
     result = NAVCsvParserParse(parser, data)
@@ -141,6 +142,9 @@ define_function TestParseMultipleRows() {
     tokens[tokenIndex].value = '30'
     tokenIndex++
 
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
+
     set_length_array(tokens, tokenIndex - 1)
 
     NAVCsvParserInit(parser, tokens)
@@ -182,6 +186,9 @@ define_function TestParseQuotedFields() {
 
     tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_STRING
     tokens[tokenIndex].value = 'Last Name'
+    tokenIndex++
+
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
     tokenIndex++
 
     set_length_array(tokens, tokenIndex - 1)
@@ -226,6 +233,9 @@ define_function TestParseEmptyFields() {
 
     tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[tokenIndex].value = 'field3'
+    tokenIndex++
+
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
     tokenIndex++
 
     set_length_array(tokens, tokenIndex - 1)
@@ -305,6 +315,9 @@ define_function TestParseMixedContent() {
     tokens[tokenIndex].value = 'true'
     tokenIndex++
 
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
+
     set_length_array(tokens, tokenIndex - 1)
 
     NAVCsvParserInit(parser, tokens)
@@ -359,6 +372,9 @@ define_function TestParseWhitespaceBeforeQuoted() {
     tokens[tokenIndex].value = 'value'
     tokenIndex++
 
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
+
     set_length_array(tokens, tokenIndex - 1)
 
     NAVCsvParserInit(parser, tokens)
@@ -402,6 +418,9 @@ define_function TestParseWhitespaceAfterQuoted() {
     tokens[tokenIndex].value = 'next'
     tokenIndex++
 
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
+
     set_length_array(tokens, tokenIndex - 1)
 
     NAVCsvParserInit(parser, tokens)
@@ -440,6 +459,9 @@ define_function TestParseWhitespaceInUnquoted() {
 
     tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[tokenIndex].value = 'World'
+    tokenIndex++
+
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
     tokenIndex++
 
     set_length_array(tokens, tokenIndex - 1)
@@ -498,6 +520,9 @@ define_function TestParseTrailingComma() {
     tokens[tokenIndex].value = ','
     tokenIndex++
 
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
+
     set_length_array(tokens, tokenIndex - 1)
 
     NAVCsvParserInit(parser, tokens)
@@ -543,6 +568,9 @@ define_function TestParseEmptyRow() {
     tokens[tokenIndex].value = 'value2'
     tokenIndex++
 
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
+
     set_length_array(tokens, tokenIndex - 1)
 
     NAVCsvParserInit(parser, tokens)
@@ -569,7 +597,8 @@ define_function TestParseSingleField() {
     // Create tokens for: value
     tokens[1].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[1].value = 'value'
-    set_length_array(tokens, 1)
+    tokens[2].type = NAV_CSV_TOKEN_TYPE_EOF
+    set_length_array(tokens, 2)
 
     NAVCsvParserInit(parser, tokens)
     result = NAVCsvParserParse(parser, data)
@@ -627,6 +656,9 @@ define_function TestParseAllEmptyFields() {
     tokens[tokenIndex].value = ','
     tokenIndex++
 
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
+
     set_length_array(tokens, tokenIndex - 1)
 
     NAVCsvParserInit(parser, tokens)
@@ -666,6 +698,9 @@ define_function TestParseLeadingEmptyFields() {
 
     tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[tokenIndex].value = 'value'
+    tokenIndex++
+
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
     tokenIndex++
 
     set_length_array(tokens, tokenIndex - 1)
@@ -709,6 +744,9 @@ define_function TestParseManyColumns() {
         tokens[tokenIndex].value = "'col', itoa(i)"
         tokenIndex++
     }
+
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
 
     set_length_array(tokens, tokenIndex - 1)
 
@@ -760,6 +798,9 @@ define_function TestParseManyRows() {
         tokens[tokenIndex].value = "'data', itoa(i)"
         tokenIndex++
     }
+
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
 
     set_length_array(tokens, tokenIndex - 1)
 
@@ -839,6 +880,9 @@ define_function TestParseMixedEmptyFilled() {
     tokens[tokenIndex].value = 'd'
     tokenIndex++
 
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
+
     set_length_array(tokens, tokenIndex - 1)
 
     NAVCsvParserInit(parser, tokens)
@@ -903,6 +947,9 @@ define_function TestParseQuotedFieldWithComma() {
     tokens[tokenIndex].value = 'Age'
     tokenIndex++
 
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
+
     set_length_array(tokens, tokenIndex - 1)
 
     NAVCsvParserInit(parser, tokens)
@@ -946,6 +993,9 @@ define_function TestParseQuotedFieldWithNewline() {
     tokens[tokenIndex].value = 'Value'
     tokenIndex++
 
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
+
     set_length_array(tokens, tokenIndex - 1)
 
     NAVCsvParserInit(parser, tokens)
@@ -986,6 +1036,9 @@ define_function TestParseQuotedFieldWithQuotes() {
 
     tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[tokenIndex].value = 'Response'
+    tokenIndex++
+
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
     tokenIndex++
 
     set_length_array(tokens, tokenIndex - 1)
@@ -1034,6 +1087,9 @@ define_function TestParseFieldsWithTabs() {
 
     tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[tokenIndex].value = 'Value'
+    tokenIndex++
+
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
     tokenIndex++
 
     set_length_array(tokens, tokenIndex - 1)
@@ -1127,6 +1183,9 @@ define_function TestParseCRLFLineEndings() {
     tokens[tokenIndex].value = 'field2'
     tokenIndex++
 
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
+    tokenIndex++
+
     set_length_array(tokens, tokenIndex - 1)
 
     NAVCsvParserInit(parser, tokens)
@@ -1168,6 +1227,9 @@ define_function TestParseOptionalTrailingNewline() {
 
     tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_NEWLINE
     tokens[tokenIndex].value = "NAV_LF"
+    tokenIndex++
+
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
     tokenIndex++
 
     set_length_array(tokens, tokenIndex - 1)
@@ -1243,6 +1305,9 @@ define_function TestParseWithHeader() {
 
     tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[tokenIndex].value = 'NYC'
+    tokenIndex++
+
+    tokens[tokenIndex].type = NAV_CSV_TOKEN_TYPE_EOF
     tokenIndex++
 
     set_length_array(tokens, tokenIndex - 1)
