@@ -149,6 +149,27 @@ define_function char NAVCsvLexerAdvanceCursor(_NAVCsvLexer lexer) {
         return false
     }
 
+    return true
+}
+
+
+/**
+ * @function NAVCsvLexerCanAddToken
+ * @private
+ * @description Check if the lexer can accept another token without exceeding the maximum limit.
+ *
+ * @param {_NAVCsvLexer} lexer - The lexer to check
+ *
+ * @returns {char} True (1) if token can be added, False (0) if limit reached
+ */
+define_function char NAVCsvLexerCanAddToken(_NAVCsvLexer lexer) {
+    if (lexer.tokenCount >= NAV_CSV_LEXER_MAX_TOKENS) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_CSV_LEXER__,
+                                    'NAVCsvLexerCanAddToken',
+                                    "'Exceeded maximum token limit'")
+        return false
+    }
 
     return true
 }
@@ -228,11 +249,7 @@ define_function char NAVCsvLexerTokenize(_NAVCsvLexer lexer) {
     }
 
     // Add EOF token to mark end of token stream
-    if (lexer.tokenCount >= NAV_CSV_LEXER_MAX_TOKENS) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_CSV_LEXER__,
-                                    'NAVCsvLexerTokenize',
-                                    "'Cannot add EOF token: maximum token limit reached'")
+    if (!NAVCsvLexerCanAddToken(lexer)) {
         return false
     }
 
@@ -293,11 +310,7 @@ define_function NAVCsvLexerConsumeIdentifier(_NAVCsvLexer lexer) {
         value = "value, lexer.source[lexer.cursor]"
     }
 
-    if (lexer.tokenCount >= NAV_CSV_LEXER_MAX_TOKENS) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_CSV_LEXER__,
-                                    'NAVCsvLexerConsumeIdentifier',
-                                    "'Exceeded maximum token limit'")
+    if (!NAVCsvLexerCanAddToken(lexer)) {
         return
     }
 
@@ -426,11 +439,7 @@ define_function NAVCsvLexerConsumeString(_NAVCsvLexer lexer) {
         }
     }
 
-    if (lexer.tokenCount >= NAV_CSV_LEXER_MAX_TOKENS) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_CSV_LEXER__,
-                                    'NAVCsvLexerConsumeString',
-                                    "'Exceeded maximum token limit'")
+    if (!NAVCsvLexerCanAddToken(lexer)) {
         return
     }
 
@@ -464,11 +473,7 @@ define_function NAVCsvLexerConsumeWhitespace(_NAVCsvLexer lexer) {
         value = "value, lexer.source[lexer.cursor]"
     }
 
-    if (lexer.tokenCount >= NAV_CSV_LEXER_MAX_TOKENS) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_CSV_LEXER__,
-                                    'NAVCsvLexerConsumeWhitespace',
-                                    "'Exceeded maximum token limit'")
+    if (!NAVCsvLexerCanAddToken(lexer)) {
         return
     }
 

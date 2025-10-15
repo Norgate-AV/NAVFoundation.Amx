@@ -140,7 +140,7 @@ define_function TestCsvSerializeFieldsWithQuotes() {
 
     if (!success) {
         NAVLogTestFailed(5, 'serialization should succeed', 'failed')
-    } else if (result != "'"', 'say ', '"', '"', 'hello', '"', '"', '"', NAV_CR, NAV_LF") {
+    } else if (result != "'"say ""hello"""', NAV_CR, NAV_LF") {
         NAVLogTestFailed(5, 'field with quote should be escaped and quoted', result)
     } else {
         NAVLogTestPassed(5)
