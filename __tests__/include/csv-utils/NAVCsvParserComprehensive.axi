@@ -57,7 +57,8 @@ define_function TestBasicSingleField() {
 
     tokens[1].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[1].value = 'value'
-    set_length_array(tokens, 1)
+    tokens[2].type = NAV_CSV_TOKEN_TYPE_EOF
+    set_length_array(tokens, 2)
 
     NAVCsvParserInit(parser, tokens)
 
@@ -412,7 +413,8 @@ define_function TestBasicLongFieldValue() {
 
     tokens[1].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[1].value = longValue
-    set_length_array(tokens, 1)
+    tokens[2].type = NAV_CSV_TOKEN_TYPE_EOF
+    set_length_array(tokens, 2)
 
     NAVCsvParserInit(parser, tokens)
 
@@ -435,7 +437,8 @@ define_function TestBasicShortFieldValue() {
 
     tokens[1].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[1].value = 'x'
-    set_length_array(tokens, 1)
+    tokens[2].type = NAV_CSV_TOKEN_TYPE_EOF
+    set_length_array(tokens, 2)
 
     NAVCsvParserInit(parser, tokens)
 
@@ -612,25 +615,25 @@ define_function TestBasicSequentialNumbers() {
 define_function TestEmptyFieldHandling() {
     NAVLog("'***************** Empty Field Handling (20 tests) *****************'")
 
-    // TestEmptyLeadingSingle()
-    // TestEmptyLeadingDouble()
-    // TestEmptyLeadingTriple()
+    TestEmptyLeadingSingle()
+    TestEmptyLeadingDouble()
+    TestEmptyLeadingTriple()
     TestEmptyTrailingSingle()
     TestEmptyTrailingDouble()
     TestEmptyTrailingTriple()
-    // TestEmptyMiddleSingle()
-    // TestEmptyMiddleDouble()
-    // TestEmptyMiddleTriple()
+    TestEmptyMiddleSingle()
+    TestEmptyMiddleDouble()
+    TestEmptyMiddleTriple()
     TestEmptyAllFields()
-    // TestEmptyFirstAndLast()
-    // TestEmptyAlternating()
-    // TestEmptyConsecutiveFour()
+    TestEmptyFirstAndLast()
+    TestEmptyAlternating()
+    TestEmptyConsecutiveFour()
     TestEmptyOnlyOneValue()
-    // TestEmptyComplexPattern1()
+    TestEmptyComplexPattern1()
     TestEmptyComplexPattern2()
-    // TestEmptyComplexPattern3()
+    TestEmptyComplexPattern3()
     TestEmptyWithQuoted()
-    // TestEmptyMultipleRows()
+    TestEmptyMultipleRows()
     TestEmptyVaryingLengths()
 }
 
@@ -2548,7 +2551,8 @@ define_function TestEdgeVeryLongRow() {
             i++
         }
     }
-    set_length_array(tokens, i - 1)
+    tokens[i].type = NAV_CSV_TOKEN_TYPE_EOF
+    set_length_array(tokens, i)
 
     NAVCsvParserInit(parser, tokens)
 
@@ -2580,7 +2584,8 @@ define_function TestEdgeManyColumns() {
             i++
         }
     }
-    set_length_array(tokens, i - 1)
+    tokens[i].type = NAV_CSV_TOKEN_TYPE_EOF
+    set_length_array(tokens, i)
 
     NAVCsvParserInit(parser, tokens)
 
@@ -2662,10 +2667,13 @@ define_function TestEdgeOnlyCommas() {
 
     NAVLog("'--- Edge: Only Commas (10 commas) ---'")
 
+    i = 1
     for (j = 1; j <= 10; j++) {
-        tokens[j].type = NAV_CSV_TOKEN_TYPE_COMMA
+        tokens[i].type = NAV_CSV_TOKEN_TYPE_COMMA
+        i++
     }
-    set_length_array(tokens, 10)
+    tokens[i].type = NAV_CSV_TOKEN_TYPE_EOF
+    set_length_array(tokens, i)
 
     NAVCsvParserInit(parser, tokens)
 
@@ -3113,7 +3121,8 @@ define_function TestEdgeMaxFields() {
             i++
         }
     }
-    set_length_array(tokens, i - 1)
+    tokens[i].type = NAV_CSV_TOKEN_TYPE_EOF
+    set_length_array(tokens, i)
 
     NAVCsvParserInit(parser, tokens)
 
@@ -3150,7 +3159,8 @@ define_function TestEdgeRepeatedPattern() {
             i++
         }
     }
-    set_length_array(tokens, i - 1)
+    tokens[i].type = NAV_CSV_TOKEN_TYPE_EOF
+    set_length_array(tokens, i)
 
     NAVCsvParserInit(parser, tokens)
 
@@ -3217,11 +3227,11 @@ define_function TestAllComprehensive() {
     NAVLog("'========================================='")
     NAVLog("''")
 
-    // TestBasicParsing()            // Tests 1-15
+    TestBasicParsing()            // Tests 1-15
     TestEmptyFieldHandling()      // Tests 16-35
-    // TestQuotedFieldHandling()     // Tests 36-50
-    // TestWhitespaceHandling()      // Tests 51-62
-    // TestEdgeCases()               // Tests 63-80
+    TestQuotedFieldHandling()     // Tests 36-50
+    TestWhitespaceHandling()      // Tests 51-62
+    TestEdgeCases()               // Tests 63-80
 
     NAVLog("''")
     NAVLog("'========================================='")
