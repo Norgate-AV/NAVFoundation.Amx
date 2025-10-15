@@ -54,7 +54,7 @@ define_function NAVCsvParserInit(_NAVCsvParser parser, _NAVCsvToken tokens[]) {
     parser.tokenCount = length_array(tokens)
     parser.cursor = 0
 
-    parser.rowCount = 1
+    parser.rowCount = 0
     parser.columnCount = 0
 }
 
@@ -112,94 +112,6 @@ define_function char NAVCsvParserCursorIsOutOfBounds(_NAVCsvParser parser) {
 
 
 /**
- * @function NAVCsvParserIsEmptyFieldComma
- * @private
- * @description Determine if the current comma token represents an empty field.
- *
- * @param {_NAVCsvParser} parser - The parser instance
- *
- * @returns {char} True (1) if this comma indicates an empty field, False (0) if it's just a separator
- */
-define_function char NAVCsvParserIsEmptyFieldComma(_NAVCsvParser parser) {
-    stack_var _NAVCsvToken prev
-    stack_var _NAVCsvToken next
-
-    // At row start (no columns yet)
-    if (parser.columnCount == 0) {
-        #IF_DEFINED CSV_PARSER_DEBUG
-        NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - at row start (columnCount=0)'")
-        #END_IF
-        return true
-    }
-
-    // Check if next token is EOF or NEWLINE (trailing comma)
-    // Also handle case where we're at end of tokens (no EOF token present)
-    if (parser.cursor + 1 > parser.tokenCount) {
-        // No more tokens after this comma - it's trailing
-        #IF_DEFINED CSV_PARSER_DEBUG
-        NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - at end of token stream (trailing comma)'")
-        #END_IF
-        return true
-    }
-
-    next = parser.tokens[parser.cursor + 1]
-
-    if (next.type == NAV_CSV_TOKEN_TYPE_EOF || next.type == NAV_CSV_TOKEN_TYPE_NEWLINE) {
-        #IF_DEFINED CSV_PARSER_DEBUG
-        NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - next token is EOF or NEWLINE (trailing comma)'")
-        #END_IF
-        return true
-    }
-
-    // Next token is also a comma (consecutive commas mean empty field)
-    if (next.type == NAV_CSV_TOKEN_TYPE_COMMA) {
-        #IF_DEFINED CSV_PARSER_DEBUG
-        NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - next token is also COMMA'")
-        #END_IF
-        return true
-    }
-
-    // Previous token was a comma (second comma in consecutive pair)
-    if (parser.cursor > 1) {
-        prev = parser.tokens[parser.cursor - 1]
-
-        #IF_DEFINED CSV_PARSER_DEBUG
-        NAVLog("'[DEBUG] IsEmptyFieldComma: prev token type=', itoa(prev.type), ' value=', prev.value")
-        #END_IF
-
-        if (prev.type == NAV_CSV_TOKEN_TYPE_COMMA) {
-            #IF_DEFINED CSV_PARSER_DEBUG
-            NAVLog("'[DEBUG] IsEmptyFieldComma: TRUE - previous token was COMMA'")
-            #END_IF
-            return true
-        }
-    }
-
-    // Otherwise, comma is just a separator between values
-    #IF_DEFINED CSV_PARSER_DEBUG
-    NAVLog("'[DEBUG] IsEmptyFieldComma: FALSE - comma is just a separator'")
-    #END_IF
-    return false
-}
-
-
-/**
- * @function NAVCsvParserAddEmptyField
- * @private
- * @description Add an empty field to the current row.
- *
- * @param {_NAVCsvParser} parser - The parser instance
- * @param {char[][][]} data - The output 2D array
- */
-define_function NAVCsvParserAddEmptyField(_NAVCsvParser parser, char data[][][]) {
-    // parser.columnCount++
-    // data[parser.rowCount][parser.columnCount] = ''
-    // set_length_array(data[parser.rowCount], parser.columnCount)
-    NAVCsvParserAddField(parser, data, '')
-}
-
-
-/**
  * @function NAVCsvParserAddField
  * @private
  * @description Add a field with the given value to the current row.
@@ -207,11 +119,83 @@ define_function NAVCsvParserAddEmptyField(_NAVCsvParser parser, char data[][][])
  * @param {_NAVCsvParser} parser - The parser instance
  * @param {char[][][]} data - The output 2D array
  * @param {char[]} value - The value to add as a field
+ *
+ * @returns {char} True (1) if field was added successfully, False (0) if column limit exceeded
  */
-define_function NAVCsvParserAddField(_NAVCsvParser parser, char data[][][], char value[]) {
+define_function char NAVCsvParserAddField(_NAVCsvParser parser, char data[][][], char value[]) {
+    if (parser.columnCount >= NAV_CSV_MAX_COLUMNS) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                            __NAV_FOUNDATION_CSV_PARSER__,
+                                            'NAVCsvParserAddField',
+                                            "'Maximum column count exceeded: ', itoa(NAV_CSV_MAX_COLUMNS)")
+        return false
+    }
+
     parser.columnCount++
     data[parser.rowCount][parser.columnCount] = value
     set_length_array(data[parser.rowCount], parser.columnCount)
+
+    return true
+}
+
+
+/**
+ * @function NAVCsvParserAddRecord
+ * @private
+ * @description Add a new record to the data array.
+ *
+ * @param {_NAVCsvParser} parser - The parser instance
+ * @param {char[][][]} data - The output 2D array
+ *
+ * @returns {char} True (1) if record was added successfully, False (0) on error
+ */
+define_function char NAVCsvParserAddRecord(_NAVCsvParser parser, char data[][][]) {
+    if (parser.rowCount >= NAV_CSV_MAX_ROWS) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                            __NAV_FOUNDATION_CSV_PARSER__,
+                                            'NAVCsvParserAddRecord',
+                                            "'Maximum record count exceeded: ', itoa(NAV_CSV_MAX_ROWS)")
+        return false
+    }
+
+    parser.rowCount++
+    parser.columnCount = 0
+    set_length_array(data, parser.rowCount)
+
+    return true
+}
+
+
+/**
+ * @function NAVCsvParserPeekTokenType
+ * @private
+ * @description Peek at the type of a token at a given offset from the current cursor without advancing the cursor.
+ *
+ * @param {_NAVCsvParser} parser - The parser instance
+ * @param {integer} offset - The offset from the current cursor to peek at
+ *
+ * @returns {integer} The type of the token at the specified offset, or 0 if out of bounds
+ */
+define_function integer NAVCsvParserPeekTokenType(_NAVCsvParser parser, integer offset) {
+    if (parser.cursor + offset > parser.tokenCount) {
+        return 0
+    }
+
+    return parser.tokens[parser.cursor + offset].type
+}
+
+
+/**
+ * @function NAVCsvParserPeekNextTokenType
+ * @private
+ * @description Peek at the type of the next token without advancing the cursor.
+ *
+ * @param {_NAVCsvParser} parser - The parser instance
+ *
+ * @returns {integer} The type of the next token, or 0 if at end of tokens
+ */
+define_function integer NAVCsvParserPeekNextTokenType(_NAVCsvParser parser) {
+    return NAVCsvParserPeekTokenType(parser, 1)
 }
 
 
@@ -225,7 +209,16 @@ define_function NAVCsvParserAddField(_NAVCsvParser parser, char data[][][], char
  *
  * @returns {char} True (1) if parsing succeeded, False (0) if failed
  */
-define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][]) {
+define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][NAV_CSV_MAX_FIELD_LENGTH]) {
+    stack_var char value[NAV_CSV_MAX_FIELD_LENGTH]
+
+    value = '' // Initialize value to empty string
+
+    // Initialize the first record
+    if (!NAVCsvParserAddRecord(parser, data)) {
+        return false
+    }
+
     while (NAVCsvParserHasMoreTokens(parser)) {
         stack_var _NAVCsvToken token
 
@@ -244,7 +237,8 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][]) {
                 #IF_DEFINED CSV_PARSER_DEBUG
                 NAVLog("'[DEBUG] Processing IDENTIFIER'")
                 #END_IF
-                if (!NAVCsvParserParseIdentifier(parser, data)) {
+
+                if (!NAVCsvParserParseField(parser, value)) {
                     return false
                 }
             }
@@ -252,59 +246,82 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][]) {
                 #IF_DEFINED CSV_PARSER_DEBUG
                 NAVLog("'[DEBUG] Processing STRING'")
                 #END_IF
-                if (!NAVCsvParserParseQuotedIdentifier(parser, data)) {
+
+                if (!NAVCsvParserParseQuotedField(parser, value)) {
                     return false
                 }
             }
             case NAV_CSV_TOKEN_TYPE_COMMA: {
-                stack_var char isEmptyField
-                isEmptyField = NAVCsvParserIsEmptyFieldComma(parser)
-
                 #IF_DEFINED CSV_PARSER_DEBUG
-                NAVLog("'[DEBUG] Processing COMMA, IsEmptyField=', itoa(isEmptyField)")
+                NAVLog("'[DEBUG] Processing COMMA - committing field value: ', value")
                 #END_IF
 
-                if (isEmptyField) {
-                    NAVCsvParserAddEmptyField(parser, data)
+                // Comma marks end of current field - commit whatever we've accumulated
+                if (!NAVCsvParserAddField(parser, data, value)) {
+                    return false
                 }
+
+                value = '' // Reset accumulator for next field
             }
             case NAV_CSV_TOKEN_TYPE_WHITESPACE: {
-                if (NAVCsvParserHasMoreTokens(parser)) {
-                    stack_var _NAVCsvToken next
+                // Check what comes next to decide how to handle whitespace
+                switch (NAVCsvParserPeekNextTokenType(parser)) {
+                    case NAV_CSV_TOKEN_TYPE_STRING: {
+                        // Ignore whitespace before quoted string
+                        #IF_DEFINED CSV_PARSER_DEBUG
+                        NAVLog("'[DEBUG] Ignoring whitespace before quoted string'")
+                        #END_IF
 
-                    next = parser.tokens[parser.cursor + 1]
-
-                    switch (next.type) {
-                        case NAV_CSV_TOKEN_TYPE_IDENTIFIER: {
-                            if (!NAVCsvParserParseIdentifier(parser, data)) {
-                                return false
-                            }
-                        }
-                        case NAV_CSV_TOKEN_TYPE_STRING: {
-                            // Ignore whitespace before quoted identifier
-                            continue
-                        }
+                        continue
                     }
-                }
-                else {
-                    // Whitespace is the last token - parsing complete
-                    #IF_DEFINED CSV_PARSER_DEBUG
-                    NAVLog("'[DEBUG] Trailing whitespace at end of input - parsing complete'")
-                    #END_IF
-                    return true
+                    case NAV_CSV_TOKEN_TYPE_EOF:
+                    case NAV_CSV_TOKEN_TYPE_NEWLINE: {
+                        // Trailing whitespace at end of field/line - ignore it
+                        #IF_DEFINED CSV_PARSER_DEBUG
+                        NAVLog("'[DEBUG] Ignoring trailing whitespace'")
+                        #END_IF
+
+                        continue
+                    }
+                    default: {
+                        // Whitespace is part of field content - accumulate it
+                        value = "value, token.value"
+                    }
                 }
             }
             case NAV_CSV_TOKEN_TYPE_NEWLINE: {
-                // If we encounter a newline token then we increment the row count
-                parser.rowCount++
-                parser.columnCount = 0
+                #IF_DEFINED CSV_PARSER_DEBUG
+                NAVLog("'[DEBUG] Processing NEWLINE - committing final field of row'")
+                #END_IF
+
+                // Commit current field before moving to next row
+                if (!NAVCsvParserAddField(parser, data, value)) {
+                    return false
+                }
+
+                value = ''
+
+                // Only add a new row if there's more data (not EOF next)
+                if (NAVCsvParserPeekNextTokenType(parser) != NAV_CSV_TOKEN_TYPE_EOF) {
+                    if (!NAVCsvParserAddRecord(parser, data)) {
+                        return false
+                    }
+                }
             }
             case NAV_CSV_TOKEN_TYPE_EOF: {
-                // EOF token indicates end of input - exit the parsing loop
+                #IF_DEFINED CSV_PARSER_DEBUG
+                NAVLog("'[DEBUG] Processing EOF - committing final field'")
+                #END_IF
+
+                // Commit any remaining field
+                if (!NAVCsvParserAddField(parser, data, value)) {
+                    return false
+                }
+
                 #IF_DEFINED CSV_PARSER_DEBUG
                 NAVLog("'[DEBUG] Reached EOF token - parsing complete'")
                 #END_IF
-                // Exit the while loop by returning success
+
                 return true
             }
             default: {
@@ -322,52 +339,56 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][]) {
 
 
 /**
- * @function NAVCsvParserParseIdentifier
+ * @function NAVCsvParserParseField
  * @private
- * @description Parse a CSV identifier (cell value).
+ * @description Parse a CSV identifier (cell value) and accumulate into value.
  *
  * @param {_NAVCsvParser} parser - The parser instance
- * @param {char[][][]} data - The output 2D array to hold parsed CSV data
+ * @param {char[]} value - The accumulator to build the field value into (passed by reference)
  *
  * @returns {char} True (1) if property was parsed successfully, False (0) on error
  */
-define_function char NAVCsvParserParseIdentifier(_NAVCsvParser parser, char data[][][]) {
-    stack_var char value[2048]
+define_function char NAVCsvParserParseField(_NAVCsvParser parser, char value[]) {
     stack_var _NAVCsvToken token
+    stack_var integer next
 
     // Start with the current token (already positioned by main loop)
     token = parser.tokens[parser.cursor]
-    value = token.value
+    value = "value, token.value"
 
     #IF_DEFINED CSV_PARSER_DEBUG
-    NAVLog("'[DEBUG] ParseIdentifier: starting with value=', value, ' at cursor=', itoa(parser.cursor)")
+    NAVLog("'[DEBUG] ParseField: starting with value=', value, ' at cursor=', itoa(parser.cursor)")
     #END_IF
 
-    // Consume all following tokens until newline or comma
+    // Consume all following tokens until delimiter
     while (NAVCsvParserHasMoreTokens(parser)) {
+        // Peek at next token to see if we should continue
+        next = NAVCsvParserPeekNextTokenType(parser)
+
+        if (next == NAV_CSV_TOKEN_TYPE_NEWLINE ||
+            next == NAV_CSV_TOKEN_TYPE_COMMA ||
+            next == NAV_CSV_TOKEN_TYPE_EOF) {
+            // Next token is a delimiter - stop here
+            #IF_DEFINED CSV_PARSER_DEBUG
+            NAVLog("'[DEBUG] ParseField: found delimiter ahead, stopping at cursor=', itoa(parser.cursor)")
+            #END_IF
+
+            break
+        }
+
         if (!NAVCsvParserAdvanceCursor(parser)) {
             #IF_DEFINED CSV_PARSER_DEBUG
-            NAVLog("'[DEBUG] ParseIdentifier: AdvanceCursor failed'")
+            NAVLog("'[DEBUG] ParseField: AdvanceCursor failed'")
             #END_IF
+
             return false
         }
 
         token = parser.tokens[parser.cursor]
 
         #IF_DEFINED CSV_PARSER_DEBUG
-        NAVLog("'[DEBUG] ParseIdentifier: advanced to cursor=', itoa(parser.cursor), ' tokenType=', itoa(token.type), ' value=', token.value")
+        NAVLog("'[DEBUG] ParseField: advanced to cursor=', itoa(parser.cursor), ' tokenType=', itoa(token.type), ' value=', token.value")
         #END_IF
-
-        if (token.type == NAV_CSV_TOKEN_TYPE_NEWLINE ||
-            token.type == NAV_CSV_TOKEN_TYPE_COMMA ||
-            token.type == NAV_CSV_TOKEN_TYPE_EOF) {
-            // Move cursor back one step so main loop can process delimiter/EOF
-            parser.cursor--
-            #IF_DEFINED CSV_PARSER_DEBUG
-            NAVLog("'[DEBUG] ParseIdentifier: found delimiter/EOF, backing up to cursor=', itoa(parser.cursor)")
-            #END_IF
-            break
-        }
 
         switch (token.type) {
             case NAV_CSV_TOKEN_TYPE_IDENTIFIER:
@@ -377,23 +398,19 @@ define_function char NAVCsvParserParseIdentifier(_NAVCsvParser parser, char data
             default: {
                 NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                             __NAV_FOUNDATION_CSV_PARSER__,
-                                            'NAVCsvParserParseIdentifier',
+                                            'NAVCsvParserParseField',
                                             "'Unexpected token type: ', itoa(token.type), ' with value: ', token.value, ' at position ', itoa(parser.cursor)")
                 #IF_DEFINED CSV_PARSER_DEBUG
-                NAVLog("'[DEBUG] ParseIdentifier: unexpected token type'")
+                NAVLog("'[DEBUG] ParseField: unexpected token type'")
                 #END_IF
+
                 return false
             }
         }
     }
 
-    // parser.columnCount++
-    // data[parser.rowCount][parser.columnCount] = value
-    // set_length_array(data[parser.rowCount], parser.columnCount)
-    NAVCsvParserAddField(parser, data, value)
-
     #IF_DEFINED CSV_PARSER_DEBUG
-    NAVLog("'[DEBUG] ParseIdentifier: completed, columnCount=', itoa(parser.columnCount), ' value=', value")
+    NAVLog("'[DEBUG] ParseField: completed, accumulated value=', value")
     #END_IF
 
     return true
@@ -401,18 +418,18 @@ define_function char NAVCsvParserParseIdentifier(_NAVCsvParser parser, char data
 
 
 /**
- * @function NAVCsvParserParseQuotedIdentifier
+ * @function NAVCsvParserParseQuotedField
  * @private
- * @description Parse a CSV quoted identifier (cell value).
+ * @description Parse a CSV quoted identifier (cell value) and accumulate into value.
  *
  * @param {_NAVCsvParser} parser - The parser instance
- * @param {char[][][]} data - The output 2D array to hold parsed CSV data
+ * @param {char[]} value - The accumulator to build the field value into (passed by reference)
  *
  * @returns {char} True (1) if property was parsed successfully, False (0) on error
  */
-define_function char NAVCsvParserParseQuotedIdentifier(_NAVCsvParser parser, char data[][][]) {
-    stack_var char value[2048]
+define_function char NAVCsvParserParseQuotedField(_NAVCsvParser parser, char value[]) {
     stack_var _NAVCsvToken token
+    stack_var integer next
 
     // Start with the current token (should be a STRING token)
     token = parser.tokens[parser.cursor]
@@ -420,48 +437,61 @@ define_function char NAVCsvParserParseQuotedIdentifier(_NAVCsvParser parser, cha
     if (token.type != NAV_CSV_TOKEN_TYPE_STRING) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_CSV_PARSER__,
-                                    'NAVCsvParserParseQuotedIdentifier',
+                                    'NAVCsvParserParseQuotedField',
                                     "'Expected STRING token but got type: ', itoa(token.type), ' at position ', itoa(parser.cursor)")
         return false
     }
 
-    value = token.value
+    value = "value, token.value"
+
+    #IF_DEFINED CSV_PARSER_DEBUG
+    NAVLog("'[DEBUG] ParseQuotedField: quoted value=', value, ' at cursor=', itoa(parser.cursor)")
+    #END_IF
 
     // Consume any following whitespace or check for delimiter
     while (NAVCsvParserHasMoreTokens(parser)) {
+        // Peek at next token to see if we should continue
+        next = NAVCsvParserPeekNextTokenType(parser)
+
+        if (next == NAV_CSV_TOKEN_TYPE_NEWLINE ||
+            next == NAV_CSV_TOKEN_TYPE_COMMA ||
+            next == NAV_CSV_TOKEN_TYPE_EOF) {
+            // Next token is a delimiter - stop here
+            #IF_DEFINED CSV_PARSER_DEBUG
+            NAVLog("'[DEBUG] ParseQuotedField: found delimiter ahead, stopping'")
+            #END_IF
+
+            break
+        }
+
         if (!NAVCsvParserAdvanceCursor(parser)) {
             return false
         }
 
         token = parser.tokens[parser.cursor]
 
-        if (token.type == NAV_CSV_TOKEN_TYPE_NEWLINE ||
-            token.type == NAV_CSV_TOKEN_TYPE_COMMA ||
-            token.type == NAV_CSV_TOKEN_TYPE_EOF) {
-            // Move cursor back one step so main loop can process delimiter/EOF
-            parser.cursor--
-            break
-        }
-
         switch (token.type) {
             case NAV_CSV_TOKEN_TYPE_WHITESPACE: {
                 // Ignore whitespace after quoted identifier
+                #IF_DEFINED CSV_PARSER_DEBUG
+                NAVLog("'[DEBUG] ParseQuotedField: ignoring trailing whitespace'")
+                #END_IF
+
                 continue
             }
             default: {
                 NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                             __NAV_FOUNDATION_CSV_PARSER__,
-                                            'NAVCsvParserParseQuotedIdentifier',
+                                            'NAVCsvParserParseQuotedField',
                                             "'Unexpected token type: ', itoa(token.type), ' with value: ', token.value, ' at position ', itoa(parser.cursor)")
                 return false
             }
         }
     }
 
-    // parser.columnCount++
-    // data[parser.rowCount][parser.columnCount] = value
-    // set_length_array(data[parser.rowCount], parser.columnCount)
-    NAVCsvParserAddField(parser, data, value)
+    #IF_DEFINED CSV_PARSER_DEBUG
+    NAVLog("'[DEBUG] ParseQuotedField: completed, accumulated value=', value")
+    #END_IF
 
     return true
 }
