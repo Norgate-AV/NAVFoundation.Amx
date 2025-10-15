@@ -2906,6 +2906,8 @@ define_function TestEdgeAlternatingEmptyFull() {
     i++
     tokens[i].type = NAV_CSV_TOKEN_TYPE_COMMA
     i++
+    tokens[i].type = NAV_CSV_TOKEN_TYPE_COMMA
+    i++
     tokens[i].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[i].value = 'c'
     i++
@@ -2923,7 +2925,7 @@ define_function TestEdgeAlternatingEmptyFull() {
         NAVLogTestPassed(74)
     }
     else {
-        NAVLogTestFailed(74, ',a,,b,,c', 'Failed')
+        NAVLogTestFailed(74, ',a,,b,,,c', 'Failed')
     }
 }
 

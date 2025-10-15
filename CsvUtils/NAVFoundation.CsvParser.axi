@@ -220,8 +220,10 @@ define_function integer NAVCsvParserPeekNextTokenType(_NAVCsvParser parser) {
  */
 define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][NAV_CSV_MAX_FIELD_LENGTH]) {
     stack_var char value[NAV_CSV_MAX_FIELD_LENGTH]
+    stack_var char inField // Track whether we're actively parsing a field (vs whitespace-only input)
 
     value = '' // Initialize value to empty string
+    inField = false // Not in a field yet
 
     // Note: Don't initialize row here - let AddField do it lazily when first field is committed
     // This way, empty/whitespace-only input creates 0 rows instead of 1 empty row
@@ -236,7 +238,7 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][NAV_C
         token = parser.tokens[parser.cursor]
 
         #IF_DEFINED CSV_PARSER_DEBUG
-        NAVLog("'[DEBUG] cursor=', itoa(parser.cursor), ' tokenType=', itoa(token.type), ' value=', token.value, ' rowCount=', itoa(parser.rowCount), ' columnCount=', itoa(parser.columnCount)")
+        NAVLog("'[DEBUG] cursor=', itoa(parser.cursor), ' tokenType=', itoa(token.type), ' value=', token.value, ' rowCount=', itoa(parser.rowCount), ' columnCount=', itoa(parser.columnCount), ' inField=', itoa(inField)")
         #END_IF
 
         switch (token.type) {
@@ -244,6 +246,8 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][NAV_C
                 #IF_DEFINED CSV_PARSER_DEBUG
                 NAVLog("'[DEBUG] Processing IDENTIFIER'")
                 #END_IF
+
+                inField = true // We're now in a field
 
                 if (!NAVCsvParserParseField(parser, value)) {
                     return false
@@ -253,6 +257,8 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][NAV_C
                 #IF_DEFINED CSV_PARSER_DEBUG
                 NAVLog("'[DEBUG] Processing STRING'")
                 #END_IF
+
+                inField = true // We're now in a field (even if empty string)
 
                 if (!NAVCsvParserParseQuotedField(parser, value)) {
                     return false
@@ -264,11 +270,14 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][NAV_C
                 #END_IF
 
                 // Comma marks end of current field - commit whatever we've accumulated
+                // COMMA always commits a field (even empty ones from consecutive commas like ",,")
+                // After committing, we're immediately "in" the next field because comma is a separator
                 if (!NAVCsvParserAddField(parser, data, value)) {
                     return false
                 }
 
                 value = '' // Reset accumulator for next field
+                inField = true // After comma, we're immediately in the next field (even if it will be empty)
             }
             case NAV_CSV_TOKEN_TYPE_WHITESPACE: {
                 // Check what comes next to decide how to handle whitespace
@@ -283,12 +292,23 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][NAV_C
                     }
                     case NAV_CSV_TOKEN_TYPE_EOF:
                     case NAV_CSV_TOKEN_TYPE_NEWLINE: {
-                        // Trailing whitespace at end of field/line - ignore it
-                        #IF_DEFINED CSV_PARSER_DEBUG
-                        NAVLog("'[DEBUG] Ignoring trailing whitespace'")
-                        #END_IF
+                        // Only ignore truly trailing whitespace (when field is still empty AND we have data)
+                        // If accumulator has content or we have fields/rows, preserve the whitespace
+                        if (value == '' && (parser.rowCount == 0 || parser.columnCount == 0)) {
+                            #IF_DEFINED CSV_PARSER_DEBUG
+                            NAVLog("'[DEBUG] Ignoring trailing whitespace (truly trailing)'")
+                            #END_IF
 
-                        continue
+                            continue
+                        }
+                        else {
+                            // This whitespace is part of field content
+                            #IF_DEFINED CSV_PARSER_DEBUG
+                            NAVLog("'[DEBUG] Preserving whitespace in field'")
+                            #END_IF
+
+                            value = "value, token.value"
+                        }
                     }
                     default: {
                         // Whitespace is part of field content - accumulate it
@@ -301,12 +321,16 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][NAV_C
                 NAVLog("'[DEBUG] Processing NEWLINE - committing final field of row'")
                 #END_IF
 
-                // Commit current field before moving to next row
-                if (!NAVCsvParserAddField(parser, data, value)) {
-                    return false
+                // Only commit a field if we're actively in a field OR already have fields in this row
+                // This allows empty rows (a\n\nb) while preventing whitespace-only from creating rows
+                if (inField || parser.columnCount > 0) {
+                    if (!NAVCsvParserAddField(parser, data, value)) {
+                        return false
+                    }
                 }
 
                 value = ''
+                inField = false // Reset for next row
 
                 // Only add a new row if there's more data (not EOF next)
                 if (NAVCsvParserPeekNextTokenType(parser) != NAV_CSV_TOKEN_TYPE_EOF) {
@@ -317,12 +341,18 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][NAV_C
             }
             case NAV_CSV_TOKEN_TYPE_EOF: {
                 #IF_DEFINED CSV_PARSER_DEBUG
-                NAVLog("'[DEBUG] Processing EOF - committing final field'")
+                NAVLog("'[DEBUG] Processing EOF - committing final field if in field'")
                 #END_IF
 
-                // Commit any remaining field
-                if (!NAVCsvParserAddField(parser, data, value)) {
-                    return false
+                // Only commit a field if we're actively parsing one
+                // This cleanly handles:
+                // - Test 59: "   " (whitespace-only) → inField=false → 0 rows
+                // - Test 39: "" (empty quoted string) → inField=true → 1 row, 1 empty field
+                // - Normal cases: Any content sets inField=true
+                if (inField || parser.columnCount > 0 || parser.rowCount > 0) {
+                    if (!NAVCsvParserAddField(parser, data, value)) {
+                        return false
+                    }
                 }
 
                 #IF_DEFINED CSV_PARSER_DEBUG

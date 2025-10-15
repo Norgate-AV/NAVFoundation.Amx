@@ -307,6 +307,60 @@ define_function NAVCsvLexerConsumeString(_NAVCsvLexer lexer) {
                 // Closing quote
                 break
             }
+            // Potential extension to handle some basic \ escape sequences
+            // case '\': {
+            //     if (NAVCsvLexerHasMoreTokens(lexer)) {
+            //         stack_var char next
+
+            //         next = lexer.source[lexer.cursor + 1]
+
+            //         switch (next) {
+            //             case 'n': {
+            //                 if (!NAVCsvLexerAdvanceCursor(lexer)) {
+            //                     return
+            //                 }
+
+            //                 value = "value, NAV_LF"
+            //             }
+            //             case 'r': {
+            //                 if (!NAVCsvLexerAdvanceCursor(lexer)) {
+            //                     return
+            //                 }
+
+            //                 value = "value, NAV_CR"
+            //             }
+            //             case 't': {
+            //                 if (!NAVCsvLexerAdvanceCursor(lexer)) {
+            //                     return
+            //                 }
+
+            //                 value = "value, NAV_TAB"
+            //             }
+            //             case '\': {
+            //                 if (!NAVCsvLexerAdvanceCursor(lexer)) {
+            //                     return
+            //                 }
+
+            //                 value = "value, ch"
+            //             }
+            //             case '"': {
+            //                 if (!NAVCsvLexerAdvanceCursor(lexer)) {
+            //                     return
+            //                 }
+
+            //                 value = "value, ch"
+            //             }
+            //             default: {
+            //                 // Unknown escape sequence - treat backslash literally
+            //                 value = "value, ch"
+            //             }
+            //         }
+
+            //         continue
+            //     }
+
+            //     value = "value, ch"
+            // }
             default: {
                 value = "value, ch"
                 // NAVLog("'Appending to string: ', ch")
