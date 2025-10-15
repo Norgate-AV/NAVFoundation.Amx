@@ -10,6 +10,7 @@
 
 #IF_DEFINED TESTING_NAVCSVLEXER
 #include 'NAVCsvLexer.axi'
+#include 'NAVCsvLexerBackslashEscapes.axi'
 #END_IF
 
 #IF_DEFINED TESTING_NAVCSVPARSER
@@ -30,6 +31,7 @@ define_function RunCsvUtilsTests() {
     TestNAVCsvLexerEdgeCases()
     TestNAVCsvLexerEpsilonFields()
     TestNAVCsvLexerSpecialCharsInQuotes()
+    TestNAVCsvLexerBackslashEscapes()
     #END_IF
 
     #IF_DEFINED TESTING_NAVCSVPARSER
