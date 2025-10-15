@@ -230,17 +230,17 @@ define_function TestBackslashEscapeComplexScenario() {
 
     if (!result) {
         NAVLogTestFailed(10, 'tokenization should succeed', 'failed')
-    } else if (lexer.tokenCount != 16) {
-        NAVLogTestFailed(10, '16 tokens expected', itoa(lexer.tokenCount))
+    } else if (lexer.tokenCount != 12) {
+        NAVLogTestFailed(10, '12 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_STRING ||
                lexer.tokens[1].value != 'name') {
         NAVLogTestFailed(10, 'first field should be "name"', lexer.tokens[1].value)
-    } else if (lexer.tokens[10].type != NAV_CSV_TOKEN_TYPE_STRING ||
-               lexer.tokens[10].value != 'C:\Users\john') {
-        NAVLogTestFailed(10, 'path should be "C:\Users\john"', lexer.tokens[10].value)
-    } else if (lexer.tokens[12].type != NAV_CSV_TOKEN_TYPE_STRING ||
-               lexer.tokens[12].value != "'Line1', NAV_LF, 'Line2', NAV_TAB, 'Tabbed'") {
-        NAVLogTestFailed(10, 'notes should have LF and TAB', lexer.tokens[12].value)
+    } else if (lexer.tokens[9].type != NAV_CSV_TOKEN_TYPE_STRING ||
+               lexer.tokens[9].value != 'C:\Users\john') {
+        NAVLogTestFailed(10, 'path should be "C:\Users\john"', lexer.tokens[9].value)
+    } else if (lexer.tokens[11].type != NAV_CSV_TOKEN_TYPE_STRING ||
+               lexer.tokens[11].value != "'Line1', NAV_LF, 'Line2', NAV_TAB, 'Tabbed'") {
+        NAVLogTestFailed(10, 'notes should have LF and TAB', lexer.tokens[11].value)
     } else {
         NAVLogTestPassed(10)
     }

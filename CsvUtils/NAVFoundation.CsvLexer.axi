@@ -387,14 +387,21 @@ define_function NAVCsvLexerConsumeString(_NAVCsvLexer lexer) {
                                 return
                             }
 
-                            value = "value, ch"
+                            value = "value, next"
                         }
                         case '"': {
-                            if (!NAVCsvLexerAdvanceCursor(lexer)) {
-                                return
-                            }
+                            // Check if there's content after this quote
+                            // If the quote is at the end, it's the closing delimiter, not an escape
+                            if (lexer.cursor + 1 < length_array(lexer.source)) {
+                                if (!NAVCsvLexerAdvanceCursor(lexer)) {
+                                    return
+                                }
 
-                            value = "value, ch"
+                                value = "value, next"
+                            } else {
+                                // Backslash at end before closing quote - treat backslash literally
+                                value = "value, ch"
+                            }
                         }
                         default: {
                             // Unknown escape sequence - treat backslash literally
