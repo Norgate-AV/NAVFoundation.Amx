@@ -2243,6 +2243,7 @@ define_function TestWhitespaceEmptyWithSpaces() {
     tokens[i].value = ' '
     i++
     tokens[i].type = NAV_CSV_TOKEN_TYPE_COMMA
+    tokens[i].value = ','
     i++
     tokens[i].type = NAV_CSV_TOKEN_TYPE_WHITESPACE
     tokens[i].value = ' '

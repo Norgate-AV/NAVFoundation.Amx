@@ -115,6 +115,7 @@ define_function char NAVCsvParserCursorIsOutOfBounds(_NAVCsvParser parser) {
  * @function NAVCsvParserAddField
  * @private
  * @description Add a field with the given value to the current row.
+ *              Creates a new row if this is the first field (lazy row initialization).
  *
  * @param {_NAVCsvParser} parser - The parser instance
  * @param {char[][][]} data - The output 2D array
@@ -123,6 +124,14 @@ define_function char NAVCsvParserCursorIsOutOfBounds(_NAVCsvParser parser) {
  * @returns {char} True (1) if field was added successfully, False (0) if column limit exceeded
  */
 define_function char NAVCsvParserAddField(_NAVCsvParser parser, char data[][][], char value[]) {
+    // Lazy row initialization: if no row exists yet, create one
+    if (parser.rowCount == 0) {
+        if (!NAVCsvParserAddRecord(parser, data)) {
+            return false
+        }
+    }
+
+    // Check column limit
     if (parser.columnCount >= NAV_CSV_MAX_COLUMNS) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                             __NAV_FOUNDATION_CSV_PARSER__,
@@ -214,10 +223,8 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][NAV_C
 
     value = '' // Initialize value to empty string
 
-    // Initialize the first record
-    if (!NAVCsvParserAddRecord(parser, data)) {
-        return false
-    }
+    // Note: Don't initialize row here - let AddField do it lazily when first field is committed
+    // This way, empty/whitespace-only input creates 0 rows instead of 1 empty row
 
     while (NAVCsvParserHasMoreTokens(parser)) {
         stack_var _NAVCsvToken token
