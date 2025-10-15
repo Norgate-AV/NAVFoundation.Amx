@@ -23,6 +23,7 @@
 
 #IF_DEFINED TESTING_NAVCSVUTILS
 #include 'NAVCsvUtilsParse.axi'
+#include 'NAVCsvUtilsSerialize.axi'
 #END_IF
 
 define_function RunCsvUtilsTests() {
@@ -59,9 +60,10 @@ define_function RunCsvUtilsTests() {
 
     #IF_DEFINED TESTING_NAVCSVUTILS
     NAVLog("'========================================='")
-    NAVLog("'HIGH-LEVEL CSV UTILS TEST SUITE (10 tests)'")
+    NAVLog("'HIGH-LEVEL CSV UTILS TEST SUITE (22 tests)'")
     NAVLog("'========================================='")
     TestNAVCsvUtilsParse()
+    TestNAVCsvUtilsSerialize()
     NAVLog("'========================================='")
     NAVLog("''")
     #END_IF

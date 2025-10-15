@@ -34,6 +34,7 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_CSVUTILS__
 #DEFINE __NAV_FOUNDATION_CSVUTILS__ 'NAVFoundation.CsvUtils'
 
+#include 'NAVFoundation.Core.h.axi'
 #include 'NAVFoundation.CsvLexer.axi'
 #include 'NAVFoundation.CsvParser.axi'
 
@@ -134,6 +135,10 @@ define_function char NAVCsvSerialize(char data[][][], char result[]) {
     stack_var integer i
 
     if (!length_array(data)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_CSVUTILS__,
+                                    'NAVCsvSerialize',
+                                    "'Input data is empty'")
         return false
     }
 
@@ -141,27 +146,45 @@ define_function char NAVCsvSerialize(char data[][][], char result[]) {
 
     for (i = 1; i <= length_array(data); i++) {
         stack_var integer j
-        stack_var char line[1024]
+        stack_var char line[NAV_MAX_BUFFER]
 
         if (!length_array(data[i])) {
+            // Empty row - output blank line with CRLF
+            result = "result, NAV_CR, NAV_LF"
             continue
         }
 
+        line = ''
+
         for (j = 1; j <= length_array(data[i]); j++) {
+            stack_var char field[NAV_MAX_BUFFER]
+
             if (j > 1) {
                 line = "line, ','"
             }
 
-            // Escape quotes by doubling them
-            if (NAVContains(data[i][j], '"') || NAVContains(data[i][j], ',')) {
-                line = "line, '"', NAVFindAndReplace(data[i][j], '"', '""'), '"'"
+            field = "data[i][j]"
+
+            // RFC 4180: Quote field if it contains comma, quote, CR, or LF
+            if (NAVContains(field, ',') ||
+                NAVContains(field, '"') ||
+                NAVContains(field, "NAV_CR") ||
+                NAVContains(field, "NAV_LF")) {
+
+                // Escape internal quotes by doubling them (RFC 4180)
+                field = NAVFindAndReplace(field, '"', '""')
+
+                // Wrap field in quotes
+                line = "line, '"', field, '"'"
             }
             else {
-                line = "line, data[i][j]"
+                // No quoting needed
+                line = "line, field"
             }
         }
 
-        result = "result, line, NAV_LF"
+        // Add line to result with CRLF (RFC 4180 standard)
+        result = "result, line, NAV_CR, NAV_LF"
     }
 
     return true
