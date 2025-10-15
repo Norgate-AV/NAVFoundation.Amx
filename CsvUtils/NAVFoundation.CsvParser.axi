@@ -225,9 +225,6 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][NAV_C
     value = '' // Initialize value to empty string
     inField = false // Not in a field yet
 
-    // Note: Don't initialize row here - let AddField do it lazily when first field is committed
-    // This way, empty/whitespace-only input creates 0 rows instead of 1 empty row
-
     while (NAVCsvParserHasMoreTokens(parser)) {
         stack_var _NAVCsvToken token
 
@@ -345,10 +342,6 @@ define_function char NAVCsvParserParse(_NAVCsvParser parser, char data[][][NAV_C
                 #END_IF
 
                 // Only commit a field if we're actively parsing one
-                // This cleanly handles:
-                // - Test 59: "   " (whitespace-only) → inField=false → 0 rows
-                // - Test 39: "" (empty quoted string) → inField=true → 1 row, 1 empty field
-                // - Normal cases: Any content sets inField=true
                 if (inField || parser.columnCount > 0 || parser.rowCount > 0) {
                     if (!NAVCsvParserAddField(parser, data, value)) {
                         return false

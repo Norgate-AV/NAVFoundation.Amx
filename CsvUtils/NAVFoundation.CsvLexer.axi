@@ -31,6 +31,51 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+/**
+ * NAVFoundation CSV Lexer
+ *
+ * RFC 4180 Compliant with Extensions
+ *
+ * This lexer tokenizes CSV (Comma-Separated Values) data according to RFC 4180
+ * with additional convenience features for AMX development.
+ *
+ * Standard Escaping (RFC 4180):
+ *   - Quotes within quoted fields are escaped by doubling them: ""
+ *   - Example: "say ""hello""" → say "hello"
+ *
+ * Extended Escaping (NAVFoundation Extension):
+ *   - Backslash escape sequences within quoted fields:
+ *     \n  → Line Feed (LF / $0A)
+ *     \r  → Carriage Return (CR / $0D)
+ *     \t  → Tab (TAB / $09)
+ *     \\  → Literal Backslash
+ *     \"  → Literal Quote
+ *   - Unknown escape sequences (e.g., \x) → Backslash is preserved literally
+ *   - Examples:
+ *     "line1\nline2"     → line1<LF>line2
+ *     "path\\file"       → path\file
+ *     "say \"hi\""       → say "hi"
+ *     "test\tab\there"   → test<TAB>ab<TAB>here
+ *
+ * Both escaping methods can be used simultaneously:
+ *   - "test""value"    → test"value  (RFC 4180 double-quote)
+ *   - "test\"value"    → test"value  (NAVFoundation backslash)
+ *   - Both produce identical results
+ *
+ * Compatibility Note:
+ *   - All standard RFC 4180 CSV files remain fully compatible
+ *   - Files using backslash escapes are intended for AMX-internal use
+ *   - External CSV parsers may not recognize backslash escape sequences
+ *
+ * Token Types:
+ *   - COMMA      : Field separator (,)
+ *   - IDENTIFIER : Unquoted field value
+ *   - STRING     : Quoted field value (quotes removed, escapes processed)
+ *   - NEWLINE    : Row separator (\n or \r\n)
+ *   - WHITESPACE : Spaces/tabs (preserved in context)
+ *   - EOF        : End of input
+ */
+
 #IF_NOT_DEFINED __NAV_FOUNDATION_CSV_LEXER__
 #DEFINE __NAV_FOUNDATION_CSV_LEXER__ 'NAVFoundation.CsvLexer'
 
@@ -307,63 +352,64 @@ define_function NAVCsvLexerConsumeString(_NAVCsvLexer lexer) {
                 // Closing quote
                 break
             }
-            // Potential extension to the RFC to handle some basic \ escape sequences
-            // case '\': {
-            //     if (NAVCsvLexerHasMoreTokens(lexer)) {
-            //         stack_var char next
 
-            //         next = lexer.source[lexer.cursor + 1]
+            // Extension to the RFC to handle some basic \ escape sequences
+            case '\': {
+                if (NAVCsvLexerHasMoreTokens(lexer)) {
+                    stack_var char next
 
-            //         switch (next) {
-            //             case 'n': {
-            //                 if (!NAVCsvLexerAdvanceCursor(lexer)) {
-            //                     return
-            //                 }
+                    next = lexer.source[lexer.cursor + 1]
 
-            //                 value = "value, NAV_LF"
-            //             }
-            //             case 'r': {
-            //                 if (!NAVCsvLexerAdvanceCursor(lexer)) {
-            //                     return
-            //                 }
+                    switch (next) {
+                        case 'n': {
+                            if (!NAVCsvLexerAdvanceCursor(lexer)) {
+                                return
+                            }
 
-            //                 value = "value, NAV_CR"
-            //             }
-            //             case 't': {
-            //                 if (!NAVCsvLexerAdvanceCursor(lexer)) {
-            //                     return
-            //                 }
+                            value = "value, NAV_LF"
+                        }
+                        case 'r': {
+                            if (!NAVCsvLexerAdvanceCursor(lexer)) {
+                                return
+                            }
 
-            //                 value = "value, NAV_TAB"
-            //             }
-            //             case '\': {
-            //                 if (!NAVCsvLexerAdvanceCursor(lexer)) {
-            //                     return
-            //                 }
+                            value = "value, NAV_CR"
+                        }
+                        case 't': {
+                            if (!NAVCsvLexerAdvanceCursor(lexer)) {
+                                return
+                            }
 
-            //                 value = "value, ch"
-            //             }
-            //             case '"': {
-            //                 if (!NAVCsvLexerAdvanceCursor(lexer)) {
-            //                     return
-            //                 }
+                            value = "value, NAV_TAB"
+                        }
+                        case '\': {
+                            if (!NAVCsvLexerAdvanceCursor(lexer)) {
+                                return
+                            }
 
-            //                 value = "value, ch"
-            //             }
-            //             default: {
-            //                 // Unknown escape sequence - treat backslash literally
-            //                 value = "value, ch"
-            //             }
-            //         }
+                            value = "value, ch"
+                        }
+                        case '"': {
+                            if (!NAVCsvLexerAdvanceCursor(lexer)) {
+                                return
+                            }
 
-            //         continue
-            //     }
+                            value = "value, ch"
+                        }
+                        default: {
+                            // Unknown escape sequence - treat backslash literally
+                            value = "value, ch"
+                        }
+                    }
 
-            //     value = "value, ch"
-            // }
+                    continue
+                }
+
+                value = "value, ch"
+            }
+
             default: {
                 value = "value, ch"
-                // NAVLog("'Appending to string: ', ch")
             }
         }
 
