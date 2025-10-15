@@ -665,10 +665,11 @@ define_function TestParseAllEmptyFields() {
     result = NAVCsvParserParse(parser, data)
 
     if (result &&
-        length_array(data[1]) == 3 &&
+        length_array(data[1]) == 4 &&
         data[1][1] == '' &&
         data[1][2] == '' &&
-        data[1][3] == '') {
+        data[1][3] == '' &&
+        data[1][4] == '') {
         NAVLogTestPassed(1)
     }
     else {
@@ -1130,7 +1131,8 @@ define_function TestParseLongField() {
     tokens[2].value = ','
     tokens[3].type = NAV_CSV_TOKEN_TYPE_IDENTIFIER
     tokens[3].value = 'short'
-    set_length_array(tokens, 3)
+    tokens[4].type = NAV_CSV_TOKEN_TYPE_EOF
+    set_length_array(tokens, 4)
 
     NAVCsvParserInit(parser, tokens)
     result = NAVCsvParserParse(parser, data)
