@@ -1,6 +1,7 @@
 #DEFINE TESTING_NAVCSVLEXER
 #DEFINE TESTING_NAVCSVPARSER
 #DEFINE TESTING_NAVCSVPARSER_COMPREHENSIVE
+#DEFINE TESTING_NAVCSVUTILS
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.CsvUtils.axi'
 #include 'NAVFoundation.Assert.axi'
@@ -18,6 +19,10 @@
 
 #IF_DEFINED TESTING_NAVCSVPARSER_COMPREHENSIVE
 #include 'NAVCsvParserComprehensive.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVCSVUTILS
+#include 'NAVCsvUtilsParse.axi'
 #END_IF
 
 define_function RunCsvUtilsTests() {
@@ -50,6 +55,15 @@ define_function RunCsvUtilsTests() {
 
     #IF_DEFINED TESTING_NAVCSVPARSER_COMPREHENSIVE
     TestAllComprehensive()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVCSVUTILS
+    NAVLog("'========================================='")
+    NAVLog("'HIGH-LEVEL CSV UTILS TEST SUITE (10 tests)'")
+    NAVLog("'========================================='")
+    TestNAVCsvUtilsParse()
+    NAVLog("'========================================='")
+    NAVLog("''")
     #END_IF
 }
 

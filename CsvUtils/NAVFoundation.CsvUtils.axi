@@ -43,12 +43,12 @@ SOFTWARE.
 (***********************************************************)
 
 /**
- * @function NAVCsvFileParse
+ * @function NAVCsvParse
  * @public
- * @description Simple high-level function to parse a CSV file from string data.
+ * @description Simple high-level function to parse CSV from string data.
  *
- * @param {char[]} data - The CSV file content as a string
- * @param {char[][]} csv - The output 2D array to hold parsed CSV data
+ * @param {char[]} data - The CSV data as a string
+ * @param {char[][][]} csv - The output 2D array to hold parsed CSV data
  *
  * @returns {char} True (1) if parsing succeeded, False (0) if failed
  *
@@ -57,14 +57,22 @@ SOFTWARE.
  * stack_var char csv[100][100][255]  // Adjust size as needed
  *
  * data = ReadFile('data.csv')  // However you read the file
- * if (NAVCsvFileParse(data, csv)) {
+ * if (NAVCsvParse(data, csv)) {
  *     csv[1][1]  // Access first row, first column
  *     csv[2][3]  // Access second row, third column
  * }
  */
-define_function char NAVCsvFileParse(char data[], char csv[][][]) {
+define_function char NAVCsvParse(char data[], char csv[][][]) {
     stack_var _NAVCsvLexer lexer
     stack_var _NAVCsvParser parser
+
+    if (!length_array(data)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_CSVUTILS__,
+                                    'NAVCsvParse',
+                                    "'Input data is empty'")
+        return false
+    }
 
     // Initialize the lexer with the input data
     NAVCsvLexerInit(lexer, data)
@@ -73,7 +81,7 @@ define_function char NAVCsvFileParse(char data[], char csv[][][]) {
     if (!NAVCsvLexerTokenize(lexer)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_CSVUTILS__,
-                                    'NAVCsvFileParse',
+                                    'NAVCsvParse',
                                     "'Error tokenizing CSV data'")
         return false
     }
@@ -85,7 +93,7 @@ define_function char NAVCsvFileParse(char data[], char csv[][][]) {
     if (!NAVCsvParserParse(parser, csv)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_CSVUTILS__,
-                                    'NAVCsvFileParse',
+                                    'NAVCsvParse',
                                     "'Error parsing CSV data'")
         return false
     }
