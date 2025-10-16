@@ -149,8 +149,7 @@ constant char REGEX_MATCH_BOUNDED_QUANTIFIER_GROUPS_EXPECTED_RESULT[] = {
 define_function char TestNAVRegexMatchBoundedQuantifierGroups() {
     stack_var integer x
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                "'***************** NAVRegexMatchBoundedQuantifierGroups *****************'")
+    NAVLog("'***************** NAVRegexMatchBoundedQuantifierGroups *****************'")
 
     for (x = 1; x <= length_array(REGEX_MATCH_BOUNDED_QUANTIFIER_GROUPS_TEST); x++) {
         stack_var char pattern[255]
@@ -173,8 +172,7 @@ define_function char TestNAVRegexMatchBoundedQuantifierGroups() {
         // Set the debug flag
         match.debug = (REGEX_MATCH_BOUNDED_QUANTIFIER_GROUPS_TEST[x][7] == 'true')
 
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                    "'Test ', itoa(x), ': pattern=[', pattern, '] text=[', text, ']'")
+        NAVLog("'Test ', itoa(x), ': pattern=[', pattern, '] text=[', text, ']'")
 
         result = NAVRegexMatch(pattern, text, match)
 
@@ -213,9 +211,6 @@ define_function char TestNAVRegexMatchBoundedQuantifierGroups() {
             NAVLogTestPassed(x)
         }
     }
-
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                "'***************** NAVRegexMatchBoundedQuantifierGroups PASSED *****************'")
 
     return true
 }

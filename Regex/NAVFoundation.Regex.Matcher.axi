@@ -817,7 +817,21 @@ define_function char NAVRegexMatchQuantifiedGroup(_NAVRegexParser parser, _NAVRe
         case REGEX_TYPE_PLUS:        { minMatches = 1; maxMatches = 999; }  // + : 1 or more
         case REGEX_TYPE_STAR:        { minMatches = 0; maxMatches = 999; }  // * : 0 or more
         case REGEX_TYPE_QUESTIONMARK: { minMatches = 0; maxMatches = 1; }   // ? : 0 or 1
-        // TODO: Handle REGEX_TYPE_QUANTIFIER for {n,m} bounds
+        case REGEX_TYPE_QUANTIFIER: {
+            // Bounded quantifier: {n}, {n,}, {n,m}
+            // Extract min and max from the quantifier token at cursor + 1
+            minMatches = type_cast(parser.state[parser.pattern.cursor + 1].quantifierMin)
+            if (parser.state[parser.pattern.cursor + 1].quantifierMax == -1) {
+                maxMatches = 999  // Unlimited
+            }
+            else {
+                maxMatches = type_cast(parser.state[parser.pattern.cursor + 1].quantifierMax)
+            }
+
+            NAVRegexDebug(parser,
+                          'MatchQuantifiedGroup',
+                          "'Bounded quantifier: min=', itoa(minMatches), ', max=', itoa(maxMatches)")
+        }
         default: {
             NAVRegexDebug(parser, 'MatchQuantifiedGroup', "'Unsupported quantifier type: ', REGEX_TYPES[quantifierType]")
             return false
