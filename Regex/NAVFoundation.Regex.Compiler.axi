@@ -475,6 +475,37 @@ define_function char NAVRegexCompileBoundedQuantifier(_NAVRegexParser parser) {
     parser.state[parser.count].quantifierMin = minVal
     parser.state[parser.count].quantifierMax = maxVal
 
+    // Check if this quantifier is on a group (previous token is GROUP_END)
+    // If so, back-propagate the min/max values to the GROUP_START token
+    if (parser.count > 1) {
+        stack_var char prevTokenType
+        stack_var integer i
+        stack_var integer groupStartToken
+
+        prevTokenType = parser.state[parser.count - 1].type
+
+        if (prevTokenType == REGEX_TYPE_GROUP_END ||
+            prevTokenType == REGEX_TYPE_NON_CAPTURE_GROUP_END) {
+
+            // Find the group whose endToken matches the previous token position
+            for (i = 1; i <= parser.groupTotal; i++) {
+                if (parser.groupInfo[i].endToken == (parser.count - 1)) {
+                    groupStartToken = parser.groupInfo[i].startToken
+
+                    // Back-propagate the min/max values to GROUP_START
+                    parser.state[groupStartToken].groupQuantifierMin = minVal
+                    parser.state[groupStartToken].groupQuantifierMax = maxVal
+
+                    #IF_DEFINED REGEX_COMPILE_DEBUG
+                    NAVLog("'[ Compile ]: Back-propagated bounded quantifier {', itoa(minVal), ',', itoa(maxVal), '} to GROUP_START token #', itoa(groupStartToken)")
+                    #END_IF
+
+                    break
+                }
+            }
+        }
+    }
+
     #IF_DEFINED REGEX_COMPILE_DEBUG
     NAVLog("'[ Compile ]: Bounded quantifier {', itoa(minVal), ',', itoa(maxVal), '}'")
     #END_IF
