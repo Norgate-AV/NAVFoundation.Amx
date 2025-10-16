@@ -267,8 +267,12 @@ define_function char NAVRegexMatchOne(_NAVRegexParser parser) {
 
     // Check for zero-width assertions first (they don't require a character or valid input position)
     switch (type) {
-        case REGEX_TYPE_WORD_BOUNDARY:      { return  NAVRegexMatchWordBoundary(parser) }
-        case REGEX_TYPE_NOT_WORD_BOUNDARY:  { return !NAVRegexMatchWordBoundary(parser) }
+        case REGEX_TYPE_WORD_BOUNDARY:          { return  NAVRegexMatchWordBoundary(parser) }
+        case REGEX_TYPE_NOT_WORD_BOUNDARY:      { return !NAVRegexMatchWordBoundary(parser) }
+        case REGEX_TYPE_GROUP_START:            { return true }  // Group markers don't match characters, just mark boundaries
+        case REGEX_TYPE_GROUP_END:              { return true }
+        case REGEX_TYPE_NON_CAPTURE_GROUP_START: { return true }
+        case REGEX_TYPE_NON_CAPTURE_GROUP_END:   { return true }
     }
 
     if (parser.input.cursor > parser.input.length) {
@@ -646,6 +650,127 @@ define_function char NAVRegexMatchBoundedQuantifier(_NAVRegexParser parser, _NAV
     return false
 }
 
+
+/**
+ * Handle group start - initialize tracking for a capturing group
+ */
+define_function integer NAVRegexMatchGroupStart(_NAVRegexParser parser, _NAVRegexMatchResult match) {
+    stack_var integer tokenIdx
+    stack_var integer groupIdx
+    stack_var integer matchIdx
+    stack_var integer i
+
+    tokenIdx = parser.pattern.cursor
+
+    // Find which group this token belongs to by searching groupInfo
+    for (i = 1; i <= parser.groupTotal; i++) {
+        if (parser.groupInfo[i].startToken == tokenIdx) {
+            groupIdx = i
+            break
+        }
+    }
+
+    if (groupIdx == 0) {
+        NAVRegexDebug(parser, 'MatchGroupStart', "'ERROR: Could not find group info for token ', itoa(tokenIdx)")
+        return 0
+    }
+
+    // Only process capturing groups
+    if (!parser.groupInfo[groupIdx].isCapturing) {
+        NAVRegexDebug(parser,
+                        'MatchGroupStart',
+                        "'Non-capturing group at token ', itoa(tokenIdx), ' - skipping'")
+        return 0
+    }
+
+    // Calculate the match index for this group
+    // match.matches[1] is the full match
+    // match.matches[2] is group 1, match.matches[3] is group 2, etc.
+    matchIdx = 1 + parser.groupInfo[groupIdx].number
+
+    NAVRegexDebug(parser,
+                    'MatchGroupStart',
+                    "'Entering capturing group #', itoa(parser.groupInfo[groupIdx].number),
+                     ' (matchIdx=', itoa(matchIdx), ') at position ', itoa(parser.input.cursor)")
+
+    // Store the start position for this group
+    match.matches[matchIdx].start = parser.input.cursor
+
+    // Update match count if this is a new group
+    if (matchIdx > match.count) {
+        match.count = matchIdx
+    }
+
+    return parser.groupInfo[groupIdx].number
+}
+
+
+/**
+ * Handle group end - extract the captured text for the group
+ */
+define_function char NAVRegexMatchGroupEnd(_NAVRegexParser parser, _NAVRegexMatchResult match) {
+    stack_var integer tokenIdx
+    stack_var integer groupIdx
+    stack_var integer matchIdx
+    stack_var integer groupStart
+    stack_var integer groupEnd
+    stack_var integer groupLength
+    stack_var integer i
+
+    tokenIdx = parser.pattern.cursor
+
+    // Find which group this token belongs to
+    for (i = 1; i <= parser.groupTotal; i++) {
+        if (parser.groupInfo[i].endToken == tokenIdx) {
+            groupIdx = i
+            break
+        }
+    }
+
+    if (groupIdx == 0) {
+        NAVRegexDebug(parser, 'MatchGroupEnd', "'ERROR: Could not find group info for token ', itoa(tokenIdx)")
+        return false
+    }
+
+    // Only process capturing groups
+    if (!parser.groupInfo[groupIdx].isCapturing) {
+        NAVRegexDebug(parser,
+                        'MatchGroupEnd',
+                        "'Non-capturing group at token ', itoa(tokenIdx), ' - skipping'")
+        return true
+    }
+
+    // Calculate the match index for this group
+    matchIdx = 1 + parser.groupInfo[groupIdx].number
+
+    groupStart = match.matches[matchIdx].start
+    groupEnd = parser.input.cursor
+    groupLength = groupEnd - groupStart
+
+    NAVRegexDebug(parser,
+                    'MatchGroupEnd',
+                    "'Closing capturing group #', itoa(parser.groupInfo[groupIdx].number),
+                     ' (matchIdx=', itoa(matchIdx), ') - start:', itoa(groupStart), ' end:', itoa(groupEnd), ' length:', itoa(groupLength)")
+
+    // Extract the captured text
+    if (groupLength > 0) {
+        match.matches[matchIdx].text = NAVStringSlice(parser.input.value, groupStart, groupEnd - 1)
+    }
+    else {
+        match.matches[matchIdx].text = ''
+    }
+
+    match.matches[matchIdx].length = groupLength
+    match.matches[matchIdx].end = groupEnd
+
+    NAVRegexDebug(parser,
+                    'MatchGroupEnd',
+                    "'Captured text: "', match.matches[matchIdx].text, '"'")
+
+    return true
+}
+
+
 define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatchResult match) {
     stack_var integer pre
 
@@ -730,6 +855,34 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
             stack_var integer currentType
 
             currentType = parser.state[parser.pattern.cursor].type
+
+            // Handle group start
+            if (currentType == REGEX_TYPE_GROUP_START ||
+                currentType == REGEX_TYPE_NON_CAPTURE_GROUP_START) {
+                NAVRegexDebug(parser,
+                                'MatchPattern',
+                                "'Group start token at pattern[', itoa(parser.pattern.cursor), ']'")
+
+                NAVRegexMatchGroupStart(parser, match)
+
+                // Advance pattern cursor only (groups don't consume characters)
+                NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
+                continue
+            }
+
+            // Handle group end
+            if (currentType == REGEX_TYPE_GROUP_END ||
+                currentType == REGEX_TYPE_NON_CAPTURE_GROUP_END) {
+                NAVRegexDebug(parser,
+                                'MatchPattern',
+                                "'Group end token at pattern[', itoa(parser.pattern.cursor), ']'")
+
+                NAVRegexMatchGroupEnd(parser, match)
+
+                // Advance pattern cursor only (groups don't consume characters)
+                NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
+                continue
+            }
 
             // Check if this is a zero-width assertion (doesn't consume characters)
             if (currentType == REGEX_TYPE_WORD_BOUNDARY ||
