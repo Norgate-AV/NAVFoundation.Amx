@@ -834,13 +834,29 @@ define_function char NAVRegexMatchQuantifiedGroup(_NAVRegexParser parser, _NAVRe
     else {
         firstMatchStart = match.matches[255].start
     }
-    matchCount = 1
-    lastMatchStart = firstMatchStart
-    lastMatchEnd = parser.input.cursor
 
-    NAVRegexDebug(parser,
-                    'MatchQuantifiedGroup',
-                    "'Already matched group once from position ', itoa(firstMatchStart), ' to ', itoa(lastMatchEnd)")
+    // Check if the group consumed any input
+    if (firstMatchStart == parser.input.cursor) {
+        // Group matched but consumed ZERO characters
+        // For optional quantifiers (? or *), treat this as zero matches
+        matchCount = 0
+        lastMatchStart = firstMatchStart
+        lastMatchEnd = firstMatchStart
+
+        NAVRegexDebug(parser,
+                        'MatchQuantifiedGroup',
+                        "'Group consumed zero characters - treating as zero matches'")
+    }
+    else {
+        // Group consumed at least one character
+        matchCount = 1
+        lastMatchStart = firstMatchStart
+        lastMatchEnd = parser.input.cursor
+
+        NAVRegexDebug(parser,
+                        'MatchQuantifiedGroup',
+                        "'Already matched group once from position ', itoa(firstMatchStart), ' to ', itoa(lastMatchEnd)")
+    }
 
     // Try to match ADDITIONAL repetitions of the group content
     matchFailed = false
@@ -995,83 +1011,21 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
                 }
             }
 
-            if (isQuantified && (quantifierType == REGEX_TYPE_QUESTIONMARK || quantifierType == REGEX_TYPE_STAR)) {
-                // This is an OPTIONAL quantified group (? or *)
-                // Try to match the group content, but if it fails, skip the group
-                stack_var integer savedInputCursor
-                stack_var integer savedPatternCursor
-                stack_var char groupMatched
+            // For all groups (optional or not), just record the start and continue
+            // The quantified group handler will deal with optional groups properly
 
-                savedInputCursor = parser.input.cursor
-                savedPatternCursor = parser.pattern.cursor
+            // Record group start
+            NAVRegexMatchGroupStart(parser, match)
 
-                NAVRegexDebug(parser,
-                                'MatchPattern',
-                                "'Detected optional quantified group - trying to match'")
-
-                // Record group start
-                NAVRegexMatchGroupStart(parser, match)
-
-                // For non-capturing groups, store the start position in match.matches[255] temporarily
-                // (using last element as temporary storage since we won't have 255 groups)
-                if (!parser.groupInfo[groupIdx].isCapturing) {
-                    match.matches[255].start = savedInputCursor
-                }
-
-                // Try to match the group content
-                NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
-                groupMatched = true
-
-                // Match tokens until we hit GROUP_END
-                while (parser.pattern.cursor < groupEndToken) {
-                    if (parser.input.cursor > parser.input.length) {
-                        // Ran out of input
-                        groupMatched = false
-                        break
-                    }
-
-                    if (!NAVRegexMatchOne(parser)) {
-                        // Failed to match
-                        groupMatched = false
-                        break
-                    }
-
-                    // Matched one character
-                    // NOTE: Don't increase match length here - NAVRegexMatchQuantifiedGroup will do it
-                    NAVRegexAdvanceInputCursor(parser, 'MatchPattern', 1)
-                    NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
-                }
-
-                if (!groupMatched) {
-                    // Group didn't match - restore input cursor and skip to after quantifier
-                    NAVRegexDebug(parser,
-                                    'MatchPattern',
-                                    "'Optional group didn`t match - skipping'")
-
-                    NAVRegexSetInputCursor(parser, 'MatchPattern', savedInputCursor)
-
-                    // Skip past GROUP_END and quantifier
-                    NAVRegexSetPatternCursor(parser, 'MatchPattern', groupEndToken + 2)
-                    continue
-                }
-                else {
-                    // Group matched - jump to GROUP_END to let quantifier handler process it
-                    NAVRegexDebug(parser,
-                                    'MatchPattern',
-                                    "'Optional group matched - jumping to GROUP_END'")
-
-                    NAVRegexSetPatternCursor(parser, 'MatchPattern', groupEndToken)
-                    continue
-                }
+            // For non-capturing groups, store the start position in match.matches[255] temporarily
+            // so NAVRegexMatchQuantifiedGroup can access it later
+            if (groupIdx > 0 && !parser.groupInfo[groupIdx].isCapturing) {
+                match.matches[255].start = parser.input.cursor
             }
-            else {
-                // Normal non-optional group or required quantified group (+)
-                NAVRegexMatchGroupStart(parser, match)
 
-                // Advance pattern cursor only (groups don't consume characters)
-                NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
-                continue
-            }
+            // Advance pattern cursor only (groups don't consume characters)
+            NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
+            continue
         }
 
         if (parser.state[parser.pattern.cursor].type == REGEX_TYPE_GROUP_END ||
@@ -1197,6 +1151,54 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
             }
 
             continue
+        }
+
+        // Match failed - check if we just entered an optional quantified group
+        // If so, skip the group instead of failing the whole pattern
+        {
+            stack_var integer prevToken
+            stack_var integer i
+            stack_var integer groupIdx
+            stack_var char isOptionalGroup
+            stack_var integer groupEndToken
+            stack_var integer quantifierType
+
+            if (parser.pattern.cursor > 1) {
+                prevToken = parser.pattern.cursor - 1
+
+                // Check if previous token was a GROUP_START
+                if (parser.state[prevToken].type == REGEX_TYPE_GROUP_START ||
+                    parser.state[prevToken].type == REGEX_TYPE_NON_CAPTURE_GROUP_START) {
+
+                    // Find which group this is
+                    for (i = 1; i <= parser.groupTotal; i++) {
+                        if (parser.groupInfo[i].startToken == prevToken) {
+                            groupIdx = i
+
+                            // Check if this group has an optional quantifier (? or *)
+                            groupEndToken = parser.groupInfo[i].endToken
+                            quantifierType = parser.state[groupEndToken + 1].type
+
+                            if (quantifierType == REGEX_TYPE_QUESTIONMARK ||
+                                quantifierType == REGEX_TYPE_STAR) {
+                                isOptionalGroup = true
+                            }
+
+                            break
+                        }
+                    }
+
+                    if (isOptionalGroup) {
+                        // Skip past GROUP_END and quantifier
+                        NAVRegexDebug(parser,
+                                        'MatchPattern',
+                                        "'First token in optional group failed - skipping group'")
+
+                        NAVRegexSetPatternCursor(parser, 'MatchPattern', groupEndToken + 2)
+                        continue
+                    }
+                }
+            }
         }
 
         // Match failed

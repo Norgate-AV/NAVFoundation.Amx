@@ -8,20 +8,20 @@ PROGRAM_NAME='NAVRegexMatchNonCapturingGroups'
 DEFINE_CONSTANT
 
 constant char MATCH_NON_CAPTURING_GROUPS_TEST[][][255] = {
-    // Pattern, Test Text, Expected Count, Group 1 Text, Group 2 Text, Group 3 Text, Group 4 Text, Group 5 Text
-    { '/(?:abc)/', 'abc', '1', 'abc', '', '', '', '' },
-    { '/x(?:abc)y/', 'xabcy', '1', 'xabcy', '', '', '', '' },
-    { '/(?:abc)(def)/', 'abcdef', '2', 'abcdef', 'def', '', '', '' },
-    { '/(?:abc)(?:def)/', 'abcdef', '1', 'abcdef', '', '', '', '' },
-    { '/(?:ab)+/', 'abab', '1', 'abab', '', '', '', '' },
-    { '/(?:(?:a)b)/', 'ab', '1', 'ab', '', '', '', '' },
-    { '/(?:(abc)def)/', 'abcdef', '2', 'abcdef', 'abc', '', '', '' },
-    { '/((?:abc)def)/', 'abcdef', '2', 'abcdef', 'abcdef', '', '', '' },
-    { '/(a)(?:b)(c)/', 'abc', '3', 'abc', 'a', 'c', '', '' },
-    { '/(?:\d+)\.(\d+)/', '123.456', '2', '123.456', '456', '', '', '' },
-    { '/(?:ab)*c/', 'ababc', '1', 'ababc', '', '', '', '' },
-    { '/a(?:bc)?d/', 'ad', '1', 'ad', '', '', '', '' },
-    { '/(?P<user>\w+)@(?:\w+\.)?([\w]+)/', 'john@mail.example', '3', 'john@mail.example', 'john', 'example', '', '' }
+    // Pattern, Test Text, Expected Count, Group 1 Text, Group 2 Text, Group 3 Text, Group 4 Text, Group 5 Text, Debug
+    { '/(?:abc)/', 'abc', '1', 'abc', '', '', '', '', 'false' },
+    { '/x(?:abc)y/', 'xabcy', '1', 'xabcy', '', '', '', '', 'false' },
+    { '/(?:abc)(def)/', 'abcdef', '2', 'abcdef', 'def', '', '', '', 'false' },
+    { '/(?:abc)(?:def)/', 'abcdef', '1', 'abcdef', '', '', '', '', 'false' },
+    { '/(?:ab)+/', 'abab', '1', 'abab', '', '', '', '', 'false' },
+    { '/(?:(?:a)b)/', 'ab', '1', 'ab', '', '', '', '', 'false' },
+    { '/(?:(abc)def)/', 'abcdef', '2', 'abcdef', 'abc', '', '', '', 'false' },
+    { '/((?:abc)def)/', 'abcdef', '2', 'abcdef', 'abcdef', '', '', '', 'false' },
+    { '/(a)(?:b)(c)/', 'abc', '3', 'abc', 'a', 'c', '', '', 'false' },
+    { '/(?:\d+)\.(\d+)/', '123.456', '2', '123.456', '456', '', '', '', 'false' },
+    { '/(?:ab)*c/', 'ababc', '1', 'ababc', '', '', '', '', 'false' },
+    { '/a(?:bc)?d/', 'ad', '1', 'ad', '', '', '', '', 'true' },
+    { '/(?P<user>\w+)@(?:\w+\.)?([\w]+)/', 'john@mail.example', '3', 'john@mail.example', 'john', 'example', '', '', 'true' }
 }
 
 
@@ -46,6 +46,8 @@ define_function TestNAVRegexMatchNonCapturingGroups() {
         pattern = MATCH_NON_CAPTURING_GROUPS_TEST[x][1]
         text = MATCH_NON_CAPTURING_GROUPS_TEST[x][2]
         expectedCount = atoi(MATCH_NON_CAPTURING_GROUPS_TEST[x][3])
+
+        parser.debug = (MATCH_NON_CAPTURING_GROUPS_TEST[x][9] == 'true')
 
         for (i = 1; i <= 5; i++) {
             expectedMatches[i] = MATCH_NON_CAPTURING_GROUPS_TEST[x][3 + i]
