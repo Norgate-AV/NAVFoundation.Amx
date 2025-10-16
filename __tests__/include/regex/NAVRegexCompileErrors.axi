@@ -57,11 +57,10 @@ constant char REGEX_COMPILE_ERROR_PATTERNS[][255] = {
 
     // Empty pattern edge cases
     '//',                   // 34: Completely empty pattern
-    '/\//',                 // 35: Just escaped forward slash
 
     // Invalid escape sequences (depending on your implementation)
-    '/\k/',                 // 36: Invalid escape character (if not supported)
-    '/\z/'                  // 37: Invalid escape character (if not supported)
+    '/\k/',                 // 35: Invalid escape character (if not supported)
+    '/\z/'                  // 36: Invalid escape character (if not supported)
 }
 
 

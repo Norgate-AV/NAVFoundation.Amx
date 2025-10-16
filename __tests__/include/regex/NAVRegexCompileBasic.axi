@@ -30,7 +30,8 @@ constant char REGEX_COMPILE_BASIC_PATTERN_TEST[][255] = {
     '/\d?\d?\d\.\d?\d?\d\.\d?\d?\d\.\d?\d?\d/',  // 19: IP address pattern
     '/\d?/',            // 20: Single optional digit
     '/\d?\d?/',         // 21: Two optional digits
-    '/\d?\d?\d/'        // 22: Three optional digits
+    '/\d?\d?\d/',       // 22: Three optional digits
+    '/\//'              // 23: Escaped forward slash (literal / character)
 }
 
 constant integer REGEX_COMPILE_BASIC_EXPECTED_TOKENS[][] = {
@@ -171,6 +172,9 @@ constant integer REGEX_COMPILE_BASIC_EXPECTED_TOKENS[][] = {
         REGEX_TYPE_DIGIT,
         REGEX_TYPE_QUESTIONMARK,
         REGEX_TYPE_DIGIT
+    },
+    {
+        REGEX_TYPE_CHAR  // Escaped forward slash becomes a CHAR token
     }
 }
 

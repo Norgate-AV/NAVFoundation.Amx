@@ -162,30 +162,205 @@ define_function char NAVRegexParserParseOptions(_NAVRegexParser parser, char pat
 }
 
 
-// define_function char NAVRegexCompilerCanQuantify(_NAVRegexParser parser) {
-//     // Check if there's a previous token that can be quantified
-//     if (parser.count == 0) {
-//         return false  // No previous token
-//     }
+define_function char NAVRegexCompilerIsValidGroupName(char name[]) {
+    stack_var integer length
+    stack_var integer x
+    stack_var char c
 
-//     // Check if previous token is already a quantifier
-//     switch (parser.state[parser.count].type) {
-//         case REGEX_TYPE_STAR:
-//         case REGEX_TYPE_PLUS:
-//         case REGEX_TYPE_QUESTIONMARK:
-//         case REGEX_TYPE_EXACT:
-//         case REGEX_TYPE_ATLEAST:
-//         case REGEX_TYPE_BETWEEN: {
-//             return false  // Can't quantify a quantifier
-//         }
-//         case REGEX_TYPE_BEGIN:
-//         case REGEX_TYPE_END: {
-//             return false  // Can't quantify anchors
-//         }
-//     }
+    length = length_array(name)
 
-//     return true
-// }
+    if (length == 0) {
+        return false
+    }
+
+    // First character must be a letter or underscore
+    c = NAVCharCodeAt(name, 1)
+    if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')) {
+        return false
+    }
+
+    // Remaining characters can be letters, digits, or underscores
+    for (x = 2; x <= length; x++) {
+        c = NAVCharCodeAt(name, x)
+        if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')) {
+            return false
+        }
+    }
+
+    return true
+}
+
+
+define_function char NAVRegexCompilerIsGroupNameUnique(_NAVRegexParser parser, char name[]) {
+    stack_var integer x
+
+    // Check all existing groups for duplicate names
+    for (x = 1; x <= parser.groupTotal; x++) {
+        if (parser.groupInfo[x].isNamed) {
+            if (parser.groupInfo[x].name == name) {
+                return false  // Duplicate found
+            }
+        }
+    }
+
+    return true
+}
+
+
+define_function char NAVRegexCompileParseGroupName(_NAVRegexParser parser, char groupName[]) {
+    stack_var char buffer[50]
+    stack_var integer length
+    stack_var char c
+
+    // We're positioned after '(?P<' or '(?<'
+    // Parse until we hit '>'
+
+    length = 0
+    while (parser.pattern.cursor <= parser.pattern.length) {
+        c = NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)
+
+        if (c == '>') {
+            break  // Found end of name
+        }
+
+        if (length >= 49) {  // Leave room for null terminator
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_REGEX__,
+                                        'NAVRegexCompileParseGroupName',
+                                        "'Group name too long (max 49 characters)'")
+            return false
+        }
+
+        length++
+        buffer = "buffer, c"
+
+        if (!NAVRegexPatternAdvanceCursor(parser)) {
+            return false
+        }
+    }
+
+    if (c != '>') {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompileParseGroupName',
+                                    "'Missing closing `>` in named group'")
+        return false
+    }
+
+    if (length == 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompileParseGroupName',
+                                    "'Empty group name'")
+        return false
+    }
+
+    set_length_array(buffer, length)
+    groupName = buffer
+
+    // Validate name
+    if (!NAVRegexCompilerIsValidGroupName(groupName)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompileParseGroupName',
+                                    "'Invalid group name: ', groupName, ' (must start with letter/underscore, contain only alphanumeric/underscore)'")
+        return false
+    }
+
+    // Check for uniqueness
+    if (!NAVRegexCompilerIsGroupNameUnique(parser, groupName)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompileParseGroupName',
+                                    "'Duplicate group name: ', groupName")
+        return false
+    }
+
+    return true
+}
+
+
+define_function char NAVRegexCompilerIsValidEscapeChar(char c) {
+    // Check if this is a valid escape character
+    // Letters that are valid escape sequences
+    switch (c) {
+        case 'b':   // Word boundary
+        case 'B':   // Not word boundary
+        case 'd':   // Digit
+        case 'D':   // Not digit
+        case 'w':   // Word character
+        case 'W':   // Not word character
+        case 's':   // Whitespace
+        case 'S':   // Not whitespace
+        case 'x':   // Hex (not implemented)
+        case 'n':   // Newline (not implemented)
+        case 'r':   // Return (not implemented)
+        case 't': { // Tab (not implemented)
+            return true
+        }
+    }
+
+    // Special characters that can be escaped (literal matching)
+    // These include regex metacharacters: . * + ? ^ $ { } [ ] ( ) | \
+    switch (c) {
+        case '.':
+        case '*':
+        case '+':
+        case '?':
+        case '^':
+        case '$':
+        case '{':
+        case '}':
+        case '[':
+        case ']':
+        case '(':
+        case ')':
+        case '|':
+        case '\':
+        case '/': {  // Forward slash for delimiter
+            return true
+        }
+    }
+
+    // If we get here, it's not a valid escape sequence
+    return false
+}
+
+
+define_function char NAVRegexCompilerCanQuantify(_NAVRegexParser parser) {
+    // Check if there's a previous token that can be quantified
+    if (parser.count == 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX__,
+                                    'NAVRegexCompilerCanQuantify',
+                                    "'Quantifier at start of pattern - nothing to quantify'")
+        return false  // No previous token
+    }
+
+    // Check if previous token is already a quantifier
+    switch (parser.state[parser.count].type) {
+        case REGEX_TYPE_STAR:
+        case REGEX_TYPE_PLUS:
+        case REGEX_TYPE_QUESTIONMARK:
+        case REGEX_TYPE_QUANTIFIER: {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_REGEX__,
+                                        'NAVRegexCompilerCanQuantify',
+                                        "'Consecutive quantifiers - cannot quantify a quantifier'")
+            return false  // Can't quantify a quantifier
+        }
+        case REGEX_TYPE_BEGIN:
+        case REGEX_TYPE_END: {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_REGEX__,
+                                        'NAVRegexCompilerCanQuantify',
+                                        "'Cannot quantify an anchor (^ or $)'")
+            return false  // Can't quantify anchors
+        }
+    }
+
+    return true
+}
 
 
 define_function char NAVRegexCompileBoundedQuantifier(_NAVRegexParser parser) {
@@ -354,6 +529,15 @@ define_function char NAVRegexCompileCharacterClass(_NAVRegexParser parser) {
             break
         }
 
+        // Check for nested opening bracket (not allowed)
+        if (code == '[') {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_REGEX__,
+                                        'NAVRegexCompileCharacterClass',
+                                        "'Nested character class - `[` not allowed inside character class'")
+            return false
+        }
+
         if (code == '\') {
             if (length > (MAX_CHAR_CLASS_LENGTH - 1)) {
                 NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
@@ -466,6 +650,11 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                     return false
                 }
 
+                // Validate that we can quantify
+                if (!NAVRegexCompilerCanQuantify(parser)) {
+                    return false
+                }
+
                 parser.count++
                 parser.state[parser.count].type = REGEX_TYPE_STAR
             }
@@ -480,6 +669,11 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                     return false
                 }
 
+                // Validate that we can quantify
+                if (!NAVRegexCompilerCanQuantify(parser)) {
+                    return false
+                }
+
                 parser.count++
                 parser.state[parser.count].type = REGEX_TYPE_PLUS
             }
@@ -491,6 +685,11 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                                                 'NAVRegexCompile',
                                                 "'Don`t support lazy quantifiers yet'")
 
+                    return false
+                }
+
+                // Validate that we can quantify
+                if (!NAVRegexCompilerCanQuantify(parser)) {
                     return false
                 }
 
@@ -522,6 +721,15 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                     #IF_DEFINED REGEX_COMPILE_DEBUG
                     NAVLog("'[ Compile ]: Backslash processing - cursor now=', itoa(parser.pattern.cursor), ' char is: ', NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)")
                     #END_IF
+
+                    // Validate that this is a supported escape sequence
+                    if (!NAVRegexCompilerIsValidEscapeChar(NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor))) {
+                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                    __NAV_FOUNDATION_REGEX__,
+                                                    'NAVRegexCompile',
+                                                    "'Invalid escape sequence: \', NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)")
+                        return false
+                    }
 
                     switch (NAVCharCodeAt(parser.pattern.value, parser.pattern.cursor)) {
                         case 'b': {
@@ -580,73 +788,235 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                     }
                     // Note: Main loop will increment cursor again, so \d sequence will advance by 2 total
                 }
+                else {
+                    // Trailing backslash with nothing after it
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_REGEX__,
+                                                'NAVRegexCompile',
+                                                "'Trailing backslash - incomplete escape sequence'")
+                    return false
+                }
             }
 
             case '{': {
+                // Validate that we can quantify
+                if (!NAVRegexCompilerCanQuantify(parser)) {
+                    return false
+                }
+
                 if (!NAVRegexCompileBoundedQuantifier(parser)) {
                     return false
                 }
             }
             case '(': {
-                // Start of capturing group
+                // Check for special group types: (?:...), (?P<name>...), (?<name>...)
+                stack_var char isCapturing
+                stack_var char isNamed
+                stack_var char groupName[50]
+                stack_var char nextChar
+                stack_var char secondChar
 
-                // Check if we've exceeded max groups BEFORE incrementing
-                // if (parser.groupCount >= NAV_REGEX_MAX_GROUPS) {
-                //     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                //                                 __NAV_FOUNDATION_REGEX__,
-                //                                 'NAVRegexCompile',
-                //                                 "'Too many capturing groups (max: ', itoa(NAV_REGEX_MAX_GROUPS), ')'")
-                //     return false
-                // }
+                isCapturing = true  // Default to capturing group
+                isNamed = false
+                groupName = ''
 
-                // parser.groupCount++
+                // Lookahead to check for special group syntax
+                if ((parser.pattern.cursor + 1) <= parser.pattern.length) {
+                    nextChar = NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1))
 
-                if (!NAVRegexCompileIncrementGroupCount(parser)) {
+                    if (nextChar == '?') {
+                        // Special group syntax - check what type
+                        if ((parser.pattern.cursor + 2) <= parser.pattern.length) {
+                            secondChar = NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 2))
+
+                            if (secondChar == ':') {
+                                // Non-capturing group (?:...)
+                                isCapturing = false
+
+                                // Advance past '(?:'
+                                if (!NAVRegexPatternAdvanceCursor(parser)) { return false }  // Move to '?'
+                                if (!NAVRegexPatternAdvanceCursor(parser)) { return false }  // Move to ':'
+
+                                #IF_DEFINED REGEX_COMPILE_DEBUG
+                                NAVLog("'[ Compile ]: Non-capturing group detected'")
+                                #END_IF
+                            }
+                            else if (secondChar == 'P') {
+                                // Python-style named group (?P<name>...)
+                                if ((parser.pattern.cursor + 3) <= parser.pattern.length) {
+                                    if (NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 3)) == '<') {
+                                        isNamed = true
+
+                                        // Advance past '(?P<'
+                                        if (!NAVRegexPatternAdvanceCursor(parser)) { return false }  // Move to '?'
+                                        if (!NAVRegexPatternAdvanceCursor(parser)) { return false }  // Move to 'P'
+                                        if (!NAVRegexPatternAdvanceCursor(parser)) { return false }  // Move to '<'
+                                        if (!NAVRegexPatternAdvanceCursor(parser)) { return false }  // Move to first char of name
+
+                                        // Parse the group name
+                                        if (!NAVRegexCompileParseGroupName(parser, groupName)) {
+                                            return false
+                                        }
+
+                                        #IF_DEFINED REGEX_COMPILE_DEBUG
+                                        NAVLog("'[ Compile ]: Named group detected: ', groupName")
+                                        #END_IF
+                                    }
+                                    else {
+                                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                                    __NAV_FOUNDATION_REGEX__,
+                                                                    'NAVRegexCompile',
+                                                                    "'Invalid group syntax - (?P requires < after P'")
+                                        return false
+                                    }
+                                }
+                                else {
+                                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                                __NAV_FOUNDATION_REGEX__,
+                                                                'NAVRegexCompile',
+                                                                "'Invalid group syntax - incomplete (?P pattern'")
+                                    return false
+                                }
+                            }
+                            else if (secondChar == '<') {
+                                // .NET-style named group (?<name>...)
+                                isNamed = true
+
+                                // Advance past '(?<'
+                                if (!NAVRegexPatternAdvanceCursor(parser)) { return false }  // Move to '?'
+                                if (!NAVRegexPatternAdvanceCursor(parser)) { return false }  // Move to '<'
+                                if (!NAVRegexPatternAdvanceCursor(parser)) { return false }  // Move to first char of name
+
+                                // Parse the group name
+                                if (!NAVRegexCompileParseGroupName(parser, groupName)) {
+                                    return false
+                                }
+
+                                #IF_DEFINED REGEX_COMPILE_DEBUG
+                                NAVLog("'[ Compile ]: Named group detected (.NET style): ', groupName")
+                                #END_IF
+                            }
+                            else {
+                                // Invalid (? pattern - not :, P, or <
+                                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                            __NAV_FOUNDATION_REGEX__,
+                                                            'NAVRegexCompile',
+                                                            "'Invalid group syntax - (? must be followed by :, P<, or <'")
+                                return false
+                            }
+                        }
+                        else {
+                            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                        __NAV_FOUNDATION_REGEX__,
+                                                        'NAVRegexCompile',
+                                                        "'Invalid group syntax - incomplete (? pattern'")
+                            return false
+                        }
+                    }
+                }
+
+                // Increment total group count (for all types)
+                parser.groupTotal++
+
+                if (parser.groupTotal > NAV_REGEX_MAX_GROUPS) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_REGEX__,
+                                                'NAVRegexCompile',
+                                                "'Too many groups (max: ', itoa(NAV_REGEX_MAX_GROUPS), ')'")
                     return false
                 }
 
-                // Check depth before using as array index
-                // if (parser.groupDepth >= NAV_REGEX_MAX_GROUPS) {
-                //     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                //                                 __NAV_FOUNDATION_REGEX__,
-                //                                 'NAVRegexCompile',
-                //                                 "'Group nesting too deep (max: ', itoa(NAV_REGEX_MAX_GROUPS), ')'")
-                //     return false
-                // }
+                // Only increment capturing group count if this is a capturing group
+                if (isCapturing) {
+                    if (!NAVRegexCompileIncrementGroupCount(parser)) {
+                        return false
+                    }
+                }
 
-                // Push group number onto stack for validation
-                // parser.groupDepth++
-
+                // Increment nesting depth (for all group types)
                 if (!NAVRegexCompilerIncrementGroupDepth(parser)) {
                     return false
                 }
 
-                parser.groupStack[parser.groupDepth] = parser.groupCount
+                // Store group info
+                parser.groupInfo[parser.groupTotal].number = parser.groupCount  // 0 for non-capturing
+                parser.groupInfo[parser.groupTotal].name = groupName
+                parser.groupInfo[parser.groupTotal].isNamed = isNamed
+                parser.groupInfo[parser.groupTotal].isCapturing = isCapturing
+                parser.groupInfo[parser.groupTotal].startToken = parser.count + 1
 
+                // Track group on stack
+                parser.groupStack[parser.groupDepth] = parser.groupTotal
+
+                // Add token
                 parser.count++
-                parser.state[parser.count].type = REGEX_TYPE_GROUP_START
-                // parser.state[parser.count].value = parser.groupCount
+                if (isCapturing) {
+                    parser.state[parser.count].type = REGEX_TYPE_GROUP_START
+                }
+                else {
+                    parser.state[parser.count].type = REGEX_TYPE_NON_CAPTURE_GROUP_START
+                }
 
                 #IF_DEFINED REGEX_COMPILE_DEBUG
-                NAVLog("'[ Compile ]: GROUP_START - Group #', itoa(parser.groupCount), ' at depth ', itoa(parser.groupDepth)")
+                if (isCapturing) {
+                    if (isNamed) {
+                        NAVLog("'[ Compile ]: GROUP_START - Named group #', itoa(parser.groupCount), ' (', groupName, ') at depth ', itoa(parser.groupDepth)")
+                    }
+                    else {
+                        NAVLog("'[ Compile ]: GROUP_START - Group #', itoa(parser.groupCount), ' at depth ', itoa(parser.groupDepth)")
+                    }
+                }
+                else {
+                    NAVLog("'[ Compile ]: NON_CAPTURE_GROUP_START at depth ', itoa(parser.groupDepth)")
+                }
                 #END_IF
             }
             case ')': {
-                // End of capturing group
+                // End of group (capturing or non-capturing)
+                stack_var integer groupIndex
+                stack_var char isCapturing
 
-                // Get the group number from the stack
-                parser.count++
-                parser.state[parser.count].type = REGEX_TYPE_GROUP_END
-                // parser.state[parser.count].value = parser.groupStack[parser.groupDepth]
-
-                #IF_DEFINED REGEX_COMPILE_DEBUG
-                NAVLog("'[ Compile ]: GROUP_END - Group #', itoa(parser.groupStack[parser.groupDepth]), ' at depth ', itoa(parser.groupDepth)")
-                #END_IF
-
-                // Validate and pop from stack
-                if (!NAVRegexCompilerDecrementGroupDepth(parser)) {
+                // First check if we have a matching opening parenthesis
+                if (parser.groupDepth <= 0) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_REGEX__,
+                                                'NAVRegexCompile',
+                                                "'Unmatched closing parenthesis `)` in pattern'")
                     return false
                 }
+
+                // Get the group index from the stack
+                groupIndex = parser.groupStack[parser.groupDepth]
+                isCapturing = parser.groupInfo[groupIndex].isCapturing
+
+                // Update group info with end token
+                parser.groupInfo[groupIndex].endToken = parser.count + 1
+
+                // Add token
+                parser.count++
+                if (isCapturing) {
+                    parser.state[parser.count].type = REGEX_TYPE_GROUP_END
+                }
+                else {
+                    parser.state[parser.count].type = REGEX_TYPE_NON_CAPTURE_GROUP_END
+                }
+
+                #IF_DEFINED REGEX_COMPILE_DEBUG
+                if (isCapturing) {
+                    if (parser.groupInfo[groupIndex].isNamed) {
+                        NAVLog("'[ Compile ]: GROUP_END - Named group #', itoa(parser.groupInfo[groupIndex].number), ' (', parser.groupInfo[groupIndex].name, ') at depth ', itoa(parser.groupDepth)")
+                    }
+                    else {
+                        NAVLog("'[ Compile ]: GROUP_END - Group #', itoa(parser.groupInfo[groupIndex].number), ' at depth ', itoa(parser.groupDepth)")
+                    }
+                }
+                else {
+                    NAVLog("'[ Compile ]: NON_CAPTURE_GROUP_END at depth ', itoa(parser.groupDepth)")
+                }
+                #END_IF
+
+                // Pop from stack
+                parser.groupDepth--
             }
             case '[': {
                 if (!NAVRegexCompileCharacterClass(parser)) {
@@ -687,8 +1057,31 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
     NAVRegexSetPatternCursor(parser, 'Compile', 0)
 
     #IF_DEFINED REGEX_COMPILE_DEBUG
-    if (parser.groupCount > 0) {
+    if (parser.groupTotal > 0) {
+        stack_var integer namedCount
+        stack_var integer nonCapturingCount
+        stack_var integer x
+
+        namedCount = 0
+        nonCapturingCount = 0
+
+        for (x = 1; x <= parser.groupTotal; x++) {
+            if (parser.groupInfo[x].isNamed) {
+                namedCount++
+            }
+            if (!parser.groupInfo[x].isCapturing) {
+                nonCapturingCount++
+            }
+        }
+
         NAVLog("'[ Compile ]: Pattern contains ', itoa(parser.groupCount), ' capturing group(s)'")
+        if (namedCount > 0) {
+            NAVLog("'[ Compile ]:   - ', itoa(namedCount), ' named group(s)'")
+        }
+        if (nonCapturingCount > 0) {
+            NAVLog("'[ Compile ]:   - ', itoa(nonCapturingCount), ' non-capturing group(s)'")
+        }
+        NAVLog("'[ Compile ]:   Total groups: ', itoa(parser.groupTotal)")
     }
     #END_IF
 

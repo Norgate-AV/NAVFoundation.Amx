@@ -10,7 +10,10 @@
 #include 'NAVRegexCompileCharClasses.axi'
 #include 'NAVRegexCompileBoundedQuantifiers.axi'
 #include 'NAVRegexCompileGroups.axi'
+#include 'NAVRegexCompileNamedGroups.axi'
+#include 'NAVRegexCompileNonCapturingGroups.axi'
 #include 'NAVRegexCompileErrors.axi'
+#include 'NAVRegexCompileGroupErrors.axi'
 #END_IF
 
 #IF_DEFINED TESTING_REGEX_MATCH
@@ -35,7 +38,10 @@ define_function RunRegexTests() {
     TestNAVRegexCompileCharClasses()
     TestNAVRegexCompileBoundedQuantifiers()
     TestNAVRegexCompileGroups()
+    TestNAVRegexCompileNamedGroups()
+    TestNAVRegexCompileNonCapturingGroups()
     TestNAVRegexCompileErrors()
+    TestNAVRegexCompileGroupErrors()
     #END_IF
 
     #IF_DEFINED TESTING_REGEX_MATCH

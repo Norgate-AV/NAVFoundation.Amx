@@ -94,6 +94,8 @@ constant integer REGEX_TYPE_RETURN                 = 26
 constant integer REGEX_TYPE_TAB                    = 27
 constant integer REGEX_TYPE_GROUP_START            = 28
 constant integer REGEX_TYPE_GROUP_END              = 29
+constant integer REGEX_TYPE_NON_CAPTURE_GROUP_START = 30
+constant integer REGEX_TYPE_NON_CAPTURE_GROUP_END   = 31
 
 constant integer NAV_REGEX_TYPE_WILDCARD        = REGEX_TYPE_DOT
 constant integer NAV_REGEX_TYPE_CHARACTER       = REGEX_TYPE_CHAR
@@ -137,7 +139,9 @@ constant char REGEX_TYPES[][NAV_MAX_CHARS]  =   {
                                                     'RETURN',
                                                     'TAB',
                                                     'GROUP_START',
-                                                    'GROUP_END'
+                                                    'GROUP_END',
+                                                    'NON_CAPTURE_GROUP_START',
+                                                    'NON_CAPTURE_GROUP_END'
                                                 }
 
 // constant integer NAV_REGEX_QUANTIFIER_EXACTLY_ONE  = 1  // '1'
@@ -175,6 +179,16 @@ constant char REGEX_CHAR_TAB            = 116   // 't'
 
 
 DEFINE_TYPE
+
+struct _NAVRegexGroupInfo {
+    integer number          // Group number (1, 2, 3...) - only for capturing groups
+    char name[50]          // Group name (empty for unnamed/non-capturing groups)
+    char isNamed           // Boolean: is this a named group?
+    char isCapturing       // Boolean: true for (), false for (?:)
+    integer startToken     // Token index where group starts (GROUP_START)
+    integer endToken       // Token index where group ends (GROUP_END)
+}
+
 
 struct _NAVRegexCharClass {
     char value[MAX_CHAR_CLASS_LENGTH]
@@ -271,9 +285,11 @@ struct _NAVRegexParser {
     _NAVRegexInput input
 
     // Track capturing groups
-    integer groupCount
+    integer groupCount          // Total number of capturing groups
+    integer groupTotal          // Total number of all groups (including non-capturing)
     integer groupStack[NAV_REGEX_MAX_GROUPS]  // Stack of open group numbers for validation
-    integer groupDepth                         // Current nesting depth
+    integer groupDepth          // Current nesting depth
+    _NAVRegexGroupInfo groupInfo[NAV_REGEX_MAX_GROUPS]  // Metadata for each group
 
     // Should the options live here or on the pattern?
     _NAVRegexOptions options
