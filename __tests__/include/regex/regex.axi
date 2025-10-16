@@ -1,5 +1,5 @@
-#DEFINE TESTING_REGEX_COMPILE
-#DEFINE TESTING_REGEX_MATCH
+// #DEFINE TESTING_REGEX_COMPILE
+// #DEFINE TESTING_REGEX_MATCH
 #DEFINE TESTING_REGEX_MATCH_GROUPS
 // #DEFINE TESTING_REGEX_MATCH_COMPILED
 #include 'NAVFoundation.Core.axi'
@@ -22,6 +22,7 @@
 #include 'NAVRegexMatchCapturingGroups.axi'
 #include 'NAVRegexMatchNamedGroups.axi'
 #include 'NAVRegexMatchNonCapturingGroups.axi'
+#include 'NAVRegexMatchBoundedQuantifierGroups.axi'
 #END_IF
 
 #IF_DEFINED TESTING_REGEX_MATCH
@@ -56,6 +57,7 @@ define_function RunRegexTests() {
     TestNAVRegexMatchCapturingGroups()
     TestNAVRegexMatchNamedGroups()
     TestNAVRegexMatchNonCapturingGroups()
+    TestNAVRegexMatchBoundedQuantifierGroups()
     #END_IF
 
     #IF_DEFINED TESTING_REGEX_MATCH
