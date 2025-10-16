@@ -974,7 +974,10 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
             case ')': {
                 // End of group (capturing or non-capturing)
                 stack_var integer groupIndex
+                stack_var integer groupStartToken
                 stack_var char isCapturing
+                stack_var char nextChar
+                stack_var char hasQuantifier
 
                 // First check if we have a matching opening parenthesis
                 if (parser.groupDepth <= 0) {
@@ -988,9 +991,54 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                 // Get the group index from the stack
                 groupIndex = parser.groupStack[parser.groupDepth]
                 isCapturing = parser.groupInfo[groupIndex].isCapturing
+                groupStartToken = parser.groupInfo[groupIndex].startToken
 
                 // Update group info with end token
                 parser.groupInfo[groupIndex].endToken = parser.count + 1
+
+                // Look ahead for quantifier after the closing parenthesis
+                hasQuantifier = false
+                if (parser.pattern.cursor < parser.pattern.length) {
+                    nextChar = NAVCharCodeAt(parser.pattern.value, (parser.pattern.cursor + 1))
+
+                    // Check if next character is a quantifier
+                    switch (nextChar) {
+                        case '?': {
+                            // Optional group: (abc)?
+                            parser.state[groupStartToken].groupQuantifierType = REGEX_TYPE_QUESTIONMARK
+                            parser.state[groupStartToken].groupQuantifierMin = 0
+                            parser.state[groupStartToken].groupQuantifierMax = 1
+                            hasQuantifier = true
+                        }
+                        case '*': {
+                            // Zero or more: (abc)*
+                            parser.state[groupStartToken].groupQuantifierType = REGEX_TYPE_STAR
+                            parser.state[groupStartToken].groupQuantifierMin = 0
+                            parser.state[groupStartToken].groupQuantifierMax = -1
+                            hasQuantifier = true
+                        }
+                        case '+': {
+                            // One or more: (abc)+
+                            parser.state[groupStartToken].groupQuantifierType = REGEX_TYPE_PLUS
+                            parser.state[groupStartToken].groupQuantifierMin = 1
+                            parser.state[groupStartToken].groupQuantifierMax = -1
+                            hasQuantifier = true
+                        }
+                        case '{': {
+                            // Bounded quantifier: (abc){n,m}
+                            // Mark as QUANTIFIER, actual min/max will be set in Phase 3
+                            parser.state[groupStartToken].groupQuantifierType = REGEX_TYPE_QUANTIFIER
+                            hasQuantifier = true
+                        }
+                    }
+                }
+
+                // If no quantifier, set defaults (group matches exactly once)
+                if (!hasQuantifier) {
+                    parser.state[groupStartToken].groupQuantifierType = REGEX_TYPE_UNUSED
+                    parser.state[groupStartToken].groupQuantifierMin = 1
+                    parser.state[groupStartToken].groupQuantifierMax = 1
+                }
 
                 // Add token
                 parser.count++
@@ -1004,14 +1052,14 @@ define_function char NAVRegexCompile(char pattern[], _NAVRegexParser parser) {
                 #IF_DEFINED REGEX_COMPILE_DEBUG
                 if (isCapturing) {
                     if (parser.groupInfo[groupIndex].isNamed) {
-                        NAVLog("'[ Compile ]: GROUP_END - Named group #', itoa(parser.groupInfo[groupIndex].number), ' (', parser.groupInfo[groupIndex].name, ') at depth ', itoa(parser.groupDepth)")
+                        NAVLog("'[ Compile ]: GROUP_END - Named group #', itoa(parser.groupInfo[groupIndex].number), ' (', parser.groupInfo[groupIndex].name, ') at depth ', itoa(parser.groupDepth), ' quantifier=', itoa(parser.state[groupStartToken].groupQuantifierType), ' min=', itoa(parser.state[groupStartToken].groupQuantifierMin), ' max=', itoa(parser.state[groupStartToken].groupQuantifierMax)")
                     }
                     else {
-                        NAVLog("'[ Compile ]: GROUP_END - Group #', itoa(parser.groupInfo[groupIndex].number), ' at depth ', itoa(parser.groupDepth)")
+                        NAVLog("'[ Compile ]: GROUP_END - Group #', itoa(parser.groupInfo[groupIndex].number), ' at depth ', itoa(parser.groupDepth), ' quantifier=', itoa(parser.state[groupStartToken].groupQuantifierType), ' min=', itoa(parser.state[groupStartToken].groupQuantifierMin), ' max=', itoa(parser.state[groupStartToken].groupQuantifierMax)")
                     }
                 }
                 else {
-                    NAVLog("'[ Compile ]: NON_CAPTURE_GROUP_END at depth ', itoa(parser.groupDepth)")
+                    NAVLog("'[ Compile ]: NON_CAPTURE_GROUP_END at depth ', itoa(parser.groupDepth), ' quantifier=', itoa(parser.state[groupStartToken].groupQuantifierType), ' min=', itoa(parser.state[groupStartToken].groupQuantifierMin), ' max=', itoa(parser.state[groupStartToken].groupQuantifierMax)")
                 }
                 #END_IF
 
