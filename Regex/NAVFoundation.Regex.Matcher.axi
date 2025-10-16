@@ -784,6 +784,7 @@ define_function char NAVRegexMatchQuantifiedGroup(_NAVRegexParser parser, _NAVRe
     stack_var integer totalConsumed
     stack_var char matchFailed
     stack_var integer firstMatchStart
+    stack_var integer firstMatchEnd
     stack_var integer lastMatchStart
     stack_var integer lastMatchEnd
 
@@ -866,6 +867,7 @@ define_function char NAVRegexMatchQuantifiedGroup(_NAVRegexParser parser, _NAVRe
         matchCount = 1
         lastMatchStart = firstMatchStart
         lastMatchEnd = parser.input.cursor
+        firstMatchEnd = parser.input.cursor  // Save the end of the first match
 
         NAVRegexDebug(parser,
                         'MatchQuantifiedGroup',
@@ -955,9 +957,22 @@ define_function char NAVRegexMatchQuantifiedGroup(_NAVRegexParser parser, _NAVRe
                         "'Captured group text: "', match.matches[matchIdx].text, '"'")
     }
 
-    // Update the overall match length with total characters consumed
+    // Update the overall match length with ADDITIONAL characters consumed
+    // The first group match is already included in preMatchLength
+    // We only need to add the characters consumed by additional matches
     totalConsumed = parser.input.cursor - firstMatchStart
-    NAVRegexMatchIncreaseLength(parser, 'MatchQuantifiedGroup', match, totalConsumed)
+    if (firstMatchEnd > 0) {
+        // Add only the additional characters beyond the first match
+        stack_var integer firstMatchLength
+        stack_var integer additionalConsumed
+        firstMatchLength = firstMatchEnd - firstMatchStart
+        additionalConsumed = totalConsumed - firstMatchLength
+        NAVRegexMatchIncreaseLength(parser, 'MatchQuantifiedGroup', match, additionalConsumed)
+    }
+    else {
+        // No first match (matchCount was 0), so totalConsumed is 0
+        // Don't modify length
+    }
 
     // Advance pattern cursor past GROUP_END and quantifier
     NAVRegexSetPatternCursor(parser, 'MatchQuantifiedGroup', savedPatternCursor + 2)
