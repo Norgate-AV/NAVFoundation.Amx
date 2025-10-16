@@ -211,8 +211,15 @@ struct _NAVRegexState {
     sinteger quantifierMin
     sinteger quantifierMax  // -1 means unlimited (for {n,})
 
+    // For GROUP_START tokens - quantifier that follows GROUP_END
+    // This allows matcher to know if a group is optional without lookbehind
+    char groupQuantifierType        // QUESTIONMARK, STAR, PLUS, QUANTIFIER, or UNUSED
+    sinteger groupQuantifierMin     // Minimum repetitions (0 for ? and *, 1 for +, n for {n,m})
+    sinteger groupQuantifierMax     // Maximum repetitions (1 for ?, -1 for unlimited, m for {n,m})
+
     // integer next[255]
 }
+
 struct _NAVRegexGroups {
     integer count
     integer current
