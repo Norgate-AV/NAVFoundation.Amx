@@ -20,8 +20,8 @@ constant char MATCH_NON_CAPTURING_GROUPS_TEST[][][255] = {
     { '/(a)(?:b)(c)/', 'abc', '3', 'abc', 'a', 'c', '', '', 'false' },
     { '/(?:\d+)\.(\d+)/', '123.456', '2', '123.456', '456', '', '', '', 'false' },
     { '/(?:ab)*c/', 'ababc', '1', 'ababc', '', '', '', '', 'false' },
-    { '/a(?:bc)?d/', 'ad', '1', 'ad', '', '', '', '', 'true' },
-    { '/(?P<user>\w+)@(?:\w+\.)?([\w]+)/', 'john@mail.example', '3', 'john@mail.example', 'john', 'example', '', '', 'true' }
+    { '/a(?:bc)?d/', 'ad', '1', 'ad', '', '', '', '', 'false' },
+    { '/(?P<user>\w+)@(?:\w+\.)?([\w]+)/', 'john@mail.example', '3', 'john@mail.example', 'john', 'example', '', '', 'false' }
 }
 
 
