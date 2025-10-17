@@ -1007,8 +1007,7 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
 
         // Handle group start/end tokens BEFORE quantifier checks
         // Groups are zero-width markers and must be processed first
-        if (parser.state[parser.pattern.cursor].type == REGEX_TYPE_GROUP_START ||
-            parser.state[parser.pattern.cursor].type == REGEX_TYPE_NON_CAPTURE_GROUP_START) {
+        if (NAVRegexIsGroupStart(parser.state[parser.pattern.cursor].type)) {
             stack_var integer groupIdx
             stack_var integer groupEndToken
             stack_var integer i
@@ -1045,10 +1044,7 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
                 quantifierType = parser.state[groupEndToken + 1].type
 
                 // Check if the token after GROUP_END is a quantifier
-                if (quantifierType == REGEX_TYPE_QUESTIONMARK ||
-                    quantifierType == REGEX_TYPE_STAR ||
-                    quantifierType == REGEX_TYPE_PLUS ||
-                    quantifierType == REGEX_TYPE_QUANTIFIER) {
+                if (NAVRegexIsQuantifier(quantifierType)) {
                     isQuantified = true
                 }
             }
@@ -1076,17 +1072,13 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
             continue
         }
 
-        if (parser.state[parser.pattern.cursor].type == REGEX_TYPE_GROUP_END ||
-            parser.state[parser.pattern.cursor].type == REGEX_TYPE_NON_CAPTURE_GROUP_END) {
+        if (NAVRegexIsGroupEnd(parser.state[parser.pattern.cursor].type)) {
             NAVRegexDebug(parser,
                             'MatchPattern',
                             "'Group end token at pattern[', itoa(parser.pattern.cursor), ']'")
 
             // Check if next token is a quantifier
-            if (parser.state[parser.pattern.cursor + 1].type == REGEX_TYPE_QUESTIONMARK ||
-                parser.state[parser.pattern.cursor + 1].type == REGEX_TYPE_STAR ||
-                parser.state[parser.pattern.cursor + 1].type == REGEX_TYPE_PLUS ||
-                parser.state[parser.pattern.cursor + 1].type == REGEX_TYPE_QUANTIFIER) {
+            if (NAVRegexNextTokenIsQuantifier(parser)) {
                 // Quantified group - DON'T extract group text yet
                 // Let NAVRegexMatchQuantifiedGroup handle text extraction
                 NAVRegexDebug(parser,
@@ -1161,7 +1153,7 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
             nextType = parser.state[parser.pattern.cursor].type
 
             // Only continue if next token is a zero-width assertion
-            if (nextType != REGEX_TYPE_WORD_BOUNDARY && nextType != REGEX_TYPE_NOT_WORD_BOUNDARY) {
+            if (!NAVRegexIsZeroWidthAssertion(nextType)) {
                 break
             }
         }
@@ -1177,8 +1169,7 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
             currentType = parser.state[parser.pattern.cursor].type
 
             // Check if this is a zero-width assertion (doesn't consume characters)
-            if (currentType == REGEX_TYPE_WORD_BOUNDARY ||
-                currentType == REGEX_TYPE_NOT_WORD_BOUNDARY) {
+            if (NAVRegexIsZeroWidthAssertion(currentType)) {
                 NAVRegexDebug(parser,
                                 'MatchPattern',
                                 'Matched zero-width assertion (word boundary)')
@@ -1351,11 +1342,11 @@ define_function char NAVRegexMatchCompiled(_NAVRegexParser parser, char subject[
 
 
 define_function integer NAVRegexPeekTokenType(_NAVRegexParser parser, integer offset) {
-    if (parser.pattern.cursor + offset >= parser.pattern.length) {
+    if (parser.pattern.cursor + offset > parser.count) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_REGEX_MATCHER__,
                                     'NAVRegexPeekTokenType',
-                                    "'Pattern cursor + offset out of bounds: ', itoa(parser.pattern.cursor + offset))
+                                    "'Pattern cursor + offset out of bounds: ', itoa(parser.pattern.cursor + offset)")
         return 0
     }
 
@@ -1365,6 +1356,52 @@ define_function integer NAVRegexPeekTokenType(_NAVRegexParser parser, integer of
 
 define_function integer NAVRegexPeekNextTokenType(_NAVRegexParser parser) {
     return NAVRegexPeekTokenType(parser, 1)
+}
+
+
+/**
+ * Check if a token type is a quantifier (?, *, +, or {n,m})
+ */
+define_function char NAVRegexIsQuantifier(integer tokenType) {
+    return (tokenType == REGEX_TYPE_QUESTIONMARK ||
+            tokenType == REGEX_TYPE_STAR ||
+            tokenType == REGEX_TYPE_PLUS ||
+            tokenType == REGEX_TYPE_QUANTIFIER)
+}
+
+
+/**
+ * Check if the next token in the pattern is a quantifier
+ */
+define_function char NAVRegexNextTokenIsQuantifier(_NAVRegexParser parser) {
+    return NAVRegexIsQuantifier(NAVRegexPeekNextTokenType(parser))
+}
+
+
+/**
+ * Check if a token type is a group start marker
+ */
+define_function char NAVRegexIsGroupStart(integer tokenType) {
+    return (tokenType == REGEX_TYPE_GROUP_START ||
+            tokenType == REGEX_TYPE_NON_CAPTURE_GROUP_START)
+}
+
+
+/**
+ * Check if a token type is a group end marker
+ */
+define_function char NAVRegexIsGroupEnd(integer tokenType) {
+    return (tokenType == REGEX_TYPE_GROUP_END ||
+            tokenType == REGEX_TYPE_NON_CAPTURE_GROUP_END)
+}
+
+
+/**
+ * Check if a token type is a zero-width assertion
+ */
+define_function char NAVRegexIsZeroWidthAssertion(integer tokenType) {
+    return (tokenType == REGEX_TYPE_WORD_BOUNDARY ||
+            tokenType == REGEX_TYPE_NOT_WORD_BOUNDARY)
 }
 
 
