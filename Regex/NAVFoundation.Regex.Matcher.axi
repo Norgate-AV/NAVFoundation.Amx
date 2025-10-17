@@ -271,7 +271,7 @@ define_function char NAVRegexMatchOne(_NAVRegexParser parser) {
         case REGEX_TYPE_NOT_WORD_BOUNDARY:      { return !NAVRegexMatchWordBoundary(parser) }
     }
 
-    if (parser.input.cursor > parser.input.length) {
+    if (NAVRegexAtEndOfInput(parser)) {
         NAVRegexDebug(parser,
                         'MatchOne',
                         'Input cursor is greater than input length')
@@ -334,7 +334,7 @@ define_function char NAVRegexMatchStar(_NAVRegexParser parser, _NAVRegexMatchRes
     // Temporarily point to the token we're matching for matchone
     NAVRegexSetPatternCursor(parser, 'MatchStar', saved_pattern_cursor - 2)
 
-    while (parser.input.cursor <= parser.input.length && NAVRegexMatchOne(parser)) {
+    while (NAVRegexCanContinueMatching(parser) && NAVRegexMatchOne(parser)) {
         NAVRegexDebug(parser,
                         'MatchStar',
                         "'Yes. Matched 1 character => "',
@@ -404,7 +404,7 @@ define_function char NAVRegexMatchPlus(_NAVRegexParser parser, _NAVRegexMatchRes
     // Temporarily point to the token we're matching for matchone
     NAVRegexSetPatternCursor(parser, 'MatchPlus', saved_pattern_cursor - 2)
 
-    while (parser.input.cursor <= parser.input.length && NAVRegexMatchOne(parser)) {
+    while (NAVRegexCanContinueMatching(parser) && NAVRegexMatchOne(parser)) {
         NAVRegexDebug(parser,
                         'MatchPlus',
                         "'Yes. Matched 1 character => "',
@@ -474,7 +474,7 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
     // Temporarily set pattern cursor to the token to match
     NAVRegexSetPatternCursor(parser, 'MatchQuestion', saved_pattern_cursor - 2)
 
-    if (parser.input.cursor <= parser.input.length && NAVRegexMatchOne(parser)) {
+    if (NAVRegexCanContinueMatching(parser) && NAVRegexMatchOne(parser)) {
         NAVRegexDebug(parser,
                         'MatchQuestion',
                         "'Matched one character => "',
@@ -487,7 +487,7 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
         NAVRegexSetPatternCursor(parser, 'MatchQuestion', saved_pattern_cursor)
 
         // Check if rest of pattern is UNUSED (end of pattern) - if so, we're done
-        if (parser.state[parser.pattern.cursor].type == REGEX_TYPE_UNUSED) {
+        if (NAVRegexAtEndOfPattern(parser)) {
             // Increase match length by 1 for the character we just matched
             NAVRegexMatchIncreaseLength(parser, 'MatchQuestion', match, 1)
 
@@ -521,7 +521,7 @@ define_function char NAVRegexMatchQuestion(_NAVRegexParser parser, _NAVRegexMatc
     NAVRegexSetPatternCursor(parser, 'MatchQuestion', saved_pattern_cursor)
 
     // Check if rest of pattern is UNUSED (end of pattern reached with zero matches)
-    if (parser.state[parser.pattern.cursor].type == REGEX_TYPE_UNUSED) {
+    if (NAVRegexAtEndOfPattern(parser)) {
         NAVRegexDebug(parser,
                         'MatchQuestion',
                         'Matched zero instances - end of pattern reached')
@@ -578,7 +578,7 @@ define_function char NAVRegexMatchBoundedQuantifier(_NAVRegexParser parser, _NAV
     NAVRegexSetPatternCursor(parser, 'MatchBoundedQuantifier', saved_pattern_cursor - 2)
 
     count = 0
-    while (parser.input.cursor <= parser.input.length &&
+    while (NAVRegexCanContinueMatching(parser) &&
            (maxCount == -1 || count < type_cast(maxCount)) &&
            NAVRegexMatchOne(parser)) {
         NAVRegexDebug(parser,
@@ -877,7 +877,7 @@ define_function char NAVRegexMatchQuantifiedGroup(_NAVRegexParser parser, _NAVRe
     // Try to match ADDITIONAL repetitions of the group content
     matchFailed = false
 
-    while (!matchFailed && matchCount < maxMatches && parser.input.cursor <= parser.input.length) {
+    while (!matchFailed && matchCount < maxMatches && NAVRegexCanContinueMatching(parser)) {
         stack_var integer groupMatchStart
         stack_var integer groupMatchEnd
         stack_var integer j
@@ -889,7 +889,7 @@ define_function char NAVRegexMatchQuantifiedGroup(_NAVRegexParser parser, _NAVRe
 
         // Match until we hit the GROUP_END token
         for (j = groupStartToken + 1; j < groupEndToken; j++) {
-            if (parser.input.cursor > parser.input.length) {
+            if (NAVRegexAtEndOfInput(parser)) {
                 // Ran out of input before completing group match
                 NAVRegexSetInputCursor(parser, 'MatchQuantifiedGroup', groupMatchStart)
                 matchFailed = true
@@ -997,7 +997,7 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
     // Main matching loop - equivalent to do-while in C
     while (true) {
         // Check if pattern[0].type == UNUSED (end of pattern)
-        if (parser.state[parser.pattern.cursor].type == REGEX_TYPE_UNUSED) {
+        if (NAVRegexAtEndOfPattern(parser)) {
             NAVRegexDebug(parser,
                             'MatchPattern',
                             'Pattern UNUSED - match successful')
@@ -1094,7 +1094,7 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
                 NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
 
                 // Check if we've reached end of pattern
-                if (parser.state[parser.pattern.cursor].type == REGEX_TYPE_UNUSED) {
+                if (NAVRegexAtEndOfPattern(parser)) {
                     return true
                 }
 
@@ -1140,7 +1140,7 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
                             'END anchor - checking if at end of text')
 
             // In C: return (text[0] == '\0')
-            return (parser.input.cursor > parser.input.length)
+            return NAVRegexAtEndOfInput(parser)
         }
 
         // Default case: try to match one character
@@ -1148,9 +1148,9 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
 
         // Check if we've reached end of text
         // BUT: Allow zero-width assertions (word boundaries) to be checked even at end of input
-        if (parser.input.cursor > parser.input.length) {
+        if (NAVRegexAtEndOfInput(parser)) {
             stack_var integer nextType
-            nextType = parser.state[parser.pattern.cursor].type
+            nextType = NAVRegexGetCurrentTokenType(parser)
 
             // Only continue if next token is a zero-width assertion
             if (!NAVRegexIsZeroWidthAssertion(nextType)) {
@@ -1402,6 +1402,38 @@ define_function char NAVRegexIsGroupEnd(integer tokenType) {
 define_function char NAVRegexIsZeroWidthAssertion(integer tokenType) {
     return (tokenType == REGEX_TYPE_WORD_BOUNDARY ||
             tokenType == REGEX_TYPE_NOT_WORD_BOUNDARY)
+}
+
+
+/**
+ * Get the type of the current token in the pattern
+ */
+define_function integer NAVRegexGetCurrentTokenType(_NAVRegexParser parser) {
+    return parser.state[parser.pattern.cursor].type
+}
+
+
+/**
+ * Check if we've reached the end of the pattern (UNUSED token)
+ */
+define_function char NAVRegexAtEndOfPattern(_NAVRegexParser parser) {
+    return (NAVRegexGetCurrentTokenType(parser) == REGEX_TYPE_UNUSED)
+}
+
+
+/**
+ * Check if we've reached the end of the input text
+ */
+define_function char NAVRegexAtEndOfInput(_NAVRegexParser parser) {
+    return (parser.input.cursor > parser.input.length)
+}
+
+
+/**
+ * Check if we can continue matching (input not exhausted)
+ */
+define_function char NAVRegexCanContinueMatching(_NAVRegexParser parser) {
+    return (parser.input.cursor <= parser.input.length)
 }
 
 
