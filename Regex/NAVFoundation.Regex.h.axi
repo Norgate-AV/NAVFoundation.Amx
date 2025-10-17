@@ -298,6 +298,11 @@ struct _NAVRegexParser {
     integer groupDepth          // Current nesting depth
     _NAVRegexGroupInfo groupInfo[NAV_REGEX_MAX_GROUPS]  // Metadata for each group
 
+    // Track the last GROUP_START we entered (for optional group skip logic)
+    integer lastGroupStartToken // Pattern cursor position of last GROUP_START
+    sinteger lastGroupMin       // groupQuantifierMin of last GROUP_START
+    integer lastGroupEndToken   // GROUP_END token position for last GROUP_START
+
     // Should the options live here or on the pattern?
     _NAVRegexOptions options
 

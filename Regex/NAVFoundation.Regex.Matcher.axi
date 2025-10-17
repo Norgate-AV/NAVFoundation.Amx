@@ -1065,6 +1065,12 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
                 match.matches[255].start = parser.input.cursor
             }
 
+            // Phase 5: Store GROUP_START info for optional group skip logic (NO LOOKBEHIND!)
+            // When next token fails to match, we can check if we just entered an optional group
+            parser.lastGroupStartToken = parser.pattern.cursor
+            parser.lastGroupMin = groupQuantifierMin
+            parser.lastGroupEndToken = groupEndToken
+
             // Advance pattern cursor only (groups don't consume characters)
             NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
             continue
@@ -1197,48 +1203,25 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
 
         // Match failed - check if we just entered an optional quantified group
         // If so, skip the group instead of failing the whole pattern
+        // Phase 5: NO LOOKBEHIND - use stored GROUP_START info from when we entered the group
         {
-            stack_var integer prevToken
-            stack_var integer i
-            stack_var integer groupIdx
-            stack_var char isOptionalGroup
-            stack_var integer groupEndToken
-            stack_var integer quantifierType
+            // Check if we just entered a group (pattern cursor immediately after last GROUP_START)
+            if (parser.lastGroupStartToken > 0 &&
+                parser.pattern.cursor == parser.lastGroupStartToken + 1) {
 
-            if (parser.pattern.cursor > 1) {
-                prevToken = parser.pattern.cursor - 1
+                // Check if that group is optional (min = 0)
+                if (parser.lastGroupMin == 0) {
+                    // This group is optional (?, *, or {0,n})
+                    // Skip past GROUP_END and quantifier
+                    NAVRegexDebug(parser,
+                                    'MatchPattern',
+                                    "'First token in optional group failed - skipping group'")
 
-                // Check if previous token was a GROUP_START
-                if (parser.state[prevToken].type == REGEX_TYPE_GROUP_START ||
-                    parser.state[prevToken].type == REGEX_TYPE_NON_CAPTURE_GROUP_START) {
+                    NAVRegexSetPatternCursor(parser, 'MatchPattern', parser.lastGroupEndToken + 2)
 
-                    // Find which group this is
-                    for (i = 1; i <= parser.groupTotal; i++) {
-                        if (parser.groupInfo[i].startToken == prevToken) {
-                            groupIdx = i
-
-                            // Check if this group has an optional quantifier (? or *)
-                            groupEndToken = parser.groupInfo[i].endToken
-                            quantifierType = parser.state[groupEndToken + 1].type
-
-                            if (quantifierType == REGEX_TYPE_QUESTIONMARK ||
-                                quantifierType == REGEX_TYPE_STAR) {
-                                isOptionalGroup = true
-                            }
-
-                            break
-                        }
-                    }
-
-                    if (isOptionalGroup) {
-                        // Skip past GROUP_END and quantifier
-                        NAVRegexDebug(parser,
-                                        'MatchPattern',
-                                        "'First token in optional group failed - skipping group'")
-
-                        NAVRegexSetPatternCursor(parser, 'MatchPattern', groupEndToken + 2)
-                        continue
-                    }
+                    // Clear the stored GROUP_START info
+                    parser.lastGroupStartToken = 0
+                    continue
                 }
             }
         }
