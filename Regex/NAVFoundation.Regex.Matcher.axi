@@ -996,65 +996,7 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
         // Handle group start/end tokens BEFORE quantifier checks
         // Groups are zero-width markers and must be processed first
         if (NAVRegexIsGroupStart(parser.state[parser.pattern.cursor].type)) {
-            stack_var integer groupIdx
-            stack_var integer groupEndToken
-            stack_var integer i
-            stack_var char isQuantified
-            stack_var integer quantifierType
-            stack_var char groupQuantifierType
-            stack_var sinteger groupQuantifierMin
-            stack_var sinteger groupQuantifierMax
-
-            NAVRegexDebug(parser,
-                            'MatchPattern',
-                            "'Group start token at pattern[', itoa(parser.pattern.cursor), ']'")
-
-            // Read quantifier info directly from GROUP_START token (Phase 4)
-            // This info was pre-computed by the compiler in Phases 2 & 3
-            groupQuantifierType = parser.state[parser.pattern.cursor].groupQuantifierType
-            groupQuantifierMin = parser.state[parser.pattern.cursor].groupQuantifierMin
-            groupQuantifierMax = parser.state[parser.pattern.cursor].groupQuantifierMax
-
-            #IF_DEFINED REGEX_MATCH_DEBUG
-            NAVLog("'[ Match ]: GROUP_START quantifier info: type=', itoa(groupQuantifierType), ' min=', itoa(groupQuantifierMin), ' max=', itoa(groupQuantifierMax)")
-            #END_IF
-
-            // Find which group this is and check if it's quantified
-            groupIdx = NAVRegexFindGroupByStartToken(parser, parser.pattern.cursor)
-
-            if (groupIdx > 0) {
-                groupEndToken = parser.groupInfo[groupIdx].endToken
-            }
-
-            if (groupIdx > 0) {
-                quantifierType = parser.state[groupEndToken + 1].type
-
-                // Check if the token after GROUP_END is a quantifier
-                if (NAVRegexIsQuantifier(quantifierType)) {
-                    isQuantified = true
-                }
-            }
-
-            // For all groups (optional or not), just record the start and continue
-            // The quantified group handler will deal with optional groups properly
-
-            // Record group start
-            NAVRegexMatchGroupStart(parser, match)
-
-            // For non-capturing groups, store the start position in match.matches[255] temporarily
-            // so NAVRegexMatchQuantifiedGroup can access it later
-            if (groupIdx > 0 && !parser.groupInfo[groupIdx].isCapturing) {
-                match.matches[255].start = parser.input.cursor
-            }
-
-            // Phase 5: Store GROUP_START info for optional group skip logic (NO LOOKBEHIND!)
-            // When next token fails to match, we can check if we just entered an optional group
-            parser.lastGroupStartToken = parser.pattern.cursor
-            parser.lastGroupMin = groupQuantifierMin
-            parser.lastGroupEndToken = groupEndToken
-
-            // Advance pattern cursor only (groups don't consume characters)
-            NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
+            NAVRegexMatchPatternHandleGroupStart(parser, match)
             continue
         }
 
@@ -1064,20 +1006,16 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
                             "'Group end token at pattern[', itoa(parser.pattern.cursor), ']'")
 
             // Check if next token is a quantifier
-            if (NAVRegexNextTokenIsQuantifier(parser)) {
-                // Quantified group - DON'T extract group text yet
-                // Let NAVRegexMatchQuantifiedGroup handle text extraction
+            if (NAVRegexMatchPatternIsQuantifiedGroup(parser)) {
+                // Quantified group - let handler deal with it and return result
                 NAVRegexDebug(parser,
                                 'MatchPattern',
                                 "'Group end followed by quantifier - calling NAVRegexMatchQuantifiedGroup'")
                 return NAVRegexMatchQuantifiedGroup(parser, match)
             }
             else {
-                // Normal non-quantified group - extract text now
-                NAVRegexMatchGroupEnd(parser, match)
-
-                // Advance and continue
-                NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
+                // Normal non-quantified group - extract text and continue
+                NAVRegexMatchPatternHandleNormalGroupEnd(parser, match)
 
                 // Check if we've reached end of pattern
                 if (NAVRegexAtEndOfPattern(parser)) {
@@ -1088,36 +1026,9 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
             }
         }
 
-        // Check if pattern[1].type == QUESTIONMARK
-        // Call matchquestion with p=pattern[0], pattern=&pattern[2]
-        if (parser.state[parser.pattern.cursor + 1].type == REGEX_TYPE_QUESTIONMARK) {
-            // Advance pattern cursor by 2 to point to &pattern[2] before calling
-            NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 2)
-            return NAVRegexMatchQuestion(parser, match)
-        }
-
-        // Check if pattern[1].type == STAR
-        // Call matchstar with p=pattern[0], pattern=&pattern[2]
-        if (parser.state[parser.pattern.cursor + 1].type == REGEX_TYPE_STAR) {
-            // Advance pattern cursor by 2 to point to &pattern[2] before calling
-            NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 2)
-            return NAVRegexMatchStar(parser, match)
-        }
-
-        // Check if pattern[1].type == PLUS
-        // Call matchplus with p=pattern[0], pattern=&pattern[2]
-        if (parser.state[parser.pattern.cursor + 1].type == REGEX_TYPE_PLUS) {
-            // Advance pattern cursor by 2 to point to &pattern[2] before calling
-            NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 2)
-            return NAVRegexMatchPlus(parser, match)
-        }
-
-        // Check if pattern[1].type == QUANTIFIER (bounded quantifiers {n}, {n,}, {n,m})
-        // Call matchboundedquantifier with p=pattern[0], pattern=&pattern[2]
-        if (parser.state[parser.pattern.cursor + 1].type == REGEX_TYPE_QUANTIFIER) {
-            // Advance pattern cursor by 2 to point to &pattern[2] before calling
-            NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 2)
-            return NAVRegexMatchBoundedQuantifier(parser, match)
+        // Check for quantifiers (?, *, +, {n,m}) and dispatch to appropriate handler
+        if (NAVRegexMatchPatternHasQuantifier(parser)) {
+            return NAVRegexMatchPatternDispatchQuantifier(parser, match)
         }
 
         // Check if pattern[0].type == END and pattern[1].type == UNUSED
@@ -1180,29 +1091,10 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
             continue
         }
 
-        // Match failed - check if we just entered an optional quantified group
-        // If so, skip the group instead of failing the whole pattern
+        // Match failed - check if we can skip an optional group
         // Phase 5: NO LOOKBEHIND - use stored GROUP_START info from when we entered the group
-        {
-            // Check if we just entered a group (pattern cursor immediately after last GROUP_START)
-            if (parser.lastGroupStartToken > 0 &&
-                parser.pattern.cursor == parser.lastGroupStartToken + 1) {
-
-                // Check if that group is optional (min = 0)
-                if (parser.lastGroupMin == 0) {
-                    // This group is optional (?, *, or {0,n})
-                    // Skip past GROUP_END and quantifier
-                    NAVRegexDebug(parser,
-                                    'MatchPattern',
-                                    "'First token in optional group failed - skipping group'")
-
-                    NAVRegexSetPatternCursor(parser, 'MatchPattern', parser.lastGroupEndToken + 2)
-
-                    // Clear the stored GROUP_START info
-                    parser.lastGroupStartToken = 0
-                    continue
-                }
-            }
+        if (NAVRegexMatchPatternTrySkipOptionalGroup(parser)) {
+            continue
         }
 
         // Match failed
@@ -1422,6 +1314,199 @@ define_function char NAVRegexAtEndOfInput(_NAVRegexParser parser) {
  */
 define_function char NAVRegexCanContinueMatching(_NAVRegexParser parser) {
     return (parser.input.cursor <= parser.input.length)
+}
+
+
+(***********************************************************)
+(*          PATTERN MATCHING LOGIC HELPERS                  *)
+(***********************************************************)
+
+/**
+ * Handle group start token during pattern matching
+ * Records group information and advances pattern cursor
+ *
+ * @param parser - The regex parser structure
+ * @param match - The match result structure
+ */
+define_function NAVRegexMatchPatternHandleGroupStart(_NAVRegexParser parser, _NAVRegexMatchResult match) {
+    stack_var integer groupIdx
+    stack_var integer groupEndToken
+    stack_var char isQuantified
+    stack_var integer quantifierType
+    stack_var char groupQuantifierType
+    stack_var sinteger groupQuantifierMin
+    stack_var sinteger groupQuantifierMax
+
+    NAVRegexDebug(parser,
+                    'MatchPattern',
+                    "'Group start token at pattern[', itoa(parser.pattern.cursor), ']'")
+
+    // Read quantifier info directly from GROUP_START token (Phase 4)
+    // This info was pre-computed by the compiler in Phases 2 & 3
+    groupQuantifierType = parser.state[parser.pattern.cursor].groupQuantifierType
+    groupQuantifierMin = parser.state[parser.pattern.cursor].groupQuantifierMin
+    groupQuantifierMax = parser.state[parser.pattern.cursor].groupQuantifierMax
+
+    #IF_DEFINED REGEX_MATCH_DEBUG
+    NAVLog("'[ Match ]: GROUP_START quantifier info: type=', itoa(groupQuantifierType), ' min=', itoa(groupQuantifierMin), ' max=', itoa(groupQuantifierMax)")
+    #END_IF
+
+    // Find which group this is and check if it's quantified
+    groupIdx = NAVRegexFindGroupByStartToken(parser, parser.pattern.cursor)
+
+    if (groupIdx > 0) {
+        groupEndToken = parser.groupInfo[groupIdx].endToken
+    }
+
+    if (groupIdx > 0) {
+        quantifierType = parser.state[groupEndToken + 1].type
+
+        // Check if the token after GROUP_END is a quantifier
+        if (NAVRegexIsQuantifier(quantifierType)) {
+            isQuantified = true
+        }
+    }
+
+    // For all groups (optional or not), just record the start and continue
+    // The quantified group handler will deal with optional groups properly
+
+    // Record group start
+    NAVRegexMatchGroupStart(parser, match)
+
+    // For non-capturing groups, store the start position in match.matches[255] temporarily
+    // so NAVRegexMatchQuantifiedGroup can access it later
+    if (groupIdx > 0 && !parser.groupInfo[groupIdx].isCapturing) {
+        match.matches[255].start = parser.input.cursor
+    }
+
+    // Phase 5: Store GROUP_START info for optional group skip logic (NO LOOKBEHIND!)
+    // When next token fails to match, we can check if we just entered an optional group
+    parser.lastGroupStartToken = parser.pattern.cursor
+    parser.lastGroupMin = groupQuantifierMin
+    parser.lastGroupEndToken = groupEndToken
+
+    // Advance pattern cursor only (groups don't consume characters)
+    NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
+}
+
+/**
+ * Check if group end is followed by quantifier
+ *
+ * @param parser - The regex parser structure
+ * @return TRUE if quantifier follows, FALSE otherwise
+ */
+define_function char NAVRegexMatchPatternIsQuantifiedGroup(_NAVRegexParser parser) {
+    return NAVRegexNextTokenIsQuantifier(parser)
+}
+
+/**
+ * Handle non-quantified group end token
+ * Extracts group text and advances pattern cursor
+ *
+ * @param parser - The regex parser structure
+ * @param match - The match result structure
+ */
+define_function NAVRegexMatchPatternHandleNormalGroupEnd(_NAVRegexParser parser, _NAVRegexMatchResult match) {
+    NAVRegexDebug(parser,
+                    'MatchPattern',
+                    "'Normal non-quantified group end'")
+
+    // Normal non-quantified group - extract text now
+    NAVRegexMatchGroupEnd(parser, match)
+
+    // Advance pattern cursor
+    NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 1)
+}
+
+/**
+ * Check if current token has a quantifier
+ *
+ * @param parser - The regex parser structure
+ * @return TRUE if next token is a quantifier, FALSE otherwise
+ */
+define_function char NAVRegexMatchPatternHasQuantifier(_NAVRegexParser parser) {
+    stack_var integer nextType
+    nextType = NAVRegexPeekNextTokenType(parser)
+
+    return (nextType == REGEX_TYPE_QUESTIONMARK ||
+            nextType == REGEX_TYPE_STAR ||
+            nextType == REGEX_TYPE_PLUS ||
+            nextType == REGEX_TYPE_QUANTIFIER)
+}
+
+/**
+ * Dispatch to appropriate quantifier handler
+ *
+ * @param parser - The regex parser structure
+ * @param match - The match result structure
+ * @return Result from the quantifier handler
+ */
+define_function char NAVRegexMatchPatternDispatchQuantifier(_NAVRegexParser parser, _NAVRegexMatchResult match) {
+    stack_var integer nextType
+
+    nextType = NAVRegexPeekNextTokenType(parser)
+
+    // Check if pattern[1].type == QUESTIONMARK
+    if (nextType == REGEX_TYPE_QUESTIONMARK) {
+        // Advance pattern cursor by 2 to point to &pattern[2] before calling
+        NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 2)
+        return NAVRegexMatchQuestion(parser, match)
+    }
+
+    // Check if pattern[1].type == STAR
+    if (nextType == REGEX_TYPE_STAR) {
+        // Advance pattern cursor by 2 to point to &pattern[2] before calling
+        NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 2)
+        return NAVRegexMatchStar(parser, match)
+    }
+
+    // Check if pattern[1].type == PLUS
+    if (nextType == REGEX_TYPE_PLUS) {
+        // Advance pattern cursor by 2 to point to &pattern[2] before calling
+        NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 2)
+        return NAVRegexMatchPlus(parser, match)
+    }
+
+    // Check if pattern[1].type == QUANTIFIER (bounded quantifiers {n}, {n,}, {n,m})
+    if (nextType == REGEX_TYPE_QUANTIFIER) {
+        // Advance pattern cursor by 2 to point to &pattern[2] before calling
+        NAVRegexAdvancePatternCursor(parser, 'MatchPattern', 2)
+        return NAVRegexMatchBoundedQuantifier(parser, match)
+    }
+
+    // Should never reach here if HasQuantifier returned true
+    return false
+}
+
+/**
+ * Check if we should skip an optional group when match fails
+ * Phase 5: NO LOOKBEHIND - uses stored GROUP_START info
+ *
+ * @param parser - The regex parser structure
+ * @return TRUE if group was skipped (continue matching), FALSE if not optional
+ */
+define_function char NAVRegexMatchPatternTrySkipOptionalGroup(_NAVRegexParser parser) {
+    // Check if we just entered a group (pattern cursor immediately after last GROUP_START)
+    if (parser.lastGroupStartToken > 0 &&
+        parser.pattern.cursor == parser.lastGroupStartToken + 1) {
+
+        // Check if that group is optional (min = 0)
+        if (parser.lastGroupMin == 0) {
+            // This group is optional (?, *, or {0,n})
+            // Skip past GROUP_END and quantifier
+            NAVRegexDebug(parser,
+                            'MatchPattern',
+                            "'First token in optional group failed - skipping group'")
+
+            NAVRegexSetPatternCursor(parser, 'MatchPattern', parser.lastGroupEndToken + 2)
+
+            // Clear the stored GROUP_START info
+            parser.lastGroupStartToken = 0
+            return true
+        }
+    }
+
+    return false
 }
 
 
