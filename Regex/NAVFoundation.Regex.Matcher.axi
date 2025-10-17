@@ -658,13 +658,8 @@ define_function integer NAVRegexMatchGroupStart(_NAVRegexParser parser, _NAVRege
 
     tokenIdx = parser.pattern.cursor
 
-    // Find which group this token belongs to by searching groupInfo
-    for (i = 1; i <= parser.groupTotal; i++) {
-        if (parser.groupInfo[i].startToken == tokenIdx) {
-            groupIdx = i
-            break
-        }
-    }
+    // Find which group this token belongs to
+    groupIdx = NAVRegexFindGroupByStartToken(parser, tokenIdx)
 
     if (groupIdx == 0) {
         NAVRegexDebug(parser, 'MatchGroupStart', "'ERROR: Could not find group info for token ', itoa(tokenIdx)")
@@ -716,12 +711,7 @@ define_function char NAVRegexMatchGroupEnd(_NAVRegexParser parser, _NAVRegexMatc
     tokenIdx = parser.pattern.cursor
 
     // Find which group this token belongs to
-    for (i = 1; i <= parser.groupTotal; i++) {
-        if (parser.groupInfo[i].endToken == tokenIdx) {
-            groupIdx = i
-            break
-        }
-    }
+    groupIdx = NAVRegexFindGroupByEndToken(parser, tokenIdx)
 
     if (groupIdx == 0) {
         NAVRegexDebug(parser, 'MatchGroupEnd', "'ERROR: Could not find group info for token ', itoa(tokenIdx)")
@@ -796,12 +786,10 @@ define_function char NAVRegexMatchQuantifiedGroup(_NAVRegexParser parser, _NAVRe
     quantifierType = parser.state[parser.pattern.cursor + 1].type
 
     // Find the matching GROUP_START for this GROUP_END
-    for (i = 1; i <= parser.groupTotal; i++) {
-        if (parser.groupInfo[i].endToken == groupEndToken) {
-            groupIdx = i
-            groupStartToken = parser.groupInfo[i].startToken
-            break
-        }
+    groupIdx = NAVRegexFindGroupByEndToken(parser, groupEndToken)
+
+    if (groupIdx > 0) {
+        groupStartToken = parser.groupInfo[groupIdx].startToken
     }
 
     if (groupIdx == 0) {
@@ -1032,12 +1020,10 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
             #END_IF
 
             // Find which group this is and check if it's quantified
-            for (i = 1; i <= parser.groupTotal; i++) {
-                if (parser.groupInfo[i].startToken == parser.pattern.cursor) {
-                    groupIdx = i
-                    groupEndToken = parser.groupInfo[i].endToken
-                    break
-                }
+            groupIdx = NAVRegexFindGroupByStartToken(parser, parser.pattern.cursor)
+
+            if (groupIdx > 0) {
+                groupEndToken = parser.groupInfo[groupIdx].endToken
             }
 
             if (groupIdx > 0) {
@@ -1100,7 +1086,9 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
 
                 continue
             }
-        }        // Check if pattern[1].type == QUESTIONMARK
+        }
+
+        // Check if pattern[1].type == QUESTIONMARK
         // Call matchquestion with p=pattern[0], pattern=&pattern[2]
         if (parser.state[parser.pattern.cursor + 1].type == REGEX_TYPE_QUESTIONMARK) {
             // Advance pattern cursor by 2 to point to &pattern[2] before calling
@@ -1434,6 +1422,49 @@ define_function char NAVRegexAtEndOfInput(_NAVRegexParser parser) {
  */
 define_function char NAVRegexCanContinueMatching(_NAVRegexParser parser) {
     return (parser.input.cursor <= parser.input.length)
+}
+
+
+(***********************************************************)
+(*               GROUP LOOKUP HELPERS                       *)
+(***********************************************************)
+
+/**
+ * Find a group by its start token index
+ *
+ * @param parser - The regex parser structure
+ * @param tokenIdx - The token index to search for
+ * @return The group index (1-based) or 0 if not found
+ */
+define_function integer NAVRegexFindGroupByStartToken(_NAVRegexParser parser, integer tokenIdx) {
+    stack_var integer i
+
+    for (i = 1; i <= parser.groupTotal; i++) {
+        if (parser.groupInfo[i].startToken == tokenIdx) {
+            return i
+        }
+    }
+
+    return 0
+}
+
+/**
+ * Find a group by its end token index
+ *
+ * @param parser - The regex parser structure
+ * @param tokenIdx - The token index to search for
+ * @return The group index (1-based) or 0 if not found
+ */
+define_function integer NAVRegexFindGroupByEndToken(_NAVRegexParser parser, integer tokenIdx) {
+    stack_var integer i
+
+    for (i = 1; i <= parser.groupTotal; i++) {
+        if (parser.groupInfo[i].endToken == tokenIdx) {
+            return i
+        }
+    }
+
+    return 0
 }
 
 
