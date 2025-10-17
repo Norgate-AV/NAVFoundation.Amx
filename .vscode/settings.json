@@ -5,6 +5,7 @@
     "editor.formatOnPaste": true,
     "files.trimTrailingWhitespace": true,
     "files.autoSave": "onFocusChange",
+    "chat.mcp.autostart": "never",
     "[markdown]": {
         "files.trimTrailingWhitespace": false
     },

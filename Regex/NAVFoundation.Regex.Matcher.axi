@@ -1014,10 +1014,23 @@ define_function char NAVRegexMatchPattern(_NAVRegexParser parser, _NAVRegexMatch
             stack_var integer i
             stack_var char isQuantified
             stack_var integer quantifierType
+            stack_var char groupQuantifierType
+            stack_var sinteger groupQuantifierMin
+            stack_var sinteger groupQuantifierMax
 
             NAVRegexDebug(parser,
                             'MatchPattern',
                             "'Group start token at pattern[', itoa(parser.pattern.cursor), ']'")
+
+            // Read quantifier info directly from GROUP_START token (Phase 4)
+            // This info was pre-computed by the compiler in Phases 2 & 3
+            groupQuantifierType = parser.state[parser.pattern.cursor].groupQuantifierType
+            groupQuantifierMin = parser.state[parser.pattern.cursor].groupQuantifierMin
+            groupQuantifierMax = parser.state[parser.pattern.cursor].groupQuantifierMax
+
+            #IF_DEFINED REGEX_MATCH_DEBUG
+            NAVLog("'[ Match ]: GROUP_START quantifier info: type=', itoa(groupQuantifierType), ' min=', itoa(groupQuantifierMin), ' max=', itoa(groupQuantifierMax)")
+            #END_IF
 
             // Find which group this is and check if it's quantified
             for (i = 1; i <= parser.groupTotal; i++) {
