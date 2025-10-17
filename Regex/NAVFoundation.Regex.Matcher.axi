@@ -755,6 +755,220 @@ define_function char NAVRegexMatchGroupEnd(_NAVRegexParser parser, _NAVRegexMatc
 }
 
 
+(***********************************************************)
+(*      QUANTIFIED GROUP MATCHING HELPERS                  *)
+(***********************************************************)
+
+/**
+ * Determine min/max match requirements based on quantifier type
+ *
+ * @param parser - The regex parser structure
+ * @param quantifierType - The type of quantifier
+ * @param minMatches - Output: minimum matches required
+ * @param maxMatches - Output: maximum matches allowed
+ * @return TRUE if quantifier type is valid, FALSE otherwise
+ */
+define_function char NAVRegexQuantifiedGroupGetLimits(_NAVRegexParser parser,
+                                                       integer quantifierType,
+                                                       integer minMatches,
+                                                       integer maxMatches) {
+    switch (quantifierType) {
+        case REGEX_TYPE_PLUS: {
+            minMatches = 1
+            maxMatches = 999
+        }
+        case REGEX_TYPE_STAR: {
+            minMatches = 0
+            maxMatches = 999
+        }
+        case REGEX_TYPE_QUESTIONMARK: {
+            minMatches = 0
+            maxMatches = 1
+        }
+        case REGEX_TYPE_QUANTIFIER: {
+            // Bounded quantifier: {n}, {n,}, {n,m}
+            minMatches = type_cast(parser.state[parser.pattern.cursor + 1].quantifierMin)
+            if (parser.state[parser.pattern.cursor + 1].quantifierMax == -1) {
+                maxMatches = 999  // Unlimited
+            }
+            else {
+                maxMatches = type_cast(parser.state[parser.pattern.cursor + 1].quantifierMax)
+            }
+
+            NAVRegexDebug(parser,
+                          'MatchQuantifiedGroup',
+                          "'Bounded quantifier: min=', itoa(minMatches), ', max=', itoa(maxMatches)")
+        }
+        default: {
+            NAVRegexDebug(parser, 'MatchQuantifiedGroup', "'Unsupported quantifier type: ', REGEX_TYPES[quantifierType]")
+            return false
+        }
+    }
+
+    return true
+}
+
+/**
+ * Track the first match of a quantified group
+ * Determines if group consumed characters and initializes match counters
+ *
+ * @param parser - The regex parser structure
+ * @param match - The match result structure
+ * @param groupIdx - The group index
+ * @param matchCount - Output: initial match count (0 or 1)
+ * @param firstMatchStart - Output: start position of first match
+ * @param firstMatchEnd - Output: end position of first match
+ * @param lastMatchStart - Output: start position for last match tracking
+ * @param lastMatchEnd - Output: end position for last match tracking
+ */
+define_function NAVRegexQuantifiedGroupTrackFirstMatch(_NAVRegexParser parser,
+                                                        _NAVRegexMatchResult match,
+                                                        integer groupIdx,
+                                                        integer matchCount,
+                                                        integer firstMatchStart,
+                                                        integer firstMatchEnd,
+                                                        integer lastMatchStart,
+                                                        integer lastMatchEnd) {
+    // Get first match start position
+    if (parser.groupInfo[groupIdx].isCapturing) {
+        firstMatchStart = match.matches[1 + parser.groupInfo[groupIdx].number].start
+    }
+    else {
+        firstMatchStart = match.matches[255].start
+    }
+
+    // Check if the group consumed any input
+    if (firstMatchStart == parser.input.cursor) {
+        // Group matched but consumed ZERO characters
+        matchCount = 0
+        lastMatchStart = firstMatchStart
+        lastMatchEnd = firstMatchStart
+        firstMatchEnd = 0
+
+        NAVRegexDebug(parser,
+                        'MatchQuantifiedGroup',
+                        "'Group consumed zero characters - treating as zero matches'")
+    }
+    else {
+        // Group consumed at least one character
+        matchCount = 1
+        lastMatchStart = firstMatchStart
+        lastMatchEnd = parser.input.cursor
+        firstMatchEnd = parser.input.cursor
+
+        NAVRegexDebug(parser,
+                        'MatchQuantifiedGroup',
+                        "'Already matched group once from position ', itoa(firstMatchStart), ' to ', itoa(lastMatchEnd)")
+    }
+}
+
+/**
+ * Try to match one additional iteration of a quantified group
+ *
+ * @param parser - The regex parser structure
+ * @param groupStartToken - Token index of group start
+ * @param groupEndToken - Token index of group end
+ * @param groupMatchStart - Output: start position of this match attempt
+ * @return TRUE if matched, FALSE if failed
+ */
+define_function char NAVRegexQuantifiedGroupMatchOneIteration(_NAVRegexParser parser,
+                                                               integer groupStartToken,
+                                                               integer groupEndToken,
+                                                               integer groupMatchStart) {
+    stack_var integer j
+
+    groupMatchStart = parser.input.cursor
+
+    // Try to match the group content (from START+1 to END-1)
+    NAVRegexSetPatternCursor(parser, 'MatchQuantifiedGroup', groupStartToken + 1)
+
+    // Match until we hit the GROUP_END token
+    for (j = groupStartToken + 1; j < groupEndToken; j++) {
+        if (NAVRegexAtEndOfInput(parser)) {
+            // Ran out of input before completing group match
+            NAVRegexSetInputCursor(parser, 'MatchQuantifiedGroup', groupMatchStart)
+            return false
+        }
+
+        if (!NAVRegexMatchOne(parser)) {
+            // Failed to match - restore input position
+            NAVRegexSetInputCursor(parser, 'MatchQuantifiedGroup', groupMatchStart)
+            return false
+        }
+
+        // Matched one character
+        NAVRegexAdvanceInputCursor(parser, 'MatchQuantifiedGroup', 1)
+        NAVRegexAdvancePatternCursor(parser, 'MatchQuantifiedGroup', 1)
+    }
+
+    return true
+}
+
+/**
+ * Extract captured text from the last iteration of a quantified group
+ *
+ * @param parser - The regex parser structure
+ * @param match - The match result structure
+ * @param groupIdx - The group index
+ * @param lastMatchStart - Start position of last match
+ * @param lastMatchEnd - End position of last match
+ */
+define_function NAVRegexQuantifiedGroupExtractCapturedText(_NAVRegexParser parser,
+                                                            _NAVRegexMatchResult match,
+                                                            integer groupIdx,
+                                                            integer lastMatchStart,
+                                                            integer lastMatchEnd) {
+    if (parser.groupInfo[groupIdx].isCapturing) {
+        stack_var integer matchIdx
+        stack_var integer captureLength
+
+        matchIdx = 1 + parser.groupInfo[groupIdx].number
+        captureLength = lastMatchEnd - lastMatchStart
+
+        if (captureLength > 0) {
+            match.matches[matchIdx].text = NAVStringSlice(parser.input.value, lastMatchStart, lastMatchEnd)
+        }
+        else {
+            match.matches[matchIdx].text = ''
+        }
+
+        match.matches[matchIdx].length = captureLength
+        match.matches[matchIdx].end = lastMatchEnd
+
+        NAVRegexDebug(parser,
+                        'MatchQuantifiedGroup',
+                        "'Captured group text: "', match.matches[matchIdx].text, '"'")
+    }
+}
+
+/**
+ * Adjust match length to account for additional group iterations
+ *
+ * @param parser - The regex parser structure
+ * @param match - The match result structure
+ * @param firstMatchStart - Start position of first match
+ * @param firstMatchEnd - End position of first match
+ */
+define_function NAVRegexQuantifiedGroupAdjustMatchLength(_NAVRegexParser parser,
+                                                          _NAVRegexMatchResult match,
+                                                          integer firstMatchStart,
+                                                          integer firstMatchEnd) {
+    stack_var integer totalConsumed
+    stack_var integer firstMatchLength
+    stack_var integer additionalConsumed
+
+    totalConsumed = parser.input.cursor - firstMatchStart
+
+    if (firstMatchEnd > 0) {
+        // Add only the additional characters beyond the first match
+        firstMatchLength = firstMatchEnd - firstMatchStart
+        additionalConsumed = totalConsumed - firstMatchLength
+        NAVRegexMatchIncreaseLength(parser, 'MatchQuantifiedGroup', match, additionalConsumed)
+    }
+    // else: No first match (matchCount was 0), so totalConsumed is 0 - don't modify length
+}
+
+
 /**
  * Handle quantified groups - matches a group pattern multiple times based on quantifier
  * This is called when we encounter GROUP_END followed by a quantifier (+, *, ?, {n,m})
@@ -802,65 +1016,14 @@ define_function char NAVRegexMatchQuantifiedGroup(_NAVRegexParser parser, _NAVRe
                     "'Matching quantified group #', itoa(groupIdx), ' with quantifier type ', REGEX_TYPES[quantifierType]")
 
     // Determine min/max matches based on quantifier type
-    switch (quantifierType) {
-        case REGEX_TYPE_PLUS:        { minMatches = 1; maxMatches = 999; }  // + : 1 or more
-        case REGEX_TYPE_STAR:        { minMatches = 0; maxMatches = 999; }  // * : 0 or more
-        case REGEX_TYPE_QUESTIONMARK: { minMatches = 0; maxMatches = 1; }   // ? : 0 or 1
-        case REGEX_TYPE_QUANTIFIER: {
-            // Bounded quantifier: {n}, {n,}, {n,m}
-            // Extract min and max from the quantifier token at cursor + 1
-            minMatches = type_cast(parser.state[parser.pattern.cursor + 1].quantifierMin)
-            if (parser.state[parser.pattern.cursor + 1].quantifierMax == -1) {
-                maxMatches = 999  // Unlimited
-            }
-            else {
-                maxMatches = type_cast(parser.state[parser.pattern.cursor + 1].quantifierMax)
-            }
-
-            NAVRegexDebug(parser,
-                          'MatchQuantifiedGroup',
-                          "'Bounded quantifier: min=', itoa(minMatches), ', max=', itoa(maxMatches)")
-        }
-        default: {
-            NAVRegexDebug(parser, 'MatchQuantifiedGroup', "'Unsupported quantifier type: ', REGEX_TYPES[quantifierType]")
-            return false
-        }
+    if (!NAVRegexQuantifiedGroupGetLimits(parser, quantifierType, minMatches, maxMatches)) {
+        return false
     }
 
-    // We've already matched the group content ONCE (from GROUP_START to GROUP_END)
-    // Track where this first match started
-    // For capturing groups, get it from match.matches. For non-capturing groups,
-    // get it from the temporary storage in match.matches[255]
-    if (parser.groupInfo[groupIdx].isCapturing) {
-        firstMatchStart = match.matches[1 + parser.groupInfo[groupIdx].number].start
-    }
-    else {
-        firstMatchStart = match.matches[255].start
-    }
-
-    // Check if the group consumed any input
-    if (firstMatchStart == parser.input.cursor) {
-        // Group matched but consumed ZERO characters
-        // For optional quantifiers (? or *), treat this as zero matches
-        matchCount = 0
-        lastMatchStart = firstMatchStart
-        lastMatchEnd = firstMatchStart
-
-        NAVRegexDebug(parser,
-                        'MatchQuantifiedGroup',
-                        "'Group consumed zero characters - treating as zero matches'")
-    }
-    else {
-        // Group consumed at least one character
-        matchCount = 1
-        lastMatchStart = firstMatchStart
-        lastMatchEnd = parser.input.cursor
-        firstMatchEnd = parser.input.cursor  // Save the end of the first match
-
-        NAVRegexDebug(parser,
-                        'MatchQuantifiedGroup',
-                        "'Already matched group once from position ', itoa(firstMatchStart), ' to ', itoa(lastMatchEnd)")
-    }
+    // Track the first match of the group
+    NAVRegexQuantifiedGroupTrackFirstMatch(parser, match, groupIdx,
+                                           matchCount, firstMatchStart, firstMatchEnd,
+                                           lastMatchStart, lastMatchEnd)
 
     // Try to match ADDITIONAL repetitions of the group content
     matchFailed = false
@@ -868,47 +1031,24 @@ define_function char NAVRegexMatchQuantifiedGroup(_NAVRegexParser parser, _NAVRe
     while (!matchFailed && matchCount < maxMatches && NAVRegexCanContinueMatching(parser)) {
         stack_var integer groupMatchStart
         stack_var integer groupMatchEnd
-        stack_var integer j
 
-        groupMatchStart = parser.input.cursor
-
-        // Try to match the group content (from START+1 to END-1)
-        NAVRegexSetPatternCursor(parser, 'MatchQuantifiedGroup', groupStartToken + 1)
-
-        // Match until we hit the GROUP_END token
-        for (j = groupStartToken + 1; j < groupEndToken; j++) {
-            if (NAVRegexAtEndOfInput(parser)) {
-                // Ran out of input before completing group match
-                NAVRegexSetInputCursor(parser, 'MatchQuantifiedGroup', groupMatchStart)
-                matchFailed = true
-                break
-            }
-
-            if (!NAVRegexMatchOne(parser)) {
-                // Failed to match - restore input position
-                NAVRegexSetInputCursor(parser, 'MatchQuantifiedGroup', groupMatchStart)
-                matchFailed = true
-                break
-            }
-
-            // Matched one character
-            NAVRegexAdvanceInputCursor(parser, 'MatchQuantifiedGroup', 1)
-            NAVRegexAdvancePatternCursor(parser, 'MatchQuantifiedGroup', 1)
+        // Try to match one iteration of the group
+        if (!NAVRegexQuantifiedGroupMatchOneIteration(parser, groupStartToken, groupEndToken, groupMatchStart)) {
+            matchFailed = true
+            continue
         }
 
-        if (!matchFailed) {
-            // Successfully matched another iteration of the group content
-            matchCount++
-            groupMatchEnd = parser.input.cursor
+        // Successfully matched another iteration of the group content
+        matchCount++
+        groupMatchEnd = parser.input.cursor
 
-            // Track the last match for group capture (capturing groups capture the LAST iteration)
-            lastMatchStart = groupMatchStart
-            lastMatchEnd = groupMatchEnd
+        // Track the last match for group capture (capturing groups capture the LAST iteration)
+        lastMatchStart = groupMatchStart
+        lastMatchEnd = groupMatchEnd
 
-            NAVRegexDebug(parser,
-                            'MatchQuantifiedGroup',
-                            "'Matched group iteration #', itoa(matchCount), ' consuming ', itoa(groupMatchEnd - groupMatchStart), ' characters'")
-        }
+        NAVRegexDebug(parser,
+                        'MatchQuantifiedGroup',
+                        "'Matched group iteration #', itoa(matchCount), ' consuming ', itoa(groupMatchEnd - groupMatchStart), ' characters'")
     }
 
     NAVRegexDebug(parser,
@@ -923,44 +1063,10 @@ define_function char NAVRegexMatchQuantifiedGroup(_NAVRegexParser parser, _NAVRe
     }
 
     // Success! Extract the captured group text (last iteration for capturing groups)
-    if (parser.groupInfo[groupIdx].isCapturing) {
-        stack_var integer matchIdx
-        stack_var integer captureLength
-
-        matchIdx = 1 + parser.groupInfo[groupIdx].number
-        captureLength = lastMatchEnd - lastMatchStart
-
-        if (captureLength > 0) {
-            match.matches[matchIdx].text = NAVStringSlice(parser.input.value, lastMatchStart, lastMatchEnd)
-        }
-        else {
-            match.matches[matchIdx].text = ''
-        }
-
-        match.matches[matchIdx].length = captureLength
-        match.matches[matchIdx].end = lastMatchEnd
-
-        NAVRegexDebug(parser,
-                        'MatchQuantifiedGroup',
-                        "'Captured group text: "', match.matches[matchIdx].text, '"'")
-    }
+    NAVRegexQuantifiedGroupExtractCapturedText(parser, match, groupIdx, lastMatchStart, lastMatchEnd)
 
     // Update the overall match length with ADDITIONAL characters consumed
-    // The first group match is already included in preMatchLength
-    // We only need to add the characters consumed by additional matches
-    totalConsumed = parser.input.cursor - firstMatchStart
-    if (firstMatchEnd > 0) {
-        // Add only the additional characters beyond the first match
-        stack_var integer firstMatchLength
-        stack_var integer additionalConsumed
-        firstMatchLength = firstMatchEnd - firstMatchStart
-        additionalConsumed = totalConsumed - firstMatchLength
-        NAVRegexMatchIncreaseLength(parser, 'MatchQuantifiedGroup', match, additionalConsumed)
-    }
-    else {
-        // No first match (matchCount was 0), so totalConsumed is 0
-        // Don't modify length
-    }
+    NAVRegexQuantifiedGroupAdjustMatchLength(parser, match, firstMatchStart, firstMatchEnd)
 
     // Advance pattern cursor past GROUP_END and quantifier
     NAVRegexSetPatternCursor(parser, 'MatchQuantifiedGroup', savedPatternCursor + 2)
