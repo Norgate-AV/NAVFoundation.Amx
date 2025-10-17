@@ -1350,4 +1350,22 @@ define_function char NAVRegexMatchCompiled(_NAVRegexParser parser, char subject[
 }
 
 
+define_function integer NAVRegexPeekTokenType(_NAVRegexParser parser, integer offset) {
+    if (parser.pattern.cursor + offset >= parser.pattern.length) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_REGEX_MATCHER__,
+                                    'NAVRegexPeekTokenType',
+                                    "'Pattern cursor + offset out of bounds: ', itoa(parser.pattern.cursor + offset))
+        return 0
+    }
+
+    return parser.state[parser.pattern.cursor + offset].type
+}
+
+
+define_function integer NAVRegexPeekNextTokenType(_NAVRegexParser parser) {
+    return NAVRegexPeekTokenType(parser, 1)
+}
+
+
 #END_IF // __NAV_FOUNDATION_REGEX_MATCHER__

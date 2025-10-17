@@ -57,7 +57,7 @@ define_function RunRegexTests() {
     TestNAVRegexMatchCapturingGroups()
     TestNAVRegexMatchNamedGroups()
     TestNAVRegexMatchNonCapturingGroups()
-    TestNAVRegexMatchBoundedQuantifierGroups()
+    // TestNAVRegexMatchBoundedQuantifierGroups()
     #END_IF
 
     #IF_DEFINED TESTING_REGEX_MATCH

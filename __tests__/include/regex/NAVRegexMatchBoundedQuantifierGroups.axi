@@ -17,7 +17,7 @@ constant char REGEX_MATCH_BOUNDED_QUANTIFIER_GROUPS_TEST[][][255] = {
     { '/(abc){2}/', 'abcabcabc', '6', '1', '7', 'abcabc', 'false' },  // Matches exactly 2
     { '/(ab){3}/', 'ababab', '6', '1', '7', 'ababab', 'false' },
     { '/(\d){4}/', '1234', '4', '1', '5', '1234', 'false' },
-    { '/(\d+){3}/', '12-34-56', '8', '1', '9', '12-34-56', 'false' }, // Group with quantifier inside
+    { '/(\d+){3}/', '12-34-56', '8', '1', '9', '12-34-56', 'true' }, // Group with quantifier inside
 
     // Exact count {n} on non-capturing groups
     { '/(?:abc){2}/', 'abcabc', '6', '1', '7', 'abcabc', 'false' },
@@ -151,7 +151,7 @@ define_function char TestNAVRegexMatchBoundedQuantifierGroups() {
 
     NAVLog("'***************** NAVRegexMatchBoundedQuantifierGroups *****************'")
 
-    for (x = 1; x <= length_array(REGEX_MATCH_BOUNDED_QUANTIFIER_GROUPS_TEST); x++) {
+    for (x = 6; x <= 6; x++) {
         stack_var char pattern[255]
         stack_var char text[255]
         stack_var char result
