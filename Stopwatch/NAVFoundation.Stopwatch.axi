@@ -44,7 +44,8 @@ SOFTWARE.
  * @description Starts the stopwatch timer by initializing and starting a timeline.
  * If the stopwatch is already running, it will be reset and restarted.
  *
- * @returns {long} Always returns 0
+ * @returns {integer} Timeline ID of the started stopwatch timeline if successful, or
+ *                    error code.
  *
  * @example
  * NAVStopwatchStart()
@@ -55,8 +56,13 @@ SOFTWARE.
  * @see NAVStopwatchStop
  * @see NAVStopwatchIsRunning
  */
-define_function long NAVStopwatchStart() {
-    NAVTimelineStart(
+define_function integer NAVStopwatchStart() {
+    if (NAVTimelineIsRunning(TL_STOPWATCH)) {
+        // Just reset the timer and keep going
+        return NAVTimelineSetValue(TL_STOPWATCH, 0)
+    }
+
+    return NAVTimelineStart(
         TL_STOPWATCH,
         TL_STOPWATCH_INTERVAL,
         TIMELINE_ABSOLUTE,
