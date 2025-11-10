@@ -130,14 +130,14 @@ define_function char NAVLexerGetNextToken(_NAVLexer lexer, _NAVLexerToken token)
 
 
 define_function char[NAV_MAX_BUFFER] NAVLexerMatchPattern(_NAVLexer lexer, char pattern[], char source[]) {
-    stack_var _NAVRegexMatchResult match
+    stack_var _NAVRegexMatchCollection collection
 
-    if (!NAVRegexMatch(pattern, source, match)) {
+    if (!NAVRegexMatch(pattern, source, collection)) {
         return ''
     }
 
-    lexer.cursor = lexer.cursor + match.matches[1].length
-    return match.matches[1].text
+    lexer.cursor = lexer.cursor + collection.matches[1].fullMatch.length
+    return collection.matches[1].fullMatch.text
 }
 
 
