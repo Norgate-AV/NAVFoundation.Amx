@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.9.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.8.0...v3.9.0) (2025-11-10)
+
+### 🌟 Features
+
+- **regex:** add initial regex engine implementation ([c283877](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c2838779258558a81be24ff21dbc33284c178196))
+- **string-utils:** add new case-insensitive variant functions ([6cacf26](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6cacf26af0dc98616a514299e894391d51788910))
+
 ## [3.8.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.7.0...v3.8.0) (2025-10-15)
 
 ### 🌟 Features
