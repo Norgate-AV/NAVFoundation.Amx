@@ -673,5 +673,27 @@
                 <Comments></Comments>
             </File>
         </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>StackOverflow</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.37|1319|1|NX-2200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>stack-overflow</Identifier>
+                <FilePathName>src\stack-overflow.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
     </Project>
 </Workspace>
