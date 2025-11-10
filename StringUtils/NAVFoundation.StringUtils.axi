@@ -1006,6 +1006,50 @@ define_function char NAVStringContains(char buffer[], char match[]) {
 
 
 /**
+ * @function NAVContainsCaseInsensitive
+ * @public
+ * @description Determines whether a string contains a specified substring, case-insensitively.
+ *
+ * @param {char[]} buffer - String to check
+ * @param {char[]} match - The substring to search for
+ *
+ * @returns {char} True if the string contains the substring (case-insensitive), false otherwise
+ *
+ * @example
+ * stack_var char text[50]
+ * stack_var char result
+ * text = 'Hello World'
+ * result = NAVContainsCaseInsensitive(text, 'world')  // Returns true
+ * result = NAVContainsCaseInsensitive(text, 'HELLO')  // Returns true
+ * result = NAVContainsCaseInsensitive(text, 'Moon')   // Returns false
+ */
+define_function char NAVContainsCaseInsensitive(char buffer[], char match[]) {
+    if (!length_array(match)) {
+        return true
+    }
+
+    return (NAVIndexOfCaseInsensitive(buffer, match, 1) > 0)
+}
+
+
+/**
+ * @function NAVStringContainsCaseInsensitive
+ * @public
+ * @description Alias for NAVContainsCaseInsensitive. Checks if a string contains a substring, case-insensitively.
+ *
+ * @param {char[]} buffer - String to check
+ * @param {char[]} match - The substring to search for
+ *
+ * @returns {char} True if the string contains the substring (case-insensitive), false otherwise
+ *
+ * @see NAVContainsCaseInsensitive
+ */
+define_function char NAVStringContainsCaseInsensitive(char buffer[], char match[]) {
+    return NAVContainsCaseInsensitive(buffer, match)
+}
+
+
+/**
  * @function NAVEndsWith
  * @public
  * @description Determines whether a string ends with a specified substring.
@@ -1072,6 +1116,29 @@ define_function integer NAVIndexOf(char buffer[], char match[], integer start) {
 
 
 /**
+ * @function NAVIndexOfCaseInsensitive
+ * @public
+ * @description Finds the position of the first occurrence of a substring in a string, case-insensitively, starting at a specified position.
+ *
+ * @param {char[]} buffer - String to search within
+ * @param {char[]} match - Substring to search for
+ * @param {integer} start - Position to start searching from (1-based index)
+ *
+ * @returns {integer} Position of the first occurrence (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var char text[50]
+ * stack_var integer position
+ * text = 'Hello World'
+ * position = NAVIndexOfCaseInsensitive(text, 'o', 1)  // Returns 5 (position of first 'o')
+ * position = NAVIndexOfCaseInsensitive(text, 'O', 6)  // Returns 8 (position of second 'o', case-insensitive)
+ */
+define_function integer NAVIndexOfCaseInsensitive(char buffer[], char match[], integer start) {
+    return NAVIndexOf(lower_string(buffer), lower_string(match), start)
+}
+
+
+/**
  * @function NAVLastIndexOf
  * @public
  * @description Finds the position of the last occurrence of a substring in a string.
@@ -1099,6 +1166,46 @@ define_function integer NAVLastIndexOf(char buffer[], char match[]) {
 
     while (index > 0) {
         next = NAVIndexOf(buffer, match, index + 1)
+
+        if (!next) {
+            break
+        }
+
+        index = next
+    }
+
+    return index
+}
+
+
+/**
+ * @function NAVLastIndexOfCaseInsensitive
+ * @public
+ * @description Finds the position of the last occurrence of a substring in a string, case-insensitively.
+ *
+ * @param {char[]} buffer - String to search within
+ * @param {char[]} match - Substring to search for
+ *
+ * @returns {integer} Position of the last occurrence (1-based), or 0 if not found
+ *
+ * @example
+ * stack_var char text[50]
+ * stack_var integer position
+ * text = 'Hello World'
+ * position = NAVLastIndexOfCaseInsensitive(text, 'O')  // Returns 8 (position of last 'o', case-insensitive)
+ */
+define_function integer NAVLastIndexOfCaseInsensitive(char buffer[], char match[]) {
+    stack_var integer index
+    stack_var integer next
+
+    index = NAVIndexOfCaseInsensitive(buffer, match, 1)
+
+    if (!index) {
+        return 0
+    }
+
+    while (index > 0) {
+        next = NAVIndexOfCaseInsensitive(buffer, match, index + 1)
 
         if (!next) {
             break

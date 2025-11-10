@@ -143,11 +143,14 @@ define_function RunStringUtilsTests() {
     TestNAVStartsWith()
     TestNAVEndsWith()
     TestNAVContains()
+    TestNAVContainsCaseInsensitive()
     #END_IF
 
     #IF_DEFINED TESTING_NAVINDEXOF
     TestNAVIndexOf()
     TestNAVLastIndexOf()
+    TestNAVIndexOfCaseInsensitive()
+    TestNAVLastIndexOfCaseInsensitive()
     #END_IF
 
     #IF_DEFINED TESTING_NAVSTRINGCOUNT

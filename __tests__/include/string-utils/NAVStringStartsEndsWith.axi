@@ -72,6 +72,46 @@ constant char CONTAINS_EXPECTED[][10] = {
     { false, false, false, false, false, false, false, false, true, false }  // 'A' contains substrings
 }
 
+// Test data for NAVContainsCaseInsensitive
+constant char CONTAINS_CI_TEST_SUBJECTS[][NAV_MAX_BUFFER] = {
+    'Hello World',
+    'AMX NetLinx',
+    'NAVFoundation',
+    'The Quick Brown Fox',
+    ''
+}
+
+constant char CONTAINS_CI_TEST_SUBSTRINGS[][NAV_MAX_BUFFER] = {
+    'hello',
+    'HELLO',
+    'HeLLo',
+    'world',
+    'WORLD',
+    'amx',
+    'AMX',
+    'netlinx',
+    'NETLINX',
+    'nav',
+    'NAV',
+    'foundation',
+    'FOUNDATION',
+    'quick',
+    'QUICK',
+    'brown',
+    'BROWN',
+    'xyz',
+    'XYZ',
+    ''
+}
+
+constant char CONTAINS_CI_EXPECTED[][20] = {
+    { true,  true,  true,  true,  true,  false, false, false, false, false, false, false, false, false, false, false, false, false, false, true  }, // 'Hello World'
+    { false, false, false, false, false, true,  true,  true,  true,  false, false, false, false, false, false, false, false, false, false, true  }, // 'AMX NetLinx'
+    { false, false, false, false, false, false, false, false, false, true,  true,  true,  true,  false, false, false, false, false, false, true  }, // 'NAVFoundation'
+    { false, false, false, false, false, false, false, false, false, false, false, false, false, true,  true,  true,  true,  false, false, true  }, // 'The Quick Brown Fox'
+    { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true  }  // ''
+}
+
 define_function TestNAVStartsWith() {
     stack_var integer i, j
 
@@ -182,6 +222,88 @@ define_function TestNAVContains() {
 
         expected = NAVContains('Hello World', 'lo Wo')
         result = NAVStringContains('Hello World', 'lo Wo')
+
+        if (result != expected) {
+            NAVLogTestFailed(1, itoa(expected), itoa(result))
+        }
+        else {
+            NAVLogTestPassed(1)
+        }
+    }
+}
+
+define_function TestNAVContainsCaseInsensitive() {
+    stack_var integer i, j
+
+    NAVLog("'***************** NAVContainsCaseInsensitive *****************'")
+
+    for (i = 1; i <= length_array(CONTAINS_CI_TEST_SUBJECTS); i++) {
+        for (j = 1; j <= length_array(CONTAINS_CI_TEST_SUBSTRINGS); j++) {
+            stack_var char expected
+            stack_var char result
+
+            expected = CONTAINS_CI_EXPECTED[i][j]
+            result = NAVContainsCaseInsensitive(CONTAINS_CI_TEST_SUBJECTS[i], CONTAINS_CI_TEST_SUBSTRINGS[j])
+
+            if (result != expected) {
+                NAVLogTestFailed((i-1)*length_array(CONTAINS_CI_TEST_SUBSTRINGS)+j, itoa(expected), itoa(result))
+                continue
+            }
+
+            NAVLogTestPassed((i-1)*length_array(CONTAINS_CI_TEST_SUBSTRINGS)+j)
+        }
+    }
+
+    // Test edge cases
+    NAVLog("'Testing edge cases...'")
+
+    // Test with all uppercase vs all lowercase
+    {
+        stack_var char result
+
+        result = NAVContainsCaseInsensitive('HELLO WORLD', 'hello world')
+
+        if (result != true) {
+            NAVLogTestFailed(1, '1', itoa(result))
+        } else {
+            NAVLogTestPassed(1)
+        }
+    }
+
+    // Test with mixed case patterns
+    {
+        stack_var char result
+
+        result = NAVContainsCaseInsensitive('ThE qUiCk BrOwN fOx', 'Quick Brown')
+
+        if (result != true) {
+            NAVLogTestFailed(2, '1', itoa(result))
+        } else {
+            NAVLogTestPassed(2)
+        }
+    }
+
+    // Test not found case
+    {
+        stack_var char result
+
+        result = NAVContainsCaseInsensitive('Hello World', 'GOODBYE')
+
+        if (result != false) {
+            NAVLogTestFailed(3, '0', itoa(result))
+        } else {
+            NAVLogTestPassed(3)
+        }
+    }
+
+    // Test the alias function
+    NAVLog("'***************** NAVStringContainsCaseInsensitive (Alias) *****************'")
+    {
+        stack_var char expected
+        stack_var char result
+
+        expected = NAVContainsCaseInsensitive('Hello World', 'HELLO')
+        result = NAVStringContainsCaseInsensitive('Hello World', 'HELLO')
 
         if (result != expected) {
             NAVLogTestFailed(1, itoa(expected), itoa(result))
