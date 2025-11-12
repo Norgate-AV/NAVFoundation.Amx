@@ -85,16 +85,6 @@ constant long NAV_DATETIME_SECONDS_IN_1_YEAR_AVG   = 31556926   // 365.24 days
  */
 constant long NAV_DATETIME_SECONDS_IN_1_LEAP_YEAR  = 31622400   // 366 days
 
-// constant long NAV_DATETIME_MILLISECONDS_IN_1_SECOND    = 1000
-// constant long NAV_DATETIME_MILLISECONDS_IN_1_MINUTE    = 60000
-// constant long NAV_DATETIME_MILLISECONDS_IN_1_HOUR      = 3600000
-// constant long NAV_DATETIME_MILLISECONDS_IN_1_DAY       = 86400000
-// constant long NAV_DATETIME_MILLISECONDS_IN_1_WEEK      = 604800000
-// constant long NAV_DATETIME_MILLISECONDS_IN_1_MONTH_AVG = 2629743000    // 30.44 days
-// constant double NAV_DATETIME_MILLISECONDS_IN_1_YEAR      = 31536000000   // 365 days
-// constant double NAV_DATETIME_MILLISECONDS_IN_1_YEAR_AVG  = 31556926000   // 365.24 days
-// constant double NAV_DATETIME_MILLISECONDS_IN_1_LEAP_YEAR = 31622400000   // 366 days
-
 /**
  * @constant NAV_DATETIME_DAY_SUNDAY
  * @description Day of week identifier for Sunday
@@ -313,50 +303,6 @@ constant integer NAV_DATETIME_TIMESTAMP_FORMAT_W3C          = 14
  * @example 2023-11-23T21:30:00+0000
  */
 constant integer NAV_DATETIME_TIMESTAMP_FORMAT_DEFAULT      = NAV_DATETIME_TIMESTAMP_FORMAT_ISO8601
-
-
-/**
- * @constant NAV_DATETIME_TIMEZONE_ALPHA_TIME_ZONE
- * @description Timezone identifier for Alpha Time Zone
- */
-constant integer NAV_DATETIME_TIMEZONE_ALPHA_TIME_ZONE                              = 1
-
-/**
- * @constant NAV_DATETIME_TIMEZONE_AUSTRALIAN_CENTRAL_DAYLIGHT_TIME
- * @description Timezone identifier for Australian Central Daylight Time
- */
-constant integer NAV_DATETIME_TIMEZONE_AUSTRALIAN_CENTRAL_DAYLIGHT_TIME             = 2
-
-/**
- * @constant NAV_DATETIME_TIMEZONE_AUSTRALIAN_CENTRAL_STANDARD_TIME
- * @description Timezone identifier for Australian Central Standard Time
- */
-constant integer NAV_DATETIME_TIMEZONE_AUSTRALIAN_CENTRAL_STANDARD_TIME             = 3
-
-/**
- * @constant NAV_DATETIME_TIMEZONE_ACRE_TIME
- * @description Timezone identifier for Acre Time
- */
-constant integer NAV_DATETIME_TIMEZONE_ACRE_TIME                                    = 4
-
-/**
- * @constant NAV_DATETIME_TIMEZONE_AUSTRALIAN_CENTRAL_TIME
- * @description Timezone identifier for Australian Central Time
- */
-constant integer NAV_DATETIME_TIMEZONE_AUSTRALIAN_CENTRAL_TIME                      = 5
-
-/**
- * @constant NAV_DATETIME_TIMEZONE_AUSTRALIAN_CENTRAL_WESTERN_STANDARD_TIME
- * @description Timezone identifier for Australian Central Western Standard Time
- */
-constant integer NAV_DATETIME_TIMEZONE_AUSTRALIAN_CENTRAL_WESTERN_STANDARD_TIME     = 6
-
-/**
- * @constant NAV_DATETIME_TIMEZONE_AUSTRALIAN_EASTERN_DAYLIGHT_TIME
- * @description Timezone identifier for Australian Eastern Daylight Time
- */
-constant integer NAV_DATETIME_TIMEZONE_AUSTRALIAN_EASTERN_DAYLIGHT_TIME             = 9
-
 
 
 DEFINE_TYPE
