@@ -610,20 +610,59 @@ define_function char[NAV_MAX_CHARS] NAVDateTimeGetShortDayString(integer day) {
  * @description Gets the number of days in the specified month.
  *
  * @param {integer} month - Month number (1-12)
+ * @param {integer} year - Full year (e.g., 2024) to check for leap year
  *
- * @returns {integer} Number of days in the month (28-31)
+ * @returns {integer} Number of days in the month (28-31), or 0 if month is invalid
  *
  * @example
  * stack_var integer days
- * days = NAVDateTimeGetDaysInMonth(2)  // Returns 28 (or 29 in leap years)
+ * days = NAVDateTimeGetDaysInMonth(2, 2024)  // Returns 29 (leap year)
+ * days = NAVDateTimeGetDaysInMonth(2, 2023)  // Returns 28 (non-leap year)
+ * days = NAVDateTimeGetDaysInMonth(13, 2024) // Returns 0 (invalid month)
  *
  */
-define_function integer NAVDateTimeGetDaysInMonth(integer month) {
-    if (month == 2 && NAVDateTimeIsLeapYear(type_cast(date_to_year(ldate)))) {
+define_function integer NAVDateTimeGetDaysInMonth(integer month, integer year) {
+    // Validate month range
+    if (month < 1 || month > 12) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetDaysInMonth',
+                                'Invalid month value (must be 1-12)')
+        return 0
+    }
+
+    // Validate year (must be non-zero)
+    if (year < 1) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetDaysInMonth',
+                                'Invalid year value (year must be >= 1)')
+        return 0
+    }
+
+    switch (month) {
+        case 1:  return 31  // January
+        case 2:  {  // February
+            if (NAVDateTimeIsLeapYear(year)) {
         return 29
     }
 
-    return NAV_DAYS_IN_MONTH[month]
+            return 28
+        }
+        case 3:  return 31  // March
+        case 4:  return 30  // April
+        case 5:  return 31  // May
+        case 6:  return 30  // June
+        case 7:  return 31  // July
+        case 8:  return 31  // August
+        case 9:  return 30  // September
+        case 10: return 31  // October
+        case 11: return 30  // November
+        case 12: return 31  // December
+    }
+
+    // Should never reach here due to validation above
+    return 0
 }
 
 
