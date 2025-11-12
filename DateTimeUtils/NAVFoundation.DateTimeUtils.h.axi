@@ -464,13 +464,4 @@ struct _NAVTimeserver {
 }
 
 
-DEFINE_VARIABLE
-
-/**
- * @constant timeserver
- * @description Default time server configuration for Windows time service
- */
-constant _NAVTimeserver timeserver = { '51.145.123.29', 'time.windows.com', 'Windows Timeserver' }
-
-
 #END_IF // __NAV_FOUNDATION_DATETIME_H__

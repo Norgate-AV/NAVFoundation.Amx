@@ -1342,17 +1342,31 @@ define_function integer NAVFindTimeServer(clkmgr_timeserver_struct servers[], ch
 /**
  * @function NAVSetupNetworkTime
  * @public
- * @description Configures the system to use network time with predefined settings.
+ * @description Configures the system to use network time with the specified time server.
+ *
+ * @param {_NAVTimeServer} timeserver - Time server configuration structure.
+ *                                       If Ip, Hostname, or Description fields are empty,
+ *                                       default values will be used (Windows time server).
  *
  * @returns {void}
  *
  * @example
- * NAVSetupNetworkTime()
+ * stack_var _NAVTimeServer server
+ * server.Ip = '132.163.97.2'
+ * server.Hostname = 'time-a.nist.gov'
+ * server.Description = 'NIST Internet Time Service'
+ * NAVSetupNetworkTime(server)
  *
- * @note Sets up NTP synchronization, timezone, DST rules, and uses the default timeserver
+ * @example
+ * // Use with default values
+ * stack_var _NAVTimeServer server
+ * NAVSetupNetworkTime(server)  // Uses Windows time server defaults
+ *
+ * @note Sets up NTP synchronization, timezone (UTC+00:00), DST rules (Europe/London)
+ * @note Default timeserver: 51.145.123.29 (time.windows.com)
  * @note Requires master control rights
  */
-define_function NAVSetupNetworkTime() {
+define_function NAVSetupNetworkTime(_NAVTimeServer timeserver) {
     stack_var clkmgr_timeoffset_struct offset
     stack_var clkmgr_timeserver_struct servers[20]
 
@@ -1369,6 +1383,18 @@ define_function NAVSetupNetworkTime() {
     clkmgr_set_daylightsavings_offset(offset)
     clkmgr_set_start_daylightsavings_rule('occurrence:5,1,3,02:00:00')
     clkmgr_set_end_daylightsavings_rule('occurrence:5,1,10,02:00:00')
+
+    if (timeserver.Ip == '') {
+        timeserver.Ip = '51.145.123.29'
+    }
+
+    if (timeserver.Hostname == '') {
+        timeserver.Hostname = 'time.windows.com'
+    }
+
+    if (timeserver.Description == '') {
+        timeserver.Description = 'Windows Timeserver'
+    }
 
     // Check if the timeserver is already in the list
     // Seems to cause issues if the timeserver already exists
