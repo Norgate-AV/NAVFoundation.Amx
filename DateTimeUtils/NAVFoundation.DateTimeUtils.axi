@@ -405,43 +405,88 @@ define_function char NAVDateTimeIsLeapYear(integer year) {
 
 
 /**
- * @function NAVGetNextDate
+ * @function NAVDateTimeGetNextDate
  * @public
- * @description Returns the next date after the current date.
+ * @description Returns the next date after the specified date.
+ *
+ * @param {char[]} date - Date string in MM/DD/YYYY format
  *
  * @returns {char[]} String representation of the next date in MM/DD/YYYY format
  *
  * @example
  * stack_var char nextDay[20]
- * nextDay = NAVGetNextDate()  // If today is 12/31/2023, returns "01/01/2024"
+ * nextDay = NAVDateTimeGetNextDate('12/31/2023')  // Returns "01/01/2024"
+ * nextDay = NAVDateTimeGetNextDate(ldate)  // Returns tomorrow's date
  *
  * @note Handles month and year transitions, including leap years
  */
-define_function char[NAV_MAX_BUFFER] NAVGetNextDate() {
+define_function char[10] NAVDateTimeGetNextDate(char date[]) {
     stack_var integer x
     stack_var integer daysInMonth[12]
 
+    stack_var sinteger result
     stack_var integer thisDay
     stack_var integer thisMonth
     stack_var integer thisYear
 
+    // Get day
+    result = date_to_day(date)
+    if (result <= 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetNextDate',
+                                'Failed to get day from date input')
+        return ''
+    }
+
+    thisDay = type_cast(result) + 1
+
+    // Get month
+    result = date_to_month(date)
+    if (result <= 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetNextDate',
+                                'Failed to get month from date input')
+        return ''
+    }
+
+    thisMonth = type_cast(result)
+
+    // Validate month range
+    if (thisMonth < 1 || thisMonth > 12) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetNextDate',
+                                'Invalid month value in date input')
+        return ''
+    }
+
+    // Get year
+    result = date_to_year(date)
+    if (result <= 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetNextDate',
+                                'Failed to get year from date input')
+        return ''
+    }
+
+    thisYear = type_cast(result)
+
+    // Validate day is within the valid range for the month (before incrementing)
+    // Note: thisDay is already incremented by 1 at this point, so we need to check against thisDay - 1
+    if ((thisDay - 1) < 1 || (thisDay - 1) > NAVDateTimeGetDaysInMonth(thisMonth, thisYear)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetNextDate',
+                                'Invalid day value in date input')
+        return ''
+    }
+
+    // Populate days in month array
     for (x = 1; x <= max_length_array(daysInMonth); x++) {
-        daysInMonth[x] = NAVDateTimeGetDaysInMonth(x)
-    }
-
-    thisDay = type_cast(date_to_day(ldate)) + 1
-    thisMonth = type_cast(date_to_month(ldate))
-    thisYear = type_cast(date_to_year(ldate))
-
-    if (thisDay <= 0 || thisMonth <= 0 || thisYear <= 0) {
-        NAVLog("'Error: NAVGetNextDate() - Failed to get the current date'")
-        return ""
-    }
-
-    if ((thisMonth == 2) && (thisDay == 29)) {
-        if (NAVDateTimeIsLeapYear(thisYear)) {
-            daysInMonth[2] = 29
-        }
+        daysInMonth[x] = NAVDateTimeGetDaysInMonth(x, thisYear)
     }
 
     if (thisDay > daysInMonth[thisMonth]) {
@@ -454,7 +499,29 @@ define_function char[NAV_MAX_BUFFER] NAVGetNextDate() {
         }
     }
 
-    return "format('%02d', thisDay), '/', format('%02d', thisMonth), '/', format('%04d', thisYear)"
+    return "format('%02d', thisMonth), '/', format('%02d', thisDay), '/', format('%04d', thisYear)"
+}
+
+
+/**
+ * @function NAVGetNextDate
+ * @public
+ * @description Alias for NAVDateTimeGetNextDate. Returns the next date after the specified date.
+ *
+ * @param {char[]} date - Date string in MM/DD/YYYY format
+ *
+ * @returns {char[]} String representation of the next date in MM/DD/YYYY format
+ *
+ * @example
+ * stack_var char nextDay[20]
+ * nextDay = NAVGetNextDate('12/31/2023')  // Returns "01/01/2024"
+ * nextDay = NAVGetNextDate(ldate)  // Returns tomorrow's date
+ *
+ * @note Handles month and year transitions, including leap years
+ * @see NAVDateTimeGetNextDate
+ */
+define_function char[10] NAVGetNextDate(char date[]) {
+    return NAVDateTimeGetNextDate(date)
 }
 
 
@@ -789,8 +856,8 @@ define_function integer NAVDateTimeGetDaysInMonth(integer month, integer year) {
         case 1:  return 31  // January
         case 2:  {  // February
             if (NAVDateTimeIsLeapYear(year)) {
-        return 29
-    }
+                return 29
+            }
 
             return 28
         }
