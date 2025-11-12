@@ -66,3 +66,4 @@ build:
       - ./__tests__/include/tui
       - ./__tests__/include/csv-utils
       - ./__tests__/include/stack-overflow
+      - ./__tests__/include/date-time-utils
