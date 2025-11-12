@@ -351,7 +351,7 @@ struct _NAVTimespec {
 
 
 /**
- * @struct _NAVTimeserver
+ * @struct _NAVTimeServer
  * @description Structure representing an NTP time server configuration.
  *
  * @property {char[15]} Ip - IP address of the time server
@@ -359,12 +359,12 @@ struct _NAVTimespec {
  * @property {char[255]} Description - Human readable description of the time server
  *
  * @example
- * stack_var _NAVTimeserver customServer
+ * stack_var _NAVTimeServer customServer
  * customServer.Ip = '132.163.97.2'
  * customServer.Hostname = 'time-a.nist.gov'
  * customServer.Description = 'NIST Internet Time Service'
  */
-struct _NAVTimeserver {
+struct _NAVTimeServer {
     char Ip[15]
     char Hostname[255]
     char Description[255]
