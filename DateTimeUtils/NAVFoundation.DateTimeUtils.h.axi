@@ -320,7 +320,10 @@ DEFINE_TYPE
  * @property {integer} Seconds - Seconds after the minute (0-59)
  * @property {integer} WeekDay - Days since Sunday (0-6)
  * @property {integer} YearDay - Days since January 1 (0-365)
+ * @property {char} IsLeapYear - Leap year flag (true if leap year, false otherwise)
  * @property {char} IsDst - Daylight Saving Time flag (positive if DST in effect, zero if not, negative if unknown)
+ * @property {sinteger} GmtOffset - GMT offset in minutes (positive for east of UTC, negative for west)
+ * @property {char[]} Timezone - Timezone string (e.g., "UTC+01:00")
  *
  * @example
  * stack_var _NAVTimespec timespec
@@ -339,11 +342,11 @@ struct _NAVTimespec {
     integer WeekDay                     // Days since Sunday - [0,6]
     integer YearDay                     // Days since January 1 - [0,365]
 
-    // char IsLeapYear
+    char IsLeapYear
 
     char IsDst                       // Daylight Saving Time flag. The value is positive if DST is in effect, zero if not and negative if no information is available
-    // integer GmtOffset
-    // char  TimeZone[NAV_MAX_CHARS]
+    sinteger GmtOffset               // GMT offset in minutes (positive for east of UTC, negative for west of UTC)
+    char  TimeZone[15]
 }
 
 

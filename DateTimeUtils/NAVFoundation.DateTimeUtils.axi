@@ -36,6 +36,7 @@ SOFTWARE.
 
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.DateTimeUtils.h.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
 
 /**
  * @function NAVDateTimeGetTimespecNow
@@ -87,41 +88,72 @@ define_function char NAVDateTimeGetTimespec(_NAVTimespec timespec, char date[], 
 
     seconds = time_to_second(time)
     if (seconds < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetTimespec',
+                                'Failed to get seconds from time input')
         return false
     }
 
     minutes = time_to_minute(time)
     if (minutes < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetTimespec',
+                                'Failed to get minutes from time input')
         return false
     }
 
     hours = time_to_hour(time)
     if (hours < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetTimespec',
+                                'Failed to get hours from time input')
         return false
     }
 
     day = date_to_day(date)
     if (day < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetTimespec',
+                                'Failed to get day from date input')
         return false
     }
 
     month = date_to_month(date)
     if (month < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetTimespec',
+                                'Failed to get month from date input')
         return false
     }
 
     year = date_to_year(date)
     if (year < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetTimespec',
+                                'Failed to get year from date input')
         return false
     }
 
     dayOfWeek = day_of_week(date)
     if (dayOfWeek < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_DATETIMEUTILS__,
+                                'NAVDateTimeGetTimespec',
+                                'Failed to get day of week from date input')
         return false
     }
 
-    timespec.Year = type_cast(year)
-    timespec.Month = type_cast(month)
+    // Convert from NetLinx formats to timespec formats
+    // NetLinx: year = YYYY (e.g., 2024), month = 1-12
+    // Timespec: Year = years since 1900 (e.g., 124), Month = 0-11
+    timespec.Year = type_cast(year) - 1900
+    timespec.Month = type_cast(month - 1)
     timespec.MonthDay = type_cast(day)
 
     timespec.Hour = type_cast(hours)
@@ -131,59 +163,13 @@ define_function char NAVDateTimeGetTimespec(_NAVTimespec timespec, char date[], 
     timespec.WeekDay = type_cast(dayOfWeek)
     timespec.YearDay = NAVDateTimeGetYearDay(timespec)
 
+    timespec.IsLeapYear = NAVDateTimeIsLeapYear(type_cast(year))
+
     timespec.IsDst = NAVDateTimeIsDst(timespec)
+    timespec.GmtOffset = NAVDateTimeGetGmtOffset()
+    timespec.Timezone = clkmgr_get_timezone()
+    return true
 }
-
-
-DEFINE_CONSTANT
-
-/**
- * @constant NAV_DATETIME_DST_START_MONTH
- * @description Month when Daylight Saving Time starts (March)
- */
-constant integer NAV_DATETIME_DST_START_MONTH = 3
-
-/**
- * @constant NAV_DATETIME_DST_START_DAY
- * @description Day when Daylight Saving Time starts (0 = last Sunday)
- */
-constant integer NAV_DATETIME_DST_START_DAY = 0
-
-/**
- * @constant NAV_DATETIME_DST_START_HOUR
- * @description Hour when Daylight Saving Time starts (2:00 AM)
- */
-constant integer NAV_DATETIME_DST_START_HOUR = 2
-
-/**
- * @constant NAV_DATETIME_DST_START_MINUTE
- * @description Minute when Daylight Saving Time starts
- */
-constant integer NAV_DATETIME_DST_START_MINUTE = 0
-
-/**
- * @constant NAV_DATETIME_DST_END_MONTH
- * @description Month when Daylight Saving Time ends (November)
- */
-constant integer NAV_DATETIME_DST_END_MONTH = 11
-
-/**
- * @constant NAV_DATETIME_DST_END_DAY
- * @description Day when Daylight Saving Time ends (0 = last Sunday)
- */
-constant integer NAV_DATETIME_DST_END_DAY = 0
-
-/**
- * @constant NAV_DATETIME_DST_END_HOUR
- * @description Hour when Daylight Saving Time ends (2:00 AM)
- */
-constant integer NAV_DATETIME_DST_END_HOUR = 2
-
-/**
- * @constant NAV_DATETIME_DST_END_MINUTE
- * @description Minute when Daylight Saving Time ends
- */
-constant integer NAV_DATETIME_DST_END_MINUTE = 0
 
 
 /**
@@ -191,10 +177,72 @@ constant integer NAV_DATETIME_DST_END_MINUTE = 0
  * @public
  * @description Gets the current GMT offset based on timezone configuration.
  *
- * @returns {integer} GMT offset in minutes, or 0 if not available
+ * @returns {sinteger} GMT offset in minutes, or 0 if not available (positive for east of UTC, negative for west)
+ *
+ * @example
+ * stack_var sinteger offset
+ * offset = NAVDateTimeGetGmtOffset()  // Returns offset in minutes (e.g., 60 for UTC+01:00, -300 for UTC-05:00)
  */
-define_function integer NAVDateTimeGetGmtOffset() {
+define_function sinteger NAVDateTimeGetGmtOffset() {
+    stack_var char timezone[15]
+    stack_var integer plusPos
+    stack_var integer minusPos
+    stack_var integer colonPos
+    stack_var char sign
+    stack_var sinteger hours
+    stack_var sinteger minutes
+    stack_var char hoursStr[3]
+    stack_var char minutesStr[3]
 
+    // 'clkmgr_get_timezone' returns a string in the format 'UTC[+|-]HH:MM'
+    timezone = clkmgr_get_timezone()
+
+    // Check if timezone is empty
+    if (!length_array(timezone)) {
+        return 0
+    }
+
+    // Find the sign (+ or -)
+    plusPos = find_string(timezone, '+', 1)
+    minusPos = find_string(timezone, '-', 1)
+
+    if (plusPos > 0) {
+        sign = '+'
+        remove_string(timezone, '+', 1)
+    }
+    else if (minusPos > 0) {
+        sign = '-'
+        remove_string(timezone, '-', 1)
+    }
+    else {
+        // No offset found, assume UTC
+        return 0
+    }
+
+    // Find colon separator
+    colonPos = find_string(timezone, ':', 1)
+
+    if (colonPos > 0) {
+        // Format: UTC+HH:MM
+        hoursStr = left_string(timezone, colonPos - 1)
+        minutesStr = mid_string(timezone, colonPos + 1, 2)
+
+        hours = atoi(hoursStr)
+        minutes = atoi(minutesStr)
+    }
+    else {
+        // Format: UTC+HH or just HH
+        hours = atoi(timezone)
+        minutes = 0
+    }
+
+    // Calculate total offset in minutes
+    if (sign == '+') {
+        return (hours * 60) + minutes
+    }
+    else {
+        return -((hours * 60) + minutes)
+    }
 }
 
 
@@ -218,7 +266,7 @@ define_function integer NAVDateTimeGetLastSundayInMonth(integer year, integer mo
     stack_var integer count
 
     day = 0
-    count = NAVDateTimeGetDaysInMonth(month)
+    count = NAVDateTimeGetDaysInMonth(month, year)
 
     for (x = 1; x <= count; x++) {
         if (day_of_week("format('%02d', month), '/', format('%02d', x), '/', format('%04d', year)") == 1) {
@@ -272,23 +320,29 @@ define_function char NAVDateTimeIsDst(_NAVTimespec timespec) {
     }
 
     // Get days in month (handles leap years)
-    lastDayOfMonth = NAVDateTimeGetDaysInMonth(month)
+    lastDayOfMonth = NAVDateTimeGetDaysInMonth(month, year)
 
     // Calculate day of week for the last day of month
     // Using the current date as reference point
-    lastDayDOW = (timespec.WeekDay + (lastDayOfMonth - day)) % 7
+    // NetLinx weekdays: 1=Sun, 2=Mon, ..., 7=Sat
+    lastDayDOW = timespec.WeekDay + ((lastDayOfMonth - day) % 7)
+    if (lastDayDOW > 7) {
+        lastDayDOW = lastDayDOW - 7
+    }
 
-    // Last Sunday is lastDayOfMonth - lastDayDOW (adjusted for Sunday = 0)
-    if (lastDayDOW == 0) {
+    // Calculate the last Sunday in the month
+    // If lastDayDOW == 1 (Sunday), last Sunday is on the last day
+    // Otherwise, subtract (lastDayDOW - 1) to get to previous Sunday
+    if (lastDayDOW == 1) {
         transitionDay = lastDayOfMonth
     } else {
-        transitionDay = lastDayOfMonth - lastDayDOW
+        transitionDay = lastDayOfMonth - (lastDayDOW - 1)
     }
 
     if (month == 3) {  // March - DST starts on transition day
         return (day >= transitionDay)
     } else { // October - DST ends on transition day
-        return (day <= transitionDay)
+        return (day < transitionDay)
     }
 }
 
@@ -312,15 +366,16 @@ define_function char NAVDateTimeIsDst(_NAVTimespec timespec) {
 define_function integer NAVDateTimeGetYearDay(_NAVTimespec timespec) {
     stack_var integer x
     stack_var integer result
+    stack_var integer fullYear
 
-    for (x = 1; x < timespec.Month; x++) {
-        result = result + NAVDateTimeGetDaysInMonth(x)
+    fullYear = timespec.Year + 1900
 
-        if (x == NAV_DATETIME_MONTH_FEBRUARY && NAVDateTimeIsLeapYear(timespec.Year)) {
-            result++
-        }
+    // Sum days from all previous months (Month is 0-based: 0=Jan, 1=Feb, etc.)
+    for (x = 0; x < timespec.Month; x++) {
+        result = result + NAVDateTimeGetDaysInMonth(x + 1, fullYear)  // GetDaysInMonth expects 1-based
     }
 
+    // Add the current day of the month
     result = result + timespec.MonthDay
 
     return result
@@ -341,7 +396,11 @@ define_function integer NAVDateTimeGetYearDay(_NAVTimespec timespec) {
  * isLeap = NAVDateTimeIsLeapYear(2024)  // Returns true
  */
 define_function char NAVDateTimeIsLeapYear(integer year) {
-    return (year % 400 == 0) || (year % 100 == 0) || (year % 4 == 0)
+    // Leap year rules:
+    // 1. Divisible by 400 -> leap year (e.g., 2000, 2400)
+    // 2. Divisible by 100 but not 400 -> NOT a leap year (e.g., 1900, 2100)
+    // 3. Divisible by 4 but not 100 -> leap year (e.g., 2020, 2024)
+    return (year % 400 == 0) || ((year % 4 == 0) && (year % 100 != 0))
 }
 
 
@@ -586,6 +645,10 @@ define_function NAVDateTimeTimespecLog(char sender[], _NAVTimespec timespec) {
     NAVLog("sender, ' => Hour: ', itoa(timespec.Hour)")
     NAVLog("sender, ' => Minute: ', itoa(timespec.Minute)")
     NAVLog("sender, ' => Second: ', itoa(timespec.Seconds)")
+    NAVLog("sender, ' => Is Leap Year: ', NAVBooleanToString(timespec.IsLeapYear)")
+    NAVLog("sender, ' => Is DST: ', NAVBooleanToString(timespec.IsDst)")
+    NAVLog("sender, ' => GMT Offset: ', itoa(timespec.GmtOffset), ' minutes'")
+    NAVLog("sender, ' => Timezone: ', timespec.Timezone")
 }
 
 
@@ -1218,7 +1281,7 @@ define_function NAVDateTimeSetClockFromTimespec(_NAVTimespec timespec) {
     stack_var char date[NAV_MAX_CHARS]
     stack_var char time[NAV_MAX_CHARS]
 
-    date = "format('%02d', timespec.Month), '/', format('%02d', timespec.MonthDay), '/', format('%04d', timespec.Year)"
+    date = "format('%02d', timespec.Month + 1), '/', format('%02d', timespec.MonthDay), '/', format('%04d', timespec.Year + 1900)"
     time = "format('%02d', timespec.Hour), ':', format('%02d', timespec.Minute), ':', format('%02d', timespec.Seconds)"
 
     NAVDateTimeSetClock(date, time)
