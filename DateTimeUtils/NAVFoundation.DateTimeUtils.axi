@@ -1086,32 +1086,30 @@ define_function NAVDateTimeSetClockFromEpoch(long epoch) {
  *
  * @param {_NAVTimespec} timespec1 - First timespec
  * @param {_NAVTimespec} timespec2 - Second timespec
- * @param {_NAVTimespec} timespecResult - Result timespec (modified in-place)
  *
- * @returns {long} Time difference in seconds
+ * @returns {slong} Time difference in seconds (positive if timespec1 is later, negative if earlier)
  *
  * @example
  * stack_var _NAVTimespec time1
  * stack_var _NAVTimespec time2
- * stack_var _NAVTimespec diff
- * stack_var long seconds
+ * stack_var slong seconds
  *
  * // Populate time1 and time2
- * seconds = NAVDateTimeGetDifference(time1, time2, diff)
+ * seconds = NAVDateTimeGetDifference(time1, time2)
  *
  * @note The result is timespec1 - timespec2
  */
-define_function long NAVDateTimeGetDifference(_NAVTimespec timespec1, _NAVTimespec timespec2, _NAVTimespec timespecResult) {
+define_function slong NAVDateTimeGetDifference(_NAVTimespec timespec1, _NAVTimespec timespec2) {
     stack_var long epoch1
     stack_var long epoch2
-    stack_var long epochResult
+    stack_var slong epochResult
 
     epoch1 = NAVDateTimeGetEpoch(timespec1)
     epoch2 = NAVDateTimeGetEpoch(timespec2)
 
-    epochResult = epoch1 - epoch2
+    epochResult = type_cast(epoch1 - epoch2)
 
-    NAVDateTimeEpochToTimespec(epochResult, timespecResult)
+    return epochResult
 }
 
 
