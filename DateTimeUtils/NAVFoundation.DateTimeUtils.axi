@@ -696,6 +696,48 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFromEpoch(long epoch
 
 
 /**
+ * @function NAVDateTimeFormatOffset
+ * @private
+ * @description Formats a GMT offset in minutes to a timezone string.
+ *
+ * @param {sinteger} offsetMinutes - GMT offset in minutes (positive for east, negative for west)
+ * @param {char} useColon - If true, format as +HH:MM, otherwise +HHMM
+ *
+ * @returns {char[]} Formatted timezone string (e.g., "+01:00" or "+0100")
+ *
+ * @example
+ * stack_var char tz[10]
+ * tz = NAVDateTimeFormatOffset(60, true)  // Returns "+01:00"
+ * tz = NAVDateTimeFormatOffset(-300, false)  // Returns "-0500"
+ */
+define_function char[10] NAVDateTimeFormatOffset(sinteger offsetMinutes, char useColon) {
+    stack_var char sign[1]
+    stack_var sinteger hours
+    stack_var sinteger minutes
+    stack_var sinteger absOffset
+
+    if (offsetMinutes >= 0) {
+        sign = '+'
+        absOffset = offsetMinutes
+    }
+    else {
+        sign = '-'
+        absOffset = -offsetMinutes
+    }
+
+    hours = absOffset / 60
+    minutes = absOffset % 60
+
+    if (useColon) {
+        return "sign, format('%02d', hours), ':', format('%02d', minutes)"
+    }
+    else {
+        return "sign, format('%02d', hours), format('%02d', minutes)"
+    }
+}
+
+
+/**
  * @function NAVDateTimeGetTimestamp
  * @public
  * @description Gets a formatted timestamp string for the specified timespec using the default format.
