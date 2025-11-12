@@ -138,20 +138,6 @@ constant integer NAV_DATETIME_DAY_FRIDAY           = 6
 constant integer NAV_DATETIME_DAY_SATURDAY         = 7
 
 /**
- * @constant NAV_DATETIME_DAY
- * @description Array of day names indexed by day of week identifiers
- */
-constant char NAV_DATETIME_DAY[][NAV_MAX_CHARS] =   {
-                                                        'Sunday',
-                                                        'Monday',
-                                                        'Tuesday',
-                                                        'Wednesday',
-                                                        'Thursday',
-                                                        'Friday',
-                                                        'Saturday'
-                                                    }
-
-/**
  * @constant NAV_DATETIME_MONTH_JANUARY
  * @description Month identifier for January (0-based)
  */

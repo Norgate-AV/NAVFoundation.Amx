@@ -581,8 +581,18 @@ define_function char[NAV_MAX_CHARS] NAVDateTimeGetShortMonthString(integer month
  * stack_var char dayName[20]
  * dayName = NAVDateTimeGetDayString(2)  // Returns "Monday"
  */
-define_function char[NAV_MAX_CHARS] NAVDateTimeGetDayString(integer day) {
-    return NAV_DATETIME_DAY[day]
+define_function char[10] NAVDateTimeGetDayString(integer day) {
+    switch (day) {
+        case 1: return 'Sunday'
+        case 2: return 'Monday'
+        case 3: return 'Tuesday'
+        case 4: return 'Wednesday'
+        case 5: return 'Thursday'
+        case 6: return 'Friday'
+        case 7: return 'Saturday'
+    }
+
+    return ''
 }
 
 
@@ -599,7 +609,7 @@ define_function char[NAV_MAX_CHARS] NAVDateTimeGetDayString(integer day) {
  * stack_var char shortDay[4]
  * shortDay = NAVDateTimeGetShortDayString(2)  // Returns "Mon"
  */
-define_function char[NAV_MAX_CHARS] NAVDateTimeGetShortDayString(integer day) {
+define_function char[3] NAVDateTimeGetShortDayString(integer day) {
     return left_string(NAVDateTimeGetDayString(day), 3)
 }
 
