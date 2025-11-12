@@ -781,11 +781,11 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
     switch (timestampFormat) {
         case NAV_DATETIME_TIMESTAMP_FORMAT_UTC: {
             return "
-                format('%02d', timespec.Month),
+                format('%02d', timespec.Month + 1),
                 '/',
                 format('%02d', timespec.MonthDay),
                 '/',
-                format('%04d', timespec.Year),
+                format('%04d', timespec.Year + 1900),
                 ' @ ',
                 format('%02d', timespec.Hour),
                 ':',
@@ -795,9 +795,9 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
         }
         case NAV_DATETIME_TIMESTAMP_FORMAT_ATOM: {
             return "
-                format('%04d', timespec.Year),
+                format('%04d', timespec.Year + 1900),
                 '-',
-                format('%02d', timespec.Month),
+                format('%02d', timespec.Month + 1),
                 '-',
                 format('%02d', timespec.MonthDay),
                 'T',
@@ -806,7 +806,7 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 format('%02d', timespec.Minute),
                 ':',
                 format('%02d', timespec.Seconds),
-                '+00:00'
+                NAVDateTimeFormatOffset(timespec.GmtOffset, true)
             "
         }
         case NAV_DATETIME_TIMESTAMP_FORMAT_COOKIE: {
@@ -815,9 +815,9 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 ', ',
                 format('%02d', timespec.MonthDay),
                 '-',
-                NAVDateTimeGetShortMonthString(timespec.Month),
+                NAVDateTimeGetShortMonthString(timespec.Month + 1),
                 '-',
-                format('%04d', timespec.Year),
+                format('%04d', timespec.Year + 1900),
                 ' ',
                 format('%02d', timespec.Hour),
                 ':',
@@ -829,9 +829,9 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
         }
         case NAV_DATETIME_TIMESTAMP_FORMAT_ISO8601: {
             return "
-                format('%04d', timespec.Year),
+                format('%04d', timespec.Year + 1900),
                 '-',
-                format('%02d', timespec.Month),
+                format('%02d', timespec.Month + 1),
                 '-',
                 format('%02d', timespec.MonthDay),
                 'T',
@@ -840,7 +840,7 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 format('%02d', timespec.Minute),
                 ':',
                 format('%02d', timespec.Seconds),
-                '+0000'
+                NAVDateTimeFormatOffset(timespec.GmtOffset, false)
             "
         }
         case NAV_DATETIME_TIMESTAMP_FORMAT_RFC822: {
@@ -849,16 +849,17 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 ', ',
                 format('%02d', timespec.MonthDay),
                 ' ',
-                NAVDateTimeGetShortMonthString(timespec.Month),
+                NAVDateTimeGetShortMonthString(timespec.Month + 1),
                 ' ',
-                right_string(format('%04d', timespec.Year), 2),
+                right_string(format('%04d', timespec.Year + 1900), 2),
                 ' ',
                 format('%02d', timespec.Hour),
                 ':',
                 format('%02d', timespec.Minute),
                 ':',
                 format('%02d', timespec.Seconds),
-                ' +0000'
+                ' ',
+                NAVDateTimeFormatOffset(timespec.GmtOffset, false)
             "
         }
         case NAV_DATETIME_TIMESTAMP_FORMAT_RFC850: {
@@ -867,9 +868,9 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 ', ',
                 format('%02d', timespec.MonthDay),
                 '-',
-                NAVDateTimeGetShortMonthString(timespec.Month),
+                NAVDateTimeGetShortMonthString(timespec.Month + 1),
                 '-',
-                right_string(format('%04d', timespec.Year), 2),
+                right_string(format('%04d', timespec.Year + 1900), 2),
                 ' ',
                 format('%02d', timespec.Hour),
                 ':',
@@ -885,16 +886,17 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 ', ',
                 format('%02d', timespec.MonthDay),
                 '-',
-                NAVDateTimeGetShortMonthString(timespec.Month),
+                NAVDateTimeGetShortMonthString(timespec.Month + 1),
                 '-',
-                right_string(format('%04d', timespec.Year), 2),
+                right_string(format('%04d', timespec.Year + 1900), 2),
                 ' ',
                 format('%02d', timespec.Hour),
                 ':',
                 format('%02d', timespec.Minute),
                 ':',
                 format('%02d', timespec.Seconds),
-                ' +0000'
+                ' ',
+                NAVDateTimeFormatOffset(timespec.GmtOffset, false)
             "
         }
         case NAV_DATETIME_TIMESTAMP_FORMAT_RFC1123: {
@@ -903,16 +905,17 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 ', ',
                 format('%02d', timespec.MonthDay),
                 ' ',
-                NAVDateTimeGetShortMonthString(timespec.Month),
+                NAVDateTimeGetShortMonthString(timespec.Month + 1),
                 ' ',
-                format('%04d', timespec.Year),
+                format('%04d', timespec.Year + 1900),
                 ' ',
                 format('%02d', timespec.Hour),
                 ':',
                 format('%02d', timespec.Minute),
                 ':',
                 format('%02d', timespec.Seconds),
-                ' +0000'
+                ' ',
+                NAVDateTimeFormatOffset(timespec.GmtOffset, false)
             "
         }
         case NAV_DATETIME_TIMESTAMP_FORMAT_RFC7231: {
@@ -921,9 +924,9 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 ', ',
                 format('%02d', timespec.MonthDay),
                 ' ',
-                NAVDateTimeGetShortMonthString(timespec.Month),
+                NAVDateTimeGetShortMonthString(timespec.Month + 1),
                 ' ',
-                format('%04d', timespec.Year),
+                format('%04d', timespec.Year + 1900),
                 ' ',
                 format('%02d', timespec.Hour),
                 ':',
@@ -939,23 +942,24 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 ', ',
                 format('%02d', timespec.MonthDay),
                 ' ',
-                NAVDateTimeGetShortMonthString(timespec.Month),
+                NAVDateTimeGetShortMonthString(timespec.Month + 1),
                 ' ',
-                format('%04d', timespec.Year),
+                format('%04d', timespec.Year + 1900),
                 ' ',
                 format('%02d', timespec.Hour),
                 ':',
                 format('%02d', timespec.Minute),
                 ':',
                 format('%02d', timespec.Seconds),
-                ' +0000'
+                ' ',
+                NAVDateTimeFormatOffset(timespec.GmtOffset, false)
             "
         }
         case NAV_DATETIME_TIMESTAMP_FORMAT_RFC3339: {
             return "
-                format('%04d', timespec.Year),
+                format('%04d', timespec.Year + 1900),
                 '-',
-                format('%02d', timespec.Month),
+                format('%02d', timespec.Month + 1),
                 '-',
                 format('%02d', timespec.MonthDay),
                 'T',
@@ -964,14 +968,14 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 format('%02d', timespec.Minute),
                 ':',
                 format('%02d', timespec.Seconds),
-                '+00:00'
+                NAVDateTimeFormatOffset(timespec.GmtOffset, true)
             "
         }
         case NAV_DATETIME_TIMESTAMP_FORMAT_RFC3339EXT: {
             return "
-                format('%04d', timespec.Year),
+                format('%04d', timespec.Year + 1900),
                 '-',
-                format('%02d', timespec.Month),
+                format('%02d', timespec.Month + 1),
                 '-',
                 format('%02d', timespec.MonthDay),
                 'T',
@@ -980,7 +984,8 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 format('%02d', timespec.Minute),
                 ':',
                 format('%02d', timespec.Seconds),
-                '.000+00:00'
+                '.000',
+                NAVDateTimeFormatOffset(timespec.GmtOffset, true)
             "
         }
         case NAV_DATETIME_TIMESTAMP_FORMAT_RSS: {
@@ -989,23 +994,24 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 ', ',
                 format('%02d', timespec.MonthDay),
                 ' ',
-                NAVDateTimeGetShortMonthString(timespec.Month),
+                NAVDateTimeGetShortMonthString(timespec.Month + 1),
                 ' ',
-                format('%04d', timespec.Year),
+                format('%04d', timespec.Year + 1900),
                 ' ',
                 format('%02d', timespec.Hour),
                 ':',
                 format('%02d', timespec.Minute),
                 ':',
                 format('%02d', timespec.Seconds),
-                ' +0000'
+                ' ',
+                NAVDateTimeFormatOffset(timespec.GmtOffset, false)
             "
         }
         case NAV_DATETIME_TIMESTAMP_FORMAT_W3C: {
             return "
-                format('%04d', timespec.Year),
+                format('%04d', timespec.Year + 1900),
                 '-',
-                format('%02d', timespec.Month),
+                format('%02d', timespec.Month + 1),
                 '-',
                 format('%02d', timespec.MonthDay),
                 'T',
@@ -1014,7 +1020,7 @@ define_function char[NAV_MAX_BUFFER] NAVDateTimeGetTimestampFormat(_NAVTimespec 
                 format('%02d', timespec.Minute),
                 ':',
                 format('%02d', timespec.Seconds),
-                '+00:00'
+                NAVDateTimeFormatOffset(timespec.GmtOffset, true)
             "
         }
         default: {
