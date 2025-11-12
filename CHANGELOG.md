@@ -1,5 +1,51 @@
 # Changelog
 
+## [4.0.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.9.0...v4.0.0) (2025-11-12)
+
+### ⚠ BREAKING CHANGES
+
+- **DateTimeUtils:** Function now requires date parameter instead of using ldate
+
+* NAVGetNextDate() → NAVGetNextDate(date)
+* Added NAVDateTimeGetNextDate as primary function
+* NAVGetNextDate now wraps NAVDateTimeGetNextDate
+* Fixed date format output (MM/DD/YYYY)
+* Added input validation and error handling
+* Return type: char[NAV_MAX_BUFFER] → char[10]
+
+- **DateTimeUtils:** Function signature changed from (month) to (month, year)
+
+* Added required year parameter for leap year accuracy
+* Replaced array lookup with switch statement
+* Added input validation with error logging
+* Returns 0 for invalid month/year values
+
+- **DateTimeUtils:** Removed third parameter, now returns slong directly
+
+* Return type: long → slong (supports negative values)
+* Removed timespecResult out parameter
+* Returns difference directly instead of populating struct
+
+- **DateTimeUtils:** Removed global timeserver constant, now passed as parameter
+
+* NAVSetupNetworkTime() signature changed from no params to requiring \_NAVTimeServer
+* Empty timeserver fields default to Windows time server (51.145.123.29)
+* Updated documentation with examples for custom and default usage
+
+### 🌟 Features
+
+- **DateTimeUtils:** add correct calculated gmt offsets to timestamps ([82ccb18](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/82ccb1842dfeca7544768891d6f044ef2fc0ede6))
+- **DateTimeUtils:** add date parameter to NAVGetNextDate ([9ad9476](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9ad9476be8e7ffabf3bc2a7c90b5c38ad290a028))
+- **DateTimeUtils:** add NAVDateTimeFormatOffset helper function ([6d71c24](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6d71c2472f650c5d278fa2d4e29dab3585917e95))
+- **DateTimeUtils:** add new fields to timespec ([b8a531d](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b8a531decf6a407db6804fd3e8065390a6c76929))
+- **DateTimeUtils:** add timeserver parameter to NAVSetupNetworkTime ([d47b2e0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/d47b2e0c72e329d6bc428fdfb5e2545e838c1220))
+- **DateTimeUtils:** change NAVDateTimeGetDifference to return value ([86fb8cb](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/86fb8cb387553116aaa79dedd00a8ff0693bfdad))
+- **DateTimeUtils:** require year parameter in NAVDateTimeGetDaysInMonth ([3db150c](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3db150cba3f39b1b1361813d9ea7c80fe273da55))
+
+### 🐛 Bug Fixes
+
+- **DateTimeUtils:** correct and improve epoch calculations ([d50ef36](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/d50ef369e8d81366db733eb457896696037b4cb3))
+
 ## [3.9.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.8.0...v3.9.0) (2025-11-10)
 
 ### 🌟 Features

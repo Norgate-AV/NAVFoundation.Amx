@@ -2,7 +2,7 @@
     "name": "navfoundation.amx",
     "displayName": "NAVFoundation.Amx",
     "description": "A collection of libraries for NetLinx software development",
-    "version": "3.9.0",
+    "version": "4.0.0",
     "keywords": [
         "amx",
         "netlinx",
