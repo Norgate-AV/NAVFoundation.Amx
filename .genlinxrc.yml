@@ -9,6 +9,7 @@ build:
       - ./Cryptography
       - ./CsvUtils
       - ./DateTimeUtils
+      - ./DnsUtils
       - ./ErrorLogUtils
       - ./Encoding
       - ./Enova
