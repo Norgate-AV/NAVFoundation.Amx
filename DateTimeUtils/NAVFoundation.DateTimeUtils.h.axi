@@ -210,34 +210,6 @@ constant integer NAV_DATETIME_MONTH_NOVEMBER       = 10
 constant integer NAV_DATETIME_MONTH_DECEMBER       = 11
 
 /**
- * @constant NAV_DATETIME_MONTH
- * @description Array of month names indexed by month identifiers
- */
-constant char NAV_DATETIME_MONTH[][NAV_MAX_CHARS]   =   {
-                                                            'January',
-                                                            'February',
-                                                            'March',
-                                                            'April',
-                                                            'May',
-                                                            'June',
-                                                            'July',
-                                                            'August',
-                                                            'September',
-                                                            'October',
-                                                            'November',
-                                                            'December'
-                                                        }
-
-/**
- * @constant NAV_DAYS_IN_MONTH
- * @description Array containing the number of days in each month (non-leap year)
- */
-constant integer NAV_DAYS_IN_MONTH[12] = {
-    31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-}
-
-
-/**
  * @constant NAV_DATETIME_TIMESTAMP_FORMAT_UTC
  * @description Format timestamp as "MM/DD/YYYY @ HH:MMam/pm"
  * @example 11/23/2023 @ 09:30pm

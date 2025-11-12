@@ -545,8 +545,23 @@ define_function NAVDateTimeTimespecLog(char sender[], _NAVTimespec timespec) {
  * stack_var char monthName[20]
  * monthName = NAVDateTimeGetMonthString(3)  // Returns "March"
  */
-define_function char[NAV_MAX_CHARS] NAVDateTimeGetMonthString(integer month) {
-    return NAV_DATETIME_MONTH[month]
+define_function char[10] NAVDateTimeGetMonthString(integer month) {
+    switch (month) {
+        case 1:  return 'January'
+        case 2:  return 'February'
+        case 3:  return 'March'
+        case 4:  return 'April'
+        case 5:  return 'May'
+        case 6:  return 'June'
+        case 7:  return 'July'
+        case 8:  return 'August'
+        case 9:  return 'September'
+        case 10: return 'October'
+        case 11: return 'November'
+        case 12: return 'December'
+    }
+
+    return ''
 }
 
 
@@ -563,7 +578,7 @@ define_function char[NAV_MAX_CHARS] NAVDateTimeGetMonthString(integer month) {
  * stack_var char shortMonth[4]
  * shortMonth = NAVDateTimeGetShortMonthString(3)  // Returns "Mar"
  */
-define_function char[NAV_MAX_CHARS] NAVDateTimeGetShortMonthString(integer month) {
+define_function char[3] NAVDateTimeGetShortMonthString(integer month) {
     return left_string(NAVDateTimeGetMonthString(month), 3)
 }
 
