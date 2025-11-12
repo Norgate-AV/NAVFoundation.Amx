@@ -442,14 +442,57 @@ define_function char NAVDateTimeTimespecPast(_NAVTimespec timespec) {
  * NAVDateTimeEpochToTimespec(epochTime, time)
  */
 define_function NAVDateTimeEpochToTimespec(long epoch, _NAVTimespec timespec) {
-    timespec.Year = type_cast((epoch / NAV_DATETIME_SECONDS_IN_1_YEAR_AVG) + 1970)
-    timespec.Month = type_cast(((epoch % NAV_DATETIME_SECONDS_IN_1_YEAR_AVG) / NAV_DATETIME_SECONDS_IN_1_MONTH_AVG)) + 1
-    timespec.MonthDay = type_cast((((epoch % NAV_DATETIME_SECONDS_IN_1_YEAR_AVG) % NAV_DATETIME_SECONDS_IN_1_MONTH_AVG) / NAV_DATETIME_SECONDS_IN_1_DAY)) + 1
-    timespec.WeekDay = type_cast(((epoch / NAV_DATETIME_SECONDS_IN_1_DAY) + 4) % 7) + 1
-    timespec.YearDay = type_cast((epoch % NAV_DATETIME_SECONDS_IN_1_YEAR_AVG) / NAV_DATETIME_SECONDS_IN_1_DAY) + 1
-    timespec.Hour = type_cast((epoch % NAV_DATETIME_SECONDS_IN_1_DAY) / NAV_DATETIME_SECONDS_IN_1_HOUR)
-    timespec.Minute = type_cast((epoch % NAV_DATETIME_SECONDS_IN_1_HOUR) / NAV_DATETIME_SECONDS_IN_1_MINUTE)
-    timespec.Seconds = type_cast(epoch % NAV_DATETIME_SECONDS_IN_1_MINUTE)
+    stack_var long daysSinceEpoch
+    stack_var long secondsToday
+    stack_var integer year
+    stack_var integer month
+    stack_var integer daysInMonth
+    stack_var long remainingDays
+
+    // Extract time components (these are simple modulo operations)
+    secondsToday = epoch % NAV_DATETIME_SECONDS_IN_1_DAY
+    timespec.Hour = type_cast(secondsToday / NAV_DATETIME_SECONDS_IN_1_HOUR)
+    timespec.Minute = type_cast((secondsToday % NAV_DATETIME_SECONDS_IN_1_HOUR) / NAV_DATETIME_SECONDS_IN_1_MINUTE)
+    timespec.Seconds = type_cast(secondsToday % NAV_DATETIME_SECONDS_IN_1_MINUTE)
+
+    // Calculate total days since epoch
+    daysSinceEpoch = epoch / NAV_DATETIME_SECONDS_IN_1_DAY
+
+    // Calculate day of week (Jan 1, 1970 was Thursday = 5 in 1-based system where Sunday = 1)
+    timespec.WeekDay = type_cast(((daysSinceEpoch + 4) % 7) + 1)
+
+    // Approximate year (will be exact or off by 1)
+    year = type_cast(1970 + (daysSinceEpoch / 365))
+
+    // Calculate exact days since Jan 1, 1970 to Jan 1 of calculated year
+    // Days = (year - 1970) * 365 + leap days
+    remainingDays = daysSinceEpoch - (((year - 1970) * 365) + ((year - 1969) / 4) - ((year - 1901) / 100) + ((year - 1601) / 400))
+
+    // Adjust if we went too far
+    if (remainingDays < 0) {
+        year--
+        remainingDays = daysSinceEpoch - (((year - 1970) * 365) + ((year - 1969) / 4) - ((year - 1901) / 100) + ((year - 1601) / 400))
+    }
+
+    // Store year as years since 1900
+    timespec.Year = year - 1900
+    timespec.YearDay = type_cast(remainingDays + 1)  // YearDay is 1-based (1-366)
+
+    // Calculate month and day from remaining days
+    month = 0  // Month is 0-based (0 = January)
+    while (month < 12 && remainingDays >= 0) {
+        daysInMonth = NAVDateTimeGetDaysInMonth(month + 1, year)
+
+        if (remainingDays < daysInMonth) {
+            break
+        }
+
+        remainingDays = remainingDays - daysInMonth
+        month++
+    }
+
+    timespec.Month = month
+    timespec.MonthDay = type_cast(remainingDays + 1)  // MonthDay is 1-based (1-31)
 }
 
 
@@ -491,15 +534,29 @@ define_function long NAVDateTimeGetEpochNow() {
  */
 define_function long NAVDateTimeGetEpoch(_NAVTimespec timespec) {
     stack_var long result
+    stack_var integer year
+    stack_var long daysSinceEpoch
 
-    result = result + timespec.Seconds
-    result = result + (timespec.Minute * NAV_DATETIME_SECONDS_IN_1_MINUTE)
+    // Convert year from "years since 1900" to full year
+    year = timespec.Year + 1900
+
+    // Calculate days from Jan 1, 1970 to Jan 1 of the given year
+    // Formula: (year - 1970) * 365 + leap day adjustments
+    daysSinceEpoch = (year - 1970) * 365
+    daysSinceEpoch = daysSinceEpoch + ((year - 1969) / 4)      // Add leap years divisible by 4
+    daysSinceEpoch = daysSinceEpoch - ((year - 1901) / 100)    // Subtract century years
+    daysSinceEpoch = daysSinceEpoch + ((year - 1601) / 400)    // Add back 400-year leap years
+
+    // Add days within the current year (YearDay is 1-based, so subtract 1)
+    daysSinceEpoch = daysSinceEpoch + (timespec.YearDay - 1)
+
+    // Convert days to seconds
+    result = daysSinceEpoch * NAV_DATETIME_SECONDS_IN_1_DAY
+
+    // Add time of day
     result = result + (timespec.Hour * NAV_DATETIME_SECONDS_IN_1_HOUR)
-    result = result + ((timespec.YearDay - 1) * NAV_DATETIME_SECONDS_IN_1_DAY)
-    result = result + (((timespec.Year - 1900) - 70) * (NAV_DATETIME_SECONDS_IN_1_YEAR))
-    result = result + ((((timespec.Year - 1900) - 69) / 4) * NAV_DATETIME_SECONDS_IN_1_DAY)
-    result = result - ((((timespec.Year - 1900) - 1) / 100) * NAV_DATETIME_SECONDS_IN_1_DAY)
-    result = result + ((((timespec.Year - 1900) + 299) / 400) * NAV_DATETIME_SECONDS_IN_1_DAY)
+    result = result + (timespec.Minute * NAV_DATETIME_SECONDS_IN_1_MINUTE)
+    result = result + timespec.Seconds
 
     return result
 }
