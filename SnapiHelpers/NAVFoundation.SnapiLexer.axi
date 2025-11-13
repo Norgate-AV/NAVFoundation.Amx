@@ -53,8 +53,6 @@ define_function NAVSnapiLexerInit(_NAVSnapiLexer lexer, char source[]) {
     lexer.source = source
     lexer.cursor = 1
     lexer.start = 1
-    lexer.column = 1
-    lexer.startColumn = 1
     lexer.tokenCount = 0
 }
 
@@ -77,14 +75,11 @@ define_function char NAVSnapiLexerEmitToken(_NAVSnapiLexer lexer, integer type) 
     lexer.tokenCount++
     lexer.tokens[lexer.tokenCount].type = type
     lexer.tokens[lexer.tokenCount].value = NAVStringSlice(lexer.source, lexer.start, lexer.cursor)
-    lexer.tokens[lexer.tokenCount].start.column = lexer.startColumn
-    lexer.tokens[lexer.tokenCount].start.offset = lexer.start
-    lexer.tokens[lexer.tokenCount].end.column = lexer.column
-    lexer.tokens[lexer.tokenCount].end.offset = lexer.cursor
+    lexer.tokens[lexer.tokenCount].start = lexer.start
+    lexer.tokens[lexer.tokenCount].end = lexer.cursor
     set_length_array(lexer.tokens, lexer.tokenCount)
 
     lexer.start = lexer.cursor
-    lexer.startColumn = lexer.column
 
     return true
 }
@@ -101,23 +96,8 @@ define_function char NAVSnapiLexerEmitToken(_NAVSnapiLexer lexer, integer type) 
  */
 define_function char NAVSnapiLexerIgnore(_NAVSnapiLexer lexer) {
     lexer.start = lexer.cursor
-    lexer.startColumn = lexer.column
 
     return true
-}
-
-
-/**
- * @function NAVSnapiLexerHasMoreTokens
- * @private
- * @description Check if there are more characters to tokenize in the source.
- *
- * @param {_NAVSnapiLexer} lexer - The lexer to check
- *
- * @returns {char} True (1) if more characters exist, False (0) otherwise
- */
-define_function char NAVSnapiLexerHasMoreTokens(_NAVSnapiLexer lexer) {
-    return lexer.cursor < length_array(lexer.source)
 }
 
 
@@ -146,52 +126,19 @@ define_function char NAVSnapiLexerIsEOF(_NAVSnapiLexer lexer) {
  * @returns {char} True (1) if the value was consumed successfully, False (0) if no match or EOF
  */
 define_function char NAVSnapiLexerConsume(_NAVSnapiLexer lexer, char value[]) {
-    stack_var integer valueLen
+    stack_var integer length
     stack_var integer i
 
-    valueLen = length_array(value)
+    length = length_array(value)
 
-    for (i = 1; i <= valueLen; i++) {
+    for (i = 1; i <= length; i++) {
         if (NAVSnapiLexerIsEOF(lexer) ||
             lexer.source[lexer.cursor] != value[i]) {
             return false
         }
 
-        if (!NAVSnapiLexerAdvanceCursor(lexer)) {
-            return false
-        }
+        lexer.cursor++
     }
-
-    return true
-}
-
-
-/**
- * @function NAVSnapiLexerCursorIsOutOfBounds
- * @private
- * @description Check if the lexer's cursor is out of bounds.
- *
- * @param {_NAVSnapiLexer} lexer - The lexer to check
- *
- * @returns {char} True (1) if cursor is out of bounds, False (0) otherwise
- */
-define_function char NAVSnapiLexerCursorIsOutOfBounds(_NAVSnapiLexer lexer) {
-    return lexer.cursor <= 0 || lexer.cursor > length_array(lexer.source)
-}
-
-
-/**
- * @function NAVSnapiLexerAdvanceCursor
- * @private
- * @description Advance the lexer's cursor by one position.
- *
- * @param {_NAVSnapiLexer} lexer - The lexer to advance
- *
- * @returns {char} True (1) if cursor advanced successfully, False (0) if out of bounds
- */
-define_function char NAVSnapiLexerAdvanceCursor(_NAVSnapiLexer lexer) {
-    lexer.cursor++
-    lexer.column++
 
     return true
 }
@@ -257,7 +204,7 @@ define_function char NAVSnapiLexerCanAddToken(_NAVSnapiLexer lexer) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_SNAPI_LEXER__,
                                     'NAVSnapiLexerCanAddToken',
-                                    "'Exceeded maximum token limit'")
+                                    "'Exceeded maximum token limit (', itoa(NAV_SNAPI_LEXER_MAX_TOKENS), ')'")
         return false
     }
 
@@ -296,11 +243,7 @@ define_function char NAVSnapiLexerTokenize(_NAVSnapiLexer lexer, char source[]) 
     while (!NAVSnapiLexerIsEOF(lexer)) {
         stack_var char ch
 
-        if (lexer.tokenCount == NAV_SNAPI_LEXER_MAX_TOKENS) {
-            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                        __NAV_FOUNDATION_SNAPI_LEXER__,
-                                        'NAVSnapiLexerTokenize',
-                                        "'Exceeded maximum token limit'")
+        if (!NAVSnapiLexerCanAddToken(lexer)) {
             return false
         }
 

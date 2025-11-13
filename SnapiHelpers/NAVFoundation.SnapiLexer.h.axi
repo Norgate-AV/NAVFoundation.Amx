@@ -38,7 +38,7 @@ SOFTWARE.
 DEFINE_CONSTANT
 
 #IF_NOT_DEFINED NAV_SNAPI_LEXER_MAX_TOKENS
-constant integer NAV_SNAPI_LEXER_MAX_TOKENS           = 200
+constant integer NAV_SNAPI_LEXER_MAX_TOKENS           = 100
 #END_IF
 
 #IF_NOT_DEFINED NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH
@@ -60,17 +60,11 @@ constant integer NAV_SNAPI_TOKEN_TYPE_EOF             = 7     // End of file/inp
 
 DEFINE_TYPE
 
-struct _NAVSnapiTokenPosition {
-    integer column
-    integer offset
-}
-
-
 struct _NAVSnapiToken {
     integer type
     char value[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH]
-    _NAVSnapiTokenPosition start
-    _NAVSnapiTokenPosition end
+    integer start
+    integer end
 }
 
 
@@ -78,9 +72,6 @@ struct _NAVSnapiLexer {
     char source[NAV_SNAPI_LEXER_MAX_SOURCE]
     integer start
     integer cursor
-
-    integer startColumn
-    integer column
 
     _NAVSnapiToken tokens[NAV_SNAPI_LEXER_MAX_TOKENS]
     integer tokenCount
