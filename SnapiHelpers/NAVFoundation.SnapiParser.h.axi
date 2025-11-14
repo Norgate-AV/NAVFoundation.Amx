@@ -40,6 +40,17 @@ DEFINE_CONSTANT
 
 DEFINE_TYPE
 
+/**
+ * @struct _NAVSnapiParser
+ * @private
+ * @description Internal parser state for processing SNAPI token streams
+ *
+ * @property {integer} cursor - Current position in the token array (1-based index)
+ * @property {_NAVSnapiToken[]} tokens - Array of tokens to parse (up to NAV_SNAPI_LEXER_MAX_TOKENS)
+ *
+ * @note This structure is for internal use by the parser implementation
+ * @see NAVSnapiParserParse
+ */
 struct _NAVSnapiParser {
     integer cursor
     _NAVSnapiToken tokens[NAV_SNAPI_LEXER_MAX_TOKENS]

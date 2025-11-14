@@ -42,12 +42,31 @@ SOFTWARE.
 #include 'NAVFoundation.SnapiHelpers.h.axi'
 
 
+/**
+ * @function NAVSnapiParserInit
+ * @private
+ * @description Initialize a SNAPI parser with an array of tokens.
+ *
+ * @param {_NAVSnapiParser} parser - The parser structure to initialize
+ * @param {_NAVSnapiToken[]} tokens - The array of tokens to parse
+ *
+ * @returns {void}
+ */
 define_function NAVSnapiParserInit(_NAVSnapiParser parser, _NAVSnapiToken tokens[]) {
     parser.cursor = 1
     parser.tokens = tokens
 }
 
 
+/**
+ * @function NAVSnapiParserUnescapeString
+ * @private
+ * @description Unescape a SNAPI string token by removing quotes and converting escaped quotes.
+ *
+ * @param {char[]} value - The string token value to unescape (including surrounding quotes)
+ *
+ * @returns {char[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH]} The unescaped string with quotes removed and "" converted to "
+ */
 define_function char[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH] NAVSnapiParserUnescapeString(char value[]) {
     // Remove opening and closing quotes
     value = NAVStringSubstring(value, 2, length_array(value) - 2)
@@ -58,21 +77,58 @@ define_function char[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH] NAVSnapiParserUnescapeStr
 }
 
 
+/**
+ * @function NAVSnapiParserHasMoreTokens
+ * @private
+ * @description Check if the parser has more tokens to process.
+ *
+ * @param {_NAVSnapiParser} parser - The parser to check
+ *
+ * @returns {char} True (1) if more tokens are available, False (0) if all tokens have been consumed
+ */
 define_function char NAVSnapiParserHasMoreTokens(_NAVSnapiParser parser) {
     return parser.cursor <= length_array(parser.tokens)
 }
 
 
+/**
+ * @function NAVSnapiParserAdvance
+ * @private
+ * @description Advance the parser cursor to the next token.
+ *
+ * @param {_NAVSnapiParser} parser - The parser structure
+ *
+ * @returns {void}
+ */
 define_function NAVSnapiParserAdvance(_NAVSnapiParser parser) {
     parser.cursor++
 }
 
 
+/**
+ * @function NAVSnapiParserCanPeek
+ * @private
+ * @description Check if the parser can peek at the next token without advancing.
+ *
+ * @param {_NAVSnapiParser} parser - The parser to check
+ *
+ * @returns {char} True (1) if peek is possible, False (0) if at or beyond last token
+ */
 define_function char NAVSnapiParserCanPeek(_NAVSnapiParser parser) {
     return parser.cursor < length_array(parser.tokens)
 }
 
 
+/**
+ * @function NAVSnapiParserPeek
+ * @private
+ * @description Peek at the next token in the stream without consuming it.
+ *
+ * @param {_NAVSnapiParser} parser - The parser structure
+ * @param {_NAVSnapiToken} token - Output parameter to receive the next token
+ *
+ * @returns {char} True (1) if peek succeeded and token was set, False (0) if unable to peek
+ */
 define_function char NAVSnapiParserPeek(_NAVSnapiParser parser, _NAVSnapiToken token) {
     if (!NAVSnapiParserCanPeek(parser)) {
         return false
@@ -84,12 +140,32 @@ define_function char NAVSnapiParserPeek(_NAVSnapiParser parser, _NAVSnapiToken t
 }
 
 
+/**
+ * @function NAVSnapiParserAddHeader
+ * @private
+ * @description Set the header/command name for a SNAPI message.
+ *
+ * @param {_NAVSnapiMessage} message - The message structure to update
+ * @param {char[]} header - The header/command string to set
+ *
+ * @returns {char} Always returns True (1)
+ */
 define_function char NAVSnapiParserAddHeader(_NAVSnapiMessage message, char header[]) {
     message.Header = header
     return true
 }
 
 
+/**
+ * @function NAVSnapiParserAddParameter
+ * @private
+ * @description Add a parameter to a SNAPI message.
+ *
+ * @param {_NAVSnapiMessage} message - The message structure to update
+ * @param {char[]} parameter - The parameter value to add
+ *
+ * @returns {char} Always returns True (1)
+ */
 define_function char NAVSnapiParserAddParameter(_NAVSnapiMessage message, char parameter[]) {
     message.ParameterCount++
     message.Parameter[message.ParameterCount] = parameter
@@ -98,6 +174,36 @@ define_function char NAVSnapiParserAddParameter(_NAVSnapiMessage message, char p
 }
 
 
+/**
+ * @function NAVSnapiParserParse
+ * @public
+ * @description Parse a SNAPI command string into a structured message with header and parameters.
+ *
+ * @param {char[]} input - The raw SNAPI command string to parse
+ * @param {_NAVSnapiMessage} message - Output parameter to receive the parsed message structure
+ *
+ * @returns {char} True (1) if parsing succeeded, False (0) if tokenization or parsing failed
+ *
+ * @example
+ * // Parse a simple command
+ * stack_var _NAVSnapiMessage msg
+ * NAVSnapiParserParse('POWER-ON', msg)
+ * // msg.Header = 'POWER'
+ * // msg.Parameter[1] = 'ON'
+ *
+ * @example
+ * // Parse a query command
+ * stack_var _NAVSnapiMessage msg
+ * NAVSnapiParserParse('?POWER', msg)
+ * // msg.Header = '?POWER'
+ *
+ * @example
+ * // Parse a command with string parameter
+ * stack_var _NAVSnapiMessage msg
+ * NAVSnapiParserParse('TEXT-"Hello World"', msg)
+ * // msg.Header = 'TEXT'
+ * // msg.Parameter[1] = 'Hello World'
+ */
 define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message) {
     stack_var _NAVSnapiLexer lexer
     stack_var _NAVSnapiParser parser
