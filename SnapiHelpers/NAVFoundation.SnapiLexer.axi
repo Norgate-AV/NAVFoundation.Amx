@@ -341,7 +341,8 @@ define_function char NAVSnapiLexerIsIdentifierChar(char value) {
             value == '@' ||
             value == '$' ||
             value == '%' ||
-            value == '~'
+            value == '~' ||
+            value == '#'
 }
 
 

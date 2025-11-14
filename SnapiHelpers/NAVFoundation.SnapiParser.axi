@@ -68,11 +68,19 @@ define_function NAVSnapiParserInit(_NAVSnapiParser parser, _NAVSnapiToken tokens
  * @returns {char[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH]} The unescaped string with quotes removed and "" converted to "
  */
 define_function char[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH] NAVSnapiParserUnescapeString(char value[]) {
+    stack_var integer length
+
+    length = length_array(value)
+
+    // Handle empty string case: "" becomes empty
+    if (length <= 2) {
+        return ''
+    }
+
     // Remove opening and closing quotes
-    value = NAVStringSubstring(value, 2, length_array(value) - 2)
+    value = NAVStringSubstring(value, 2, length - 2)
 
     // Replace escaped quotes ("") with single quotes (")
-    // Might replace this with a manual for loop if problematic
     return NAVStringReplace(value, '""', '"')
 }
 
@@ -209,6 +217,7 @@ define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message)
     stack_var _NAVSnapiParser parser
     stack_var char parsingHeader
     stack_var char currentValue[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH]
+    stack_var char hasValue
 
     // Tokenize the input
     if (!NAVSnapiLexerTokenize(lexer, input)) {
@@ -224,6 +233,7 @@ define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message)
 
     // Accumulator
     currentValue = ''
+    hasValue = false
 
     // Always start by parsing the header
     parsingHeader = true
@@ -251,6 +261,7 @@ define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message)
 
                 NAVSnapiParserAddHeader(message, NAVTrimString(currentValue))
                 currentValue = ''
+                hasValue = false
                 parsingHeader = false
 
                 NAVSnapiParserAdvance(parser)
@@ -269,6 +280,7 @@ define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message)
                 NAVSnapiParserAddParameter(message, currentValue)
 
                 currentValue = ''
+                hasValue = false
 
                 NAVSnapiParserAdvance(parser)
             }
@@ -325,12 +337,14 @@ define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message)
                 }
 
                 currentValue = "currentValue, value"
+                hasValue = true
                 NAVSnapiParserAdvance(parser)
             }
 
             case NAV_SNAPI_TOKEN_TYPE_IDENTIFIER:
             case NAV_SNAPI_TOKEN_TYPE_WHITESPACE: {
                 currentValue = "currentValue, token.value"
+                hasValue = true
                 NAVSnapiParserAdvance(parser)
             }
 
@@ -340,7 +354,7 @@ define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message)
                     NAVSnapiParserAddHeader(message, NAVTrimString(currentValue))
                 }
                 else {
-                    if (length_array(currentValue) ||
+                    if (hasValue ||
                         parser.tokens[parser.cursor - 1].type == NAV_SNAPI_TOKEN_TYPE_COMMA) {
                         NAVSnapiParserAddParameter(message, currentValue)
                     }
