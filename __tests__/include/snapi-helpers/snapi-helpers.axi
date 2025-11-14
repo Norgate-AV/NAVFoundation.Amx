@@ -1,5 +1,8 @@
 #DEFINE TESTING_NAVSNAPILEXER
-#DEFINE SNAPI_LEXER_DEBUG
+#DEFINE TESTING_NAVSNAPIPARSER
+#DEFINE TESTING_NAVSNAPIPARSEMESSAGE
+// #DEFINE SNAPI_LEXER_DEBUG
+// #DEFINE SNAPI_PARSER_DEBUG
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.Assert.axi'
 #include 'NAVFoundation.ErrorLogUtils.axi'
@@ -9,9 +12,25 @@
 #include 'NAVSnapiLexer.axi'
 #END_IF
 
+#IF_DEFINED TESTING_NAVSNAPIPARSER
+#include 'NAVSnapiParser.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVSNAPIPARSEMESSAGE
+#include 'NAVSnapiParseMessage.axi'
+#END_IF
+
 define_function RunSnapiHelpersTests() {
     #IF_DEFINED TESTING_NAVSNAPILEXER
     TestNAVSnapiLexerBasic()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVSNAPIPARSER
+    TestNAVSnapiParserBasic()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVSNAPIPARSEMESSAGE
+    TestNAVSnapiParseMessage()
     #END_IF
 }
 

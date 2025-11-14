@@ -268,7 +268,7 @@ define_function char NAVSnapiLexerTokenize(_NAVSnapiLexer lexer, char source[]) 
                     return false
                 }
 
-                if (!NAVSnapiLexerEmitToken(lexer, NAV_SNAPI_TOKEN_TYPE_QUENTIONMARK)) {
+                if (!NAVSnapiLexerEmitToken(lexer, NAV_SNAPI_TOKEN_TYPE_QUESTIONMARK)) {
                     return false
                 }
             }
@@ -486,7 +486,7 @@ define_function char[NAV_MAX_BUFFER] NAVSnapiLexerTokenSerialize(_NAVSnapiToken 
 define_function char[NAV_MAX_CHARS] NAVSnapiLexerGetTokenType(integer type) {
     switch (type) {
         case NAV_SNAPI_TOKEN_TYPE_DASH:         { return 'DASH' }           // -
-        case NAV_SNAPI_TOKEN_TYPE_QUENTIONMARK: { return 'QUENTIONMARK' }   // ?
+        case NAV_SNAPI_TOKEN_TYPE_QUESTIONMARK: { return 'QUESTIONMARK' }   // ?
         case NAV_SNAPI_TOKEN_TYPE_COMMA:        { return 'COMMA' }          // ,
         case NAV_SNAPI_TOKEN_TYPE_IDENTIFIER:   { return 'IDENTIFIER' }     // Alphanumeric strings
         case NAV_SNAPI_TOKEN_TYPE_STRING:       { return 'STRING' }         // Quoted strings or unquoted values

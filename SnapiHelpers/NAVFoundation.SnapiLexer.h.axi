@@ -51,7 +51,7 @@ constant long NAV_SNAPI_LEXER_MAX_SOURCE              = 1024
 
 constant integer NAV_SNAPI_TOKEN_TYPE_COMMA           = 1     // ,
 constant integer NAV_SNAPI_TOKEN_TYPE_DASH            = 2     // -
-constant integer NAV_SNAPI_TOKEN_TYPE_QUENTIONMARK    = 3     // ?
+constant integer NAV_SNAPI_TOKEN_TYPE_QUESTIONMARK    = 3     // ?
 constant integer NAV_SNAPI_TOKEN_TYPE_IDENTIFIER      = 4     // Alphanumeric strings
 constant integer NAV_SNAPI_TOKEN_TYPE_STRING          = 5     // Quoted strings or unquoted values
 constant integer NAV_SNAPI_TOKEN_TYPE_WHITESPACE      = 6     // Spaces or tabs

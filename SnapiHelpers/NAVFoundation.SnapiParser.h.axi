@@ -34,10 +34,33 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_SNAPI_PARSER_H__
 #DEFINE __NAV_FOUNDATION_SNAPI_PARSER_H__ 'NAVFoundation.SnapiParser.h'
 
+#include 'NAVFoundation.SnapiLexer.h.axi'
 
 DEFINE_CONSTANT
 
 DEFINE_TYPE
+
+struct _NAVSnapiParser {
+    integer cursor
+    _NAVSnapiToken tokens[NAV_SNAPI_LEXER_MAX_TOKENS]
+}
+
+/**
+ * @struct _NAVSnapiMessage
+ * @description Represents a parsed SNAPI protocol message with header and parameters
+ *
+ * @property {char[NAV_MAX_BUFFER]} Header - Command name or message type
+ * @property {char[][]} Parameter - Array of message parameters (up to NAV_MAX_SNAPI_MESSAGE_PARAMETERS)
+ * @property {integer} ParameterCount - Number of parameters in the message
+ *
+ * @note Use NAVParseSnapiMessage to populate this structure from a raw SNAPI message
+ * @see NAVParseSnapiMessage
+ */
+// struct _NAVSnapiMessage {
+//     char Header[NAV_MAX_BUFFER]
+//     char Parameter[NAV_MAX_SNAPI_MESSAGE_PARAMETERS][255]
+//     integer ParameterCount
+// }
 
 
 #END_IF // __NAV_FOUNDATION_SNAPI_PARSER_H__
