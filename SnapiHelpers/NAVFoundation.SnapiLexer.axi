@@ -131,6 +131,10 @@ define_function char NAVSnapiLexerConsume(_NAVSnapiLexer lexer, char value[]) {
 
     length = length_array(value)
 
+    if (!length) {
+        return false
+    }
+
     for (i = 1; i <= length; i++) {
         if (NAVSnapiLexerIsEOF(lexer) ||
             lexer.source[lexer.cursor] != value[i]) {
@@ -342,7 +346,26 @@ define_function char NAVSnapiLexerIsIdentifierChar(char value) {
             value == '$' ||
             value == '%' ||
             value == '~' ||
-            value == '#'
+            value == '#' ||
+            value == '^' ||
+            value == '!' ||
+            value == '&' ||
+            value == '£' ||
+            value == '*' ||
+            value == '+' ||
+            value == '=' ||
+            value == '<' ||
+            value == '>' ||
+            value == '`' ||
+            value == '?' ||
+            value == '|' ||
+            value == '(' ||
+            value == ')' ||
+            value == '{' ||
+            value == '}' ||
+            value == '[' ||
+            value == ']' ||
+            value == '~'
 }
 
 

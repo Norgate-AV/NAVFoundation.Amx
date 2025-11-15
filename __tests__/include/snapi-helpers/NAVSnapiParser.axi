@@ -28,7 +28,12 @@ constant char SNAPI_PARSER_BASIC_TEST[][255] = {
     'COMBO-A,"B",C,"D,E",F',                    // 17: Mix of quoted and unquoted
     'NUMBERS-123,456.789,"-10"',                // 18: Numeric parameters (negative must be quoted)
     'LONG-A,B,C,D,E,F,G,H,I,J',                 // 19: Many parameters
-    'WHITESPACE- , , '                          // 20: Parameters with just whitespace
+    'WHITESPACE- , , ',                         // 20: Parameters with just whitespace
+    'DASH-test-value,another-one',              // 21: Dash in unquoted parameters (after first separator)
+    'QUERY-param1,"?query",param2',             // 22: Question mark in quoted parameter
+    'MIXED-value-with-dashes,"data?query"',     // 23: Both dash and question mark in parameters
+    'UNQUOTED-data?test,value',                 // 24: Unquoted question mark in parameter
+    'SWITCH--,-,--,?-,?'                        // 25: Edge case with multiple dashes and question marks
 }
 
 constant char SNAPI_PARSER_BASIC_EXPECTED_HEADER_VALUES[][50] = {
@@ -51,7 +56,12 @@ constant char SNAPI_PARSER_BASIC_EXPECTED_HEADER_VALUES[][50] = {
     'COMBO',
     'NUMBERS',
     'LONG',
-    'WHITESPACE'
+    'WHITESPACE',
+    'DASH',
+    'QUERY',
+    'MIXED',
+    'UNQUOTED',
+    'SWITCH'
 }
 
 constant integer SNAPI_PARSER_BASIC_EXPECTED_ARG_COUNTS[] = {
@@ -74,7 +84,12 @@ constant integer SNAPI_PARSER_BASIC_EXPECTED_ARG_COUNTS[] = {
     5,
     3,
     10,
-    3
+    3,
+    2,
+    3,
+    2,
+    2,
+    5
 }
 
 constant char SNAPI_PARSER_BASIC_EXPECTED_ARG_VALUES[][][50] = {
@@ -167,6 +182,30 @@ constant char SNAPI_PARSER_BASIC_EXPECTED_ARG_VALUES[][][50] = {
         ' ',
         ' ',
         ' '
+    },
+    {
+        'test-value',
+        'another-one'
+    },
+    {
+        'param1',
+        '?query',
+        'param2'
+    },
+    {
+        'value-with-dashes',
+        'data?query'
+    },
+    {
+        'data?test',
+        'value'
+    },
+    {
+        '-',
+        '-',
+        '--',
+        '?-',
+        '?'
     }
 }
 

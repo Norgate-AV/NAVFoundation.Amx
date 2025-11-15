@@ -42,8 +42,13 @@
 
 (*
  * Headers can contain any characters except:
- * - Cannot have internal `-` (would be parsed as separator)
- * - Can end with `-` (will be normalized by packer)
+ * - Cannot contain `-` (first `-` is always header/parameter separator)
+ * - `?` only special when it appears at command start (query command)
+ *
+ * Design decision: We use a simple rule where the FIRST `-` in a command
+ * always marks the header/parameter boundary. This prevents ambiguity
+ * in parsing. Subsequent `-` characters in parameters are treated as
+ * regular content.
  *
  * Practical examples: VERSION, ?STATUS, MY COMMAND, CMD@123
  *)
@@ -56,7 +61,7 @@
                 | <special-char>
                 ;
 
-(* Note: `-` is intentionally excluded from header-char to prevent ambiguity *)
+(* Note: `-` intentionally excluded from header to enforce "first `-` is separator" rule *)
 
 
 (* ==================================================================
@@ -171,7 +176,8 @@
                  | "(" | ")" | "_" | "+" | "=" | "[" | "]" | "{"
                  | "}" | "|" | "\" | ":" | ";" | "'" | "<" | ">"
                  | "." | "?" | "/" | "~" | "`" | ","
-                 (* Note: `-` excluded to prevent header ambiguity *)
+                 (* Note: `-` excluded from headers; first `-` is always separator *)
+                 (* `-` and `?` are allowed in parameters as regular characters *)
                  ;
 
 
@@ -198,6 +204,14 @@
  * Edge cases that are valid:
  *
  * COMMAND-
+ * COMMAND- value
+ * CMD@123-test
+ * DASH-test-value,another-one         (dashes in parameters)
+ * QUERY-param1,"?query",param2        (question mark in quoted parameter)
+ * UNQUOTED-data?test,value            (question mark in unquoted parameter)
+ * SWITCH--,-,--,?-,?                  (extreme edge case: special chars as parameters)
+ *
+ *)
  * COMMAND- value
  * CMD@123-test
  *

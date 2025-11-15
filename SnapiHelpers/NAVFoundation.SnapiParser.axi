@@ -251,18 +251,15 @@ define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message)
             case NAV_SNAPI_TOKEN_TYPE_DASH: {
                 // This terminates the header
                 // Although commands can be header only so we may never see this
-                if (!parsingHeader) {
-                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                __NAV_FOUNDATION_SNAPI_PARSER__,
-                                                'NAVSnapiParserParse',
-                                                "'Unexpected dash token in parameter at position ', itoa(token.start)")
-                    return false
+                if (parsingHeader) {
+                    NAVSnapiParserAddHeader(message, NAVTrimString(currentValue))
+                    currentValue = ''
+                    parsingHeader = false
+                    hasValue = false
+                } else {
+                    currentValue = "currentValue, token.value"
+                    hasValue = true
                 }
-
-                NAVSnapiParserAddHeader(message, NAVTrimString(currentValue))
-                currentValue = ''
-                hasValue = false
-                parsingHeader = false
 
                 NAVSnapiParserAdvance(parser)
             }
@@ -284,44 +281,6 @@ define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message)
 
                 NAVSnapiParserAdvance(parser)
             }
-            case NAV_SNAPI_TOKEN_TYPE_QUESTIONMARK: {
-                // The start of a query header
-                // The next token MUST be an identifier, if not it's invalid
-                stack_var _NAVSnapiToken next
-
-                if (!NAVSnapiParserPeek(parser, next)) {
-                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                        __NAV_FOUNDATION_SNAPI_PARSER__,
-                        'NAVSnapiParserParse',
-                        "'Unexpected end of input after ? at position ', itoa(token.start)")
-                        return false
-                    }
-
-                if (next.type != NAV_SNAPI_TOKEN_TYPE_IDENTIFIER) {
-                    stack_var char value[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH]
-
-                    switch (next.type) {
-                        case NAV_SNAPI_TOKEN_TYPE_STRING: {
-                            value = "'"', next.value, '"'"
-                        }
-                        case NAV_SNAPI_TOKEN_TYPE_EOF: {
-                            value = 'EOF'
-                        }
-                        default: {
-                            value = next.value
-                        }
-                    }
-
-                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                __NAV_FOUNDATION_SNAPI_PARSER__,
-                                                'NAVSnapiParserParse',
-                                                "'Unexpected token after ?: ', value, ' at position ', itoa(next.start)")
-                    return false
-                }
-
-                currentValue = "currentValue, token.value"
-                NAVSnapiParserAdvance(parser)
-            }
             case NAV_SNAPI_TOKEN_TYPE_STRING: {
                 // Only valid in args
                 stack_var char value[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH]
@@ -341,6 +300,7 @@ define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message)
                 NAVSnapiParserAdvance(parser)
             }
 
+            case NAV_SNAPI_TOKEN_TYPE_QUESTIONMARK:
             case NAV_SNAPI_TOKEN_TYPE_IDENTIFIER:
             case NAV_SNAPI_TOKEN_TYPE_WHITESPACE: {
                 currentValue = "currentValue, token.value"
