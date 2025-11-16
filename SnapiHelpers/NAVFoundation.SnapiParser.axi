@@ -65,9 +65,9 @@ define_function NAVSnapiParserInit(_NAVSnapiParser parser, _NAVSnapiToken tokens
  *
  * @param {char[]} value - The string token value to unescape (including surrounding quotes)
  *
- * @returns {char[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH]} The unescaped string with quotes removed and "" converted to "
+ * @returns {char[NAV_SNAPI_PARSER_MAX_PARAM_LENGTH]} The unescaped string with quotes removed and "" converted to "
  */
-define_function char[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH] NAVSnapiParserUnescapeString(char value[]) {
+define_function char[NAV_SNAPI_PARSER_MAX_PARAM_LENGTH] NAVSnapiParserUnescapeString(char value[]) {
     stack_var integer length
 
     length = length_array(value)
@@ -216,7 +216,7 @@ define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message)
     stack_var _NAVSnapiLexer lexer
     stack_var _NAVSnapiParser parser
     stack_var char parsingHeader
-    stack_var char currentValue[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH]
+    stack_var char currentValue[NAV_SNAPI_PARSER_MAX_PARAM_LENGTH]
     stack_var char hasValue
 
     // Tokenize the input
@@ -231,7 +231,7 @@ define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message)
     // Initialize parser
     NAVSnapiParserInit(parser, lexer.tokens)
 
-    // Accumulator
+    // Accumulator for building header and parameter values from tokens
     currentValue = ''
     hasValue = false
 
@@ -283,7 +283,7 @@ define_function char NAVSnapiParserParse(char input[], _NAVSnapiMessage message)
             }
             case NAV_SNAPI_TOKEN_TYPE_STRING: {
                 // Only valid in args
-                stack_var char value[NAV_SNAPI_LEXER_MAX_TOKEN_LENGTH]
+                stack_var char value[NAV_SNAPI_PARSER_MAX_PARAM_LENGTH]
 
                 value = NAVSnapiParserUnescapeString(token.value)
 

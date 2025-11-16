@@ -249,7 +249,7 @@ define_function char NAVParseSnapiMessage(char data[], _NAVSnapiMessage message)
  * @note This is an internal helper function used by NAVParseSnapiMessage
  * @see NAVParseSnapiMessage
  */
-define_function char[255] NAVParseSnapiMessageParamter(char data[]) {
+define_function char[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH] NAVParseSnapiMessageParamter(char data[]) {
     if (NAVContains(data, ',')) {
         return NAVStripRight(remove_string(data, ',', 1), 1)
     }
@@ -271,8 +271,8 @@ define_function char[255] NAVParseSnapiMessageParamter(char data[]) {
  * @note This is an internal helper function used by NAVParseSnapiMessage
  * @see NAVParseSnapiMessage
  */
-define_function char[255] NAVParseEscapedSnapiMessageParameter(char data[]) {
-    stack_var char result[255]
+define_function char[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH] NAVParseEscapedSnapiMessageParameter(char data[]) {
+    stack_var char result[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH]
     stack_var integer i
     stack_var char inEscape
 

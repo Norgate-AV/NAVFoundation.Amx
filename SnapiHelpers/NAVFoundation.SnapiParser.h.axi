@@ -38,6 +38,24 @@ SOFTWARE.
 
 DEFINE_CONSTANT
 
+/**
+ * Maximum length of a SNAPI command header.
+ * Headers are the command names (e.g., "POWER", "INPUT", "?VERSION").
+ * @default 100
+ */
+#IF_NOT_DEFINED NAV_SNAPI_PARSER_MAX_HEADER_LENGTH
+constant integer NAV_SNAPI_PARSER_MAX_HEADER_LENGTH   = 100
+#END_IF
+
+/**
+ * Maximum length of a single SNAPI parameter value.
+ * Parameters are accumulated during parsing from multiple tokens.
+ * @default 255
+ */
+#IF_NOT_DEFINED NAV_SNAPI_PARSER_MAX_PARAM_LENGTH
+constant integer NAV_SNAPI_PARSER_MAX_PARAM_LENGTH    = 255
+#END_IF
+
 DEFINE_TYPE
 
 /**
@@ -55,23 +73,6 @@ struct _NAVSnapiParser {
     integer cursor
     _NAVSnapiToken tokens[NAV_SNAPI_LEXER_MAX_TOKENS]
 }
-
-/**
- * @struct _NAVSnapiMessage
- * @description Represents a parsed SNAPI protocol message with header and parameters
- *
- * @property {char[NAV_MAX_BUFFER]} Header - Command name or message type
- * @property {char[][]} Parameter - Array of message parameters (up to NAV_MAX_SNAPI_MESSAGE_PARAMETERS)
- * @property {integer} ParameterCount - Number of parameters in the message
- *
- * @note Use NAVParseSnapiMessage to populate this structure from a raw SNAPI message
- * @see NAVParseSnapiMessage
- */
-// struct _NAVSnapiMessage {
-//     char Header[NAV_MAX_BUFFER]
-//     char Parameter[NAV_MAX_SNAPI_MESSAGE_PARAMETERS][255]
-//     integer ParameterCount
-// }
 
 
 #END_IF // __NAV_FOUNDATION_SNAPI_PARSER_H__
