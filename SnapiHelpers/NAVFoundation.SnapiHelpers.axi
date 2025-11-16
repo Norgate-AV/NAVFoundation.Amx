@@ -169,7 +169,7 @@ define_function integer NAVGetVolumeMute(dev device) {
  * @param {char[]} data - Raw SNAPI message string
  * @param {_NAVSnapiMessage} message - Message structure to populate (modified in-place)
  *
- * @returns {void}
+ * @returns {char} True (1) if parsing succeeded, False (0) if parsing failed
  *
  * @example
  * stack_var _NAVSnapiMessage msg
@@ -179,25 +179,25 @@ define_function integer NAVGetVolumeMute(dev device) {
  * @see _NAVSnapiMessage
  * @see NAVSnapiMessageLog
  */
-define_function integer NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
+define_function char NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
     stack_var char dataCopy[NAV_MAX_BUFFER]
     stack_var integer count
 
     if (!length_array(data)) {
-        return 1    // Invald argument
+        return false    // Invald argument
     }
 
     dataCopy = data
 
     if (!NAVContains(dataCopy, '-')) {
         message.Header = dataCopy
-        return 0
+        return true
     }
 
     message.Header = NAVStripRight(remove_string(dataCopy, '-', 1), 1)
 
     if (!length_array(dataCopy)) {
-        return 0
+        return true
     }
 
     count = 0
@@ -226,7 +226,7 @@ define_function integer NAVParseSnapiMessage(char data[], _NAVSnapiMessage messa
     }
 
     set_length_array(message.Parameter, count)
-    return 0
+    return true
 }
 
 
