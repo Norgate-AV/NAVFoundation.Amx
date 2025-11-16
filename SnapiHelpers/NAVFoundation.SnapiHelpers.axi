@@ -225,6 +225,13 @@ define_function char NAVParseSnapiMessage(char data[], _NAVSnapiMessage message)
         message.ParameterCount = count
     }
 
+    // Handle trailing comma (creates an empty final parameter)
+    if (data[length_array(data)] == ',') {
+        count++
+        message.Parameter[count] = ''
+        message.ParameterCount = count
+    }
+
     set_length_array(message.Parameter, count)
     return true
 }
