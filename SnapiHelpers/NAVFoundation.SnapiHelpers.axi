@@ -37,6 +37,7 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.SnapiHelpers.h.axi'
 #include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.SnapiParser.axi'
 
 
 /**
@@ -331,6 +332,7 @@ define_function char[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH] NAVParseEscapedSnap
  * NAVSnapiMessageLog(msg)
  *
  * @see NAVParseSnapiMessage
+ * @see NAVSnapiParse
  * @see _NAVSnapiMessage
  */
 define_function NAVSnapiMessageLog(_NAVSnapiMessage message) {
@@ -350,6 +352,46 @@ define_function NAVSnapiMessageLog(_NAVSnapiMessage message) {
             NAVLog("'    Parameter ', itoa(x), ': ', message.Parameter[x]")
         }
     }
+}
+
+
+/**
+ * @function NAVSnapiParse
+ * @public
+ * @description Parse a SNAPI command string using lexer/parser implementation.
+ * This is a wrapper around the token-based lexer/parser that provides the same
+ * clean API as NAVParseSnapiMessage. Offers better architecture and debuggability
+ * at a small performance cost compared to the string-based parser.
+ *
+ * @param {char[]} data - Raw SNAPI command string to parse
+ * @param {_NAVSnapiMessage} message - Output structure to populate with parsed data
+ *
+ * @returns {char} True (1) if parsing succeeded, False (0) if parsing failed
+ *
+ * @example
+ * stack_var _NAVSnapiMessage msg
+ * if (NAVSnapiParse('INPUT-HDMI,1', msg)) {
+ *     // msg.Header = 'INPUT'
+ *     // msg.ParameterCount = 2
+ *     // msg.Parameter[1] = 'HDMI'
+ *     // msg.Parameter[2] = '1'
+ * }
+ *
+ * @example
+ * stack_var _NAVSnapiMessage msg
+ * NAVSnapiParse('PASSTHRU-"Complex,Value",123', msg)
+ * // msg.Header = 'PASSTHRU'
+ * // msg.Parameter[1] = 'Complex,Value' (comma preserved, quotes removed)
+ * // msg.Parameter[2] = '123'
+ *
+ * @note Uses the lexer/parser implementation for token-based parsing
+ * @note For better performance, use NAVParseSnapiMessage (string-based)
+ * @see NAVParseSnapiMessage
+ * @see NAVSnapiParserParse
+ * @see _NAVSnapiMessage
+ */
+define_function char NAVSnapiParse(char data[], _NAVSnapiMessage message) {
+    return NAVSnapiParserParse(data, message)
 }
 
 
