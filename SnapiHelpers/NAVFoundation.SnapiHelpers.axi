@@ -271,28 +271,47 @@ define_function char[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH] NAVParseSnapiMessag
  * @note This is an internal helper function used by NAVParseSnapiMessage
  * @see NAVParseSnapiMessage
  */
-define_function char[255] NAVParseEscapedSnapiMessageParameter(char data[]) {
-    stack_var integer x
-    stack_var char endings[2][3]
+define_function char[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH] NAVParseEscapedSnapiMessageParameter(char data[]) {
+    stack_var char result[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH]
+    stack_var integer i
+    stack_var char inEscape
 
-    endings[1] = '"",'
-    endings[2] = '",'
+    // Parse until we find the closing quote (that's not part of an escape sequence)
+    for (i = 1; i <= length_array(data); i++) {
+        stack_var char ch
 
-    for (x = 1; x <= max_length_array(endings); x++) {
-        stack_var integer index
+        ch = data[i]
 
-        index = NAVIndexOf(data, endings[x], 1)
+        if (ch == '"') {
+            // Check if this is an escaped quote ("")
+            if (i < length_array(data) && data[i + 1] == '"') {
+                // This is an escaped quote - add one quote to result and skip the next quote
+                result = "result, ch"
+                i++  // Skip the second quote
+                continue
+            }
+            else {
+                // This is the closing quote - we're done
+                // Remove everything we've processed from data (including the closing quote)
+                get_buffer_string(data, i)
 
-        if (index) {
-            stack_var integer end
+                // Also consume the trailing comma if present
+                if (length_array(data) && data[1] == ',') {
+                    get_buffer_char(data)
+                }
 
-            end = index + length_array(endings[x])
-
-            return NAVStripRight(get_buffer_string(data, end), 2)
+                return result
+            }
+        }
+        else {
+            // Regular character - add to result
+            result = "result, ch"
         }
     }
 
-    return NAVStripRight(get_buffer_string(data, length_array(data)), 1)
+    // If we get here, we didn't find a closing quote - just return what we have
+    get_buffer_string(data, length_array(data))
+    return result
 }
 
 
