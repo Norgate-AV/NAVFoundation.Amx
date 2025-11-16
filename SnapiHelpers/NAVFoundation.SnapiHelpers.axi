@@ -203,7 +203,7 @@ define_function char NAVParseSnapiMessage(char data[], _NAVSnapiMessage message)
     count = 0
     while (length_array(dataCopy)) {
         stack_var char byte
-        stack_var char parameter[255]
+        stack_var char parameter[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH]
 
         byte = get_buffer_char(dataCopy)
 
@@ -242,7 +242,7 @@ define_function char NAVParseSnapiMessage(char data[], _NAVSnapiMessage message)
  * @note This is an internal helper function used by NAVParseSnapiMessage
  * @see NAVParseSnapiMessage
  */
-define_function char[255] NAVParseSnapiMessageParamter(char data[]) {
+define_function char[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH] NAVParseSnapiMessageParamter(char data[]) {
     if (NAVContains(data, ',')) {
         return NAVStripRight(remove_string(data, ',', 1), 1)
     }
