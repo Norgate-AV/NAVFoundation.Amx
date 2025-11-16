@@ -1,6 +1,7 @@
 #DEFINE TESTING_NAVSNAPILEXER
 #DEFINE TESTING_NAVSNAPIPARSER
 #DEFINE TESTING_NAVSNAPIPARSEMESSAGE
+#DEFINE TESTING_DUETPARSECMD
 // #DEFINE SNAPI_LEXER_DEBUG
 // #DEFINE SNAPI_PARSER_DEBUG
 #include 'NAVFoundation.Core.axi'
@@ -20,6 +21,10 @@
 #include 'NAVSnapiParseMessage.axi'
 #END_IF
 
+#IF_DEFINED TESTING_DUETPARSECMD
+#include 'DuetParseCmd.axi'
+#END_IF
+
 define_function RunSnapiHelpersTests() {
     #IF_DEFINED TESTING_NAVSNAPILEXER
     TestNAVSnapiLexerBasic()
@@ -31,6 +36,10 @@ define_function RunSnapiHelpersTests() {
 
     #IF_DEFINED TESTING_NAVSNAPIPARSEMESSAGE
     TestNAVSnapiParseMessage()
+    #END_IF
+
+    #IF_DEFINED TESTING_DUETPARSECMD
+    TestDuetParseCmd()
     #END_IF
 }
 
