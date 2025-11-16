@@ -36,9 +36,9 @@ COMMAND-param1,param2,"quoted,param"
 
 ```netlinx
 'SWITCH-2,1,VID'           // Switch input 2 to output 1, video only
-'INPUT-HDMI1'              // Select HDMI1 input
+'INPUT-HDMI,1'             // Select HDMI1 input
 'PASSTHRU-"Data,Value"'    // Parameter with comma preserved
-'POWER-1'                  // Power on
+'POWER-ON'                 // Power on
 ```
 
 ## Public API Functions
@@ -66,17 +66,17 @@ define_function NAVSwitch(dev device, integer input, integer output, integer lev
 
 ```netlinx
 // Route input 2 to output 3, video only
-NAVSwitch(dvSwitcher, 2, 3, NAV_SWITCH_LEVEL_VID)
+NAVSwitch(vdvSwitcher, 2, 3, NAV_SWITCH_LEVEL_VID)
 
 // Select input 2 on device with single output, all signals
-NAVSwitch(dvDisplay, 2, 0, NAV_SWITCH_LEVEL_ALL)
+NAVSwitch(vdvSwitcher, 2, 0, NAV_SWITCH_LEVEL_ALL)
 ```
 
 ---
 
 #### `NAVInput`
 
-Sends an INPUT command to select an input source by name or number.
+Sends an INPUT command to select an input source.
 
 ```netlinx
 define_function NAVInput(dev device, char input[])
@@ -84,16 +84,16 @@ define_function NAVInput(dev device, char input[])
 
 **Parameters:**
 - `device` - Target device
-- `input` - Input identifier (name or number)
+- `input` - Input identifier (SNAPI compliant list. HDMI,1; VGA,2; etc.)
 
 **Examples:**
 
 ```netlinx
-// Select input by number
-NAVInput(dvDisplay, '2')
+// Select input HDMI 2
+NAVInput(vdvDisplay, 'HDMI,2')
 
-// Select input by name
-NAVInput(dvReceiver, 'HDMI1')
+// Select input HDMI 1
+NAVInput(vdvReceiver, 'HDMI,1')
 ```
 
 ---
@@ -108,17 +108,17 @@ define_function NAVInputArray(dev device[], char input[])
 
 **Parameters:**
 - `device` - Array of target devices
-- `input` - Input identifier (name or number)
+- `input` - Input identifier (SNAPI compliant list)
 
 **Example:**
 
 ```netlinx
 stack_var dev displays[2]
-displays[1] = dvDisplay1
-displays[2] = dvDisplay2
+displays[1] = vdvDisplay1
+displays[2] = vdvDisplay2
 
 // Select input 2 on both displays
-NAVInputArray(displays, '2')
+NAVInputArray(displays, 'HDMI,2')
 ```
 
 ---
@@ -141,7 +141,7 @@ define_function integer NAVGetPower(dev device)
 **Example:**
 
 ```netlinx
-if (NAVGetPower(dvDisplay)) {
+if (NAVGetPower(vdvDisplay)) {
     // Device is on
 }
 ```
@@ -164,7 +164,7 @@ define_function integer NAVGetVolumeMute(dev device)
 **Example:**
 
 ```netlinx
-if (NAVGetVolumeMute(dvDisplay)) {
+if (NAVGetVolumeMute(vdvDisplay)) {
     // Volume is muted
 }
 ```
@@ -366,31 +366,31 @@ Both parsers:
 ### Basic Switching
 
 ```netlinx
-// Route HDMI 2 to output 1 (video only)
-NAVSwitch(dvSwitcher, 2, 1, NAV_SWITCH_LEVEL_VID)
+// Route input 2 to output 1 (video only)
+NAVSwitch(vdvSwitcher, 2, 1, NAV_SWITCH_LEVEL_VID)
 
-// Route HDMI 3 to output 2 (all signals)
-NAVSwitch(dvSwitcher, 3, 2, NAV_SWITCH_LEVEL_ALL)
+// Route input 3 to output 2 (all signals)
+NAVSwitch(vdvSwitcher, 3, 2, NAV_SWITCH_LEVEL_ALL)
 ```
 
 ### Input Selection
 
 ```netlinx
 // Single device
-NAVInput(dvDisplay, 'HDMI1')
+NAVInput(vdvDisplay, 'HDMI,1')
 
 // Multiple devices
 stack_var dev displays[3]
-displays[1] = dvDisplay1
-displays[2] = dvDisplay2
-displays[3] = dvDisplay3
-NAVInputArray(displays, 'HDMI2')
+displays[1] = vdvDisplay1
+displays[2] = vdvDisplay2
+displays[3] = vdvDisplay3
+NAVInputArray(displays, 'HDMI,2')
 ```
 
 ### Parsing SNAPI Feedback
 
 ```netlinx
-data_event[dvDevice] {
+data_event[vdvDevice] {
     string: {
         stack_var _NAVSnapiMessage msg
         
@@ -410,7 +410,7 @@ data_event[dvDevice] {
                 case 'POWER': {
                     // Handle power feedback
                     if (msg.ParameterCount >= 1) {
-                        if (msg.Parameter[1] == '1') {
+                        if (msg.Parameter[1] == 'ON') {
                             send_string 0, 'Device powered on'
                         }
                     }
@@ -452,17 +452,13 @@ NAVParseSnapiMessage('DATA-,,value', msg)
 
 ```netlinx
 // Check power state before sending command
-if (!NAVGetPower(dvDisplay)) {
-    pulse [dvDisplay, PWR_ON]
-    wait 50 {
-        NAVInput(dvDisplay, 'HDMI1')
-    }
+if (!NAVGetPower(vdvDisplay)) {
+    pulse [vdvDisplay, PWR_ON]
 }
 
 // Check mute state
-if (NAVGetVolumeMute(dvReceiver)) {
+if (NAVGetVolumeMute(vdvReceiver)) {
     send_string 0, 'Audio is muted'
-    pulse [dvReceiver, VOL_MUTE_ON]  // Unmute
 }
 ```
 
