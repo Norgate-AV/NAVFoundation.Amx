@@ -37,6 +37,7 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.SnapiHelpers.h.axi'
 #include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.SnapiParser.axi'
 
 
 /**
@@ -169,7 +170,7 @@ define_function integer NAVGetVolumeMute(dev device) {
  * @param {char[]} data - Raw SNAPI message string
  * @param {_NAVSnapiMessage} message - Message structure to populate (modified in-place)
  *
- * @returns {void}
+ * @returns {char} True (1) if parsing succeeded, False (0) if parsing failed
  *
  * @example
  * stack_var _NAVSnapiMessage msg
@@ -179,31 +180,31 @@ define_function integer NAVGetVolumeMute(dev device) {
  * @see _NAVSnapiMessage
  * @see NAVSnapiMessageLog
  */
-define_function integer NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
+define_function char NAVParseSnapiMessage(char data[], _NAVSnapiMessage message) {
     stack_var char dataCopy[NAV_MAX_BUFFER]
     stack_var integer count
 
     if (!length_array(data)) {
-        return 1    // Invald argument
+        return false    // Invald argument
     }
 
     dataCopy = data
 
     if (!NAVContains(dataCopy, '-')) {
         message.Header = dataCopy
-        return 0
+        return true
     }
 
     message.Header = NAVStripRight(remove_string(dataCopy, '-', 1), 1)
 
     if (!length_array(dataCopy)) {
-        return 0
+        return true
     }
 
     count = 0
     while (length_array(dataCopy)) {
         stack_var char byte
-        stack_var char parameter[255]
+        stack_var char parameter[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH]
 
         byte = get_buffer_char(dataCopy)
 
@@ -225,8 +226,15 @@ define_function integer NAVParseSnapiMessage(char data[], _NAVSnapiMessage messa
         message.ParameterCount = count
     }
 
+    // Handle trailing comma (creates an empty final parameter)
+    if (data[length_array(data)] == ',') {
+        count++
+        message.Parameter[count] = ''
+        message.ParameterCount = count
+    }
+
     set_length_array(message.Parameter, count)
-    return 0
+    return true
 }
 
 
@@ -242,7 +250,7 @@ define_function integer NAVParseSnapiMessage(char data[], _NAVSnapiMessage messa
  * @note This is an internal helper function used by NAVParseSnapiMessage
  * @see NAVParseSnapiMessage
  */
-define_function char[255] NAVParseSnapiMessageParamter(char data[]) {
+define_function char[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH] NAVParseSnapiMessageParamter(char data[]) {
     if (NAVContains(data, ',')) {
         return NAVStripRight(remove_string(data, ',', 1), 1)
     }
@@ -264,28 +272,47 @@ define_function char[255] NAVParseSnapiMessageParamter(char data[]) {
  * @note This is an internal helper function used by NAVParseSnapiMessage
  * @see NAVParseSnapiMessage
  */
-define_function char[255] NAVParseEscapedSnapiMessageParameter(char data[]) {
-    stack_var integer x
-    stack_var char endings[2][3]
+define_function char[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH] NAVParseEscapedSnapiMessageParameter(char data[]) {
+    stack_var char result[NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH]
+    stack_var integer i
+    stack_var char inEscape
 
-    endings[1] = '"",'
-    endings[2] = '",'
+    // Parse until we find the closing quote (that's not part of an escape sequence)
+    for (i = 1; i <= length_array(data); i++) {
+        stack_var char ch
 
-    for (x = 1; x <= max_length_array(endings); x++) {
-        stack_var integer index
+        ch = data[i]
 
-        index = NAVIndexOf(data, endings[x], 1)
+        if (ch == '"') {
+            // Check if this is an escaped quote ("")
+            if (i < length_array(data) && data[i + 1] == '"') {
+                // This is an escaped quote - add one quote to result and skip the next quote
+                result = "result, ch"
+                i++  // Skip the second quote
+                continue
+            }
+            else {
+                // This is the closing quote - we're done
+                // Remove everything we've processed from data (including the closing quote)
+                get_buffer_string(data, i)
 
-        if (index) {
-            stack_var integer end
+                // Also consume the trailing comma if present
+                if (length_array(data) && data[1] == ',') {
+                    get_buffer_char(data)
+                }
 
-            end = index + length_array(endings[x])
-
-            return NAVStripRight(get_buffer_string(data, end), 2)
+                return result
+            }
+        }
+        else {
+            // Regular character - add to result
+            result = "result, ch"
         }
     }
 
-    return NAVStripRight(get_buffer_string(data, length_array(data)), 1)
+    // If we get here, we didn't find a closing quote - just return what we have
+    get_buffer_string(data, length_array(data))
+    return result
 }
 
 
@@ -305,6 +332,7 @@ define_function char[255] NAVParseEscapedSnapiMessageParameter(char data[]) {
  * NAVSnapiMessageLog(msg)
  *
  * @see NAVParseSnapiMessage
+ * @see NAVSnapiParse
  * @see _NAVSnapiMessage
  */
 define_function NAVSnapiMessageLog(_NAVSnapiMessage message) {
@@ -324,6 +352,46 @@ define_function NAVSnapiMessageLog(_NAVSnapiMessage message) {
             NAVLog("'    Parameter ', itoa(x), ': ', message.Parameter[x]")
         }
     }
+}
+
+
+/**
+ * @function NAVSnapiParse
+ * @public
+ * @description Parse a SNAPI command string using lexer/parser implementation.
+ * This is a wrapper around the token-based lexer/parser that provides the same
+ * clean API as NAVParseSnapiMessage. Offers better architecture and debuggability
+ * at a small performance cost compared to the string-based parser.
+ *
+ * @param {char[]} data - Raw SNAPI command string to parse
+ * @param {_NAVSnapiMessage} message - Output structure to populate with parsed data
+ *
+ * @returns {char} True (1) if parsing succeeded, False (0) if parsing failed
+ *
+ * @example
+ * stack_var _NAVSnapiMessage msg
+ * if (NAVSnapiParse('INPUT-HDMI,1', msg)) {
+ *     // msg.Header = 'INPUT'
+ *     // msg.ParameterCount = 2
+ *     // msg.Parameter[1] = 'HDMI'
+ *     // msg.Parameter[2] = '1'
+ * }
+ *
+ * @example
+ * stack_var _NAVSnapiMessage msg
+ * NAVSnapiParse('PASSTHRU-"Complex,Value",123', msg)
+ * // msg.Header = 'PASSTHRU'
+ * // msg.Parameter[1] = 'Complex,Value' (comma preserved, quotes removed)
+ * // msg.Parameter[2] = '123'
+ *
+ * @note Uses the lexer/parser implementation for token-based parsing
+ * @note For better performance, use NAVParseSnapiMessage (string-based)
+ * @see NAVParseSnapiMessage
+ * @see NAVSnapiParserParse
+ * @see _NAVSnapiMessage
+ */
+define_function char NAVSnapiParse(char data[], _NAVSnapiMessage message) {
+    return NAVSnapiParserParse(data, message)
 }
 
 

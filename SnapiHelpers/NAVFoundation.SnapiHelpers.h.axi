@@ -52,6 +52,18 @@ DEFINE_CONSTANT
 constant integer DUET_MAX_PARAM_LEN     = 1024
 
 /**
+ * @constant NAV_MAX_SNAPI_MESSAGE_HEADER_LENGTH
+ * @description Maximum length of a SNAPI message header
+ */
+constant integer NAV_MAX_SNAPI_MESSAGE_HEADER_LENGTH       = 100
+
+/**
+ * @constant NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH
+ * @description Maximum length of a parameter in a SNAPI message
+ */
+constant integer NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH    = 255
+
+/**
  * @constant NAV_MAX_SNAPI_MESSAGE_PARAMETERS
  * @description Maximum number of parameters in a SNAPI message
  */
@@ -262,8 +274,8 @@ DEFINE_TYPE
  * @see NAVParseSnapiMessage
  */
 struct _NAVSnapiMessage {
-    char Header[NAV_MAX_BUFFER]
-    char Parameter[NAV_MAX_SNAPI_MESSAGE_PARAMETERS][255]
+    char Header[NAV_MAX_SNAPI_MESSAGE_HEADER_LENGTH]
+    char Parameter[NAV_MAX_SNAPI_MESSAGE_PARAMETERS][NAV_MAX_SNAPI_MESSAGE_PARAMETER_LENGTH]
     integer ParameterCount
 }
 

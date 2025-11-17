@@ -1,0 +1,332 @@
+(*
+ * SNAPI Command Syntax - Formal BNF Grammar
+ *
+ * This grammar describes the SNAPI (Standard NetLinx API)
+ * command syntax used in AMX control systems.
+ *
+ * NOTES:
+ * - Commands are case-sensitive
+ * - Whitespace is preserved (not trimmed)
+ * - Parameters follow CSV-style escaping with double-quotes
+ * - Empty parameters are valid (consecutive commas)
+ * - Headers can contain almost any character except internal `-`
+ *)
+
+(* ==================================================================
+ * TOP-LEVEL COMMAND STRUCTURE
+ * ================================================================== *)
+
+<command> ::= <query-command>
+            | <set-command>
+            | <header-only>
+            ;
+
+(* Query commands: start with ? and may have parameters *)
+<query-command> ::= "?" <header>
+                  | "?" <header> "-" <parameter-list>
+                  ;
+
+(* Set commands: header with - separator and optional parameters *)
+<set-command> ::= <header> "-" <parameter-list>
+                | <header> "-"
+                ;
+
+(* Header-only commands: no separator, no parameters *)
+<header-only> ::= <header>
+                ;
+
+
+(* ==================================================================
+ * HEADER RULES
+ * ================================================================== *)
+
+(*
+ * Headers can contain any characters except:
+ * - Cannot contain `-` (first `-` is always header/parameter separator)
+ * - `?` only special when it appears at command start (query command)
+ *
+ * Design decision: We use a simple rule where the FIRST `-` in a command
+ * always marks the header/parameter boundary. This prevents ambiguity
+ * in parsing. Subsequent `-` characters in parameters are treated as
+ * regular content.
+ *
+ * Practical examples: VERSION, ?STATUS, MY COMMAND, CMD@123
+ *)
+<header> ::= <header-char>+
+           ;
+
+<header-char> ::= <letter>
+                | <digit>
+                | <space>
+                | <special-char>
+                ;
+
+(* Note: `-` intentionally excluded from header to enforce "first `-` is separator" rule *)
+
+
+(* ==================================================================
+ * PARAMETER LIST (CSV-STYLE)
+ * ================================================================== *)
+
+<parameter-list> ::= <parameter>
+                   | <parameter> "," <parameter-list>
+                   ;
+
+<parameter> ::= <quoted-parameter>
+              | <unquoted-parameter>
+              | <empty-parameter>
+              ;
+
+(* Empty parameter: consecutive commas like "val1,,val3" *)
+<empty-parameter> ::= ""
+                    ;
+
+
+(* ==================================================================
+ * QUOTED PARAMETERS
+ * ================================================================== *)
+
+(*
+ * Quoted parameters:
+ * - Enclosed in double-quotes
+ * - Required when parameter contains comma
+ * - Double-quotes inside are escaped as ""
+ *
+ * Examples:
+ *   "Hello, World"       -> Hello, World
+ *   "Van ""The Man"""    -> Van "The Man"
+ *)
+<quoted-parameter> ::= '"' <quoted-content> '"'
+                     ;
+
+<quoted-content> ::= <quoted-char>*
+                   ;
+
+<quoted-char> ::= <escaped-quote>
+                | <non-quote-char>
+                ;
+
+(* Two double-quotes represent one literal quote *)
+<escaped-quote> ::= '""'
+                  ;
+
+<non-quote-char> ::= <letter>
+                   | <digit>
+                   | <space>
+                   | <special-char>
+                   | ","
+                   | "-"
+                   (* any char except standalone " *)
+                   ;
+
+
+(* ==================================================================
+ * UNQUOTED PARAMETERS
+ * ================================================================== *)
+
+(*
+ * Unquoted parameters:
+ * - Cannot contain comma (would be parameter separator)
+ * - Can contain spaces, quotes (treated as literals), and other chars
+ * - Whitespace is preserved
+ *
+ * Examples:
+ *   Hello          -> Hello
+ *   Hello World    -> Hello World
+ *   123            -> 123
+ *)
+<unquoted-parameter> ::= <unquoted-char>+
+                       ;
+
+<unquoted-char> ::= <letter>
+                  | <digit>
+                  | <space>
+                  | <special-char-no-comma>
+                  | '"'
+                  | "-"
+                  ;
+
+(* Special chars excluding comma (which is parameter separator) *)
+<special-char-no-comma> ::= "!" | "@" | "#" | "$" | "%" | "^" | "&" | "*"
+                          | "(" | ")" | "_" | "+" | "=" | "[" | "]" | "{"
+                          | "}" | "|" | "\" | ":" | ";" | "'" | "<" | ">"
+                          | "." | "?" | "/" | "~" | "`"
+                          ;
+
+
+(* ==================================================================
+ * CHARACTER CLASSES
+ * ================================================================== *)
+
+<letter> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J"
+           | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T"
+           | "U" | "V" | "W" | "X" | "Y" | "Z"
+           | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j"
+           | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t"
+           | "u" | "v" | "w" | "x" | "y" | "z"
+           ;
+
+<digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+          ;
+
+<space> ::= " " | "\t"
+          ;
+
+<special-char> ::= "!" | "@" | "#" | "$" | "%" | "^" | "&" | "*"
+                 | "(" | ")" | "_" | "+" | "=" | "[" | "]" | "{"
+                 | "}" | "|" | "\" | ":" | ";" | "'" | "<" | ">"
+                 | "." | "?" | "/" | "~" | "`" | ","
+                 (* Note: `-` excluded from headers; first `-` is always separator *)
+                 (* `-` and `?` are allowed in parameters as regular characters *)
+                 ;
+
+
+(* ==================================================================
+ * COMPLETE COMMAND EXAMPLES (INFORMATIVE)
+ * ================================================================== *)
+
+(*
+ * Valid command examples according to this grammar:
+ *
+ * ?VERSION
+ * ?DEVICE-STATUS
+ * REBOOT
+ * COMMAND-value
+ * COMMAND-value1,value2,value3
+ * COMMAND-"value, with comma"
+ * COMMAND-"Morrison, Van",Wild Nights,""The Man"",Tupelo Honey
+ * COMMAND-,,value3
+ * COMMAND-value1,
+ * MY COMMAND-data
+ * PASSTHRU-
+ * SET_TEMP-72
+ *
+ * Edge cases that are valid:
+ *
+ * COMMAND-
+ * COMMAND- value
+ * CMD@123-test
+ * DASH-test-value,another-one         (dashes in parameters)
+ * QUERY-param1,"?query",param2        (question mark in quoted parameter)
+ * UNQUOTED-data?test,value            (question mark in unquoted parameter)
+ * SWITCH--,-,--,?-,?                  (extreme edge case: special chars as parameters)
+ *
+ *)
+ * COMMAND- value
+ * CMD@123-test
+ *
+ *)
+
+
+(* ==================================================================
+ * SEMANTIC CONSTRAINTS (NOT ENFORCED BY SYNTAX)
+ * ================================================================== *)
+
+(*
+ * The following rules are not enforced by this BNF but should be
+ * considered in implementation:
+ *
+ * 1. Maximum lengths (from SNAPI.axi constants):
+ *    - Header length: DUET_MAX_HDR_LEN (value not specified)
+ *    - Parameter length: DUET_MAX_PARAM_LEN (value not specified)
+ *    - Total command length: DUET_MAX_CMD_LEN (value not specified)
+ *
+ * 2. Case sensitivity:
+ *    - Commands are case-sensitive
+ *    - "COMMAND" ≠ "command" ≠ "Command"
+ *
+ * 3. Whitespace preservation:
+ *    - Leading/trailing spaces in parameters are preserved
+ *    - "COMMAND- value " has parameter " value " (with spaces)
+ *
+ * 4. Character encoding:
+ *    - Not specified in documentation (assume ASCII or UTF-8)
+ *
+ * 5. Reserved commands:
+ *    - Some commands may be reserved by SNAPI standard
+ *    - Documentation does not provide exhaustive list
+ *
+ * 6. Error handling:
+ *    - Malformed commands should be handled gracefully
+ *    - Reference parser is very permissive
+ *
+ * 7. Quote escaping:
+ *    - Only within quoted parameters
+ *    - "" in quoted context = single "
+ *    - "" in unquoted context = two separate quotes (implementation-dependent)
+ *
+ * 8. After-quote content:
+ *    - Content after closing quote (before comma) is not well-defined
+ *    - "value"extra,next -> behavior undefined
+ *    - Recommendation: require comma immediately after closing quote
+ *)
+
+
+(* ==================================================================
+ * LEXICAL CONSIDERATIONS
+ * ================================================================== *)
+
+(*
+ * Tokenization order of precedence:
+ *
+ * 1. If starts with `?` -> Query command header
+ * 2. First `-` character -> Header/Parameter separator
+ * 3. `,` -> Parameter separator (outside quotes)
+ * 4. `"` at parameter start -> Begin quoted parameter
+ * 5. `""` inside quoted parameter -> Escaped quote
+ * 6. `"` inside quoted parameter -> End quoted parameter
+ * 7. Everything else -> Content
+ *
+ * State machine for parameter parsing:
+ *
+ * ST_START:
+ *   - `"` -> Enter quoted mode, go to ST_COLLECT
+ *   - `,` -> Empty parameter, done
+ *   - other -> Add to buffer, go to ST_COLLECT (unquoted mode)
+ *
+ * ST_COLLECT (quoted):
+ *   - `"` -> Go to ST_END_QUOTE
+ *   - other -> Add to buffer
+ *
+ * ST_COLLECT (unquoted):
+ *   - `,` -> Parameter done
+ *   - `"` -> Check next char for `""`, handle gracefully
+ *   - other -> Add to buffer
+ *
+ * ST_END_QUOTE:
+ *   - `,` -> Parameter done
+ *   - `"` -> Escaped quote, add `"` to buffer, return to ST_COLLECT
+ *   - other -> Implementation-defined (possibly error)
+ *)
+
+
+(* ==================================================================
+ * EBNF EXTENSIONS (OPTIONAL NOTATION)
+ * ================================================================== *)
+
+(*
+ * Using EBNF notation for more compact representation:
+ *
+ * command = query-command | set-command | header-only ;
+ *
+ * query-command = "?" header [ "-" parameter-list ] ;
+ *
+ * set-command = header "-" [ parameter-list ] ;
+ *
+ * header-only = header ;
+ *
+ * header = header-char+ ;
+ *
+ * parameter-list = parameter { "," parameter } ;
+ *
+ * parameter = quoted-parameter | unquoted-parameter | empty ;
+ *
+ * quoted-parameter = '"' { escaped-quote | non-quote-char } '"' ;
+ *
+ * escaped-quote = '""' ;
+ *
+ * unquoted-parameter = unquoted-char+ ;
+ *
+ * (* Character classes defined above *)
+ *
+ *)
