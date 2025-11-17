@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.1.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v4.0.0...v4.1.0) (2025-11-17)
+
+### 🌟 Features
+
+- **snapi-helpers:** add snapi lexer/parser implementation ([ed0e794](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/ed0e794a2e32a1b374bdaf19c26ca536c826fd90))
+
+### 🐛 Bug Fixes
+
+- **snapi-helpers:** handle trailing commas in NAVParseSnapiMessage ([12dcda9](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/12dcda93827e3bd439cc33ff6c67e3c2d892dd3e))
+- **snapi-helpers:** improve escape detection in NAVParserSnapiMessage ([28fc081](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/28fc081c2c7b7c74354cb17eaa0163e88e349639))
+
 ## [4.0.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v3.9.0...v4.0.0) (2025-11-12)
 
 ### ⚠ BREAKING CHANGES
