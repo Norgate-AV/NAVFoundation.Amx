@@ -61,6 +61,8 @@ define_function integer NAVDnsDomainNameEncode(char domain[], char encoded[]) {
     stack_var integer labelLen
     stack_var char currentChar
     stack_var integer i
+    stack_var integer j
+    stack_var integer k
 
     pos = 1
     encPos = 1
@@ -101,12 +103,14 @@ define_function integer NAVDnsDomainNameEncode(char domain[], char encoded[]) {
             }
 
             // Write label length
-            encoded[encPos] = labelLen
+            encoded[encPos] = type_cast(labelLen)
             encPos++
 
-            // Write label data
-            encoded = "encoded, mid_string(domain, labelStart, labelLen)"
-            encPos = encPos + labelLen
+            // Write label data byte by byte
+            for (j = 0; j < labelLen; j++) {
+                encoded[encPos] = domain[labelStart + j]
+                encPos++
+            }
 
             // Reset for next label
             labelStart = i + 1
@@ -127,18 +131,21 @@ define_function integer NAVDnsDomainNameEncode(char domain[], char encoded[]) {
             return 0
         }
 
-        encoded[encPos] = labelLen
+        encoded[encPos] = type_cast(labelLen)
         encPos++
-        encoded = "encoded, mid_string(domain, labelStart, labelLen)"
-        encPos = encPos + labelLen
+
+        // Write final label data byte by byte
+        for (k = 0; k < labelLen; k++) {
+            encoded[encPos] = domain[labelStart + k]
+            encPos++
+        }
     }
 
     // Append null terminator (zero-length label)
     encoded[encPos] = 0
-    encPos++
 
-    set_length_array(encoded, encPos - 1)
-    return encPos - 1
+    set_length_array(encoded, encPos)
+    return encPos
 }
 
 /**
@@ -192,7 +199,7 @@ define_function char NAVDnsDomainNameDecode(char data[], integer offset, char de
             }
 
             // Extract pointer offset (lower 14 bits)
-            pointer = ((labelLen & $3F) << 8) | data[pos + 1]
+            pointer = type_cast(((labelLen & $3F) << 8) | data[pos + 1])
             pointer = pointer + 1  // Convert to 1-indexed
 
             if (!jumped) {
@@ -276,17 +283,20 @@ define_function char NAVDnsDomainNameDecode(char data[], integer offset, char de
  */
 define_function NAVDnsHeaderInit(_NAVDnsHeader header, integer transactionId) {
     header.transactionId = transactionId
-    header.flags = 0
+    header.flags = $0100  // Default: RD=1 (request recursion)
     header.questionCount = 0
     header.answerCount = 0
     header.authorityCount = 0
     header.additionalCount = 0
 
-    header.qr = NAV_DNS_FLAG_QR_QUERY
-    header.opcode = NAV_DNS_OPCODE_QUERY
+    // Individual flag fields should be set via NAVDnsHeaderUnpackFlags()
+    // or explicitly by caller. Don't initialize them here to avoid
+    // conflicts with header.flags value.
+    header.qr = 0
+    header.opcode = 0
     header.aa = 0
     header.tc = 0
-    header.rd = 1  // Request recursion by default
+    header.rd = 0
     header.ra = 0
     header.responseCode = 0
 }
@@ -302,28 +312,28 @@ define_function NAVDnsHeaderPackFlags(_NAVDnsHeader header) {
     // Pack flags into 16-bit field
     // Format: [QR|Opcode(4)|AA|TC|RD|RA|Z(3)|RCODE(4)]
     if (header.qr) {
-        header.flags = header.flags | $8000  // QR bit (bit 15)
+        header.flags = type_cast(header.flags | $8000)  // QR bit (bit 15)
     }
 
-    header.flags = header.flags | ((header.opcode & $0F) << 11)  // Opcode (bits 11-14)
+    header.flags = type_cast(header.flags | ((header.opcode & $0F) << 11))  // Opcode (bits 11-14)
 
     if (header.aa) {
-        header.flags = header.flags | $0400  // AA bit (bit 10)
+        header.flags = type_cast(header.flags | $0400)  // AA bit (bit 10)
     }
 
     if (header.tc) {
-        header.flags = header.flags | $0200  // TC bit (bit 9)
+        header.flags = type_cast(header.flags | $0200)  // TC bit (bit 9)
     }
 
     if (header.rd) {
-        header.flags = header.flags | $0100  // RD bit (bit 8)
+        header.flags = type_cast(header.flags | $0100)  // RD bit (bit 8)
     }
 
     if (header.ra) {
-        header.flags = header.flags | $0080  // RA bit (bit 7)
+        header.flags = type_cast(header.flags | $0080)  // RA bit (bit 7)
     }
 
-    header.flags = header.flags | (header.responseCode & $0F)  // RCODE (bits 0-3)
+    header.flags = type_cast(header.flags | (header.responseCode & $0F))  // RCODE (bits 0-3)
 }
 
 /**
@@ -332,13 +342,13 @@ define_function NAVDnsHeaderPackFlags(_NAVDnsHeader header) {
  * @param header - DNS header structure
  */
 define_function NAVDnsHeaderUnpackFlags(_NAVDnsHeader header) {
-    header.qr = (header.flags & $8000) >> 15
-    header.opcode = (header.flags & $7800) >> 11
-    header.aa = (header.flags & $0400) >> 10
-    header.tc = (header.flags & $0200) >> 9
-    header.rd = (header.flags & $0100) >> 8
-    header.ra = (header.flags & $0080) >> 7
-    header.responseCode = header.flags & $000F
+    header.qr = type_cast((header.flags & $8000) >> 15)
+    header.opcode = type_cast((header.flags & $7800) >> 11)
+    header.aa = type_cast((header.flags & $0400) >> 10)
+    header.tc = type_cast((header.flags & $0200) >> 9)
+    header.rd = type_cast((header.flags & $0100) >> 8)
+    header.ra = type_cast((header.flags & $0080) >> 7)
+    header.responseCode = type_cast(header.flags & $000F)
 }
 
 /**
@@ -355,28 +365,28 @@ define_function integer NAVDnsHeaderEncode(_NAVDnsHeader header, char data[]) {
     data = ''
 
     // Transaction ID (2 bytes)
-    data[1] = (header.transactionId >> 8) & $FF
-    data[2] = header.transactionId & $FF
+    data[1] = type_cast((header.transactionId >> 8) & $FF)
+    data[2] = type_cast(header.transactionId & $FF)
 
     // Flags (2 bytes)
-    data[3] = (header.flags >> 8) & $FF
-    data[4] = header.flags & $FF
+    data[3] = type_cast((header.flags >> 8) & $FF)
+    data[4] = type_cast(header.flags & $FF)
 
     // Question count (2 bytes)
-    data[5] = (header.questionCount >> 8) & $FF
-    data[6] = header.questionCount & $FF
+    data[5] = type_cast((header.questionCount >> 8) & $FF)
+    data[6] = type_cast(header.questionCount & $FF)
 
     // Answer count (2 bytes)
-    data[7] = (header.answerCount >> 8) & $FF
-    data[8] = header.answerCount & $FF
+    data[7] = type_cast((header.answerCount >> 8) & $FF)
+    data[8] = type_cast(header.answerCount & $FF)
 
     // Authority count (2 bytes)
-    data[9] = (header.authorityCount >> 8) & $FF
-    data[10] = header.authorityCount & $FF
+    data[9] = type_cast((header.authorityCount >> 8) & $FF)
+    data[10] = type_cast(header.authorityCount & $FF)
 
     // Additional count (2 bytes)
-    data[11] = (header.additionalCount >> 8) & $FF
-    data[12] = header.additionalCount & $FF
+    data[11] = type_cast((header.additionalCount >> 8) & $FF)
+    data[12] = type_cast(header.additionalCount & $FF)
 
     set_length_array(data, NAV_DNS_HEADER_SIZE)
     return NAV_DNS_HEADER_SIZE
@@ -400,17 +410,17 @@ define_function char NAVDnsHeaderDecode(char data[], _NAVDnsHeader header) {
     }
 
     // Transaction ID
-    header.transactionId = (data[1] << 8) | data[2]
+    header.transactionId = type_cast((data[1] << 8) | data[2])
 
     // Flags
-    header.flags = (data[3] << 8) | data[4]
+    header.flags = type_cast((data[3] << 8) | data[4])
     NAVDnsHeaderUnpackFlags(header)
 
     // Counts
-    header.questionCount = (data[5] << 8) | data[6]
-    header.answerCount = (data[7] << 8) | data[8]
-    header.authorityCount = (data[9] << 8) | data[10]
-    header.additionalCount = (data[11] << 8) | data[12]
+    header.questionCount = type_cast((data[5] << 8) | data[6])
+    header.answerCount = type_cast((data[7] << 8) | data[8])
+    header.authorityCount = type_cast((data[9] << 8) | data[10])
+    header.additionalCount = type_cast((data[11] << 8) | data[12])
 
     return true
 }
@@ -517,14 +527,15 @@ define_function char NAVDnsQueryBuild(_NAVDnsQuery query, integer transactionId)
         pos = nameLen + 1
 
         // Type (2 bytes, big-endian)
-        questionData[pos] = (query.questions[i].type >> 8) & $FF
-        questionData[pos + 1] = query.questions[i].type & $FF
+        questionData[pos] = type_cast((query.questions[i].type >> 8) & $FF)
+        questionData[pos + 1] = type_cast(query.questions[i].type & $FF)
         pos = pos + 2
 
         // Class (2 bytes, big-endian)
-        questionData[pos] = (query.questions[i].qclass >> 8) & $FF
-        questionData[pos + 1] = query.questions[i].qclass & $FF
-        pos = pos + 2        set_length_array(questionData, pos - 1)
+        questionData[pos] = type_cast((query.questions[i].qclass >> 8) & $FF)
+        questionData[pos + 1] = type_cast(query.questions[i].qclass & $FF)
+        pos = pos + 2
+        set_length_array(questionData, pos - 1)
 
         // Append to packet
         query.packetData = "query.packetData, questionData"
@@ -647,12 +658,13 @@ define_function char NAVDnsQuestionParse(char data[], integer offset, _NAVDnsQue
     }
 
     // Parse type (2 bytes)
-    question.type = (data[pos] << 8) | data[pos + 1]
+    question.type = type_cast((data[pos] << 8) | data[pos + 1])
     pos = pos + 2
 
     // Parse class (2 bytes)
-    question.qclass = (data[pos] << 8) | data[pos + 1]
-    pos = pos + 2    bytesRead = pos - offset
+    question.qclass = type_cast((data[pos] << 8) | data[pos + 1])
+    pos = pos + 2
+    bytesRead = pos - offset
     return true
 }
 
@@ -687,17 +699,19 @@ define_function char NAVDnsResourceRecordParse(char data[], integer offset, _NAV
     }
 
     // Parse type (2 bytes)
-    rr.type = (data[pos] << 8) | data[pos + 1]
+    rr.type = type_cast((data[pos] << 8) | data[pos + 1])
     pos = pos + 2
 
     // Parse class (2 bytes)
-    rr.qclass = (data[pos] << 8) | data[pos + 1]
-    pos = pos + 2    // Parse TTL (4 bytes)
+    rr.qclass = type_cast((data[pos] << 8) | data[pos + 1])
+    pos = pos + 2
+
+    // Parse TTL (4 bytes)
     rr.ttl = (type_cast(data[pos]) << 24) | (type_cast(data[pos + 1]) << 16) | (type_cast(data[pos + 2]) << 8) | type_cast(data[pos + 3])
     pos = pos + 4
 
     // Parse RDLENGTH (2 bytes)
-    rr.dataLength = (data[pos] << 8) | data[pos + 1]
+    rr.dataLength = type_cast((data[pos] << 8) | data[pos + 1])
     pos = pos + 2
 
     // Check if we have enough data for RDATA
@@ -998,7 +1012,7 @@ define_function char NAVDnsDecodeMXRecord(char data[], _NAVDnsResourceRecord rr,
     }
 
     // MX RDATA format: PREFERENCE (2 bytes) + EXCHANGE (domain name)
-    rr.priority = (rr.data[1] << 8) | rr.data[2]
+    rr.priority = type_cast((rr.data[1] << 8) | rr.data[2])
 
     // Decode exchange domain name (starts at offset + 2)
     if (!NAVDnsDomainNameDecode(data, rrOffset + 2, rr.target, bytesRead)) {

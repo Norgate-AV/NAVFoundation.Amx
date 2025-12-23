@@ -1,0 +1,14 @@
+[
+    {
+        "label": "Open NetLinx Help",
+        "command": "hh.exe",
+        "args": [
+            "C:\\Program Files (x86)\\AMX Control Disc\\NetLinx Studio 4\\NetLinx-Keywords.chm"
+        ],
+        "reveal": "never",
+        "hide": "always",
+        "shell": "system",
+        "show_summary": false,
+        "show_command": false
+    }
+]
