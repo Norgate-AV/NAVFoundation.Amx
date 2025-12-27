@@ -116,8 +116,6 @@ define_function char[NAV_MAX_BUFFER] NAVGetFileError(slong error) {
 define_function slong NAVFileOpen(char path[], char mode[]) {
     stack_var slong result
     stack_var long flag
-    stack_var char filePath[NAV_MAX_BUFFER]
-    stack_var char fileName[NAV_MAX_BUFFER]
 
     if (!length_array(path)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
@@ -127,9 +125,6 @@ define_function slong NAVFileOpen(char path[], char mode[]) {
 
         return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
-
-    filePath = NAVPathDirName(path)
-    fileName = NAVPathBaseName(path)
 
     switch (lower_string(mode)) {
         case 'rwa': {
