@@ -515,7 +515,7 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
 
     if (result < 0) {
         if (result == NAV_FILE_ERROR_FILE_PATH_NOT_LOADED) {
-            // Empty directory
+            // Empty directory or non-existent directory
             return 0
         }
 
@@ -527,32 +527,47 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
         return result
     }
 
-    count = type_cast(result)
-    count = count + index
+    // Check if entity buffer is empty - indicates non-existent directory
+    if (length_array(entity) == 0) {
+        // No valid entry returned, directory likely doesn't exist
+        return 0
+    }
+
+    // result contains the number of REMAINING files after index 1
+    // Total files = 1 (current) + result (remaining)
+    count = type_cast(result) + index
     set_length_array(entities, count)
 
+    // Process entries starting from index 1
     while (index <= count) {
-        result = file_dir(path, entity, index)
+        // We already have the data for index 1 from the first call above
+        // For subsequent entries, call file_dir again
+        if (index > 1) {
+            result = file_dir(path, entity, index)
 
-        if (result < 0) {
-            if (result == NAV_FILE_ERROR_FILE_PATH_NOT_LOADED) {
-                // Empty directory
+            if (result < 0) {
+                if (result == NAV_FILE_ERROR_FILE_PATH_NOT_LOADED) {
+                    // No more entries - adjust count and exit
+                    count = index - 1
+                    set_length_array(entities, count)
+                    return type_cast(count)
+                }
+
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                            __NAV_FOUNDATION_FILEUTILS__,
+                                            'NAVReadDirectory',
+                                            "'Error reading directory "', path, '" : ', NAVGetFileError(result)")
+
+                index++
                 continue
             }
-
-            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                        __NAV_FOUNDATION_FILEUTILS__,
-                                        'NAVReadDirectory',
-                                        "'Error reading directory "', path, '" : ', NAVGetFileError(result)")
-
-            continue
         }
 
         entities[index].Name = NAVPathName(entity)
         entities[index].BaseName = NAVPathBaseName(entity)
         entities[index].Extension = NAVPathExtName(entity)
-        entities[index].Path = entity
-        entities[index].Parent = NAVPathDirName(entity)
+        entities[index].Path = NAVPathJoinPath(path, entity, '', '')
+        entities[index].Parent = path
         entities[index].IsDirectory = NAVPathIsDirectory(entity)
 
         index++
