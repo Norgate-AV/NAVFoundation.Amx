@@ -68,3 +68,4 @@ build:
       - ./__tests__/include/stack-overflow
       - ./__tests__/include/date-time-utils
       - ./__tests__/include/snapi-helpers
+      - ./__tests__/include/file-utils
