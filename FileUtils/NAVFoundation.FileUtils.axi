@@ -684,10 +684,10 @@ define_function integer NAVFileExists(char path[], char fileName[]) {
  *
  * @param {char[]} path - Directory path to check
  *
- * @returns {integer} true if the directory exists, false otherwise
+ * @returns {char} true if the directory exists, false otherwise
  *
  * @example
- * stack_var integer exists
+ * stack_var char exists
  *
  * exists = NAVDirectoryExists('/user/data')
  * if (!exists) {
@@ -697,7 +697,7 @@ define_function integer NAVFileExists(char path[], char fileName[]) {
  *
  * @note If path is empty, it defaults to the root directory '/'
  */
-define_function integer NAVDirectoryExists(char path[]) {
+define_function char NAVDirectoryExists(char path[]) {
     stack_var _NAVFileEntity entities[255]
     stack_var integer x
 
@@ -714,7 +714,7 @@ define_function integer NAVDirectoryExists(char path[]) {
     }
 
     for (x = 1; x <= length_array(entities); x++) {
-        if (entities[x].Name == path && entities[x].IsDirectory) {
+        if (entities[x].BaseName == path && entities[x].IsDirectory) {
             return true
         }
     }
