@@ -287,6 +287,7 @@ define_function slong NAVFileReadLine(long handle, char data[]) {
                                     __NAV_FOUNDATION_FILEUTILS__,
                                     'NAVFileReadLine',
                                     "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : The handle provided is null.'")
+        return NAV_FILE_ERROR_INVALID_FILE_HANDLE
     }
 
     result = file_read_line(handle, data, max_length_array(data))
