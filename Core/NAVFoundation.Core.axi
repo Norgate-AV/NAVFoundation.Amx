@@ -206,7 +206,7 @@ define_function char NAVStringToBoolean(char value[]) {
 
     copy = lower_string(value)
 
-    if (copy == 'true' || copy == '1' || copy == 'on') {
+    if (copy == 'true' || copy == '1' || copy == 'on' || copy == 'yes') {
         return true
     }
 
