@@ -606,11 +606,15 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
     stack_var _NAVFileEntity entities[1000]
     stack_var slong count
     stack_var integer x
-    local_var integer fileCount
+    stack_var integer fileCount
+    stack_var integer startIndex
 
     if (!length_array(path)) {
         path = '/'
     }
+
+    // Get starting index from current array length
+    startIndex = length_array(files)
 
     count = NAVReadDirectory(path, entities)
     if (count <= 0) {
@@ -625,18 +629,29 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
         entityPath = NAVPathJoinPath(path, entity.BaseName, '', '')
 
         if (entity.IsDirectory) {
-            fileCount = fileCount + type_cast(NAVWalkDirectory(entityPath, files))
+            stack_var slong result
+
+            // Recursively walk subdirectory - it will append to files array
+            result = NAVWalkDirectory(entityPath, files)
+
+            // Log errors but continue processing other directories
+            if (result < 0) {
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                            __NAV_FOUNDATION_FILEUTILS__,
+                                            'NAVWalkDirectory',
+                                            "'Error walking subdirectory "', entityPath, '" : ', NAVGetFileError(result)")
+            }
         }
         else {
-            fileCount++
+            // Add file to the array
+            fileCount = length_array(files) + 1
+            set_length_array(files, fileCount)
             files[fileCount] = entityPath
         }
     }
 
-    set_length_array(files, fileCount)
-    count = type_cast(fileCount)
-
-    fileCount = 0
+    // Return total number of files added by this call (and recursive calls)
+    count = type_cast(length_array(files) - startIndex)
 
     return count
 }
@@ -723,22 +738,54 @@ define_function char NAVFileExists(char path[]) {
  */
 define_function char NAVDirectoryExists(char path[]) {
     stack_var _NAVFileEntity entities[255]
+    stack_var char dirPath[NAV_MAX_BUFFER]
+    stack_var char parentPath[NAV_MAX_BUFFER]
+    stack_var char dirName[NAV_MAX_BUFFER]
     stack_var integer x
 
     if (!length_array(path)) {
-        path = '/'
-    }
-
-    if (!NAVStartsWith(path, '/')) {
-        path = "'/', path"
-    }
-
-    if (NAVReadDirectory(path, entities) <= 0) {
         return false
     }
 
+    dirPath = path
+
+    // Handle current directory indicator
+    if (dirPath == '.') {
+        dirPath = '/'
+    }
+
+    // Ensure directory path starts with /
+    if (!NAVStartsWith(dirPath, '/')) {
+        dirPath = "'/', dirPath"
+    }
+
+    // Remove trailing slash if present (except for root)
+    if (length_array(dirPath) > 1 && NAVEndsWith(dirPath, '/')) {
+        dirPath = left_string(dirPath, length_array(dirPath) - 1)
+    }
+
+    // Root directory always exists
+    if (dirPath == '/') {
+        return true
+    }
+
+    // Get parent directory and directory name
+    parentPath = NAVPathDirName(dirPath)
+    dirName = NAVPathBaseName(dirPath)
+
+    // If parent is '.', convert to root
+    if (parentPath == '.') {
+        parentPath = '/'
+    }
+
+    // Read parent directory to check if this directory exists in it
+    if (NAVReadDirectory(parentPath, entities) <= 0) {
+        return false
+    }
+
+    // Search for the directory name in parent's contents
     for (x = 1; x <= length_array(entities); x++) {
-        if (entities[x].BaseName == path && entities[x].IsDirectory) {
+        if (entities[x].BaseName == dirName && entities[x].IsDirectory) {
             return true
         }
     }
