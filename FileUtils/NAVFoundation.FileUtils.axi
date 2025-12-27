@@ -907,7 +907,7 @@ define_function slong NAVFileRename(char source[], char destination[]) {
     if (!length_array(source)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
-                                    'NAVRenameFile',
+                                    'NAVFileRename',
                                     "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The source path supplied is empty.'")
 
         return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
