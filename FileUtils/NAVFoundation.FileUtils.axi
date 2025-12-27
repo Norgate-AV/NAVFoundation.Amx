@@ -437,7 +437,9 @@ define_function slong NAVFileAppend(char path[], char data[]) {
                                     "'Error appending file "', path, '" : ', NAVGetFileError(result)")
     }
 
-    return NAVFileClose(handle)
+    NAVFileClose(handle)
+
+    return result
 }
 
 
