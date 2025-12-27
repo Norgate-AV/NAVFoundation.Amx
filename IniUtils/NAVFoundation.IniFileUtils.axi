@@ -235,4 +235,136 @@ define_function char[NAV_INI_PARSER_MAX_VALUE_LENGTH] NAVIniFileGetValue(_NAVIni
 }
 
 
+/**
+ * @function NAVIniFileHasKey
+ * @public
+ * @description Helper function to check if a property key exists using dot notation.
+ *              Supports both simple keys and section.key notation:
+ *              - "key" -> looks in default section
+ *              - "section.key" -> looks in specified section
+ *
+ * @param {_NAVIniFile} iniFile - The parsed INI file structure
+ * @param {char[]} dotPath - The dot-notation path (e.g., "database.host" or "timeout")
+ *
+ * @returns {char} True (1) if the key exists, False (0) otherwise
+ *
+ * @example
+ * stack_var char exists
+ * exists = NAVIniFileHasKey(ini, 'database.host')      // [database] host=...
+ * exists = NAVIniFileHasKey(ini, 'timeout')           // [default] timeout=...
+ */
+define_function char NAVIniFileHasKey(_NAVIniFile iniFile, char dotPath[]) {
+    stack_var integer dotPos
+    stack_var char sectionName[NAV_INI_PARSER_MAX_SECTION_NAME_LENGTH]
+    stack_var char propertyKey[NAV_INI_PARSER_MAX_KEY_LENGTH]
+    stack_var integer sectionIndex
+    stack_var integer propertyIndex
+
+    // Find the first dot in the path
+    dotPos = find_string(dotPath, '.', 1)
+
+    if (dotPos == 0) {
+        // No dot found - treat as global property in default section
+        sectionIndex = NAVIniFileFindSection(iniFile, 'default')
+        if (sectionIndex == 0) {
+            return false
+        }
+
+        propertyIndex = NAVIniFileFindProperty(iniFile.sections[sectionIndex], dotPath)
+
+        return propertyIndex != 0
+    } else {
+        // Dot found - split into section.property
+        sectionName = left_string(dotPath, dotPos - 1)
+        propertyKey = right_string(dotPath, length_array(dotPath) - dotPos)
+
+        sectionIndex = NAVIniFileFindSection(iniFile, sectionName)
+        if (sectionIndex == 0) {
+            return false
+        }
+
+        propertyIndex = NAVIniFileFindProperty(iniFile.sections[sectionIndex], propertyKey)
+
+        return propertyIndex != 0
+    }
+}
+
+
+define_function integer NAVIniFileGetIntegerValue(_NAVIniFile iniFile, char dotPath[], integer defaultValue) {
+    stack_var char valueStr[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+    stack_var integer valueInt
+
+    valueStr = NAVIniFileGetValue(iniFile, dotPath)
+    if (!length_array(valueStr)) {
+        return defaultValue
+    }
+
+    valueInt = atoi(valueStr)
+    return valueInt
+}
+
+
+define_function char NAVIniFileGetBooleanValue(_NAVIniFile iniFile, char dotPath[], char defaultValue) {
+    stack_var char valueStr[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+
+    valueStr = NAVIniFileGetValue(iniFile, dotPath)
+    if (!length_array(valueStr)) {
+        return defaultValue
+    }
+
+    // Normalize to lowercase for comparison
+    valueStr = to_lower_string(valueStr)
+
+    if (valueStr == '1' || valueStr == 'true' || valueStr == 'yes' || valueStr == 'on') {
+        return true
+    } else if (valueStr == '0' || valueStr == 'false' || valueStr == 'no' || valueStr == 'off') {
+        return false
+    } else {
+        return defaultValue
+    }
+}
+
+
+define_function double NAVIniFileGetDoubleValue(_NAVIniFile iniFile, char dotPath[], double defaultValue) {
+    stack_var char valueStr[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+    stack_var double valueDouble
+
+    valueStr = NAVIniFileGetValue(iniFile, dotPath)
+    if (!length_array(valueStr)) {
+        return defaultValue
+    }
+
+    valueDouble = atof(valueStr)
+    return valueDouble
+}
+
+
+define_function long NAVIniFileGetLongValue(_NAVIniFile iniFile, char dotPath[], long defaultValue) {
+    stack_var char valueStr[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+    stack_var long valueLong
+
+    valueStr = NAVIniFileGetValue(iniFile, dotPath)
+    if (!length_array(valueStr)) {
+        return defaultValue
+    }
+
+    valueLong = atol(valueStr)
+    return valueLong
+}
+
+
+define_function float NAVIniFileGetFloatValue(_NAVIniFile iniFile, char dotPath[], float defaultValue) {
+    stack_var char valueStr[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+    stack_var float valueFloat
+
+    valueStr = NAVIniFileGetValue(iniFile, dotPath)
+    if (!length_array(valueStr)) {
+        return defaultValue
+    }
+
+    valueFloat = atof(valueStr)
+    return valueFloat
+}
+
+
 #END_IF // __NAV_FOUNDATION_INIFILEUTILS__
