@@ -126,7 +126,7 @@ define_function slong NAVErrorLogToFile(char file[], long level, char value[]) {
     }
 
     // If the file does not exist, create it and write the message
-    if (!NAVFileExists(NAV_LOGS_DIRECTORY, file)) {
+    if (!NAVFileExists("NAV_LOGS_DIRECTORY, '/', file")) {
         return NAVFileWriteLine("NAV_LOGS_DIRECTORY, '/', file", log)
     }
 
@@ -172,12 +172,12 @@ define_function slong NAVErrorLogToFile(char file[], long level, char value[]) {
 define_function slong NAVErrorLogFileRotate(char file[]) {
     stack_var integer count
 
-    if (NAVFileExists(NAV_LOGS_DIRECTORY, "file, '.old.', itoa(NAV_MAX_OLD_LOG_FILES)")) {
+    if (NAVFileExists("NAV_LOGS_DIRECTORY, '/', file, '.old.', itoa(NAV_MAX_OLD_LOG_FILES)")) {
         NAVFileDelete("NAV_LOGS_DIRECTORY, '/', file, '.old.', itoa(NAV_MAX_OLD_LOG_FILES)")
     }
 
     for (count = (NAV_MAX_OLD_LOG_FILES - 1); count > 0; count--) {
-        if (!NAVFileExists(NAV_LOGS_DIRECTORY, "file, '.old.', itoa(count)")) {
+        if (!NAVFileExists("NAV_LOGS_DIRECTORY, '/', file, '.old.', itoa(count)")) {
             continue
         }
 

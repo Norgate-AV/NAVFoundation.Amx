@@ -645,45 +645,54 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
 /**
  * @function NAVFileExists
  * @public
- * @description Checks if a file exists in the specified directory.
+ * @description Checks if a file exists at the specified path.
  *
- * @param {char[]} path - Directory path to check
- * @param {char[]} fileName - Name of the file to look for
+ * @param {char[]} path - Path to the file (relative or absolute)
  *
- * @returns {integer} true if the file exists, false otherwise
+ * @returns {char} true if the file exists, false otherwise
  *
  * @example
- * stack_var integer exists
+ * stack_var char exists
  *
- * exists = NAVFileExists('/user', 'config.txt')
- * if (exists) {
- *     // File exists, proceed
- * }
+ * // Absolute path
+ * exists = NAVFileExists('/user/config.txt')
  *
- * @note If path is empty, it defaults to the root directory '/'
+ * // Relative path (checked in root directory)
+ * exists = NAVFileExists('config.txt')
  */
-define_function integer NAVFileExists(char path[], char fileName[]) {
+define_function char NAVFileExists(char path[]) {
     stack_var _NAVFileEntity entities[255]
+    stack_var char dirPath[NAV_MAX_BUFFER]
+    stack_var char fileName[NAV_MAX_BUFFER]
     stack_var integer x
+
+    if (!length_array(path)) {
+        return false
+    }
+
+    dirPath = NAVPathDirName(path)
+    fileName = NAVPathBaseName(path)
 
     if (!length_array(fileName)) {
         return false
     }
 
-    if (!length_array(path)) {
-        path = '/'
+    // Handle current directory indicator
+    if (dirPath == '.') {
+        dirPath = '/'
     }
 
-    if (!NAVStartsWith(path, '/')) {
-        path = "'/', path"
+    // Ensure directory path starts with /
+    if (!NAVStartsWith(dirPath, '/')) {
+        dirPath = "'/', dirPath"
     }
 
-    if (NAVReadDirectory(path, entities) <= 0) {
+    if (NAVReadDirectory(dirPath, entities) <= 0) {
         return false
     }
 
     for (x = 1; x <= length_array(entities); x++) {
-        if (entities[x].Name == fileName) {
+        if (entities[x].BaseName == fileName && !entities[x].IsDirectory) {
             return true
         }
     }
