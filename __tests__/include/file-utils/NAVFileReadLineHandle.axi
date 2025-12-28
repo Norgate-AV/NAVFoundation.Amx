@@ -1,12 +1,12 @@
-PROGRAM_NAME='NAVFileReadLine'
+PROGRAM_NAME='NAVFileReadLineHandle'
 
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.Testing.axi'
 
 DEFINE_CONSTANT
 
-// Test cases for NAVFileReadLine
-constant char FILE_READ_LINE_TESTS[][255] = {
+// Test cases for NAVFileReadLineHandle
+constant char FILE_READ_LINE_HANDLE_TESTS[][255] = {
     '/testreadline/single.txt',        // Test 1: Single line file
     '/testreadline/multiple.txt',      // Test 2: Multiple line file
     '/testreadline/empty.txt',         // Test 3: Empty file (EOF immediately)
@@ -19,7 +19,7 @@ constant char FILE_READ_LINE_TESTS[][255] = {
     '/nonexistent-readline.txt'        // Test 10: Non-existent file (should fail to open)
 }
 
-constant slong FILE_READ_LINE_EXPECTED_LINE_COUNT[] = {
+constant slong FILE_READ_LINE_HANDLE_EXPECTED_LINE_COUNT[] = {
     1,      // Test 1: Single line
     5,      // Test 2: Five lines
     0,      // Test 3: Empty file (0 lines)
@@ -32,7 +32,7 @@ constant slong FILE_READ_LINE_EXPECTED_LINE_COUNT[] = {
     -1      // Test 10: Error case (file open fails)
 }
 
-constant char FILE_READ_LINE_NEEDS_CREATION[] = {
+constant char FILE_READ_LINE_HANDLE_NEEDS_CREATION[] = {
     true,   // Test 1: Create single line file
     true,   // Test 2: Create multiple line file
     false,  // Test 3: Empty file (can't create with 0 bytes)
@@ -49,79 +49,79 @@ constant char FILE_READ_LINE_NEEDS_CREATION[] = {
 DEFINE_VARIABLE
 
 // Global variables for test data
-volatile char FILE_READ_LINE_SETUP_REQUIRED = false
-volatile char FILE_READ_LINE_TEST_CONTENT[10][NAV_MAX_BUFFER]
+volatile char FILE_READ_LINE_HANDLE_SETUP_REQUIRED = false
+volatile char FILE_READ_LINE_HANDLE_TEST_CONTENT[10][NAV_MAX_BUFFER]
 
 /**
  * Initialize global test data arrays at runtime
  */
-define_function InitializeFileReadLineTestData() {
+define_function InitializeFileReadLineHandleTestData() {
     stack_var slong result
 
     // Create parent directory
     result = NAVDirectoryCreate('/testreadline')
 
     // Test 1: Single line
-    FILE_READ_LINE_TEST_CONTENT[1] = 'Single line of text'
-    FILE_READ_LINE_TEST_CONTENT[1] = "FILE_READ_LINE_TEST_CONTENT[1], NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[1] = 'Single line of text'
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[1] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[1], NAV_CR, NAV_LF"
 
     // Test 2: Multiple lines
-    FILE_READ_LINE_TEST_CONTENT[2] = 'Line 1'
-    FILE_READ_LINE_TEST_CONTENT[2] = "FILE_READ_LINE_TEST_CONTENT[2], NAV_CR, NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[2] = "FILE_READ_LINE_TEST_CONTENT[2], 'Line 2', NAV_CR, NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[2] = "FILE_READ_LINE_TEST_CONTENT[2], 'Line 3', NAV_CR, NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[2] = "FILE_READ_LINE_TEST_CONTENT[2], 'Line 4', NAV_CR, NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[2] = "FILE_READ_LINE_TEST_CONTENT[2], 'Line 5', NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[2] = 'Line 1'
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[2] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[2], NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[2] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[2], 'Line 2', NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[2] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[2], 'Line 3', NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[2] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[2], 'Line 4', NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[2] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[2], 'Line 5', NAV_CR, NAV_LF"
 
     // Test 3: Empty file
-    FILE_READ_LINE_TEST_CONTENT[3] = ''
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[3] = ''
 
     // Test 4: CRLF endings
-    FILE_READ_LINE_TEST_CONTENT[4] = 'Windows line 1'
-    FILE_READ_LINE_TEST_CONTENT[4] = "FILE_READ_LINE_TEST_CONTENT[4], NAV_CR, NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[4] = "FILE_READ_LINE_TEST_CONTENT[4], 'Windows line 2', NAV_CR, NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[4] = "FILE_READ_LINE_TEST_CONTENT[4], 'Windows line 3', NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[4] = 'Windows line 1'
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[4] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[4], NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[4] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[4], 'Windows line 2', NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[4] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[4], 'Windows line 3', NAV_CR, NAV_LF"
 
     // Test 5: LF endings only
-    FILE_READ_LINE_TEST_CONTENT[5] = 'Unix line 1'
-    FILE_READ_LINE_TEST_CONTENT[5] = "FILE_READ_LINE_TEST_CONTENT[5], NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[5] = "FILE_READ_LINE_TEST_CONTENT[5], 'Unix line 2', NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[5] = "FILE_READ_LINE_TEST_CONTENT[5], 'Unix line 3', NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[5] = 'Unix line 1'
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[5] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[5], NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[5] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[5], 'Unix line 2', NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[5] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[5], 'Unix line 3', NAV_LF"
 
     // Test 6: Mixed endings
-    FILE_READ_LINE_TEST_CONTENT[6] = 'Mixed line 1'
-    FILE_READ_LINE_TEST_CONTENT[6] = "FILE_READ_LINE_TEST_CONTENT[6], NAV_CR, NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[6] = "FILE_READ_LINE_TEST_CONTENT[6], 'Mixed line 2', NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[6] = "FILE_READ_LINE_TEST_CONTENT[6], 'Mixed line 3', NAV_CR, NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[6] = "FILE_READ_LINE_TEST_CONTENT[6], 'Mixed line 4', NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[6] = 'Mixed line 1'
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[6] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[6], NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[6] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[6], 'Mixed line 2', NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[6] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[6], 'Mixed line 3', NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[6] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[6], 'Mixed line 4', NAV_LF"
 
     // Test 7: Long lines (100+ characters each)
-    FILE_READ_LINE_TEST_CONTENT[7] = '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'
-    FILE_READ_LINE_TEST_CONTENT[7] = "FILE_READ_LINE_TEST_CONTENT[7], NAV_CR, NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[7] = "FILE_READ_LINE_TEST_CONTENT[7], 'ABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJ', NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[7] = '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[7] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[7], NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[7] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[7], 'ABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJ', NAV_CR, NAV_LF"
 
     // Test 8: Empty lines
-    FILE_READ_LINE_TEST_CONTENT[8] = 'First line'
-    FILE_READ_LINE_TEST_CONTENT[8] = "FILE_READ_LINE_TEST_CONTENT[8], NAV_CR, NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[8] = "FILE_READ_LINE_TEST_CONTENT[8], NAV_CR, NAV_LF"  // Empty line
-    FILE_READ_LINE_TEST_CONTENT[8] = "FILE_READ_LINE_TEST_CONTENT[8], 'Third line', NAV_CR, NAV_LF"
-    FILE_READ_LINE_TEST_CONTENT[8] = "FILE_READ_LINE_TEST_CONTENT[8], NAV_CR, NAV_LF"  // Empty line
-    FILE_READ_LINE_TEST_CONTENT[8] = "FILE_READ_LINE_TEST_CONTENT[8], 'Fifth line', NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[8] = 'First line'
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[8] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[8], NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[8] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[8], NAV_CR, NAV_LF"  // Empty line
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[8] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[8], 'Third line', NAV_CR, NAV_LF"
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[8] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[8], NAV_CR, NAV_LF"  // Empty line
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[8] = "FILE_READ_LINE_HANDLE_TEST_CONTENT[8], 'Fifth line', NAV_CR, NAV_LF"
 
     // Test 9: No trailing newline
-    FILE_READ_LINE_TEST_CONTENT[9] = 'Line without newline at end'
+    FILE_READ_LINE_HANDLE_TEST_CONTENT[9] = 'Line without newline at end'
 
-    FILE_READ_LINE_SETUP_REQUIRED = true
+    FILE_READ_LINE_HANDLE_SETUP_REQUIRED = true
 }
 
 /**
  * Setup test files
  */
-define_function SetupFileReadLineTest(integer testNum, char path[]) {
+define_function SetupFileReadLineHandleTest(integer testNum, char path[]) {
     stack_var slong result
     stack_var char dirPath[255]
 
-    if (!FILE_READ_LINE_NEEDS_CREATION[testNum]) {
+    if (!FILE_READ_LINE_HANDLE_NEEDS_CREATION[testNum]) {
         return
     }
 
@@ -136,33 +136,33 @@ define_function SetupFileReadLineTest(integer testNum, char path[]) {
     }
 
     // Create the file with specific content
-    result = NAVFileWrite(path, FILE_READ_LINE_TEST_CONTENT[testNum])
+    result = NAVFileWrite(path, FILE_READ_LINE_HANDLE_TEST_CONTENT[testNum])
 
     if (result < 0) {
         NAVLog("'WARNING: Failed to create test file: ', path, ' (', itoa(result), ')'")
     }
 }
 
-define_function TestNAVFileReadLine() {
+define_function TestNAVFileReadLineHandle() {
     stack_var integer x
     stack_var char testPath[255]
 
-    NAVLog("'***************** NAVFileReadLine *****************'")
+    NAVLog("'***************** NAVFileReadLineHandle *****************'")
 
-    InitializeFileReadLineTestData()
+    InitializeFileReadLineHandleTestData()
 
-    for (x = 1; x <= length_array(FILE_READ_LINE_TESTS); x++) {
+    for (x = 1; x <= length_array(FILE_READ_LINE_HANDLE_TESTS); x++) {
         stack_var long fileHandle
         stack_var slong result
         stack_var slong expectedLineCount
         stack_var integer actualLineCount
         stack_var char line[NAV_MAX_BUFFER]
 
-        testPath = FILE_READ_LINE_TESTS[x]
-        expectedLineCount = FILE_READ_LINE_EXPECTED_LINE_COUNT[x]
+        testPath = FILE_READ_LINE_HANDLE_TESTS[x]
+        expectedLineCount = FILE_READ_LINE_HANDLE_EXPECTED_LINE_COUNT[x]
 
         // Setup: Create file if needed for this test
-        SetupFileReadLineTest(x, testPath)
+        SetupFileReadLineHandleTest(x, testPath)
 
         // Open the file
         result = NAVFileOpen(testPath, 'r')
@@ -197,7 +197,7 @@ define_function TestNAVFileReadLine() {
         actualLineCount = 0
         while (1) {
             line = ''
-            result = NAVFileReadLine(fileHandle, line)
+            result = NAVFileReadLineHandle(fileHandle, line)
 
             if (result < 0) {
                 // EOF or error
@@ -226,3 +226,4 @@ define_function TestNAVFileReadLine() {
         NAVLogTestPassed(x)
     }
 }
+

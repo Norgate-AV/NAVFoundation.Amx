@@ -250,7 +250,61 @@ define_function slong NAVFileRead(char path[], char data[]) {
 
 
 /**
- * @function NAVFileReadLine
+ * @function NAVFileReadHandle
+ * @public
+ * @description Reads raw bytes from an open file.
+ *
+ * @param {long} handle - File handle previously obtained from NAVFileOpen
+ * @param {char[]} data - Output buffer to store the data (modified in-place)
+ *
+ * @returns {slong} Number of bytes read on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileHandle
+ * stack_var char buffer[1024]
+ * stack_var slong bytesRead
+ *
+ * fileHandle = NAVFileOpen('/data.bin', 'r')
+ * if (fileHandle >= 0) {
+ *     bytesRead = NAVFileReadHandle(fileHandle, buffer)
+ *     if (bytesRead > 0) {
+ *         // Process the data
+ *     }
+ *     NAVFileClose(fileHandle)
+ * }
+ *
+ * @note Reads up to the maximum buffer size (max_length_array)
+ * @note Uses AMX file_read function
+ * @see NAVFileOpen
+ * @see NAVFileClose
+ * @see NAVFileReadLineHandle
+ */
+define_function slong NAVFileReadHandle(long handle, char data[]) {
+    stack_var slong result
+
+    if (!handle) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileReadHandle',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : The handle provided is null.'")
+        return NAV_FILE_ERROR_INVALID_FILE_HANDLE
+    }
+
+    result = file_read(handle, data, max_length_array(data))
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileReadHandle',
+                                    "'Error reading from file : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+/**
+ * @function NAVFileReadLineHandle
  * @public
  * @description Reads a single line from an open file.
  *
@@ -268,7 +322,7 @@ define_function slong NAVFileRead(char path[], char data[]) {
  * if (fileHandle >= 0) {
  *     // Read file line by line
  *     while (1) {
- *         result = NAVFileReadLine(fileHandle, line)
+ *         result = NAVFileReadLineHandle(fileHandle, line)
  *         if (result < 0) break;  // End of file or error
  *         // Process the line
  *     }
@@ -276,16 +330,18 @@ define_function slong NAVFileRead(char path[], char data[]) {
  * }
  *
  * @note Returns NAV_FILE_ERROR_EOF_END_OF_FILE_REACHED when end of file is reached
+ * @note Uses AMX file_read_line function
  * @see NAVFileOpen
  * @see NAVFileClose
+ * @see NAVFileReadHandle
  */
-define_function slong NAVFileReadLine(long handle, char data[]) {
+define_function slong NAVFileReadLineHandle(long handle, char data[]) {
     stack_var slong result
 
     if (!handle) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
-                                    'NAVFileReadLine',
+                                    'NAVFileReadLineHandle',
                                     "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : The handle provided is null.'")
         return NAV_FILE_ERROR_INVALID_FILE_HANDLE
     }
@@ -295,7 +351,7 @@ define_function slong NAVFileReadLine(long handle, char data[]) {
     if (result < 0) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
-                                    'NAVFileReadLine',
+                                    'NAVFileReadLineHandle',
                                     "'Error reading line in file : ', NAVGetFileError(result)")
     }
 
@@ -363,15 +419,130 @@ define_function slong NAVFileWrite(char path[], char data[]) {
 
 
 /**
+ * @function NAVFileWriteHandle
+ * @public
+ * @description Writes raw bytes to an open file.
+ *
+ * @param {long} handle - File handle previously obtained from NAVFileOpen
+ * @param {char[]} data - Data to write to the file
+ *
+ * @returns {slong} Number of bytes written on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileHandle
+ * stack_var char data[1024]
+ * stack_var slong bytesWritten
+ *
+ * fileHandle = NAVFileOpen('/data.bin', 'rw')
+ * if (fileHandle >= 0) {
+ *     data = 'Binary data...'
+ *     bytesWritten = NAVFileWriteHandle(fileHandle, data)
+ *     NAVFileClose(fileHandle)
+ * }
+ *
+ * @note Writes the entire buffer content (length_array)
+ * @note Uses AMX file_write function
+ * @note Open with 'rw' to overwrite, 'rwa' to append
+ * @see NAVFileOpen
+ * @see NAVFileClose
+ * @see NAVFileWriteLineHandle
+ */
+define_function slong NAVFileWriteHandle(long handle, char data[]) {
+    stack_var slong result
+
+    if (!handle) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileWriteHandle',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : The handle provided is null.'")
+        return NAV_FILE_ERROR_INVALID_FILE_HANDLE
+    }
+
+    result = file_write(handle, data, length_array(data))
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileWriteHandle',
+                                    "'Error writing to file : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+/**
+ * @function NAVFileWriteLineHandle
+ * @public
+ * @description Writes a line to an open file, adding a carriage return and line feed.
+ *
+ * @param {long} handle - File handle previously obtained from NAVFileOpen
+ * @param {char[]} buffer - Line text to write
+ *
+ * @returns {slong} Number of bytes written on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileHandle
+ * stack_var char line[100]
+ * stack_var slong result
+ *
+ * fileHandle = NAVFileOpen('/log.txt', 'rw')
+ * if (fileHandle >= 0) {
+ *     line = 'Log entry 1'
+ *     result = NAVFileWriteLineHandle(fileHandle, line)
+ *     line = 'Log entry 2'
+ *     result = NAVFileWriteLineHandle(fileHandle, line)
+ *     NAVFileClose(fileHandle)
+ * }
+ *
+ * @note Uses AMX file_write_line function which automatically adds CRLF
+ * @note Open with 'rw' to overwrite, 'rwa' to append
+ * @see NAVFileOpen
+ * @see NAVFileClose
+ * @see NAVFileWriteHandle
+ * @see NAVFileReadLineHandle
+ */
+define_function slong NAVFileWriteLineHandle(long handle, char buffer[]) {
+    stack_var slong result
+
+    if (!handle) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileWriteLineHandle',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : The handle provided is null.'")
+        return NAV_FILE_ERROR_INVALID_FILE_HANDLE
+    }
+
+    // For empty lines, file_write_line doesn't work with zero-length buffers
+    // So we use file_write to write just CRLF
+    if (!length_array(buffer)) {
+        result = file_write(handle, "NAV_CR, NAV_LF", 2)
+    }
+    else {
+        result = file_write_line(handle, buffer, length_array(buffer))
+    }
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileWriteLineHandle',
+                                    "'Error writing line to file : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+/**
  * @function NAVFileWriteLine
  * @public
  * @description Writes a line to a file, adding a carriage return and line feed.
  * Opens the file, writes the line with CRLF, and closes it automatically.
  *
  * @param {char[]} path - Full path to the file
- * @param {char[]} buffer - Line text to write
+ * @param {char[]} buffer - Line text to write (can be empty)
  *
- * @returns {slong} 0 on success, or negative error code on failure
+ * @returns {slong} Number of bytes written on success, or negative error code on failure
  *
  * @example
  * stack_var char line[100]
@@ -381,9 +552,15 @@ define_function slong NAVFileWrite(char path[], char data[]) {
  * result = NAVFileWriteLine('/config.txt', line)
  *
  * @note Creates a new file if it doesn't exist, otherwise overwrites existing file
+ * @note Empty buffer is valid - will write just CRLF (2 bytes)
+ * @note Always appends CRLF to the buffer content
  * @see NAVFileWrite
+ * @see NAVFileWriteLineHandle
+ * @see NAVFileAppendLine
  */
 define_function slong NAVFileWriteLine(char path[], char buffer[]) {
+    // Note: Empty buffer is explicitly supported - writes just CRLF (2 bytes)
+    // The concatenation with NAV_CR and NAV_LF ensures we always have content to write
     return NAVFileWrite(path, "buffer, NAV_CR, NAV_LF")
 }
 
@@ -451,9 +628,9 @@ define_function slong NAVFileAppend(char path[], char data[]) {
  * Opens the file in append mode, writes the line with CRLF, and closes it automatically.
  *
  * @param {char[]} path - Full path to the file
- * @param {char[]} buffer - Line text to append
+ * @param {char[]} buffer - Line text to append (can be empty)
  *
- * @returns {slong} 0 on success, or negative error code on failure
+ * @returns {slong} Number of bytes written on success, or negative error code on failure
  *
  * @example
  * stack_var char logEntry[100]
@@ -463,9 +640,15 @@ define_function slong NAVFileAppend(char path[], char data[]) {
  * result = NAVFileAppendLine('/log.txt', logEntry)
  *
  * @note Creates a new file if it doesn't exist
+ * @note Empty buffer is valid - will append just CRLF (2 bytes)
+ * @note Always appends CRLF to the buffer content
  * @see NAVFileAppend
+ * @see NAVFileWriteLine
+ * @see NAVFileWriteLineHandle
  */
 define_function slong NAVFileAppendLine(char path[], char buffer[]) {
+    // Note: Empty buffer is explicitly supported - appends just CRLF (2 bytes)
+    // The concatenation with NAV_CR and NAV_LF ensures we always have content to write
     return NAVFileAppend(path, "buffer, NAV_CR, NAV_LF")
 }
 
