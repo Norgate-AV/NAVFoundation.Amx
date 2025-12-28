@@ -70,6 +70,10 @@ volatile char FILE_WRITE_LINE_RUNTIME_DATA[10][NAV_MAX_BUFFER]
  */
 define_function InitializeFileWriteLineTestData() {
     stack_var integer i
+    stack_var slong result
+
+    // Create parent directory
+    result = NAVDirectoryCreate('/testwriteline')
 
     // Test 8: Long line (200 characters)
     FILE_WRITE_LINE_RUNTIME_DATA[8] = ''

@@ -67,6 +67,14 @@ volatile char FILE_APPEND_LINE_SETUP_REQUIRED = false
  * Initialize global test data arrays at runtime
  */
 define_function InitializeFileAppendLineTestData() {
+    stack_var slong result
+
+    // Create parent directory
+    result = NAVDirectoryCreate('/testappendline')
+
+    // Create initial file for append tests
+    result = NAVFileWrite('/testappendline/existing.txt', "'Initial line', NAV_CR, NAV_LF")
+
     FILE_APPEND_LINE_SETUP_REQUIRED = true
 }
 
@@ -125,10 +133,10 @@ define_function TestNAVFileAppendLine() {
             if (NAVContains(verifyContent, 'Fourth line')) lineCount++
 
             if (lineCount == 4) {
-                NAVLog("'  ✓ Multiple line appends verified successfully'")
+                NAVLog("'  Multiple line appends verified successfully'")
             }
             else {
-                NAVLog("'  ✗ Multiple line appends verification failed - found ', itoa(lineCount), ' lines'")
+                NAVLog("'  Multiple line appends verification failed - found ', itoa(lineCount), ' lines'")
             }
         }
 
@@ -139,10 +147,10 @@ define_function TestNAVFileAppendLine() {
             if (NAVContains(verifyContent, 'Multi line 1') &&
                 NAVContains(verifyContent, 'Multi line 2') &&
                 NAVContains(verifyContent, 'Multi line 3')) {
-                NAVLog("'  ✓ Multi-line appends verified successfully'")
+                NAVLog("'  Multi-line appends verified successfully'")
             }
             else {
-                NAVLog("'  ✗ Multi-line appends verification failed'")
+                NAVLog("'  Multi-line appends verification failed'")
             }
         }
     }
