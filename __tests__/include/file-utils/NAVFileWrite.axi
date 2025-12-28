@@ -35,10 +35,10 @@ constant char FILE_WRITE_TEST_DATA[][NAV_MAX_BUFFER] = {
 constant slong FILE_WRITE_EXPECTED_RESULT[] = {
     -2,     // Test 1: Empty path - NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     11,     // Test 2: Success - bytes written (length of 'Hello World')
-    20,     // Test 3: Success - bytes written (length of 'Overwritten Content')
-    0,      // Test 4: Success - 0 bytes written
+    19,     // Test 3: Success - bytes written (length of 'Overwritten Content')
+    -6,     // Test 4: Error - NAV_FILE_ERROR_INVALID_PARAMETER (empty data not allowed by file_write)
     0,      // Test 5: Success - large data (check >= 0)
-    26,     // Test 6: Success - bytes written
+    23,     // Test 6: Success - bytes written (length of 'Special characters test')
     -2,     // Test 7: Invalid path - parent doesn't exist
     0,      // Test 8: Success - unicode content (check >= 0)
     0,      // Test 9: Success - multiline content (check >= 0)
@@ -58,6 +58,12 @@ volatile char FILE_WRITE_RUNTIME_DATA[10][NAV_MAX_BUFFER]
  */
 define_function InitializeFileWriteTestData() {
     stack_var integer i
+
+    // Create test directory
+    NAVDirectoryCreate('/testwrite')
+
+    // Create a file to test overwriting (Test 3)
+    NAVFileWrite('/testwrite/overwrite.txt', 'Original content')
 
     // Test 5: Large data (1000 characters)
     FILE_WRITE_RUNTIME_DATA[5] = ''

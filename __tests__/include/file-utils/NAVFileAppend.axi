@@ -41,7 +41,7 @@ constant slong FILE_APPEND_EXPECTED_RESULT[] = {
     10,     // Test 2: Success - bytes written (length of 'First line')
     11,     // Test 3: Success - bytes written (length of 'Second line')
     10,     // Test 4: Success - bytes written (length of 'Third line')
-    0,      // Test 5: Success - 0 bytes written
+    -6,     // Test 5: Error - NAV_FILE_ERROR_INVALID_PARAMETER (empty data not allowed by file_write)
     6,      // Test 6: Success - bytes written (length of 'Line 1')
     6,      // Test 7: Success - bytes written (length of 'Line 2')
     6,      // Test 8: Success - bytes written (length of 'Line 3')
@@ -63,6 +63,16 @@ volatile char FILE_APPEND_RUNTIME_DATA[12][NAV_MAX_BUFFER]
  * Required because NetLinx cannot handle complex string expressions in constants
  */
 define_function InitializeFileAppendTestData() {
+    // Create test directory
+    NAVDirectoryCreate('/testappend')
+
+    // Create existing files for tests 3-4 (append to existing)
+    NAVFileWrite('/testappend/existing.txt', 'First line')
+
+    // Create file for multiple append tests 6-8
+    // Note: Test 6 will append to it first, tests 7-8 will append more
+    NAVFileWrite('/testappend/multiappend.txt', '')
+
     // Test 12: Binary-like data (control characters)
     FILE_APPEND_RUNTIME_DATA[12] = "'Binary', $00, $01, $02, $FF, 'Data'"
 
@@ -133,10 +143,10 @@ define_function TestNAVFileAppend() {
             if (NAVContains(verifyContent, 'Line 1') &&
                 NAVContains(verifyContent, 'Line 2') &&
                 NAVContains(verifyContent, 'Line 3')) {
-                NAVLog("'  ✓ Multiple appends verified successfully'")
+                NAVLog("'  Multiple appends verified successfully'")
             }
             else {
-                NAVLog("'  ✗ Multiple appends verification failed - content incomplete'")
+                NAVLog("'  Multiple appends verification failed - content incomplete'")
             }
         }
     }

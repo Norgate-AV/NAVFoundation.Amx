@@ -31,8 +31,8 @@ constant slong FILE_READ_EXPECTED_RESULT[] = {
     0,      // Test 7: Success - bytes read (check >= 0)
     0,      // Test 8: Success - bytes read (check >= 0)
     0,      // Test 9: Success - bytes read (check >= 0)
-    -2,     // Test 10: Directory is not a file
-    -2,     // Test 11: Root is not a file
+    -5,     // Test 10: Directory is not a file (Disk I/O error)
+    -5,     // Test 11: Root is not a file (Disk I/O error)
     -2      // Test 12: Non-existent path
 }
 
@@ -72,7 +72,21 @@ volatile char FILE_READ_SETUP_REQUIRED = false
  *   - /testdir/nested/deep.txt
  */
 define_function InitializeFileReadTestData() {
-    // Future: Create test files here if needed
+    // Create directories
+    NAVDirectoryCreate('/user')
+    NAVDirectoryCreate('/user/logs')
+    NAVDirectoryCreate('/testdir')
+    NAVDirectoryCreate('/testdir/nested')
+
+    // Create test files with content
+    NAVFileWrite('/user/config.txt', 'Config data here')
+    NAVFileWrite('/user/data.xml', '<?xml version="1.0"?><data>Test</data>')
+    NAVFileWrite('/user/noextension', 'File without extension')
+    NAVFileWrite('/user/logs/error.log', 'Error log entry 1')
+    NAVFileWrite('/testdir/test.txt', 'Simple test file')
+    NAVFileWrite('/testdir/file with spaces.txt', 'File with spaces in name')
+    NAVFileWrite('/testdir/nested/deep.txt', 'Deeply nested file')
+
     FILE_READ_SETUP_REQUIRED = true
 }
 
