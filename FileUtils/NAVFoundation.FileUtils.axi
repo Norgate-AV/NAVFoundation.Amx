@@ -192,65 +192,6 @@ define_function slong NAVFileClose(long handle) {
 
 
 /**
- * @function NAVFileSeek
- * @public
- * @description Seeks to a specific position in an open file.
- *
- * @param {long} handle - File handle returned by NAVFileOpen
- * @param {slong} position - Byte position to seek to:
- *                           0 = beginning of file
- *                           -1 = end of file (use NAV_FILE_SEEK_END constant)
- *                           N = absolute byte position
- *
- * @returns {slong} New position in file on success, or negative error code on failure
- *
- * @example
- * stack_var long handle
- * stack_var slong position
- *
- * handle = type_cast(NAVFileOpen('/data.txt', 'r'))
- *
- * // Seek to beginning
- * position = NAVFileSeek(handle, 0)
- *
- * // Seek to end (get file size)
- * position = NAVFileSeek(handle, NAV_FILE_SEEK_END)
- *
- * // Seek to specific byte
- * position = NAVFileSeek(handle, 100)
- *
- * NAVFileClose(handle)
- *
- * @note AMX file_seek only supports absolute positioning, not relative
- * @see NAVFileOpen
- * @see NAVFileClose
- */
-define_function slong NAVFileSeek(long handle, slong position) {
-    stack_var slong result
-
-    if (!handle) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_FILEUTILS__,
-                                    'NAVFileSeek',
-                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : Invalid file handle (0)'")
-
-        return NAV_FILE_ERROR_INVALID_FILE_HANDLE
-    }
-
-    result = file_seek(handle, type_cast(position))
-
-    if (result < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_FILEUTILS__,
-                                    'NAVFileSeek',
-                                    "'Error seeking to position ', itoa(position), ' : ', NAVGetFileError(result)")
-    }
-
-    return result
-}
-
-
-/**
  * @function NAVFileRead
  * @public
  * @description Reads the entire content of a file into a buffer.
@@ -942,6 +883,65 @@ define_function slong NAVDirectoryDelete(char path[]) {
 
 
 /**
+ * @function NAVFileSeek
+ * @public
+ * @description Seeks to a specific position in an open file.
+ *
+ * @param {long} handle - File handle returned by NAVFileOpen
+ * @param {slong} position - Byte position to seek to:
+ *                           0 = beginning of file
+ *                           -1 = end of file (use NAV_FILE_SEEK_END constant)
+ *                           N = absolute byte position
+ *
+ * @returns {slong} New position in file on success, or negative error code on failure
+ *
+ * @example
+ * stack_var long handle
+ * stack_var slong position
+ *
+ * handle = type_cast(NAVFileOpen('/data.txt', 'r'))
+ *
+ * // Seek to beginning
+ * position = NAVFileSeek(handle, 0)
+ *
+ * // Seek to end (get file size)
+ * position = NAVFileSeek(handle, NAV_FILE_SEEK_END)
+ *
+ * // Seek to specific byte
+ * position = NAVFileSeek(handle, 100)
+ *
+ * NAVFileClose(handle)
+ *
+ * @note AMX file_seek only supports absolute positioning, not relative
+ * @see NAVFileOpen
+ * @see NAVFileClose
+ */
+define_function slong NAVFileSeek(long handle, slong position) {
+    stack_var slong result
+
+    if (!handle) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileSeek',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : Invalid file handle (0)'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_HANDLE
+    }
+
+    result = file_seek(handle, type_cast(position))
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileSeek',
+                                    "'Error seeking to position ', itoa(position), ' : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+/**
  * @function NAVFileGetSize
  * @public
  * @description Gets the size of a file in bytes.
@@ -961,7 +961,6 @@ define_function slong NAVDirectoryDelete(char path[]) {
 define_function slong NAVFileGetSize(char path[]) {
     stack_var slong result
     stack_var long handle
-    stack_var slong count
 
     result = NAVFileOpen(path, 'r')
 
@@ -971,47 +970,12 @@ define_function slong NAVFileGetSize(char path[]) {
 
     handle = type_cast(result)
 
-    /**
-     * Ref: NetLinx Keywords Help
-     *
-     * SLONG FILE_SEEK (LONG HFile, LONG Pos)
-     *
-     * Parameters:
-     *      HFile - handle to the file returned by FILE_OPEN.
-     *      Pos - The byte position to set the file pointer (0 = beginning of file, -1 = end of file)
-     */
-    // I need to seek staright to the end of the file to get the size.
-    // The help docs for "file_seek" say that -1 is the end of the file.
-    // However, the function takes an argument of type LONG for the position.
-    // Passing -1 to the function results in the compiler warning 10571.
-    // The function does work as expected, but the warning is annoying.
-    // Should the position argument be changed to type SLONG AMX?
-    // I tried to use this compiler directive,
-    // since I'm unable to suppress the warning using "type_cast".
-    // #DISABLE_WARNING 10571
-    // However, this disables all type mismatch warnings globally,
-    // which is not desirable.
-    result = file_seek(handle, type_cast(NAV_FILE_SEEK_END))
+    // Use NAVFileSeek to get file size by seeking to end
+    result = NAVFileSeek(handle, NAV_FILE_SEEK_END)
 
-    if (result < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_FILEUTILS__,
-                                    'NAVFileGetSize',
-                                    "'Error seeking to the end of file "', path, '" : ', NAVGetFileError(result)")
+    NAVFileClose(handle)
 
-        NAVFileClose(handle)
-        return result
-    }
-
-    count = result
-
-    result = NAVFileClose(handle)
-
-    if (result < 0) {
-        return result
-    }
-
-    return count
+    return result
 }
 
 
