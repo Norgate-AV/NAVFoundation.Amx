@@ -192,6 +192,65 @@ define_function slong NAVFileClose(long handle) {
 
 
 /**
+ * @function NAVFileSeek
+ * @public
+ * @description Seeks to a specific position in an open file.
+ *
+ * @param {long} handle - File handle returned by NAVFileOpen
+ * @param {slong} position - Byte position to seek to:
+ *                           0 = beginning of file
+ *                           -1 = end of file (use NAV_FILE_SEEK_END constant)
+ *                           N = absolute byte position
+ *
+ * @returns {slong} New position in file on success, or negative error code on failure
+ *
+ * @example
+ * stack_var long handle
+ * stack_var slong position
+ *
+ * handle = type_cast(NAVFileOpen('/data.txt', 'r'))
+ *
+ * // Seek to beginning
+ * position = NAVFileSeek(handle, 0)
+ *
+ * // Seek to end (get file size)
+ * position = NAVFileSeek(handle, NAV_FILE_SEEK_END)
+ *
+ * // Seek to specific byte
+ * position = NAVFileSeek(handle, 100)
+ *
+ * NAVFileClose(handle)
+ *
+ * @note AMX file_seek only supports absolute positioning, not relative
+ * @see NAVFileOpen
+ * @see NAVFileClose
+ */
+define_function slong NAVFileSeek(long handle, slong position) {
+    stack_var slong result
+
+    if (!handle) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileSeek',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : Invalid file handle (0)'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_HANDLE
+    }
+
+    result = file_seek(handle, type_cast(position))
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileSeek',
+                                    "'Error seeking to position ', itoa(position), ' : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+/**
  * @function NAVFileRead
  * @public
  * @description Reads the entire content of a file into a buffer.
