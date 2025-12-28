@@ -654,6 +654,238 @@ define_function slong NAVFileAppendLine(char path[], char buffer[]) {
 
 
 /**
+ * @function NAVFileReadLines
+ * @public
+ * @description Reads all lines from a file into an array.
+ * Opens the file, reads all lines, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[][]} lines - Output array to store lines (modified in-place)
+ *
+ * @returns {slong} Number of lines read on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char configLines[100][NAV_MAX_BUFFER]
+ * stack_var slong lineCount
+ * stack_var integer i
+ *
+ * lineCount = NAVFileReadLines('/config.txt', configLines)
+ * if (lineCount > 0) {
+ *     for (i = 1; i <= lineCount; i++) {
+ *         // Process each line
+ *     }
+ * }
+ *
+ * @note Handles CRLF, LF, and mixed line endings
+ * @note Line endings are stripped from returned lines
+ * @note Returns 0 for empty files (not an error)
+ * @note Maximum lines limited by array size (max_length_array)
+ * @see NAVFileWriteLines
+ * @see NAVFileAppendLines
+ * @see NAVFileReadLineHandle
+ */
+define_function slong NAVFileReadLines(char path[], char lines[][]) {
+    stack_var long handle
+    stack_var slong result
+    stack_var integer lineCount
+    stack_var char line[NAV_MAX_BUFFER]
+
+    // Validate path
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileReadLines',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    // Open file for reading
+    result = NAVFileOpen(path, 'r')
+    if (result < 0) {
+        return result
+    }
+
+    handle = type_cast(result)
+    lineCount = 0
+
+    // Read lines into array
+    while (lineCount < max_length_array(lines)) {
+        line = ''
+        result = NAVFileReadLineHandle(handle, line)
+
+        if (result < 0) {
+            if (result == NAV_FILE_ERROR_EOF_END_OF_FILE_REACHED) {
+                // If EOF but line buffer has content, store it (last line without trailing newline)
+                if (length_array(line) > 0) {
+                    lineCount++
+                    lines[lineCount] = line
+                }
+
+                break  // Normal end of file
+            }
+
+            NAVFileClose(handle)
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_FILEUTILS__,
+                                        'NAVFileReadLines',
+                                        "'Error reading lines from file "', path, '" : ', NAVGetFileError(result)")
+            return result
+        }
+
+        lineCount++
+        lines[lineCount] = line
+    }
+
+    set_length_array(lines, lineCount)
+    NAVFileClose(handle)
+
+    return type_cast(lineCount)
+}
+
+
+/**
+ * @function NAVFileWriteLines
+ * @public
+ * @description Writes an array of lines to a file.
+ * Opens the file, writes all lines with CRLF, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[][]} lines - Array of lines to write
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char configLines[10][NAV_MAX_BUFFER]
+ * stack_var slong result
+ *
+ * configLines[1] = 'Setting1=Value1'
+ * configLines[2] = 'Setting2=Value2'
+ * configLines[3] = 'Setting3=Value3'
+ * set_length_array(configLines, 3)
+ *
+ * result = NAVFileWriteLines('/config.txt', configLines)
+ *
+ * @note Creates a new file if it doesn't exist, otherwise overwrites existing file
+ * @note Each line automatically gets CRLF appended
+ * @note Empty lines (empty strings) are valid and write just CRLF
+ * @note Empty array writes nothing (creates/truncates file to 0 bytes)
+ * @see NAVFileReadLines
+ * @see NAVFileAppendLines
+ * @see NAVFileWriteLineHandle
+ */
+define_function slong NAVFileWriteLines(char path[], char lines[][]) {
+    stack_var long handle
+    stack_var slong result
+    stack_var integer x
+
+    // Validate path
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileWriteLines',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    // Open file in overwrite mode
+    result = NAVFileOpen(path, 'rw')
+    if (result < 0) {
+        return result
+    }
+
+    handle = type_cast(result)
+
+    // Write each line
+    for (x = 1; x <= length_array(lines); x++) {
+        result = NAVFileWriteLineHandle(handle, lines[x])
+
+        if (result < 0) {
+            NAVFileClose(handle)
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_FILEUTILS__,
+                                        'NAVFileWriteLines',
+                                        "'Error writing lines to file "', path, '" : ', NAVGetFileError(result)")
+            return result
+        }
+    }
+
+    NAVFileClose(handle)
+    return 0
+}
+
+
+/**
+ * @function NAVFileAppendLines
+ * @public
+ * @description Appends an array of lines to the end of a file.
+ * Opens the file in append mode, writes all lines with CRLF, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[][]} lines - Array of lines to append
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char logEntries[5][NAV_MAX_BUFFER]
+ * stack_var slong result
+ *
+ * logEntries[1] = "NAVGetTimeStamp(), ': System started'"
+ * logEntries[2] = "NAVGetTimeStamp(), ': Config loaded'"
+ * logEntries[3] = "NAVGetTimeStamp(), ': Connection established'"
+ * set_length_array(logEntries, 3)
+ *
+ * result = NAVFileAppendLines('/log.txt', logEntries)
+ *
+ * @note Creates a new file if it doesn't exist
+ * @note Each line automatically gets CRLF appended
+ * @note Empty lines (empty strings) are valid and append just CRLF
+ * @note Empty array appends nothing (no-op, returns success)
+ * @see NAVFileReadLines
+ * @see NAVFileWriteLines
+ * @see NAVFileWriteLineHandle
+ */
+define_function slong NAVFileAppendLines(char path[], char lines[][]) {
+    stack_var long handle
+    stack_var slong result
+    stack_var integer x
+
+    // Validate path
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileAppendLines',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    // Open file in append mode
+    result = NAVFileOpen(path, 'rwa')
+    if (result < 0) {
+        return result
+    }
+
+    handle = type_cast(result)
+
+    // Append each line
+    for (x = 1; x <= length_array(lines); x++) {
+        result = NAVFileWriteLineHandle(handle, lines[x])
+
+        if (result < 0) {
+            NAVFileClose(handle)
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_FILEUTILS__,
+                                        'NAVFileAppendLines',
+                                        "'Error appending lines to file "', path, '" : ', NAVGetFileError(result)")
+            return result
+        }
+    }
+
+    NAVFileClose(handle)
+    return 0
+}
+
+
+/**
  * @function NAVReadDirectory
  * @public
  * @description Reads the contents of a directory and returns details about each file and subdirectory.

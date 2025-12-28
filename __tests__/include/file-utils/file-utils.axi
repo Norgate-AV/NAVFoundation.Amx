@@ -20,12 +20,16 @@
 #DEFINE TESTING_NAVFILEREADLINEHANDLE
 #DEFINE TESTING_NAVFILEWRITEHANDLE
 #DEFINE TESTING_NAVFILEWRITELINEHANDLE
+#DEFINE TESTING_NAVFILEREADLINES
+#DEFINE TESTING_NAVFILEWRITELINES
+#DEFINE TESTING_NAVFILEAPPENDLINES
 
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.FileUtils.axi'
 #include 'NAVFoundation.Assert.axi'
 #include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Testing.axi'
+#include 'NAVFileUtilsTestHelpers.axi'
 
 #IF_DEFINED TESTING_NAVFILEEXISTS
 #include 'NAVFileExists.axi'
@@ -115,6 +119,18 @@
 #include 'NAVFileWriteLineHandle.axi'
 #END_IF
 
+#IF_DEFINED TESTING_NAVFILEREADLINES
+#include 'NAVFileReadLines.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVFILEWRITELINES
+#include 'NAVFileWriteLines.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVFILEAPPENDLINES
+#include 'NAVFileAppendLines.axi'
+#END_IF
+
 define_function RunFileUtilsTests() {
     #IF_DEFINED TESTING_NAVREADDIRECTORY
     TestNAVReadDirectory()
@@ -202,5 +218,17 @@ define_function RunFileUtilsTests() {
 
     #IF_DEFINED TESTING_NAVFILEWRITELINEHANDLE
     TestNAVFileWriteLineHandle()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVFILEREADLINES
+    TestNAVFileReadLines()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVFILEWRITELINES
+    TestNAVFileWriteLines()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVFILEAPPENDLINES
+    TestNAVFileAppendLines()
     #END_IF
 }

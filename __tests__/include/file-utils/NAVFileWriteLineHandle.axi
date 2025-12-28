@@ -74,38 +74,6 @@ define_function SetupFileWriteLineHandleTest(integer testIndex) {
 }
 
 /**
- * Count lines in a file
- */
-define_function integer CountLinesInFile(char path[]) {
-    stack_var slong result
-    stack_var long handle
-    stack_var char line[NAV_MAX_BUFFER]
-    stack_var integer lineCount
-
-    result = NAVFileOpen(path, 'r')
-    if (result < 0) {
-        return 0
-    }
-
-    handle = type_cast(result)
-    lineCount = 0
-
-    while (1) {
-        line = ''
-        result = NAVFileReadLineHandle(handle, line)
-
-        if (result < 0) {
-            break
-        }
-
-        lineCount++
-    }
-
-    NAVFileClose(handle)
-    return lineCount
-}
-
-/**
  * Main test function
  */
 define_function TestNAVFileWriteLineHandle() {
