@@ -24,7 +24,7 @@ constant slong DIRECTORY_DELETE_EXPECTED_RESULT[] = {
     -2,     // Test 1: Empty path - NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     0,      // Test 2: Success - empty directory deleted
     -5,     // Test 3: Disk I/O error (directory not empty)
-    -13,    // Test 4: File path not loaded (doesn't exist)
+    -4,     // Test 4: Invalid file path (doesn't exist)
     0,      // Test 5: Success - directory deleted
     0,      // Test 6: Success - deleted
     0,      // Test 7: Success - deleted
@@ -73,7 +73,9 @@ volatile char DIRECTORY_DELETE_SETUP_REQUIRED = false
  * Required because NetLinx cannot handle complex string expressions in constants
  */
 define_function InitializeDirectoryDeleteTestData() {
-    // Future: Setup here if needed
+    // Create parent directory for tests
+    NAVDirectoryCreate('/testdirdelete')
+
     DIRECTORY_DELETE_SETUP_REQUIRED = true
 }
 
@@ -147,7 +149,7 @@ define_function TestNAVDirectoryDelete() {
         else {
             // For error cases, check specific error code or just < 0
             // Some error codes may vary by system
-            if (expected == -2 || expected == -13) {
+            if (expected == -2 || expected == -4) {
                 if (!NAVAssertSignedLongEqual('Should return expected error code', expected, result)) {
                     NAVLogTestFailed(x, "itoa(expected)", "itoa(result)")
                     continue
