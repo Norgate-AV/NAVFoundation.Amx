@@ -23,7 +23,7 @@ constant slong GET_FILE_ERROR_TEST_CODES[] = {
     NAV_FILE_ERROR_FILE_PATH_NOT_LOADED,                // Test 14: -13
     NAV_FILE_ERROR_MAXIMUM_NUMBER_OF_FILES_ARE_ALREADY_OPEN,  // Test 15: -14
     NAV_FILE_ERROR_INVALID_FILE_FORMAT,                 // Test 16: -15
-    -999                                                // Test 17: Unknown error code
+    -100                                                // Test 17: Unknown error code
 }
 
 constant char GET_FILE_ERROR_EXPECTED_MESSAGES[][NAV_MAX_BUFFER] = {
@@ -43,7 +43,7 @@ constant char GET_FILE_ERROR_EXPECTED_MESSAGES[][NAV_MAX_BUFFER] = {
     'File path not loaded',                             // Test 14: -13
     'Maximum number of files are already open (max is 10)',  // Test 15: -14
     'Invalid file format',                              // Test 16: -15
-    'Unknown error (-999)'                              // Test 17: Unknown error
+    'Unknown error (-100)'                              // Test 17: Unknown error
 }
 
 constant char GET_FILE_ERROR_CHECK_TYPE[] = {
@@ -63,7 +63,7 @@ constant char GET_FILE_ERROR_CHECK_TYPE[] = {
     2,      // Test 14: Check exact match
     2,      // Test 15: Check exact match
     2,      // Test 16: Check exact match
-    3       // Test 17: Check contains "Unknown error"
+    2       // Test 17: Check exact match (unknown error with code)
 }
 
 
@@ -96,31 +96,32 @@ define_function TestNAVGetFileError() {
         checkType = GET_FILE_ERROR_CHECK_TYPE[x]
 
         result = NAVGetFileError(errorCode)
+        NAVLog("'Test ', itoa(x), ': NAVGetFileError(', itoa(errorCode), ') returned: ', result")
 
         // Check type 1: Should return empty string (success cases)
         if (checkType == 1) {
             if (!NAVAssertStringEqual('Should return empty string for non-error', expected, result)) {
-                NAVLogTestFailed(x, 'empty string', "'", result, "'")
+                NAVLogTestFailed(x, 'empty string', result)
                 continue
             }
         }
         // Check type 2: Should return exact error message
         else if (checkType == 2) {
             if (!NAVAssertStringEqual('Should return correct error message', expected, result)) {
-                NAVLogTestFailed(x, "'", expected, "'", "'", result, "'")
+                NAVLogTestFailed(x, expected, result)
                 continue
             }
         }
         // Check type 3: Should contain "Unknown error"
         else if (checkType == 3) {
             if (!NAVAssertTrue('Should return unknown error message', NAVContains(result, 'Unknown error'))) {
-                NAVLogTestFailed(x, 'contains "Unknown error"', "'", result, "'")
+                NAVLogTestFailed(x, 'contains "Unknown error"', result)
                 continue
             }
 
             // Also verify it includes the error code
             if (!NAVAssertTrue('Should include error code in message', NAVContains(result, itoa(errorCode)))) {
-                NAVLogTestFailed(x, "'contains ", itoa(errorCode), "'", "'", result, "'")
+                NAVLogTestFailed(x, "'contains ', itoa(errorCode)", result)
                 continue
             }
         }

@@ -46,8 +46,8 @@ constant slong FILE_OPEN_EXPECTED_RESULT[] = {
     0,      // Test 7: Success - handle >= 0
     0,      // Test 8: Success - handle >= 0
     0,      // Test 9: Success - handle >= 0
-    -2,     // Test 10: Invalid file path (directory)
-    -2,     // Test 11: Invalid file path (root)
+    0,      // Test 10: Success - handle >= 0 (directories can be opened)
+    0,      // Test 11: Success - handle >= 0 (root can be opened)
     0       // Test 12: Success - handle >= 0
 }
 
@@ -76,8 +76,8 @@ constant char FILE_OPEN_TEST_CLOSE[] = {
     true,   // Test 7: Close after open
     true,   // Test 8: Close after open
     true,   // Test 9: Close after open
-    false,  // Test 10: Don't close (open failed)
-    false,  // Test 11: Don't close (open failed)
+    true,   // Test 10: Close after open (directories can be opened)
+    true,   // Test 11: Close after open (root can be opened)
     true    // Test 12: Close after open
 }
 
@@ -91,6 +91,11 @@ volatile char FILE_OPEN_CLOSE_SETUP_REQUIRED = false
  * Initialize global test data arrays at runtime
  */
 define_function InitializeFileOpenCloseTestData() {
+    stack_var slong result
+
+    // Create parent directory
+    result = NAVDirectoryCreate('/testopenclose')
+
     FILE_OPEN_CLOSE_SETUP_REQUIRED = true
 }
 
@@ -183,10 +188,10 @@ define_function TestNAVFileOpenClose() {
     {
         closeResult = NAVFileClose(0)
         if (closeResult < 0) {
-            NAVLog("'  ✓ Close invalid handle returned error as expected'")
+            NAVLog("'  Close invalid handle returned error as expected'")
         }
         else {
-            NAVLog("'  ✗ Close invalid handle should return error'")
+            NAVLog("'  Close invalid handle should return error'")
         }
     }
 }
