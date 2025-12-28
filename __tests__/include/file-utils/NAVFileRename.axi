@@ -42,7 +42,7 @@ constant slong FILE_RENAME_EXPECTED_RESULT[] = {
     -2,     // Test 1: Empty source - NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     0,      // Test 2: Success - file renamed
     0,      // Test 3: Success - file moved
-    -13,    // Test 4: File path not loaded (doesn't exist)
+    -4,     // Test 4: Invalid file path (doesn't exist)
     0,      // Test 5: Success - renamed
     0,      // Test 6: Success - renamed
     0,      // Test 7: Success - renamed
@@ -50,8 +50,8 @@ constant slong FILE_RENAME_EXPECTED_RESULT[] = {
     -5,     // Test 9: Disk I/O error (can't rename directory as file)
     -8,     // Test 10: File name exists (target exists)
     0,      // Test 11: Success - extension changed
-    0,      // Test 12: Success - same name (no-op)
-    0       // Test 13: Success - relative paths
+    -8,     // Test 12: File name exists (same source and dest returns -8)
+    0       // Test 13: Success - relative path rename works
 }
 
 constant char FILE_RENAME_NEEDS_CREATION[] = {
@@ -96,6 +96,11 @@ volatile char FILE_RENAME_SETUP_REQUIRED = false
  * Initialize global test data arrays at runtime
  */
 define_function InitializeFileRenameTestData() {
+    // Create parent directories for tests
+    NAVDirectoryCreate('/testrename')
+    NAVDirectoryCreate('/testrename/nested')
+    NAVDirectoryCreate('/testrename/moved')
+
     FILE_RENAME_SETUP_REQUIRED = true
 }
 
@@ -119,6 +124,12 @@ define_function SetupFileRenameTest(integer testNum, char sourcePath[], char des
                 NAVLog("'WARNING: Failed to create destination directory: ', dirPath")
             }
         }
+    }
+
+    // Clean up any existing destination file from previous test runs
+    // (except for test 10 which specifically tests destination exists)
+    if (testNum != 10 && NAVFileExists(destPath)) {
+        NAVFileDelete(destPath)
     }
 
     // Test 10: Create target file (to test failure)

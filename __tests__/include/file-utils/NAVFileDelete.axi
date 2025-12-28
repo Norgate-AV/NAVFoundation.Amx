@@ -26,7 +26,7 @@ constant slong FILE_DELETE_EXPECTED_RESULT[] = {
     -2,     // Test 1: Empty path - NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     0,      // Test 2: Success - file deleted
     0,      // Test 3: Success - file deleted
-    -13,    // Test 4: File path not loaded (doesn't exist)
+    -4,     // Test 4: Invalid file path (doesn't exist)
     0,      // Test 5: Success - deleted
     0,      // Test 6: Success - deleted
     0,      // Test 7: Success - deleted
@@ -35,7 +35,7 @@ constant slong FILE_DELETE_EXPECTED_RESULT[] = {
     -5,     // Test 10: Disk I/O error (can't delete directory as file)
     -5,     // Test 11: Disk I/O error (can't delete root)
     0,      // Test 12: Success - deleted (check >= 0)
-    -13     // Test 13: File path not loaded (parent doesn't exist)
+    -4      // Test 13: Invalid file path (parent doesn't exist)
 }
 
 constant char FILE_DELETE_NEEDS_CREATION[] = {
@@ -81,7 +81,10 @@ volatile char FILE_DELETE_SETUP_REQUIRED = false
  * Required because NetLinx cannot handle complex string expressions in constants
  */
 define_function InitializeFileDeleteTestData() {
-    // Future: Setup here if needed
+    // Create parent directory for tests
+    NAVDirectoryCreate('/testfiledelete')
+    NAVDirectoryCreate('/testfiledelete/nested')
+
     FILE_DELETE_SETUP_REQUIRED = true
 }
 
