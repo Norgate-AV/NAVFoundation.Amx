@@ -4,7 +4,6 @@ build:
       - ./ArrayUtils
       - ./Assert
       - ./BinaryUtils
-      - ./Console
       - ./Core
       - ./Cryptography
       - ./CsvUtils

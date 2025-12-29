@@ -72,7 +72,6 @@ For more detailed guides and documentation, please refer the `README.md` files i
 - [Assert](./Assert)
 - [BinaryUtils](./BinaryUtils)
     - Provides functions for binary data manipulation and conversion.
-- [Console](./Console)
 - [Cryptography](./Cryptography)
     - Provides cryptographic functions and utilities for secure data handling.
 - [DateTimeUtils](./DateTimeUtils)
