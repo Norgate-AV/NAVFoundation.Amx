@@ -1,5 +1,77 @@
 # Changelog
 
+## [5.0.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v4.1.0...v5.0.0) (2025-12-29)
+
+### ⚠ BREAKING CHANGES
+
+- **binary-utils:** BinaryUtils function names have changed
+
+Function renames:
+
+- NAVCharToDecimalBinaryString() → NAVByteToBitArray()
+  Returns integer array of bit values instead of string
+
+- NAVCharToAsciiBinaryString() → NAVByteToBinaryString()
+  Returns ASCII string representation (unchanged behavior)
+
+- NAVDecimalToBinary() → NAVBinaryToBcd()
+  Converts integer to BCD format (corrected naming)
+
+New functions:
+
+- NAVBcdToBinary(char value)
+  Reverse operation: converts BCD byte to integer
+
+Migration guide:
+Replace NAVCharToDecimalBinaryString() calls with NAVByteToBitArray()
+Replace NAVCharToAsciiBinaryString() calls with NAVByteToBinaryString()
+Replace NAVDecimalToBinary() calls with NAVBinaryToBcd()
+For BCD hardware reading, use new NAVBcdToBinary() function
+
+- **ntp:** NtpClientBase removed (side effects incompatible with foundation library). NtpClient renamed to NtpUtils. Core utilities unchanged.
+- Console library removed from foundation. It contained side effects (network servers, global state) that don't belong in a foundation library. Archived in branch archive/console for reference.
+- **file-utils:** NAVFileReadLine renamed to NAVFileReadLineHandle
+
+* Add NAVFileReadHandle for raw byte reads from open file handles
+* Add NAVFileWriteHandle for raw byte writes to open file handles
+* Add NAVFileWriteLineHandle for line writes with automatic CRLF
+* Rename NAVFileReadLine to NAVFileReadLineHandle for consistency
+* Refactor NAVFileGetSize to use NAVFileSeek wrapper
+* Add support for empty line writes (CRLF only) in WriteLine functions
+* Add 31 new tests for handle-based functions (268 total tests passing)
+* Update documentation for empty buffer handling
+
+All handle-based functions now use "Handle" suffix for immediate
+recognition. Convenience functions (path-based) remain unchanged.
+
+- **file-utils:** NAVFileExists now accepts only a single path parameter instead of two parameters. Function now parses the directory and filename internally using NAVPathDirName and NAVPathBaseName, and validates files by reading the parent directory.
+
+Migration: Update calls from NAVFileExists(dir, file) to NAVFileExists('/path/to/file')
+
+### 🌟 Features
+
+- **core:** add "yes" in NAVStringToBoolean ([b2915c0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b2915c019bdb11426e0119c7c28a4988844ce99d))
+- **file-utils:** add array-based line operations ([77bf8d6](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/77bf8d6e1526d75bac0e73f7461dac1633cdad58))
+- **file-utils:** add complete handle-based file API with consistent naming ([4095801](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/40958018e11045562aeebae4e2e033444e01a13c))
+- **file-utils:** add NAVFileSeek helper function ([98d0bbe](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/98d0bbeba9e95edeba9c819301b02d3bd8dcf1bb))
+- **ini-utils:** add typed getter functions and key existence check ([c641f21](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c641f2102a71e9f315ee57fc0f61c0bb839e145e))
+- **binary-utils:** improve function naming clarity and add bidirectional BCD conversion ([6c3e1be](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/6c3e1be3dcd3a0453b4b97f729aafb5953254baa))
+
+### 🐛 Bug Fixes
+
+- **file-utils:** change NAVFileExists signature to single parameter ([f48112b](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/f48112b8f6b36c4e42b215a5dea32128c43b8fcd))
+- **file-utils:** correctly return error code if NAVFileReadLine does ([137770b](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/137770b593430d06bee2fd9a8f3e2ba234e2f046))
+- **file-utils:** fix incorrect function name in NAVFileRename error ([0ba8307](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/0ba8307db23eef05b323412bf862d381ec6c4374))
+- **file-utils:** return number of bytes written correctly from ([3f6f08d](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3f6f08db3a45d1e4b20c0092990ff3030e95436c))
+- **file-utils:** use BaseName for checking entity exists in ([c24e4b9](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c24e4b929230dce1aecc4e831f672f54578b0932))
+- **file-utils:** various fixes and improvements ([c934c20](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c934c2031cf4954441ace7037d2859e3bc534afa))
+- **file-utils:** various fixes for NAVReadDirectory ([1a09086](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/1a0908606bab1781cd8e4615f0b3e6339e149b34))
+
+### ✨ Refactor
+
+- remove Console library ([8d0d0ad](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/8d0d0adab2a1aff0ca4b5e9ccc225049acc9e5a9))
+- **ntp:** remove NtpClientBase, rename to NtpUtils ([94503bd](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/94503bd05469464f9ae7961ab2fcf36f31510b58))
+
 ## [4.1.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v4.0.0...v4.1.0) (2025-11-17)
 
 ### 🌟 Features
