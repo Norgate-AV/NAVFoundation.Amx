@@ -17,10 +17,6 @@
             "url": "github.com/Norgate-AV/NAVDatabase.Amx.EnovaDVX"
         },
         {
-            "version": "~1.0.0",
-            "url": "github.com/Norgate-AV/NAVDatabase.Amx.NtpClient"
-        },
-        {
             "version": "4.7.21",
             "url": "github.com/Norgate-AV/RMS-SDK"
         }
