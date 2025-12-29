@@ -18,7 +18,6 @@ build:
       - ./Int64
       - ./InterModuleApi
       - ./Jsmn
-      - ./Json
       - ./Lexer
       - ./LogicEngine
       - ./Math
