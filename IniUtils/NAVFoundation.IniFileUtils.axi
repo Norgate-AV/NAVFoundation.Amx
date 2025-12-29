@@ -36,6 +36,7 @@ SOFTWARE.
 
 #include 'NAVFoundation.IniFileLexer.axi'
 #include 'NAVFoundation.IniFileParser.axi'
+#include 'NAVFoundation.Regex.axi'
 
 
 (***********************************************************)
@@ -290,80 +291,424 @@ define_function char NAVIniFileHasKey(_NAVIniFile iniFile, char dotPath[]) {
 }
 
 
+/**
+ * @function NAVIniFileGetIntegerValue
+ * @public
+ * @description Get an integer property value using dot notation with a default fallback.
+ *              Uses atoi() for conversion - invalid strings convert to 0.
+ *              Returns the default value if key doesn't exist.
+ *
+ * @param {_NAVIniFile} iniFile - The parsed INI file structure
+ * @param {char[]} dotPath - The dot-notation path (e.g., "database.port" or "timeout")
+ * @param {integer} defaultValue - The default integer value to return if not found
+ *
+ * @returns {integer} The integer value or defaultValue if not found
+ *
+ * @example
+ * stack_var integer port
+ * stack_var integer timeout
+ * port = NAVIniFileGetIntegerValue(ini, 'database.port', 5432)
+ * timeout = NAVIniFileGetIntegerValue(ini, 'timeout', 30)
+ *
+ * @note atoi() converts invalid strings to 0. Use NAVIniFileHasKey() to check existence first if needed.
+ */
 define_function integer NAVIniFileGetIntegerValue(_NAVIniFile iniFile, char dotPath[], integer defaultValue) {
-    stack_var char valueStr[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+    stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
     stack_var integer valueInt
 
-    valueStr = NAVIniFileGetValue(iniFile, dotPath)
-    if (!length_array(valueStr)) {
+    if (!NAVIniFileHasKey(iniFile, dotPath)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_INIFILEUTILS__,
+                                    'NAVIniFileGetIntegerValue',
+                                    "'Key not found: ', dotPath, '. Returning default value (', itoa(defaultValue), ')'")
+
         return defaultValue
     }
 
-    valueInt = atoi(valueStr)
-    return valueInt
+    value = NAVIniFileGetValue(iniFile, dotPath)
+    if (!length_array(value)) {
+        return defaultValue
+    }
+
+    // Trim whitespace and validate it's a valid integer
+    value = NAVTrimString(value)
+
+    if (NAVRegexTest('/^\d+$/', value)) {
+        return atoi(value)
+    }
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_INIFILEUTILS__,
+                                'NAVIniFileGetIntegerValue',
+                                "'Invalid integer value for key ', dotPath, ': ', value, '. Returning default value (', itoa(defaultValue), ')'")
+
+    return defaultValue
 }
 
 
-define_function char NAVIniFileGetBooleanValue(_NAVIniFile iniFile, char dotPath[], char defaultValue) {
-    stack_var char valueStr[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+/**
+ * @function NAVIniFileGetSignedIntegerValue
+ * @public
+ * @description Get a signed integer property value using dot notation with a default fallback.
+ *              Uses atoi() for conversion - invalid strings convert to 0.
+ *              Returns the default value if key doesn't exist.
+ *
+ * @param {_NAVIniFile} iniFile - The parsed INI file structure
+ * @param {char[]} dotPath - The dot-notation path (e.g., "database.offset" or "adjustment")
+ * @param {sinteger} defaultValue - The default signed integer value to return if not found
+ *
+ * @returns {sinteger} The signed integer value or defaultValue if not found
+ *
+ * @example
+ * stack_var sinteger offset
+ * stack_var sinteger adjustment
+ * offset = NAVIniFileGetSignedIntegerValue(ini, 'database.offset', -10)
+ * adjustment = NAVIniFileGetSignedIntegerValue(ini, 'adjustment', 0)
+ *
+ * @note atoi() converts invalid strings to 0. Use NAVIniFileHasKey() to check existence first if needed.
+ * @note NetLinx sinteger is 16-bit signed: -32768 to 32767
+ */
+define_function sinteger NAVIniFileGetSignedIntegerValue(_NAVIniFile iniFile, char dotPath[], sinteger defaultValue) {
+    stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
 
-    valueStr = NAVIniFileGetValue(iniFile, dotPath)
-    if (!length_array(valueStr)) {
+    if (!NAVIniFileHasKey(iniFile, dotPath)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_INIFILEUTILS__,
+                                    'NAVIniFileGetSignedIntegerValue',
+                                    "'Key not found: ', dotPath, '. Returning default value (', itoa(defaultValue), ')'")
+
         return defaultValue
     }
 
-    // Normalize to lowercase for comparison
-    valueStr = to_lower_string(valueStr)
-
-    if (valueStr == '1' || valueStr == 'true' || valueStr == 'yes' || valueStr == 'on') {
-        return true
-    } else if (valueStr == '0' || valueStr == 'false' || valueStr == 'no' || valueStr == 'off') {
-        return false
-    } else {
+    value = NAVIniFileGetValue(iniFile, dotPath)
+    if (!length_array(value)) {
         return defaultValue
     }
+
+    // Trim whitespace and validate it's a valid signed integer
+    value = NAVTrimString(value)
+
+    if (NAVRegexTest('/^[+-]?\d+$/', value)) {
+        return atoi(value)
+    }
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_INIFILEUTILS__,
+                                'NAVIniFileGetSignedIntegerValue',
+                                "'Invalid signed integer value for key ', dotPath, ': ', value, '. Returning default value (', itoa(defaultValue), ')'")
+
+    return defaultValue
 }
 
 
-define_function double NAVIniFileGetDoubleValue(_NAVIniFile iniFile, char dotPath[], double defaultValue) {
-    stack_var char valueStr[NAV_INI_PARSER_MAX_VALUE_LENGTH]
-    stack_var double valueDouble
-
-    valueStr = NAVIniFileGetValue(iniFile, dotPath)
-    if (!length_array(valueStr)) {
-        return defaultValue
-    }
-
-    valueDouble = atof(valueStr)
-    return valueDouble
-}
-
-
+/**
+ * @function NAVIniFileGetLongValue
+ * @public
+ * @description Get a long integer property value using dot notation with a default fallback.
+ *              Uses atol() for conversion - invalid strings convert to 0.
+ *              Returns the default value if key doesn't exist.
+ *
+ * @param {_NAVIniFile} iniFile - The parsed INI file structure
+ * @param {char[]} dotPath - The dot-notation path (e.g., "system.timestamp" or "counter")
+ * @param {long} defaultValue - The default long integer value to return if not found
+ *
+ * @returns {long} The long integer value or defaultValue if not found
+ *
+ * @example
+ * stack_var long timestamp
+ * stack_var long counter
+ * timestamp = NAVIniFileGetLongValue(ini, 'system.timestamp', 0)
+ * counter = NAVIniFileGetLongValue(ini, 'counter', 1000000)
+ *
+ * @note atol() converts invalid strings to 0. Use NAVIniFileHasKey() to check existence first if needed.
+ * @note NetLinx long is 32-bit unsigned: 0 to 4294967295
+ */
 define_function long NAVIniFileGetLongValue(_NAVIniFile iniFile, char dotPath[], long defaultValue) {
-    stack_var char valueStr[NAV_INI_PARSER_MAX_VALUE_LENGTH]
-    stack_var long valueLong
+    stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
 
-    valueStr = NAVIniFileGetValue(iniFile, dotPath)
-    if (!length_array(valueStr)) {
+    if (!NAVIniFileHasKey(iniFile, dotPath)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_INIFILEUTILS__,
+                                    'NAVIniFileGetLongValue',
+                                    "'Key not found: ', dotPath, '. Returning default value (', itoa(defaultValue), ')'")
+
         return defaultValue
     }
 
-    valueLong = atol(valueStr)
-    return valueLong
+    value = NAVIniFileGetValue(iniFile, dotPath)
+    if (!length_array(value)) {
+        return defaultValue
+    }
+
+    // Trim whitespace and validate it's a valid long integer
+    value = NAVTrimString(value)
+
+    if (NAVRegexTest('/^\d+$/', value)) {
+        return atol(value)
+    }
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_INIFILEUTILS__,
+                                'NAVIniFileGetLongValue',
+                                "'Invalid long integer value for key ', dotPath, ': ', value, '. Returning default value (', itoa(defaultValue), ')'")
+
+    return defaultValue
 }
 
 
-define_function float NAVIniFileGetFloatValue(_NAVIniFile iniFile, char dotPath[], float defaultValue) {
-    stack_var char valueStr[NAV_INI_PARSER_MAX_VALUE_LENGTH]
-    stack_var float valueFloat
+/**
+ * @function NAVIniFileGetSignedLongValue
+ * @public
+ * @description Get a signed long integer property value using dot notation with a default fallback.
+ *              Uses atol() for conversion - invalid strings convert to 0.
+ *              Returns the default value if key doesn't exist.
+ *
+ * @param {_NAVIniFile} iniFile - The parsed INI file structure
+ * @param {char[]} dotPath - The dot-notation path (e.g., "system.offset" or "delta")
+ * @param {slong} defaultValue - The default signed long integer value to return if not found
+ *
+ * @returns {slong} The signed long integer value or defaultValue if not found
+ *
+ * @example
+ * stack_var slong offset
+ * stack_var slong delta
+ * offset = NAVIniFileGetSignedLongValue(ini, 'system.offset', -1000000)
+ * delta = NAVIniFileGetSignedLongValue(ini, 'delta', 0)
+ *
+ * @note atol() converts invalid strings to 0. Use NAVIniFileHasKey() to check existence first if needed.
+ * @note NetLinx slong is 32-bit signed: -2147483648 to 2147483647
+ */
+define_function slong NAVIniFileGetSignedLongValue(_NAVIniFile iniFile, char dotPath[], slong defaultValue) {
+    stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
 
-    valueStr = NAVIniFileGetValue(iniFile, dotPath)
-    if (!length_array(valueStr)) {
+    if (!NAVIniFileHasKey(iniFile, dotPath)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_INIFILEUTILS__,
+                                    'NAVIniFileGetSignedLongValue',
+                                    "'Key not found: ', dotPath, '. Returning default value (', itoa(defaultValue), ')'")
+
         return defaultValue
     }
 
-    valueFloat = atof(valueStr)
-    return valueFloat
+    value = NAVIniFileGetValue(iniFile, dotPath)
+    if (!length_array(value)) {
+        return defaultValue
+    }
+
+    // Trim whitespace and validate it's a valid signed long integer
+    value = NAVTrimString(value)
+
+    if (NAVRegexTest('/^[+-]?\d+$/', value)) {
+        return atol(value)
+    }
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_INIFILEUTILS__,
+                                'NAVIniFileGetSignedLongValue',
+                                "'Invalid signed long integer value for key ', dotPath, ': ', value, '. Returning default value (', itoa(defaultValue), ')'")
+
+    return defaultValue
+}
+
+
+/**
+ * @function NAVIniFileGetFloatValue
+ * @public
+ * @description Get a float property value using dot notation with a default fallback.
+ *              Uses atof() for conversion - invalid strings convert to 0.0.
+ *              Returns the default value if key doesn't exist.
+ *
+ * @param {_NAVIniFile} iniFile - The parsed INI file structure
+ * @param {char[]} dotPath - The dot-notation path (e.g., "graphics.scale" or "threshold")
+ * @param {float} defaultValue - The default float value to return if not found
+ *
+ * @returns {float} The float value or defaultValue if not found
+ *
+ * @example
+ * stack_var float scale
+ * stack_var float threshold
+ * scale = NAVIniFileGetFloatValue(ini, 'graphics.scale', 1.0)
+ * threshold = NAVIniFileGetFloatValue(ini, 'threshold', 0.5)
+ *
+ * @note atof() converts invalid strings to 0.0. Use NAVIniFileHasKey() to check existence first if needed.
+ * @note Accepts decimal notation: "3.14", "-2.5", "42", ".5" (without leading zero), "-.25", "+1.5"
+ */
+define_function float NAVIniFileGetFloatValue(_NAVIniFile iniFile, char dotPath[], float defaultValue) {
+    stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+
+    if (!NAVIniFileHasKey(iniFile, dotPath)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_INIFILEUTILS__,
+                                    'NAVIniFileGetFloatValue',
+                                    "'Key not found: ', dotPath, '. Returning default value (', ftoa(defaultValue), ')'")
+
+        return defaultValue
+    }
+
+    value = NAVIniFileGetValue(iniFile, dotPath)
+    if (!length_array(value)) {
+        return defaultValue
+    }
+
+    // Trim whitespace and validate it's a valid float
+    value = NAVTrimString(value)
+
+    // Allow formats: 5, 5.0, .5, +5.0, -.5
+    if (NAVRegexTest('/^[+-]?(\d+(\.\d*)?|\.\d+)$/', value)) {
+        return atof(value)
+    }
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_INIFILEUTILS__,
+                                'NAVIniFileGetFloatValue',
+                                "'Invalid float value for key ', dotPath, ': ', value, '. Returning default value (', ftoa(defaultValue), ')'")
+
+    return defaultValue
+}
+
+
+/**
+ * @function NAVIniFileGetBooleanValue
+ * @public
+ * @description Get a boolean property value using dot notation with a default fallback.
+ *              Recognizes multiple boolean representations (case-insensitive):
+ *              - True values: "1", "true", "yes", "on"
+ *              - False values: "0", "false", "no", "off"
+ *              Returns the default value if key doesn't exist or value is invalid.
+ *
+ * @param {_NAVIniFile} iniFile - The parsed INI file structure
+ * @param {char[]} dotPath - The dot-notation path (e.g., "database.enabled" or "debug")
+ * @param {char} defaultValue - The default boolean value to return if not found or invalid
+ *
+ * @returns {char} The boolean value (true/false) or defaultValue if not found/invalid
+ *
+ * @example
+ * stack_var char enabled
+ * enabled = NAVIniFileGetBooleanValue(ini, 'database.enabled', false)
+ * enabled = NAVIniFileGetBooleanValue(ini, 'debug', true)
+ */
+define_function char NAVIniFileGetBooleanValue(_NAVIniFile iniFile, char dotPath[], char defaultValue) {
+    stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+
+    if (!NAVIniFileHasKey(iniFile, dotPath)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_INIFILEUTILS__,
+                                    'NAVIniFileGetBooleanValue',
+                                    "'Key not found: ', dotPath, '. Returning default value (', NAVBooleanToString(defaultValue), ')'")
+
+        return defaultValue
+    }
+
+    value = NAVIniFileGetValue(iniFile, dotPath)
+    if (!length_array(value)) {
+        return defaultValue
+    }
+
+    // Validate it's a recognized boolean value, then convert
+    if (NAVRegexTest('/^(1|true|yes|on|0|false|no|off)$/i', value)) {
+        return NAVStringToBoolean(value)
+    }
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_INIFILEUTILS__,
+                                'NAVIniFileGetBooleanValue',
+                                "'Invalid boolean value for key ', dotPath, ': ', value, '. Returning default value (', NAVBooleanToString(defaultValue), ')'")
+
+    return defaultValue
+}
+
+
+/**
+ * @function NAVIniFileGetStringValue
+ * @public
+ * @description Get a string property value using dot notation with a default fallback.
+ *              Returns the raw string value without any conversion or validation.
+ *              Returns the default value if key doesn't exist or value is empty.
+ *
+ * @param {_NAVIniFile} iniFile - The parsed INI file structure
+ * @param {char[]} dotPath - The dot-notation path (e.g., "database.host" or "name")
+ * @param {char[]} defaultValue - The default string value to return if not found
+ *
+ * @returns {char[]} The string value or defaultValue if not found or empty
+ *
+ * @example
+ * stack_var char hostname[128]
+ * stack_var char username[64]
+ * hostname = NAVIniFileGetStringValue(ini, 'database.host', 'localhost')
+ * username = NAVIniFileGetStringValue(ini, 'username', 'admin')
+ *
+ * @note Unlike typed getters, this returns the raw string without trimming or validation.
+ */
+define_function char[NAV_INI_PARSER_MAX_VALUE_LENGTH] NAVIniFileGetStringValue(_NAVIniFile iniFile, char dotPath[], char defaultValue[]) {
+    stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+
+    if (!NAVIniFileHasKey(iniFile, dotPath)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_INIFILEUTILS__,
+                                    'NAVIniFileGetStringValue',
+                                    "'Key not found: ', dotPath, '. Returning default value (', defaultValue, ')'")
+
+        return defaultValue
+    }
+
+    value = NAVIniFileGetValue(iniFile, dotPath)
+    // Return the value even if empty - empty string is valid for strings
+    return value
+}
+
+
+/**
+ * @function NAVIniFileGetCharValue
+ * @public
+ * @description Get a single character property value using dot notation with a default fallback.
+ *              Returns the first character of the value string.
+ *              Returns the default value if key doesn't exist, value is empty, or invalid.
+ *
+ * @param {_NAVIniFile} iniFile - The parsed INI file structure
+ * @param {char[]} dotPath - The dot-notation path (e.g., "settings.mode" or "flag")
+ * @param {char} defaultValue - The default character value to return if not found
+ *
+ * @returns {char} The first character of the value or defaultValue if not found/empty
+ *
+ * @example
+ * stack_var char mode
+ * stack_var char flag
+ * mode = NAVIniFileGetCharValue(ini, 'settings.mode', 'A')
+ * flag = NAVIniFileGetCharValue(ini, 'flag', 'X')
+ *
+ * @note Returns only the first character. For single-letter codes or flags.
+ * @note Whitespace is trimmed before extracting the character.
+ */
+define_function char NAVIniFileGetCharValue(_NAVIniFile iniFile, char dotPath[], char defaultValue) {
+    stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+
+    if (!NAVIniFileHasKey(iniFile, dotPath)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_INIFILEUTILS__,
+                                    'NAVIniFileGetCharValue',
+                                    "'Key not found: ', dotPath, '. Returning default value (', defaultValue, ')'")
+
+        return defaultValue
+    }
+
+    value = NAVIniFileGetValue(iniFile, dotPath)
+    if (!length_array(value)) {
+        return defaultValue
+    }
+
+    // Trim whitespace and validate we have at least one character
+    value = NAVTrimString(value)
+
+    if (!length_array(value)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_INIFILEUTILS__,
+                                    'NAVIniFileGetCharValue',
+                                    "'Empty value after trimming for key ', dotPath, '. Returning default value (', defaultValue, ')'")
+
+        return defaultValue
+    }
+
+    return value[1]  // Return first character (1-indexed in NetLinx)
 }
 
 
