@@ -1,4 +1,4 @@
-PROGRAM_NAME='NAVFoundation.NtpClient'
+PROGRAM_NAME='NAVFoundation.NtpUtils'
 
 /*
  _   _                       _          ___     __
@@ -31,8 +31,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#IF_NOT_DEFINED __NAV_FOUNDATION_NTP_CLIENT__
-#DEFINE __NAV_FOUNDATION_NTP_CLIENT__ 'NAVFoundation.NtpClient'
+#IF_NOT_DEFINED __NAV_FOUNDATION_NTP_UTILS__
+#DEFINE __NAV_FOUNDATION_NTP_UTILS__ 'NAVFoundation.NtpUtils'
 
 #include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.DateTimeUtils.axi'
@@ -227,4 +227,4 @@ define_function NAVNtpSyncClock(long epoch) {
 }
 
 
-#END_IF
+#END_IF // __NAV_FOUNDATION_NTP_UTILS__

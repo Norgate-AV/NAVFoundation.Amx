@@ -23,7 +23,7 @@ build:
       - ./LogicEngine
       - ./Math
       - ./McpBase
-      - ./NtpClient
+      - ./NtpUtils
       - ./PathUtils
       - ./Queue
       - ./Regex

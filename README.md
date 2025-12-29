@@ -99,7 +99,7 @@ For more detailed guides and documentation, please refer the `README.md` files i
     - Provides mathematical functions and utilities.
 - [McpBase](./McpBase)
 - [ModuleBase](./ModuleBase)
-- [NtpClient](./NtpClient)
+- [NtpUtils](./NtpUtils)
 - [PathUtils](./PathUtils)
     - Provides utility functions for file path manipulation.
 - [Queue](./Queue)
