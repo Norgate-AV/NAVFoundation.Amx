@@ -68,3 +68,4 @@ build:
       - ./__tests__/include/date-time-utils
       - ./__tests__/include/snapi-helpers
       - ./__tests__/include/file-utils
+      - ./__tests__/include/binary-utils

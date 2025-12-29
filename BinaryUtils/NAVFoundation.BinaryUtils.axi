@@ -162,23 +162,23 @@ define_function long NAVBinaryGetBit(long value, long bit) {
 
 
 /**
- * @function NAVCharToDecimalBinaryString
+ * @function NAVByteToBitArray
  * @public
- * @description Converts a byte to its binary representation as a string of decimal digits.
- * Each bit is represented as a separate decimal digit (0 or 1) in the returned string.
+ * @description Converts a byte to an array of individual bit values.
+ * Each bit is represented as a numeric value (0 or 1) in the returned array.
  *
  * @param {char} value - The byte value to convert
  *
- * @returns {char[]} Binary representation as a string of decimal digits
+ * @returns {char[]} Array of 8 bit values (0 or 1)
  *
  * @example
  * stack_var char value
- * stack_var char result[NAV_MAX_BUFFER]
+ * stack_var char result[8]
  *
  * value = $A5  // Binary: 10100101
- * result = NAVCharToDecimalBinaryString(value)  // Returns "1,0,1,0,0,1,0,1"
+ * result = NAVByteToBitArray(value)  // Returns {1, 0, 1, 0, 0, 1, 0, 1}
  */
-define_function char[NAV_MAX_BUFFER] NAVCharToDecimalBinaryString(char value) {
+define_function char[8] NAVByteToBitArray(char value) {
     stack_var integer msb
     stack_var integer lsb
     stack_var char binary[8]
@@ -229,25 +229,26 @@ define_function char[NAV_MAX_BUFFER] NAVCharToDecimalBinaryString(char value) {
 
 
 /**
- * @function NAVDecimalToBinary
+ * @function NAVBinaryToBcd
  * @public
- * @description Converts a decimal integer to its binary representation as a long value.
- * This performs BCD (Binary Coded Decimal) to binary conversion.
+ * @description Converts a binary integer to BCD (Binary Coded Decimal) format.
+ * This performs binary to BCD conversion using the double-dabble algorithm.
  *
- * @param {integer} value - The decimal integer to convert
+ * @param {integer} value - The binary integer to convert
  *
- * @returns {long} Binary representation of the decimal value
+ * @returns {long} BCD representation of the value
  *
  * @example
  * stack_var integer decimal
- * stack_var long binary
+ * stack_var long bcd
  *
  * decimal = 42
- * binary = NAVDecimalToBinary(decimal)  // Returns binary representation of 42
+ * bcd = NAVBinaryToBcd(decimal)  // Returns 0x42 (BCD format)
  *
- * @note This implements the double-dabble algorithm for BCD conversion
+ * @note This implements the double-dabble algorithm for BCD conversion.
+ * @note Use when sending decimal values to hardware that expects BCD encoding.
  */
-define_function long NAVDecimalToBinary(integer value) {
+define_function long NAVBinaryToBcd(integer value) {
     stack_var long result
     stack_var char x
     stack_var char j
@@ -269,25 +270,25 @@ define_function long NAVDecimalToBinary(integer value) {
 
 
 /**
- * @function NAVCharToAsciiBinaryString
+ * @function NAVByteToBinaryString
  * @public
- * @description Converts a byte to its binary representation as a string of ASCII characters.
- * Returns the binary representation with binary digits grouped in nibbles (4 bits).
+ * @description Converts a byte to its binary representation as a string.
+ * Returns an 8-character string representing the binary value.
  *
- * @param {integer} value - The byte value to convert
+ * @param {char} value - The byte value to convert
  *
- * @returns {char[]} Binary representation as a string of ASCII characters
+ * @returns {char[]} Binary representation as an 8-character string
  *
  * @example
  * stack_var char value
- * stack_var char result[NAV_MAX_BUFFER]
+ * stack_var char result[8]
  *
  * value = $A5  // Binary: 10100101
- * result = NAVCharToAsciiBinaryString(value)  // Returns "'1010''0101'"
+ * result = NAVByteToBinaryString(value)  // Returns '10100101'
  *
- * @note Returns binary digits grouped in nibbles with each nibble surrounded by single quotes
+ * @note Useful for debugging and logging binary data
  */
-define_function char[NAV_MAX_BUFFER] NAVCharToAsciiBinaryString(integer value) {
+define_function char[8] NAVByteToBinaryString(char value) {
     stack_var integer msb
     stack_var integer lsb
     stack_var char binary[8]
@@ -334,6 +335,34 @@ define_function char[NAV_MAX_BUFFER] NAVCharToAsciiBinaryString(integer value) {
     }
 
     return binary
+}
+
+
+/**
+ * @function NAVBcdToBinary
+ * @public
+ * @description Converts a BCD (Binary Coded Decimal) byte to its binary integer value.
+ * Each nibble (4 bits) of the input represents a decimal digit (0-9).
+ *
+ * @param {char} value - The BCD-encoded byte to convert
+ *
+ * @returns {integer} Binary integer representation
+ *
+ * @example
+ * stack_var char bcdValue
+ * stack_var integer decimal
+ *
+ * bcdValue = $42  // BCD representation of 42
+ * decimal = NAVBcdToBinary(bcdValue)  // Returns 42
+ *
+ * bcdValue = $99  // BCD representation of 99
+ * decimal = NAVBcdToBinary(bcdValue)  // Returns 99
+ *
+ * @note Use when reading BCD-encoded data from hardware (RTCs, displays, etc.)
+ * @note Input values should only use digits 0-9 in each nibble (0x00-0x99)
+ */
+define_function integer NAVBcdToBinary(char value) {
+    return type_cast(((value >> 4) * 10) + (value & $0F))
 }
 
 
