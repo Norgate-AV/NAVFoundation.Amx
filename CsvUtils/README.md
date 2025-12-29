@@ -721,4 +721,4 @@ NAVCsvParse(csvData, fields)
 
 MIT License - See LICENSE file for details
 
-Copyright (c) 2023 Norgate AV Services Limited
+Copyright (c) 2010-2026 Norgate AV

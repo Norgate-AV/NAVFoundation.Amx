@@ -1239,4 +1239,4 @@ define_function ProcessLargeFile(char filePath[]) {
 
 ## License
 
-MIT License - Copyright (c) 2023 Norgate AV Services Limited
+MIT License - Copyright (c) 2010-2026 Norgate AV

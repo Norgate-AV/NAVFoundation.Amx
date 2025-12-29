@@ -7,7 +7,7 @@ PROGRAM_NAME='NAVFoundation.Cryptography.Sha256.h'
  * This file defines the constants, structures, and types needed for the SHA-256
  * cryptographic hash function implementation.
  *
- * @copyright 2023 Norgate AV Services Limited
+ * @copyright 2010-2026 Norgate AV
  */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_CRYPTOGRAPHY_SHA256_H__

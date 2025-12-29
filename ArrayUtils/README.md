@@ -326,4 +326,4 @@ For issues, suggestions, or contributions, please contact Norgate AV Services Li
 
 ## License
 
-MIT License - Copyright (c) 2023 Norgate AV Services Limited
+MIT License - Copyright (c) 2010-2026 Norgate AV

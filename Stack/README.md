@@ -669,4 +669,4 @@ All errors are logged using the NAVFoundation error logging system for debugging
 
 ## License
 
-MIT License - Copyright (c) 2023 Norgate AV Services Limited
+MIT License - Copyright (c) 2010-2026 Norgate AV

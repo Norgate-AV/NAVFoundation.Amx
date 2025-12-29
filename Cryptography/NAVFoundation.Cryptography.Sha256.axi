@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.Cryptography.Sha256'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Services Limited
+Copyright (c) 2010-2026 Norgate AV
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,7 @@ SOFTWARE.
  *
  * Implementation based on RFC6234: https://www.rfc-editor.org/rfc/rfc6234
  *
- * @copyright 2023 Norgate AV Services Limited
+ * @copyright 2010-2026 Norgate AV
  */
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_CRYPTOGRAPHY_SHA256__
