@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.0.0...v5.1.0) (2025-12-31)
+
+### 🌟 Features
+
+- **assert:** add array assertion functions ([d040574](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/d040574e9d7ed8b3b981d1d808537c958c29e1d7))
+- add figlet library ([7e21ab6](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/7e21ab6104a91a46b9daf109eca9e5c8eccef939))
+
 ## [5.0.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v4.1.0...v5.0.0) (2025-12-29)
 
 ### ⚠ BREAKING CHANGES
