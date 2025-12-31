@@ -882,7 +882,7 @@ define_function NAVPrintBanner(_NAVController controller) {
     NAVLog("'                 |___/'")
     NAVLog("")
     NAVLog("'MIT License'")
-    NAVLog("'Copyright (c) 2010-2025, Norgate AV'")
+    NAVLog("'Copyright (c) 2010-2026, Norgate AV'")
     NAVLog("'https://github.com/Norgate-AV/NAVFoundation.Amx'")
     NAVLog("")
     NAVLog("'============================================================='")
