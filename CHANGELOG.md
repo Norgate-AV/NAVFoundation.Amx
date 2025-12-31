@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.1.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.1.0...v5.1.1) (2025-12-31)
+
+### 🐛 Bug Fixes
+
+- **ini-utils:** fix type conversion warning ([ca8ddef](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/ca8ddef5a8a1d40da64e67b17ba5481ee98d760c))
+
 ## [5.1.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.0.0...v5.1.0) (2025-12-31)
 
 ### 🌟 Features
