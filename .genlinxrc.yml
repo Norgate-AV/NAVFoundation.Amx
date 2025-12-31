@@ -11,6 +11,7 @@ build:
       - ./ErrorLogUtils
       - ./Encoding
       - ./Enova
+      - ./Figlet
       - ./FileUtils
       - ./HashTable
       - ./HttpUtils
@@ -68,3 +69,4 @@ build:
       - ./__tests__/include/snapi-helpers
       - ./__tests__/include/file-utils
       - ./__tests__/include/binary-utils
+      - ./__tests__/include/figlet
