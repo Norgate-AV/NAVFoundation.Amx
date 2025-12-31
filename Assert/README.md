@@ -572,6 +572,270 @@ define_function char NAVAssertFloatAlmostEqual(char testName[], float expected, 
 
 **Returns:** `true` if |expected-actual| <= epsilon, `false` otherwise
 
+---
+
+### Array Assertions
+
+#### String Array Assertions
+
+##### NAVAssertStringArrayEqual
+
+```netlinx
+define_function char NAVAssertStringArrayEqual(char testName[], char expected[][], char actual[][])
+```
+
+**Description:** Tests if two string arrays are equal (same length and all elements match).
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `expected` - Expected string array
+- `actual` - Actual string array
+
+**Returns:** `true` if arrays are equal, `false` otherwise
+
+---
+
+##### NAVAssertStringArrayNotEqual
+
+```netlinx
+define_function char NAVAssertStringArrayNotEqual(char testName[], char expected[][], char actual[][])
+```
+
+**Description:** Tests if two string arrays are not equal (different length or any elements differ).
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `expected` - Expected string array
+- `actual` - Actual string array
+
+**Returns:** `true` if arrays are not equal, `false` otherwise
+
+---
+
+##### NAVAssertStringArrayContains
+
+```netlinx
+define_function char NAVAssertStringArrayContains(char testName[], char searchString[], char array[][])
+```
+
+**Description:** Tests if a string array contains a specific string.
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `searchString` - String to search for
+- `array` - String array to search in
+
+**Returns:** `true` if array contains searchString, `false` otherwise
+
+---
+
+##### NAVAssertStringArrayNotContains
+
+```netlinx
+define_function char NAVAssertStringArrayNotContains(char testName[], char searchString[], char array[][])
+```
+
+**Description:** Tests if a string array does not contain a specific string.
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `searchString` - String to search for
+- `array` - String array to search in
+
+**Returns:** `true` if array does not contain searchString, `false` otherwise
+
+---
+
+##### NAVAssertStringArrayLengthEqual
+
+```netlinx
+define_function char NAVAssertStringArrayLengthEqual(char testName[], integer expectedLength, char array[][])
+```
+
+**Description:** Tests if a string array has the expected length.
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `expectedLength` - Expected array length
+- `array` - String array to check
+
+**Returns:** `true` if array length matches expectedLength, `false` otherwise
+
+---
+
+##### NAVAssertStringArrayLengthNotEqual
+
+```netlinx
+define_function char NAVAssertStringArrayLengthNotEqual(char testName[], integer expectedLength, char array[][])
+```
+
+**Description:** Tests if a string array does not have the specified length.
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `expectedLength` - Length that array should not have
+- `array` - String array to check
+
+**Returns:** `true` if array length does not match expectedLength, `false` otherwise
+
+---
+
+#### Integer Array Assertions
+
+##### NAVAssertIntegerArrayEqual
+
+```netlinx
+define_function char NAVAssertIntegerArrayEqual(char testName[], integer expected[], integer actual[])
+```
+
+**Description:** Tests if two integer arrays are equal (same length and all elements match).
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `expected` - Expected integer array
+- `actual` - Actual integer array
+
+**Returns:** `true` if arrays are equal, `false` otherwise
+
+---
+
+##### NAVAssertIntegerArrayNotEqual
+
+```netlinx
+define_function char NAVAssertIntegerArrayNotEqual(char testName[], integer expected[], integer actual[])
+```
+
+**Description:** Tests if two integer arrays are not equal (different length or any elements differ).
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `expected` - Expected integer array
+- `actual` - Actual integer array
+
+**Returns:** `true` if arrays are not equal, `false` otherwise
+
+---
+
+##### NAVAssertIntegerArrayLengthEqual
+
+```netlinx
+define_function char NAVAssertIntegerArrayLengthEqual(char testName[], integer expectedLength, integer array[])
+```
+
+**Description:** Tests if an integer array has the expected length.
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `expectedLength` - Expected array length
+- `array` - Integer array to check
+
+**Returns:** `true` if array length matches expectedLength, `false` otherwise
+
+---
+
+##### NAVAssertIntegerArrayLengthNotEqual
+
+```netlinx
+define_function char NAVAssertIntegerArrayLengthNotEqual(char testName[], integer expectedLength, integer array[])
+```
+
+**Description:** Tests if an integer array does not have the specified length.
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `expectedLength` - Length that array should not have
+- `array` - Integer array to check
+
+**Returns:** `true` if array length does not match expectedLength, `false` otherwise
+
+---
+
+#### Two-Dimensional Integer Array Assertions
+
+##### NAVAssertInteger2DArrayEqual
+
+```netlinx
+define_function char NAVAssertInteger2DArrayEqual(char testName[], integer expected[][], integer actual[][])
+```
+
+**Description:** Tests if two 2D integer arrays are equal (same dimensions and all elements match).
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `expected` - Expected 2D integer array
+- `actual` - Actual 2D integer array
+
+**Returns:** `true` if arrays are equal, `false` otherwise
+
+---
+
+##### NAVAssertInteger2DArrayNotEqual
+
+```netlinx
+define_function char NAVAssertInteger2DArrayNotEqual(char testName[], integer expected[][], integer actual[][])
+```
+
+**Description:** Tests if two 2D integer arrays are not equal (different dimensions or any elements differ).
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `expected` - Expected 2D integer array
+- `actual` - Actual 2D integer array
+
+**Returns:** `true` if arrays are not equal, `false` otherwise
+
+---
+
+##### NAVAssertInteger2DArrayDimensionsEqual
+
+```netlinx
+define_function char NAVAssertInteger2DArrayDimensionsEqual(char testName[], integer expectedRows, integer expectedCols, integer array[][])
+```
+
+**Description:** Tests if a 2D integer array has the expected dimensions.
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `expectedRows` - Expected number of rows
+- `expectedCols` - Expected number of columns
+- `array` - 2D integer array to check
+
+**Returns:** `true` if array dimensions match expected values, `false` otherwise
+
+---
+
+##### NAVAssertInteger2DArrayDimensionsNotEqual
+
+```netlinx
+define_function char NAVAssertInteger2DArrayDimensionsNotEqual(char testName[], integer expectedRows, integer expectedCols, integer array[][])
+```
+
+**Description:** Tests if a 2D integer array does not have the specified dimensions.
+
+**Parameters:**
+
+- `testName` - Name of the test
+- `expectedRows` - Row count that array should not have
+- `expectedCols` - Column count that array should not have
+- `array` - 2D integer array to check
+
+**Returns:** `true` if array dimensions do not match expected values, `false` otherwise
+
+---
+
 ## Usage Examples
 
 ### Basic Usage

@@ -817,4 +817,509 @@ define_function char NAVAssertFloatAlmostEqual(char testName[], float expected, 
     }
 }
 
+
+/**
+ * @function NAVAssertStringArrayEqual
+ * @description Test if two string arrays are equal (same length and all elements match) and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {char[][]} expected - Expected string array
+ * @param {char[][]} actual - Actual string array
+ *
+ * @returns {char} true if arrays are equal, false otherwise
+ */
+define_function char NAVAssertStringArrayEqual(char testName[], char expected[][], char actual[][]) {
+    stack_var integer expectedCount
+    stack_var integer actualCount
+    stack_var integer i
+
+    expectedCount = length_array(expected)
+    actualCount = length_array(actual)
+
+    if (expectedCount != actualCount) {
+        if (length_array(testName) > 0) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+        }
+
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected array length: ', itoa(expectedCount)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got array length     : ', itoa(actualCount)")
+        return false
+    }
+
+    for (i = 1; i <= expectedCount; i++) {
+        if (expected[i] != actual[i]) {
+            if (length_array(testName) > 0) {
+                NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+            }
+
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Mismatch at index ', itoa(i), ':'")
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Expected: "', expected[i], '"'")
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Got     : "', actual[i], '"'")
+            return false
+        }
+    }
+
+    return true
+}
+
+
+/**
+ * @function NAVAssertStringArrayNotEqual
+ * @description Test if two string arrays are not equal (different lengths or any element differs) and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {char[][]} expected - Expected string array (should differ from actual)
+ * @param {char[][]} actual - Actual string array
+ *
+ * @returns {char} true if arrays are different, false if they are equal
+ */
+define_function char NAVAssertStringArrayNotEqual(char testName[], char expected[][], char actual[][]) {
+    stack_var integer expectedCount
+    stack_var integer actualCount
+    stack_var integer i
+
+    expectedCount = length_array(expected)
+    actualCount = length_array(actual)
+
+    if (expectedCount != actualCount) {
+        return true
+    }
+
+    for (i = 1; i <= expectedCount; i++) {
+        if (expected[i] != actual[i]) {
+            return true
+        }
+    }
+
+    if (length_array(testName) > 0) {
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+    }
+
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected arrays to be different but they are equal.'")
+    return false
+}
+
+
+/**
+ * @function NAVAssertStringArrayContains
+ * @description Test if a string array contains a specific string and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {char[]} searchString - String to search for in the array
+ * @param {char[][]} stringArray - String array to search in
+ *
+ * @returns {char} true if string is found in array, false otherwise
+ */
+define_function char NAVAssertStringArrayContains(char testName[], char searchString[], char stringArray[][]) {
+    stack_var integer i
+    stack_var integer arrayLength
+
+    arrayLength = length_array(stringArray)
+
+    for (i = 1; i <= arrayLength; i++) {
+        if (stringArray[i] == searchString) {
+            return true
+        }
+    }
+
+    if (length_array(testName) > 0) {
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+    }
+
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected to find: "', searchString, '"'")
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'In string array but it was not found.'")
+    return false
+}
+
+
+/**
+ * @function NAVAssertStringArrayNotContains
+ * @description Test if a string array does not contain a specific string and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {char[]} searchString - String that should not be in the array
+ * @param {char[][]} stringArray - String array to check
+ *
+ * @returns {char} true if string is not found in array, false if it is found
+ */
+define_function char NAVAssertStringArrayNotContains(char testName[], char searchString[], char stringArray[][]) {
+    stack_var integer i
+    stack_var integer arrayLength
+
+    arrayLength = length_array(stringArray)
+
+    for (i = 1; i <= arrayLength; i++) {
+        if (stringArray[i] == searchString) {
+            if (length_array(testName) > 0) {
+                NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+            }
+
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected not to find: "', searchString, '"'")
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'But it was found in the string array.'")
+            return false
+        }
+    }
+
+    return true
+}
+
+
+/**
+ * @function NAVAssertStringArrayLengthEqual
+ * @description Test if a string array has the expected length and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {char[][]} stringArray - String array to check
+ * @param {integer} expectedLength - Expected array length
+ *
+ * @returns {char} true if array length matches expected, false otherwise
+ */
+define_function char NAVAssertStringArrayLengthEqual(char testName[], char stringArray[][], integer expectedLength) {
+    stack_var integer actualLength
+
+    actualLength = length_array(stringArray)
+
+    if (actualLength == expectedLength) {
+        return true
+    } else {
+        if (length_array(testName) > 0) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+        }
+
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected array length: ', itoa(expectedLength)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got array length     : ', itoa(actualLength)")
+        return false
+    }
+}
+
+
+/**
+ * @function NAVAssertStringArrayLengthNotEqual
+ * @description Test if a string array does not have the specified length and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {char[][]} stringArray - String array to check
+ * @param {integer} notExpectedLength - Length that the array should not have
+ *
+ * @returns {char} true if array length differs from specified value, false if lengths match
+ */
+define_function char NAVAssertStringArrayLengthNotEqual(char testName[], char stringArray[][], integer notExpectedLength) {
+    stack_var integer actualLength
+
+    actualLength = length_array(stringArray)
+
+    if (actualLength != notExpectedLength) {
+        return true
+    } else {
+        if (length_array(testName) > 0) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+        }
+
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected array length different from: ', itoa(notExpectedLength)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got array length                     : ', itoa(actualLength)")
+        return false
+    }
+}
+
+
+/**
+ * @function NAVAssertIntegerArrayEqual
+ * @description Test if two integer arrays are equal (same length and all elements match) and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {integer[]} expected - Expected integer array
+ * @param {integer[]} actual - Actual integer array
+ *
+ * @returns {char} true if arrays are equal, false otherwise
+ */
+define_function char NAVAssertIntegerArrayEqual(char testName[], integer expected[], integer actual[]) {
+    stack_var integer expectedCount
+    stack_var integer actualCount
+    stack_var integer i
+
+    expectedCount = length_array(expected)
+    actualCount = length_array(actual)
+
+    if (expectedCount != actualCount) {
+        if (length_array(testName) > 0) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+        }
+
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected array length: ', itoa(expectedCount)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got array length     : ', itoa(actualCount)")
+        return false
+    }
+
+    for (i = 1; i <= expectedCount; i++) {
+        if (expected[i] != actual[i]) {
+            if (length_array(testName) > 0) {
+                NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+            }
+
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Mismatch at index ', itoa(i), ':'")
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Expected: ', itoa(expected[i])")
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'  Got     : ', itoa(actual[i])")
+            return false
+        }
+    }
+
+    return true
+}
+
+
+/**
+ * @function NAVAssertIntegerArrayNotEqual
+ * @description Test if two integer arrays are not equal (different lengths or any element differs) and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {integer[]} expected - Expected integer array (should differ from actual)
+ * @param {integer[]} actual - Actual integer array
+ *
+ * @returns {char} true if arrays are different, false if they are equal
+ */
+define_function char NAVAssertIntegerArrayNotEqual(char testName[], integer expected[], integer actual[]) {
+    stack_var integer expectedCount
+    stack_var integer actualCount
+    stack_var integer i
+
+    expectedCount = length_array(expected)
+    actualCount = length_array(actual)
+
+    if (expectedCount != actualCount) {
+        return true
+    }
+
+    for (i = 1; i <= expectedCount; i++) {
+        if (expected[i] != actual[i]) {
+            return true
+        }
+    }
+
+    if (length_array(testName) > 0) {
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+    }
+
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected arrays to be different but they are equal.'")
+    return false
+}
+
+
+/**
+ * @function NAVAssertIntegerArrayLengthEqual
+ * @description Test if an integer array has the expected length and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {integer[]} intArray - Integer array to check
+ * @param {integer} expectedLength - Expected array length
+ *
+ * @returns {char} true if array length matches expected, false otherwise
+ */
+define_function char NAVAssertIntegerArrayLengthEqual(char testName[], integer intArray[], integer expectedLength) {
+    stack_var integer actualLength
+
+    actualLength = length_array(intArray)
+
+    if (actualLength == expectedLength) {
+        return true
+    } else {
+        if (length_array(testName) > 0) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+        }
+
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected array length: ', itoa(expectedLength)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got array length     : ', itoa(actualLength)")
+        return false
+    }
+}
+
+
+/**
+ * @function NAVAssertIntegerArrayLengthNotEqual
+ * @description Test if an integer array does not have the specified length and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {integer[]} intArray - Integer array to check
+ * @param {integer} notExpectedLength - Length that the array should not have
+ *
+ * @returns {char} true if array length differs from specified value, false if lengths match
+ */
+define_function char NAVAssertIntegerArrayLengthNotEqual(char testName[], integer intArray[], integer notExpectedLength) {
+    stack_var integer actualLength
+
+    actualLength = length_array(intArray)
+
+    if (actualLength != notExpectedLength) {
+        return true
+    } else {
+        if (length_array(testName) > 0) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+        }
+
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected array length different from: ', itoa(notExpectedLength)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got array length                     : ', itoa(actualLength)")
+        return false
+    }
+}
+
+
+/**
+ * @function NAVAssertInteger2DArrayEqual
+ * @description Test if two 2D integer arrays are equal (same dimensions and all elements match) and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {integer[][]} expected - Expected 2D integer array
+ * @param {integer[][]} actual - Actual 2D integer array
+ *
+ * @returns {char} true if 2D arrays are equal, false otherwise
+ */
+define_function char NAVAssertInteger2DArrayEqual(char testName[], integer expected[][], integer actual[][]) {
+    stack_var integer expectedRowCount
+    stack_var integer actualRowCount
+    stack_var integer i
+
+    expectedRowCount = length_array(expected)
+    actualRowCount = length_array(actual)
+
+    if (expectedRowCount != actualRowCount) {
+        if (length_array(testName) > 0) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+        }
+
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected array row count: ', itoa(expectedRowCount)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got array row count     : ', itoa(actualRowCount)")
+        return false
+    }
+
+    for (i = 1; i <= expectedRowCount; i++) {
+        if (!NAVAssertIntegerArrayEqual(testName, expected[i], actual[i])) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Mismatch found in row ', itoa(i)")
+            return false
+        }
+    }
+
+    return true
+}
+
+
+/**
+ * @function NAVAssertInteger2DArrayNotEqual
+ * @description Test if two 2D integer arrays are not equal (different dimensions or any element differs) and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {integer[][]} expected - Expected 2D integer array (should differ from actual)
+ * @param {integer[][]} actual - Actual 2D integer array
+ *
+ * @returns {char} true if 2D arrays are different, false if they are equal
+ */
+define_function char NAVAssertInteger2DArrayNotEqual(char testName[], integer expected[][], integer actual[][]) {
+    stack_var integer expectedRowCount
+    stack_var integer actualRowCount
+    stack_var integer i
+
+    expectedRowCount = length_array(expected)
+    actualRowCount = length_array(actual)
+
+    if (expectedRowCount != actualRowCount) {
+        return true
+    }
+
+    for (i = 1; i <= expectedRowCount; i++) {
+        if (!NAVAssertIntegerArrayEqual(testName, expected[i], actual[i])) {
+            return true
+        }
+    }
+
+    if (length_array(testName) > 0) {
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+    }
+
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected arrays to be different but they are equal.'")
+    return false
+}
+
+
+/**
+ * @function NAVAssertInteger2DArrayDimensionsEqual
+ * @description Test if a 2D integer array has the expected dimensions (row and column counts) and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {integer[][]} int2DArray - 2D integer array to check
+ * @param {integer} expectedRowCount - Expected number of rows
+ * @param {integer} expectedColCount - Expected number of columns in each row
+ *
+ * @returns {char} true if dimensions match expected values, false otherwise
+ */
+define_function char NAVAssertInteger2DArrayDimensionsEqual(char testName[], integer int2DArray[][], integer expectedRowCount, integer expectedColCount) {
+    stack_var integer actualRowCount
+    stack_var integer actualColCount
+    stack_var integer i
+
+    actualRowCount = length_array(int2DArray)
+
+    if (actualRowCount != expectedRowCount) {
+        if (length_array(testName) > 0) {
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+        }
+
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected row count: ', itoa(expectedRowCount)")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got row count     : ', itoa(actualRowCount)")
+        return false
+    }
+
+    for (i = 1; i <= actualRowCount; i++) {
+        actualColCount = length_array(int2DArray[i])
+        if (actualColCount != expectedColCount) {
+            if (length_array(testName) > 0) {
+                NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+            }
+
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected column count in row ', itoa(i), ': ', itoa(expectedColCount)")
+            NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got column count               : ', itoa(actualColCount)")
+            return false
+        }
+    }
+
+    return true
+}
+
+
+/**
+ * @function NAVAssertInteger2DArrayDimensionsNotEqual
+ * @description Test if a 2D integer array does not have the specified dimensions and log the result
+ *
+ * @param {char[]} testName - Name of the test
+ * @param {integer[][]} int2DArray - 2D integer array to check
+ * @param {integer} notExpectedRowCount - Row count that array should not have
+ * @param {integer} notExpectedColCount - Column count that array should not have
+ *
+ * @returns {char} true if dimensions differ from specified values, false if dimensions match
+ */
+define_function char NAVAssertInteger2DArrayDimensionsNotEqual(char testName[], integer int2DArray[][], integer notExpectedRowCount, integer notExpectedColCount) {
+    stack_var integer actualRowCount
+    stack_var integer actualColCount
+    stack_var integer i
+
+    actualRowCount = length_array(int2DArray)
+
+    if (actualRowCount != notExpectedRowCount) {
+        return true
+    }
+
+    for (i = 1; i <= actualRowCount; i++) {
+        actualColCount = length_array(int2DArray[i])
+        if (actualColCount != notExpectedColCount) {
+            return true
+        }
+    }
+
+    if (length_array(testName) > 0) {
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "testName")
+    }
+
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Expected dimensions to be different from: ', itoa(notExpectedRowCount), 'x', itoa(notExpectedColCount)")
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Got dimensions                     : ', itoa(actualRowCount), 'x', itoa(actualColCount)")
+    return false
+}
+
+
 #END_IF // __NAV_FOUNDATION_ASSERT__
