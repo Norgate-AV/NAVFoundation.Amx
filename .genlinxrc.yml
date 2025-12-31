@@ -23,6 +23,7 @@ build:
       - ./LogicEngine
       - ./Math
       - ./McpBase
+      - ./NetUtils
       - ./NtpUtils
       - ./PathUtils
       - ./Queue
@@ -70,3 +71,4 @@ build:
       - ./__tests__/include/file-utils
       - ./__tests__/include/binary-utils
       - ./__tests__/include/figlet
+      - ./__tests__/include/net-utils

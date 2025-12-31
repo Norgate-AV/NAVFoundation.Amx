@@ -1,0 +1,44 @@
+#DEFINE TESTING_NAVNETPARSEIPV4
+#DEFINE TESTING_NAVNETSPLITHOSTPORT
+#DEFINE TESTING_NAVNETPARSEIPADDR
+#DEFINE TESTING_NAVNETJOINHOSTPORT
+
+#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.NetUtils.axi'
+#include 'NAVFoundation.Assert.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
+#include 'NAVFoundation.Testing.axi'
+
+#IF_DEFINED TESTING_NAVNETPARSEIPV4
+#include 'NAVNetParseIPv4.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVNETSPLITHOSTPORT
+#include 'NAVNetSplitHostPort.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVNETPARSEIPADDR
+#include 'NAVNetParseIPAddr.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVNETJOINHOSTPORT
+#include 'NAVNetJoinHostPort.axi'
+#END_IF
+
+define_function RunNetUtilsTests() {
+    #IF_DEFINED TESTING_NAVNETPARSEIPV4
+    TestNAVNetParseIPv4()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVNETSPLITHOSTPORT
+    TestNAVNetSplitHostPort()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVNETPARSEIPADDR
+    TestNAVNetParseIPAddr()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVNETJOINHOSTPORT
+    TestNAVNetJoinHostPort()
+    #END_IF
+}
