@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.2.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.1.1...v5.2.0) (2025-12-31)
+
+### 🌟 Features
+
+- add NetUtils library ([99a8aed](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/99a8aedd62a1ae0bb663ba3efe9bbea1b1837922))
+
+### 🐛 Bug Fixes
+
+- **string-utils:** preserve empty tokens in NAVSplitString ([f6f6e85](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/f6f6e8551925b3ba8619f4b5d0a7c29698432eaf))
+
 ## [5.1.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.1.0...v5.1.1) (2025-12-31)
 
 ### 🐛 Bug Fixes
