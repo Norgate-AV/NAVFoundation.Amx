@@ -178,14 +178,58 @@ try {
         # Send command
         $stream.WriteLine($command)
 
-        # Wait for command to process and read output
-        Start-Sleep -Milliseconds 1000
+        # For the test trigger command, wait intelligently for completion
+        if ($command -match "pulse") {
+            Write-Log "Waiting for test execution (max 60s, auto-exit after 3s idle)..."
 
-        $output = $stream.Read()
-        if ($output) {
-            # Stream output directly to console
-            Write-Host $output
-            $allOutput += $output
+            $maxWaitSeconds = 60
+            $idleTimeoutSeconds = 3
+            $pollIntervalMs = 500
+
+            $startTime = Get-Date
+            $lastOutputTime = Get-Date
+            $hasReceivedOutput = $false
+
+            while ($true) {
+                $elapsed = (Get-Date) - $startTime
+
+                # Check max timeout
+                if ($elapsed.TotalSeconds -ge $maxWaitSeconds) {
+                    Write-Log "Maximum wait time of ${maxWaitSeconds}s reached" "WARNING"
+                    break
+                }
+
+                # Try to read output
+                Start-Sleep -Milliseconds $pollIntervalMs
+                $output = $stream.Read()
+
+                if ($output) {
+                    # We got output - stream it and update timestamps
+                    Write-Host $output
+                    $allOutput += $output
+                    $lastOutputTime = Get-Date
+                    $hasReceivedOutput = $true
+                }
+                else {
+                    # No output - check if we've been idle long enough
+                    $idleTime = (Get-Date) - $lastOutputTime
+
+                    # Only exit on idle if we've received at least some output
+                    if ($hasReceivedOutput -and $idleTime.TotalSeconds -ge $idleTimeoutSeconds) {
+                        Write-Log "No output for ${idleTimeoutSeconds}s - tests appear complete"
+                        break
+                    }
+                }
+            }
+        }
+        else {
+            # For non-test commands, use simple wait
+            Start-Sleep -Milliseconds 1000
+            $output = $stream.Read()
+            if ($output) {
+                Write-Host $output
+                $allOutput += $output
+            }
         }
 
         Write-Log "Command sent successfully" "SUCCESS"
@@ -193,8 +237,8 @@ try {
         $commandIndex++
     }
 
-    # Give final output time to arrive
-    Start-Sleep -Milliseconds 500
+    # Give a final moment for any stragglers
+    Start-Sleep -Milliseconds 250
     $finalOutput = $stream.Read()
     if ($finalOutput) {
         Write-Host $finalOutput
