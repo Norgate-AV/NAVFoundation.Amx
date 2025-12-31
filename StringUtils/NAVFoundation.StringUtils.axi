@@ -1244,7 +1244,7 @@ define_function integer NAVSplitString(char buffer[], char separator[], char res
     count = 0
 
     if (!length_array(buffer)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
                                     __NAV_FOUNDATION_STRINGUTILS__,
                                     'NAVSplitString',
                                     'Invalid argument. The provided argument "buffer" is an empty string')
@@ -1266,21 +1266,13 @@ define_function integer NAVSplitString(char buffer[], char separator[], char res
     bufferCopy = buffer
 
     while (NAVContains(bufferCopy, separator)) {
-        token = NAVStripCharsFromRight(remove_string(bufferCopy, separator, 1), length_array(separator))
-
-        if (!length_array(token)) {
-            continue
-        }
+        token = NAVStripRight(remove_string(bufferCopy, separator, 1), length_array(separator))
 
         count++
         result[count] = token
     }
 
-    if (!length_array(bufferCopy)) {
-        set_length_array(result, count)
-        return count
-    }
-
+    // Always add the remaining buffer (even if empty, for trailing separators)
     count++
     result[count] = bufferCopy
     set_length_array(result, count)
