@@ -444,7 +444,7 @@ define_function long NAVIniFileGetLongValue(_NAVIniFile iniFile, char dotPath[],
     value = NAVTrimString(value)
 
     if (NAVRegexTest('/^\d+$/', value)) {
-        return atol(value)
+        return type_cast(atol(value))
     }
 
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
