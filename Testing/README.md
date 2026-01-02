@@ -30,7 +30,9 @@ Include the library in your NetLinx project:
 
 ## API Reference
 
-### `NAVLogTestPassed(integer test)`
+### Test Result Logging
+
+#### `NAVLogTestPassed(integer test)`
 
 Logs a test passed message.
 
@@ -45,26 +47,128 @@ NAVLogTestPassed(1)
 
 ---
 
-### `NAVLogTestFailed(integer test, char expected[], char result[])`
+#### `NAVLogTestFailed(integer test, char expected[], char result[])`
 
 Logs a test failed message with expected and actual values.
 
 **Parameters:**
 - `test` (integer): The test number
-- `expected` (char[]): The expected value
-- `result` (char[]): The actual result value
+- `expected` (char[]): The expected value as a string
+- `result` (char[]): The actual result value as a string
 
 **Example:**
 ```netlinx
 NAVLogTestFailed(2, '42', '43')
 // Output: "Test 2 failed. Expected: "42", but got: "43"."
+
+NAVLogTestFailed(3, 'true', '')
+// Output: "Test 3 failed. Expected: "true", but got: ""."
 ```
 
-**Note:** If both expected and result are empty strings, comparison details are still shown.
+**Note:** Empty string comparisons are explicitly shown in the output to make failures clear.
+
+---
+
+### Test Suite Markers
+
+#### `NAVLogTestSuiteStart(char suiteName[])`
+
+Logs the start of a named test suite with a prominent header.
+
+**Parameters:**
+- `suiteName` (char[]): The name of the test suite
+
+**Example:**
+```netlinx
+NAVLogTestSuiteStart('JSMN Parser')
+// Output: "================= Starting Test Suite: JSMN Parser ================="
+```
+
+---
+
+#### `NAVLogTestSuiteEnd(char suiteName[])`
+
+Logs the end of a named test suite with a prominent footer.
+
+**Parameters:**
+- `suiteName` (char[]): The name of the test suite
+
+**Example:**
+```netlinx
+NAVLogTestSuiteEnd('JSMN Parser')
+// Output: "================= Finished Test Suite: JSMN Parser ================="
+```
+
+---
+
+### Test Run Markers
+
+#### `NAVLogTestStart()`
+
+Logs the start of the overall test run with a prominent header.
+
+**Example:**
+```netlinx
+NAVLogTestStart()
+// Output: "================= Starting Tests ================="
+```
+
+---
+
+#### `NAVLogTestEnd()`
+
+Logs the end of the overall test run with a prominent footer.
+
+**Example:**
+```netlinx
+NAVLogTestEnd()
+// Output: "================= Finished Tests ================="
+```
 
 ---
 
 ## Usage Patterns
+
+### Complete Test Suite Example
+
+```netlinx
+define_function RunJsmnTests() {
+    stack_var integer x
+    stack_var JsmnParser parser
+    stack_var JsmnToken tokens[128]
+    stack_var sinteger result
+    
+    NAVLogTestSuiteStart('JSMN')
+    
+    for (x = 1; x <= max_length_array(JSMN_TEST); x++) {
+        if (!JSMN_TEST_ENABLED[x]) {
+            continue
+        }
+        
+        jsmn_init(parser)
+        result = jsmn_parse(parser, JSMN_TEST[x], length_array(JSMN_TEST[x]), tokens, max_length_array(tokens))
+        
+        if (result == JSMN_EXPECTED_COUNT[x]) {
+            NAVLogTestPassed(x)
+        }
+        else {
+            NAVLogTestFailed(x, itoa(JSMN_EXPECTED_COUNT[x]), itoa(result))
+        }
+    }
+    
+    NAVLogTestSuiteEnd('JSMN')
+}
+
+define_function RunAllTests() {
+    NAVLogTestStart()
+    
+    RunJsmnTests()
+    RunJsmnExTests()
+    // Add more test suites...
+    
+    NAVLogTestEnd()
+}
+```
 
 ### Basic Test Structure
 
@@ -195,23 +299,32 @@ define_function TestWithAssertions() {
 ## Example Test Output
 
 ```
-2025-12-29 (15:22:43.682):: ***************** NAVBinaryRotateLeft *****************
-2025-12-29 (15:22:43.702):: Test 1 passed
-2025-12-29 (15:22:43.702):: Test 2 passed
-2025-12-29 (15:22:43.702):: Test 3 passed
-2025-12-29 (15:22:43.702):: Test 4 failed. Expected: "16", but got: "15".
-2025-12-29 (15:22:43.702):: Test 5 passed
+2026-01-02 (13:47:54.946):: ================= Starting Tests =================
+2026-01-02 (13:47:54.948):: ================= Starting Test Suite: JSMN =================
+2026-01-02 (13:47:54.955):: Test 1 passed
+2026-01-02 (13:47:54.957):: Test 2 passed
+2026-01-02 (13:47:54.964):: Test 3 passed
+2026-01-02 (13:47:54.972):: Test 4 failed. Expected: "3", but got: "2".
+2026-01-02 (13:47:54.975):: Test 5 passed
+2026-01-02 (13:47:55.301):: ================= Finished Test Suite: JSMN =================
+2026-01-02 (13:47:55.306):: ================= Starting Test Suite: JSMN Extended =================
+2026-01-02 (13:47:55.321):: Test 1 passed
+2026-01-02 (13:47:55.326):: Test 2 passed
+2026-01-02 (13:47:55.396):: ================= Finished Test Suite: JSMN Extended =================
+2026-01-02 (13:47:55.400):: ================= Finished Tests =================
 ```
 
 ## Best Practices
 
-1. **One test function per library function** - Keep tests organized and focused
-2. **Use descriptive test section headers** - Log section names with asterisks for clarity
-3. **Sequential test numbering** - Use a counter variable for test numbers
-4. **Convert values to strings** - Use `itoa()`, `ftoa()`, etc. for numeric comparisons
-5. **Separate test data initialization** - Keep test setup separate from execution
-6. **Use conditional compilation** - Enable/disable test suites as needed
-7. **Write tests alongside development** - Test as you implement
+1. **Use test suite markers** - Wrap test suites with `NAVLogTestSuiteStart/End` for clear grouping
+2. **Wrap entire test run** - Use `NAVLogTestStart/End` for the overall test session
+3. **One test function per library function** - Keep tests organized and focused
+4. **Sequential test numbering** - Use a loop index or counter variable for test numbers
+5. **Convert values to strings** - Use `itoa()`, `ftoa()`, etc. for numeric comparisons
+6. **Separate test data initialization** - Keep test setup separate from execution
+7. **Use conditional compilation** - Enable/disable test suites with `#DEFINE`
+8. **Array-based test data** - Store test cases in arrays for easier iteration
+9. **Write tests alongside development** - Test as you implement
 
 ## Limitations
 
