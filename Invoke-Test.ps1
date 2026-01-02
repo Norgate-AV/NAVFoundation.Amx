@@ -56,7 +56,7 @@ function Write-Log {
 
 # Define the commands to execute
 $commands = @(
-    "msg on all",
+    "msg on debug",
     "pulse[33201:1:0,1]"
 )
 
@@ -180,7 +180,7 @@ try {
 
         # For the test trigger command, wait intelligently for completion
         if ($command -match "pulse") {
-            Write-Log "Waiting for test execution (max 60s, auto-exit after 3s idle)..."
+            Write-Log "Waiting for test execution (max 60s)..."
 
             $maxWaitSeconds = 60
             $idleTimeoutSeconds = 3
@@ -189,6 +189,8 @@ try {
             $startTime = Get-Date
             $lastOutputTime = Get-Date
             $hasReceivedOutput = $false
+            $testsStarted = $false
+            $testsFinished = $false
 
             while ($true) {
                 $elapsed = (Get-Date) - $startTime
@@ -209,6 +211,19 @@ try {
                     $allOutput += $output
                     $lastOutputTime = Get-Date
                     $hasReceivedOutput = $true
+
+                    # Check for test start marker
+                    if ($output -match "Starting Tests") {
+                        $testsStarted = $true
+                        Write-Log "Tests started" "INFO"
+                    }
+
+                    # Check for test end marker
+                    if ($output -match "Finished Tests") {
+                        $testsFinished = $true
+                        Write-Log "Tests completed" "SUCCESS"
+                        break
+                    }
                 }
                 else {
                     # No output - check if we've been idle long enough
@@ -216,7 +231,15 @@ try {
 
                     # Only exit on idle if we've received at least some output
                     if ($hasReceivedOutput -and $idleTime.TotalSeconds -ge $idleTimeoutSeconds) {
-                        Write-Log "No output for ${idleTimeoutSeconds}s - tests appear complete"
+                        if (-not $testsStarted) {
+                            Write-Log "No test start detected after ${idleTimeoutSeconds}s idle" "WARNING"
+                        }
+                        elseif (-not $testsFinished) {
+                            Write-Log "Tests started but did not complete normally (${idleTimeoutSeconds}s idle)" "WARNING"
+                        }
+                        else {
+                            Write-Log "No output for ${idleTimeoutSeconds}s - tests appear complete"
+                        }
                         break
                     }
                 }
@@ -257,27 +280,83 @@ try {
     Write-Host "Test Results Analysis" -ForegroundColor Cyan
     Write-Host "========================================" -ForegroundColor Cyan
 
-    # Parse test results
-    $passedTests = [regex]::Matches($allOutput, "Test (\d+) passed")
-    $failedTests = [regex]::Matches($allOutput, "Test (\d+) failed")
+    # Build a map of test suites and their tests
+    $testSuiteMap = @{}
+    $currentSuite = $null
+    $lines = $allOutput -split "`n"
 
-    $passedCount = $passedTests.Count
-    $failedCount = $failedTests.Count
-    $totalCount = $passedCount + $failedCount
+    foreach ($line in $lines) {
+        # Check for test suite start
+        if ($line -match "Starting Test Suite:\s+(.+?)\s+=====") {
+            $currentSuite = $matches[1].Trim()
+            if (-not $testSuiteMap.ContainsKey($currentSuite)) {
+                $testSuiteMap[$currentSuite] = @{
+                    Passed = @()
+                    Failed = @()
+                }
+            }
+        }
+
+        # Check for test suite end
+        if ($line -match "Finished Test Suite:") {
+            $currentSuite = $null
+        }
+
+        # Parse test results within the current suite
+        if ($null -ne $currentSuite) {
+            if ($line -match "Test (\d+) passed") {
+                $testNum = $matches[1]
+                $testSuiteMap[$currentSuite].Passed += $testNum
+            }
+            elseif ($line -match "Test (\d+) failed") {
+                $testNum = $matches[1]
+                $testSuiteMap[$currentSuite].Failed += $testNum
+            }
+        }
+    }
+
+    # Calculate totals
+    $totalPassed = 0
+    $totalFailed = 0
+    foreach ($suite in $testSuiteMap.Keys) {
+        $totalPassed += $testSuiteMap[$suite].Passed.Count
+        $totalFailed += $testSuiteMap[$suite].Failed.Count
+    }
+    $totalTests = $totalPassed + $totalFailed
 
     Write-Host ""
-    Write-Host "Total Tests: $totalCount" -ForegroundColor White
-    Write-Host "Passed: $passedCount" -ForegroundColor Green
-    Write-Host "Failed: $failedCount" -ForegroundColor $(if ($failedCount -gt 0) { "Red" } else { "Green" })
+    Write-Host "Total Tests: $totalTests" -ForegroundColor White
+    Write-Host "Passed: $totalPassed" -ForegroundColor Green
+    Write-Host "Failed: $totalFailed" -ForegroundColor $(if ($totalFailed -gt 0) { "Red" } else { "Green" })
     Write-Host ""
 
-    if ($failedCount -gt 0) {
-        Write-Host "Failed Tests:" -ForegroundColor Red
-        foreach ($match in $failedTests) {
-            $testNum = $match.Groups[1].Value
-            Write-Host "  - Test $testNum" -ForegroundColor Red
+    # Show results by test suite
+    if ($testSuiteMap.Count -gt 0) {
+        Write-Host "Results by Test Suite:" -ForegroundColor Cyan
+        foreach ($suite in $testSuiteMap.Keys | Sort-Object) {
+            $suiteData = $testSuiteMap[$suite]
+            $suitePassed = $suiteData.Passed.Count
+            $suiteFailed = $suiteData.Failed.Count
+            $suiteTotal = $suitePassed + $suiteFailed
+
+            $suiteColor = if ($suiteFailed -gt 0) { "Red" } else { "Green" }
+            Write-Host "  [$suite]" -ForegroundColor White -NoNewline
+            Write-Host " $suiteTotal tests: " -NoNewline
+            Write-Host "$suitePassed passed" -ForegroundColor Green -NoNewline
+            Write-Host ", " -NoNewline
+            Write-Host "$suiteFailed failed" -ForegroundColor $suiteColor
+
+            # Show failed tests for this suite
+            if ($suiteFailed -gt 0) {
+                foreach ($testNum in $suiteData.Failed) {
+                    Write-Host "    - $suite Test $testNum" -ForegroundColor Red
+                }
+            }
         }
         Write-Host ""
+    }
+
+    if ($totalFailed -gt 0) {
         Write-Log "Test run completed with failures" "ERROR"
         exit 1
     }
