@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.3.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.2.0...v5.3.0) (2026-01-02)
+
+### 🌟 Features
+
+- **testing:** add suite and run marker logging ([0027a1a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/0027a1ae2f5df81fa5b71397a9b1d69853cc15e9))
+- **jsmn:** complete minimalistic JSON parser implementation ([e511bd0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e511bd07c2faa8fb48b523167415407041f3dadd))
+
 ## [5.2.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.1.1...v5.2.0) (2025-12-31)
 
 ### 🌟 Features
