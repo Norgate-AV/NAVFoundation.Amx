@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.4.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.3.0...v5.4.0) (2026-01-03)
+
+### 🌟 Features
+
+- **string-utils:** add number parsing functions with validation ([c11e546](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c11e546895a095e78872aa637cc78ad200bd4e28))
+
 ## [5.3.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.2.0...v5.3.0) (2026-01-02)
 
 ### 🌟 Features
