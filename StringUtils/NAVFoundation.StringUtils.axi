@@ -1387,6 +1387,505 @@ define_function long NAVStringToLongMilliseconds(char duration[]) {
 
 
 /**
+ * @function NAVParseInteger
+ * @public
+ * @description Parses a string representation of an unsigned integer.
+ *
+ * Uses ATOI internally to parse the string. Validates that the parsed value
+ * is within the valid NetLinx integer range (0-65535). Parses the first valid
+ * number and stops at whitespace or non-digit characters after it.
+ *
+ * @param {char[]} data - The string to parse as an unsigned integer
+ * @param {integer} result - Variable to populate with the parsed integer value
+ *
+ * @returns {char} true if parsing succeeded and value is in valid range, false otherwise
+ *
+ * @example
+ * stack_var integer value
+ * stack_var char result
+ * result = NAVParseInteger('12345', value)
+ * if (result) {
+ *     // value = 12345
+ * }
+ *
+ * result = NAVParseInteger('99999', value)     // Returns false (out of range)
+ * result = NAVParseInteger('-100', value)      // Returns false (negative)
+ * result = NAVParseInteger('Volume=50', value) // value = 50 (ATOF extracts first number)
+ */
+define_function char NAVParseInteger(char data[], integer result) {
+    stack_var slong tempValue
+    stack_var integer x
+    stack_var integer length
+    stack_var char hasDigit
+
+    // Initialize result
+    result = 0
+
+    // Validate non-empty input
+    if (!length_array(data)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseInteger',
+                                    'Invalid argument. The provided string is empty')
+        return false
+    }
+
+    // Verify the string contains at least one digit
+    // ATOI returns 0 if no valid numeric characters are found
+    length = length_array(data)
+    hasDigit = false
+
+    for (x = 1; x <= length; x++) {
+        if (NAVIsDigit(data[x])) {
+            hasDigit = true
+            break
+        }
+    }
+
+    if (!hasDigit) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseInteger',
+                                    "'No numeric characters found in string: ', data")
+        return false
+    }
+
+    // Parse using ATOI (returns slong, ignores non-numeric characters)
+    tempValue = atoi(data)
+
+    // Validate range for unsigned integer (0-65535)
+    if (tempValue < 0 || tempValue > 65535) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseInteger',
+                                    "'Value out of range (0-65535): ', itoa(tempValue)")
+        return false
+    }
+
+    // Success - set the result
+    result = type_cast(tempValue)
+    return true
+}
+
+
+/**
+ * @function NAVParseSignedInteger
+ * @public
+ * @description Parses a string representation of a signed integer.
+ *
+ * Uses ATOI internally to parse the string. Validates that the parsed value
+ * is within the valid NetLinx signed integer range (-32768 to 32767). Parses
+ * the first valid number and stops at whitespace or non-digit characters after it.
+ *
+ * @param {char[]} data - The string to parse as a signed integer
+ * @param {sinteger} result - Variable to populate with the parsed signed integer value
+ *
+ * @returns {char} true if parsing succeeded and value is in valid range, false otherwise
+ *
+ * @example
+ * stack_var sinteger value
+ * stack_var char result
+ * result = NAVParseSignedInteger('-12345', value)
+ * if (result) {
+ *     // value = -12345
+ * }
+ *
+ * result = NAVParseSignedInteger('50000', value) // Returns false (out of range)
+ */
+define_function char NAVParseSignedInteger(char data[], sinteger result) {
+    stack_var slong tempValue
+    stack_var integer x
+    stack_var integer length
+    stack_var char hasDigit
+
+    // Initialize result
+    result = 0
+
+    // Validate non-empty input
+    if (!length_array(data)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseSignedInteger',
+                                    'Invalid argument. The provided string is empty')
+        return false
+    }
+
+    // Verify the string contains at least one digit
+    // ATOI returns 0 if no valid numeric characters are found
+    length = length_array(data)
+    hasDigit = false
+
+    for (x = 1; x <= length; x++) {
+        if (NAVIsDigit(data[x])) {
+            hasDigit = true
+            break
+        }
+    }
+
+    if (!hasDigit) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseSignedInteger',
+                                    "'No numeric characters found in string: ', data")
+        return false
+    }
+
+    // Parse using ATOI (returns slong, ignores non-numeric characters)
+    tempValue = atoi(data)
+
+    // Validate range for signed integer (-32768 to 32767)
+    if (tempValue < -32768 || tempValue > 32767) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseSignedInteger',
+                                    "'Value out of range (-32768 to 32767): ', itoa(tempValue)")
+        return false
+    }
+
+    // Success - set the result
+    result = type_cast(tempValue)
+    return true
+}
+
+
+/**
+ * @function NAVParseLong
+ * @public
+ * @description Parses a string representation of an unsigned long integer.
+ *
+ * Uses manual digit-by-digit parsing to handle the full LONG range (0 to 4294967295).
+ * ATOI cannot be used because it returns SLONG, which maxes out at 2,147,483,647,
+ * preventing proper parsing of values above that limit. Parses the first valid number
+ * and stops at whitespace or non-digit characters after it (matching ATOI behavior).
+ *
+ * @param {char[]} data - The string to parse as an unsigned long
+ * @param {long} result - Variable to populate with the parsed long value
+ *
+ * @returns {char} true if parsing succeeded and value is in valid range, false otherwise
+ *
+ * @example
+ * stack_var long value
+ * stack_var char result
+ * result = NAVParseLong('1234567890', value)
+ * if (result) {
+ *     // value = 1234567890
+ * }
+ *
+ * result = NAVParseLong('-100', value) // Returns false (negative)
+ *
+ * @note Manual parsing is required because ATOI returns SLONG (max 2,147,483,647),
+ *       which cannot represent the full LONG range (0-4,294,967,295).
+ */
+define_function char NAVParseLong(char data[], long result) {
+    stack_var long accumulator
+    stack_var integer x
+    stack_var integer length
+    stack_var char hasDigit
+    stack_var integer digit
+    stack_var char foundNumber
+    stack_var char isNegative
+
+    // Initialize result
+    result = 0
+    accumulator = 0
+    hasDigit = false
+    foundNumber = false
+    isNegative = false
+
+    // Validate non-empty input
+    if (!length_array(data)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseLong',
+                                    'Invalid argument. The provided string is empty')
+        return false
+    }
+
+    length = length_array(data)
+
+    // Manual digit-by-digit parsing to handle full LONG range (0 to 4294967295)
+    for (x = 1; x <= length; x++) {
+        select {
+            active (NAVIsDigit(data[x])): {
+                hasDigit = true
+                foundNumber = true
+                digit = data[x] - '0'
+
+                // Check for overflow before multiplying
+                // Max LONG is 4294967295, so if accumulator > 429496729, multiplication will overflow
+                if (accumulator > 429496729) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_STRINGUTILS__,
+                                                'NAVParseLong',
+                                                "'Value out of range (0 to 4294967295): ', data")
+                    return false
+                }
+
+                // Special case: if accumulator == 429496729, check if adding digit would exceed 4294967295
+                if (accumulator == 429496729 && digit > 5) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_STRINGUTILS__,
+                                                'NAVParseLong',
+                                                "'Value out of range (0 to 4294967295): ', data")
+                    return false
+                }
+
+                accumulator = accumulator * 10 + digit
+            }
+            active (data[x] == '-' && !foundNumber): {
+                // Found negative sign before any digits
+                isNegative = true
+            }
+            active (foundNumber): {
+                // Stop parsing after we've found digits and hit a non-digit character
+                // This matches ATOI behavior: '   100  200' -> 100
+                break
+            }
+            active (true): {
+                // Skip leading non-digit characters (whitespace, letters, etc.)
+            }
+        }
+    }
+
+    if (!hasDigit) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseLong',
+                                    "'No numeric characters found in string: ', data")
+        return false
+    }
+
+    // LONG is unsigned, reject negative values
+    if (isNegative) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseLong',
+                                    "'Value out of range (0 to 4294967295): ', data")
+        return false
+    }
+
+    // Success - set the result
+    result = accumulator
+    return true
+}
+
+
+/**
+ * @function NAVParseSignedLong
+ * @public
+ * @description Parses a string representation of a signed long integer.
+ *
+ * Uses manual digit-by-digit parsing to properly validate the full SLONG range
+ * (-2147483648 to 2147483647) and detect overflow/underflow conditions.
+ * ATOI cannot be used because it silently clamps out-of-range values to the
+ * SLONG min/max instead of reporting an error, preventing proper validation.
+ * Parses the first valid number and stops at whitespace or non-digit characters
+ * after it (matching ATOI behavior).
+ *
+ * @param {char[]} data - The string to parse as a signed long
+ * @param {slong} result - Variable to populate with the parsed signed long value
+ *
+ * @returns {char} true if parsing succeeded and value is in valid range, false otherwise
+ *
+ * @example
+ * stack_var slong value
+ * stack_var char result
+ * result = NAVParseSignedLong('-1234567890', value)
+ * if (result) {
+ *     // value = -1234567890
+ * }
+ *
+ * result = NAVParseSignedLong('3000000000', value) // Returns false (out of range)
+ *
+ * @note Manual parsing is required because ATOI silently clamps overflow values
+ *       (e.g., '3000000000' returns 2,147,483,647 without error), preventing
+ *       proper detection of out-of-range inputs.
+ */
+define_function char NAVParseSignedLong(char data[], slong result) {
+    stack_var slong accumulator
+    stack_var integer x
+    stack_var integer length
+    stack_var char hasDigit
+    stack_var integer digit
+    stack_var char foundNumber
+    stack_var char isNegative
+
+    // Initialize result
+    result = 0
+    accumulator = 0
+    hasDigit = false
+    foundNumber = false
+    isNegative = false
+
+    // Validate non-empty input
+    if (!length_array(data)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseSignedLong',
+                                    'Invalid argument. The provided string is empty')
+        return false
+    }
+
+    length = length_array(data)
+
+    // Manual digit-by-digit parsing to handle full SLONG range (-2147483648 to 2147483647)
+    for (x = 1; x <= length; x++) {
+        select {
+            active (NAVIsDigit(data[x])): {
+                hasDigit = true
+                foundNumber = true
+                digit = data[x] - '0'
+
+                if (isNegative) {
+                    // For negative numbers, check underflow
+                    // Min SLONG is -2147483648, so if accumulator < -214748364, multiplication will underflow
+                    if (accumulator < -214748364) {
+                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                                    'NAVParseSignedLong',
+                                                    "'Value out of range (-2147483648 to 2147483647): ', data")
+                        return false
+                    }
+
+                    // Special case: if accumulator == -214748364, check if subtracting digit would go below -2147483648
+                    if (accumulator == -214748364 && digit > 8) {
+                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                                    'NAVParseSignedLong',
+                                                    "'Value out of range (-2147483648 to 2147483647): ', data")
+                        return false
+                    }
+
+                    accumulator = accumulator * 10 - digit
+                }
+                else {
+                    // For positive numbers, check overflow
+                    // Max SLONG is 2147483647, so if accumulator > 214748364, multiplication will overflow
+                    if (accumulator > 214748364) {
+                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                                    'NAVParseSignedLong',
+                                                    "'Value out of range (-2147483648 to 2147483647): ', data")
+                        return false
+                    }
+
+                    // Special case: if accumulator == 214748364, check if adding digit would exceed 2147483647
+                    if (accumulator == 214748364 && digit > 7) {
+                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                                    'NAVParseSignedLong',
+                                                    "'Value out of range (-2147483648 to 2147483647): ', data")
+                        return false
+                    }
+
+                    accumulator = accumulator * 10 + digit
+                }
+            }
+            active (data[x] == '-' && !foundNumber): {
+                // Found negative sign before any digits
+                isNegative = true
+            }
+            active (data[x] == '+' && !foundNumber): {
+                // Found positive sign before any digits (explicit positive)
+                // Do nothing, already positive by default
+            }
+            active (foundNumber): {
+                // Stop parsing after we've found digits and hit a non-digit character
+                // This matches ATOI behavior: '   -100  200' -> -100
+                break
+            }
+            active (true): {
+                // Skip leading non-digit characters (whitespace, letters, etc.)
+            }
+        }
+    }
+
+    if (!hasDigit) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseSignedLong',
+                                    "'No numeric characters found in string: ', data")
+        return false
+    }
+
+    // Success - set the result
+    result = accumulator
+    return true
+}
+
+
+/**
+ * @function NAVParseFloat
+ * @public
+ * @description Parses a string representation of a floating-point number.
+ *
+ * Uses ATOF internally to parse the string. Accepts standard floating-point
+ * notation including decimal points and scientific notation (e.g., "1.25e-3").
+ * Parses the first valid number and stops at whitespace or non-digit characters
+ * after it (matching ATOF behavior).
+ *
+ * @param {char[]} data - The string to parse as a float
+ * @param {float} result - Variable to populate with the parsed float value
+ *
+ * @returns {char} true if parsing succeeded, false otherwise
+ *
+ * @example
+ * stack_var float value
+ * stack_var char result
+ * result = NAVParseFloat('3.14159', value)
+ * if (result) {
+ *     // value = 3.14159
+ * }
+ *
+ * result = NAVParseFloat('-1.25e-3', value) // value = -0.00125
+ * result = NAVParseFloat('Temp=22.5', value) // value = 22.5 (extracts first number)
+ */
+define_function char NAVParseFloat(char data[], float result) {
+    stack_var integer x
+    stack_var integer length
+    stack_var char hasDigit
+
+    // Initialize result
+    result = 0
+
+    // Validate non-empty input
+    if (!length_array(data)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseFloat',
+                                    'Invalid argument. The provided string is empty')
+        return false
+    }
+
+    // Verify the string contains at least one digit
+    // ATOF returns 0.0 if no valid numeric characters are found
+    length = length_array(data)
+    hasDigit = false
+
+    for (x = 1; x <= length; x++) {
+        if (NAVIsDigit(data[x])) {
+            hasDigit = true
+            break
+        }
+    }
+
+    if (!hasDigit) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseFloat',
+                                    "'No numeric characters found in string: ', data")
+        return false
+    }
+
+    // Parse using ATOF (returns float, ignores non-numeric characters)
+    result = atof(data)
+
+    // Success
+    return true
+}
+
+
+/**
  * @function NAVGetTimeSpan
  * @public
  * @description Converts a duration in milliseconds to a human-readable time span string.
