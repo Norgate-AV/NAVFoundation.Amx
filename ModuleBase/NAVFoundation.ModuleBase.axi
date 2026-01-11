@@ -87,6 +87,7 @@ define_function NAVModuleInit(_NAVModule module) {
     module.Device.SocketConnection.IsConnected = false
     module.Device.SocketConnection.IsAuthenticated = false
     module.Device.SocketConnection.Interval[1] = 0
+    set_length_array(module.Device.SocketConnection.Interval, 1)
     module.Device.SocketConnection.RetryCount = 0
 
     module.Enabled = true
