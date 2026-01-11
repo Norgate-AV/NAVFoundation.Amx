@@ -633,12 +633,14 @@ struct _NAVCredential {
 
 /**
  * @struct _NAVSocketConnection
- * @description Manages a network socket connection.
+ * @description Manages a network socket connection with retry and timing functionality.
  * @property {integer} Socket - The socket identifier
  * @property {integer} Port - The TCP/IP port number
  * @property {integer} IsConnected - Flag indicating connection status (0=disconnected, non-zero=connected)
  * @property {integer} IsAuthenticated - Flag indicating authentication status (0=not authenticated, non-zero=authenticated)
  * @property {char[]} Address - The IP address or hostname for the connection
+ * @property {long[1]} Interval - Array containing the retry interval in milliseconds for connection attempts
+ * @property {integer} RetryCount - Current count of connection retry attempts
  */
 struct _NAVSocketConnection {
     integer Socket
@@ -646,6 +648,8 @@ struct _NAVSocketConnection {
     integer IsConnected
     integer IsAuthenticated
     char Address[NAV_MAX_CHARS]
+    long Interval[1]
+    integer RetryCount
 }
 
 
