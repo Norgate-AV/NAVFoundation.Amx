@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.4.0...v5.5.0) (2026-01-11)
+
+### 🌟 Features
+
+- **socket-utils:** add exponential backoff retry mechanism ([2694e95](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/2694e9597311141ba9bd6ced207c2eb976419a6c))
+- **core:** add Interval and RetryCount to SocketConnection struct ([40e3345](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/40e334549e047987b3d1d3f77d2d774add9a5f7b))
+
 ## [5.4.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.3.0...v5.4.0) (2026-01-03)
 
 ### 🌟 Features
