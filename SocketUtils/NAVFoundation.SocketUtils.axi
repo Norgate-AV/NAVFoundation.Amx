@@ -475,4 +475,96 @@ define_function slong NAVClientTlsSocketClose(integer socket) {
 }
 
 
+/**
+ * @function NAVSocketGetExponentialBackoff
+ * @public
+ * @description Calculates an exponential backoff interval for socket connection retry attempts.
+ *              Uses a base delay for initial attempts, then applies exponential backoff with jitter
+ *              to prevent thundering herd problems.
+ *
+ * @param {integer} attempt - Current attempt number (1-based)
+ * @param {integer} maxRetries - Number of attempts to use base delay before starting exponential backoff
+ * @param {long} baseDelay - Base delay in milliseconds for initial attempts
+ * @param {long} maxDelay - Maximum delay in milliseconds (cap for exponential growth)
+ *
+ * @returns {long} Calculated delay interval in milliseconds
+ *
+ * @example
+ * stack_var integer attemptCount
+ * stack_var long retryInterval
+ *
+ * attemptCount = 5
+ * retryInterval = NAVSocketGetExponentialBackoff(attemptCount, 3, 5000, 300000)
+ * // First 3 attempts: 5000ms
+ * // 4th attempt: ~5000ms
+ * // 5th attempt: ~10000ms + jitter
+ * // 6th attempt: ~20000ms + jitter
+ *
+ * @note For attempts <= maxRetries, returns baseDelay
+ * @note For attempts > maxRetries, uses formula: baseDelay * 2^(attempt - maxRetries) + jitter
+ * @note Jitter is a random value between 100-1000ms to prevent synchronized retries
+ * @note Final delay is capped at maxDelay (after jitter is added)
+ */
+define_function long NAVSocketGetExponentialBackoff(integer attempt,
+                                                    integer maxRetries,
+                                                    long baseDelay,
+                                                    long maxDelay) {
+    stack_var long interval
+    stack_var long jitter
+
+    // For first N attempts, use base delay
+    if (attempt <= maxRetries) {
+        interval = baseDelay
+    }
+    else {
+        // After N attempts, start exponential backoff
+        // Use native POWER_VALUE function for 2^n calculation
+        interval = baseDelay * power_value(2, attempt - maxRetries)
+
+        // Add jitter (100-1000ms) to prevent thundering herd
+        jitter = random_number(10) * 100  // 1-10 * 100ms = 100-1000ms
+        interval = interval + jitter
+
+        // Cap at maximum delay (after jitter)
+        interval = min_value(interval, maxDelay)
+    }
+
+    return interval
+}
+
+
+/**
+ * @function NAVSocketGetConnectionInterval
+ * @public
+ * @description Calculates the retry interval for socket connection attempts using exponential backoff.
+ *              This is a convenience wrapper around NAVSocketGetExponentialBackoff that uses
+ *              the library's default retry constants.
+ *
+ * @param {integer} attempt - Current attempt number (1-based)
+ *
+ * @returns {long} Calculated delay interval in milliseconds
+ *
+ * @example
+ * stack_var integer attemptCount
+ * stack_var long retryInterval
+ *
+ * attemptCount++
+ * retryInterval = NAVSocketGetConnectionInterval(attemptCount)
+ * wait retryInterval 'SOCKET_RETRY' {
+ *     NAVClientSocketOpen(dvTCPClient.PORT, '192.168.1.100', 23, IP_TCP)
+ * }
+ *
+ * @note Uses NAV_MAX_SOCKET_CONNECTION_RETRIES (10 attempts before exponential backoff)
+ * @note Uses NAV_SOCKET_CONNECTION_INTERVAL_BASE_DELAY (5000ms base delay)
+ * @note Uses NAV_SOCKET_CONNECTION_INTERVAL_MAX_DELAY (300000ms maximum delay)
+ * @note See NAVSocketGetExponentialBackoff for detailed backoff algorithm
+ */
+define_function long NAVSocketGetConnectionInterval(integer attempt) {
+    return NAVSocketGetExponentialBackoff(attempt,
+                                          NAV_MAX_SOCKET_CONNECTION_RETRIES,
+                                          NAV_SOCKET_CONNECTION_INTERVAL_BASE_DELAY,
+                                          NAV_SOCKET_CONNECTION_INTERVAL_MAX_DELAY)
+}
+
+
 #END_IF // __NAV_FOUNDATION_SOCKETUTILS__
