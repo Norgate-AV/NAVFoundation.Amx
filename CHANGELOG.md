@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.5.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.5.0...v5.5.1) (2026-01-11)
+
+### 🐛 Bug Fixes
+
+- **core/module:** ensure SocketConnection Interval has array length set ([b5476ea](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b5476ea1c0a3bd16babeb9ad73f726eb2abfbc73))
+
 ## [5.5.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.4.0...v5.5.0) (2026-01-11)
 
 ### 🌟 Features
