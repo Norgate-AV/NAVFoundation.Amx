@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.6.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.5.1...v5.6.0) (2026-01-17)
+
+### 🌟 Features
+
+- **http-utils:** various updates and improvements ([e6ca531](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e6ca5314538f4b6a0e5f24fa096da5695c0da135))
+
 ## [5.5.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.5.0...v5.5.1) (2026-01-11)
 
 ### 🐛 Bug Fixes
