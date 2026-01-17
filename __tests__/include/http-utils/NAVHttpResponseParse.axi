@@ -2,703 +2,461 @@ PROGRAM_NAME='HttpResponseParse'
 
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.Assert.axi'
-#include 'NAVFoundation.Testing.axi'
 
-/**
- * Tests for NAVHttpParseResponse function
- * These tests define the expected behavior for parsing HTTP responses
- */
+
+DEFINE_VARIABLE
+
+// Test vectors for NAVHttpParseResponse (Headers Only)
+volatile char RESPONSE_PARSE_TEST[11][NAV_MAX_BUFFER]
+
+// Test vectors for NAVHttpParseStatusLine
+volatile char STATUS_LINE_TEST[14][NAV_MAX_BUFFER]
+
+// Test vectors for NAVHttpParseHeaders
+volatile char HEADERS_PARSE_TEST[12][NAV_MAX_BUFFER]
+
+
+define_function InitializeNAVHttpParseResponseTestData() {
+    // Response buffers (headers only - body parsing is separate)
+    set_length_array(RESPONSE_PARSE_TEST, 11)
+    RESPONSE_PARSE_TEST[1] = "
+        'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
+        'Content-Type: application/json', NAV_CR, NAV_LF,
+        'Content-Length: 13', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF
+    "
+    RESPONSE_PARSE_TEST[2] = "
+        'HTTP/1.1 404 Not Found', NAV_CR, NAV_LF,
+        'Content-Type: text/plain', NAV_CR, NAV_LF,
+        'Content-Length: 14', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF
+    "
+    RESPONSE_PARSE_TEST[3] = "
+        'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
+        'Content-Type: text/html', NAV_CR, NAV_LF,
+        'Content-Length: 13', NAV_CR, NAV_LF,
+        'Server: NAVFoundation/1.0', NAV_CR, NAV_LF,
+        'Cache-Control: no-cache', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF
+    "
+    RESPONSE_PARSE_TEST[4] = "
+        'HTTP/1.1 204 No Content', NAV_CR, NAV_LF,
+        'Content-Length: 0', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF
+    "
+    RESPONSE_PARSE_TEST[5] = "
+        'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
+        'Content-Type: application/json', NAV_CR, NAV_LF,
+        'Content-Length: 38', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF
+    "
+    RESPONSE_PARSE_TEST[6] = "
+        'HTTP/1.1 500 Internal Server Error', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF
+    "
+    RESPONSE_PARSE_TEST[7] = "
+        'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
+        'Transfer-Encoding: chunked', NAV_CR, NAV_LF,
+        'Content-Length: 9', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF
+    "
+    RESPONSE_PARSE_TEST[8] = "
+        'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
+        'Content-Length: 0', NAV_CR, NAV_LF,
+        'X-Custom-Header: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF
+    "
+    RESPONSE_PARSE_TEST[9] = "
+        'HTTP/1.1 304 Not Modified', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF
+    "
+    RESPONSE_PARSE_TEST[10] = "
+        'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
+        'Content-Length: 0', NAV_CR, NAV_LF,
+        'X-Empty:', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF
+    "
+    RESPONSE_PARSE_TEST[11] = "
+        'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
+        'Content-Length: 10', NAV_CR, NAV_LF,
+        NAV_CR, NAV_LF
+    "
+
+    set_length_array(STATUS_LINE_TEST, 14)
+    STATUS_LINE_TEST[1] = 'HTTP/1.1 200 OK'
+    STATUS_LINE_TEST[2] = 'HTTP/1.1 404 Not Found'
+    STATUS_LINE_TEST[3] = 'HTTP/1.0 500 Internal Server Error'
+    STATUS_LINE_TEST[4] = 'HTTP/1.1 201 Created'
+    STATUS_LINE_TEST[5] = 'HTTP/1.1 304 Not Modified'
+    STATUS_LINE_TEST[6] = 'HTTP/1.1 Status Unknown'  // Invalid - status code not numeric
+    STATUS_LINE_TEST[7] = ''  // Invalid - empty
+    STATUS_LINE_TEST[8] = 'HTTP/1.1 200'  // Valid - no message
+    STATUS_LINE_TEST[9] = "'HTTP/1.1', $09, '200', $09, 'OK'"  // Invalid - tabs instead of spaces
+    STATUS_LINE_TEST[10] = 'HTTP/1.1 200 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'  // Long message
+    STATUS_LINE_TEST[11] = 'HTTP/1.1 100 Continue'  // Boundary status code
+    STATUS_LINE_TEST[12] = 'HTTP/1.1 599 Custom'  // High boundary
+    STATUS_LINE_TEST[13] = 'HTTP/1.1 99 Too Low'  // Invalid - too low
+    STATUS_LINE_TEST[14] = 'HTTP/1.1 600 Too High'  // Invalid - too high
+
+    set_length_array(HEADERS_PARSE_TEST, 12)
+    HEADERS_PARSE_TEST[1] = "'Content-Type: application/json', NAV_CR, NAV_LF"
+    HEADERS_PARSE_TEST[2] = "
+        'Content-Type: application/json', NAV_CR, NAV_LF,
+        'Content-Length: 123', NAV_CR, NAV_LF
+    "
+    HEADERS_PARSE_TEST[3] = "'X-Custom-Header: custom-value', NAV_CR, NAV_LF"
+    HEADERS_PARSE_TEST[4] = "''"  // Empty headers
+    HEADERS_PARSE_TEST[5] = "'Content-Type:application/json', NAV_CR, NAV_LF"  // No space after colon
+    HEADERS_PARSE_TEST[6] = "'Content-Type: ', NAV_CR, NAV_LF"  // Empty value
+    HEADERS_PARSE_TEST[7] = "
+        'X-Header-1: value1', NAV_CR, NAV_LF,
+        'X-Header-2: value2', NAV_CR, NAV_LF,
+        'X-Header-3: value3', NAV_CR, NAV_LF,
+        'X-Header-4: value4', NAV_CR, NAV_LF,
+        'X-Header-5: value5', NAV_CR, NAV_LF
+    "  // Multiple headers
+    HEADERS_PARSE_TEST[8] = "'Authorization: Bearer token:with:colons', NAV_CR, NAV_LF"  // Colons in value
+    HEADERS_PARSE_TEST[9] = "'   Content-Type   :   application/json   ', NAV_CR, NAV_LF"  // Whitespace
+    HEADERS_PARSE_TEST[10] = "'Set-Cookie: sessionId=abc123; Path=/; HttpOnly', NAV_CR, NAV_LF"  // Semicolons in value
+    HEADERS_PARSE_TEST[11] = "'content-type: application/json', NAV_CR, NAV_LF"  // Lowercase key
+    HEADERS_PARSE_TEST[12] = "'X-Header', NAV_CR, NAV_LF"  // No colon - should be skipped
+}
+
+
+DEFINE_CONSTANT
+
+constant integer RESPONSE_PARSE_EXPECTED_CODE[] = {
+    200,  // Test 1: 200 OK
+    404,  // Test 2: 404 Not Found
+    200,  // Test 3: 200 with multiple headers
+    204,  // Test 4: 204 No Content
+    200,  // Test 5: 200 with JSON
+    500,  // Test 6: 500 Error
+    200,  // Test 7: 200 with chunked encoding
+    200,  // Test 8: 200 with long header
+    304,  // Test 9: 304 Not Modified
+    200,  // Test 10: 200 with empty header value
+    200   // Test 11: 200 for body test
+}
+
+constant char RESPONSE_PARSE_EXPECTED_RESULT[] = {
+    true,   // Test 1
+    true,   // Test 2
+    true,   // Test 3
+    true,   // Test 4
+    true,   // Test 5
+    true,   // Test 6
+    true,   // Test 7
+    true,   // Test 8
+    true,   // Test 9
+    true,   // Test 10
+    true    // Test 11
+}
+
+constant long RESPONSE_PARSE_EXPECTED_CONTENT_LENGTH[] = {
+    13,   // Test 1
+    14,   // Test 2
+    13,   // Test 3
+    0,    // Test 4
+    38,   // Test 5
+    0,    // Test 6
+    9,    // Test 7
+    0,    // Test 8
+    0,    // Test 9
+    0,    // Test 10
+    10    // Test 11
+}
+
+constant integer RESPONSE_PARSE_EXPECTED_HEADER_COUNT[] = {
+    2,    // Test 1: Content-Type, Content-Length
+    2,    // Test 2: Content-Type, Content-Length
+    4,    // Test 3: Multiple headers
+    1,    // Test 4: Content-Length only
+    2,    // Test 5: Content-Type, Content-Length
+    0,    // Test 6: No headers
+    2,    // Test 7: Transfer-Encoding, Content-Length
+    2,    // Test 8: Content-Length, X-Custom-Header
+    0,    // Test 9: No headers
+    2,    // Test 10: Content-Length, X-Empty
+    1     // Test 11: Content-Length only
+}
+
+constant integer STATUS_LINE_EXPECTED_CODE[] = {
+    200,  // Test 1
+    404,  // Test 2
+    500,  // Test 3
+    201,  // Test 4
+    304,  // Test 5
+    0,    // Test 6: Invalid
+    0,    // Test 7: Invalid
+    200,  // Test 8
+    0,    // Test 9: Invalid
+    200,  // Test 10
+    100,  // Test 11
+    599,  // Test 12
+    0,    // Test 13: Invalid
+    0     // Test 14: Invalid
+}
+
+constant char STATUS_LINE_EXPECTED_MESSAGE[][200] = {
+    'OK',
+    'Not Found',
+    'Internal Server Error',
+    'Created',
+    'Not Modified',
+    '',  // Invalid
+    '',  // Invalid
+    '',  // No message
+    '',  // Invalid
+    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    'Continue',
+    'Custom',
+    '',  // Invalid
+    ''   // Invalid
+}
+
+constant char STATUS_LINE_EXPECTED_RESULT[] = {
+    true,   // Test 1
+    true,   // Test 2
+    true,   // Test 3
+    true,   // Test 4
+    true,   // Test 5
+    false,  // Test 6: Invalid
+    false,  // Test 7: Invalid
+    true,   // Test 8
+    false,  // Test 9: Invalid
+    true,   // Test 10
+    true,   // Test 11
+    true,   // Test 12
+    false,  // Test 13: Invalid
+    false   // Test 14: Invalid
+}
+
+constant integer HEADERS_PARSE_EXPECTED_COUNT[] = {
+    1,   // Test 1
+    2,   // Test 2
+    1,   // Test 3
+    0,   // Test 4
+    1,   // Test 5
+    1,   // Test 6: Empty value should be stored
+    5,   // Test 7
+    1,   // Test 8
+    1,   // Test 9
+    1,   // Test 10
+    1,   // Test 11
+    0    // Test 12: No colon - skipped
+}
+
+constant char HEADERS_PARSE_EXPECTED_RESULT[] = {
+    true,   // Test 1
+    true,   // Test 2
+    true,   // Test 3
+    true,   // Test 4: Empty is valid
+    true,   // Test 5
+    true,   // Test 6
+    true,   // Test 7
+    true,   // Test 8
+    true,   // Test 9
+    true,   // Test 10
+    true,   // Test 11
+    true    // Test 12: Parse succeeds but skips invalid line
+}
+
+
 define_function TestNAVHttpParseResponse() {
-    stack_var _NAVHttpResponse response
-    stack_var char buffer[2048]
-    stack_var char result
+    stack_var integer x
 
-    NAVLog("'***************** NAVHttpParseResponse *****************'")
+    NAVLogTestSuiteStart("'NAVHttpParseResponse'")
 
-    // Test 1: Parse simple 200 OK response
-    buffer = "'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
-              'Content-Type: application/json', NAV_CR, NAV_LF,
-              'Content-Length: 13', NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF,
-              '{"test":true}'"
+    InitializeNAVHttpParseResponseTestData()
 
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
+    for (x = 1; x <= length_array(RESPONSE_PARSE_TEST); x++) {
+        stack_var _NAVHttpResponse response
+        stack_var char result
 
-    if (!result) {
-        NAVLogTestFailed(1, 'Should parse simple 200 response', 'Parse failed')
-        return
-    }
+        NAVHttpResponseInit(response)
+        result = NAVHttpParseResponse(RESPONSE_PARSE_TEST[x], response)
 
-    if (response.Status.Code != 200) {
-        NAVLogTestFailed(1, '200', itoa(response.Status.Code))
-        return
-    }
-
-    if (response.Status.Message != 'OK') {
-        NAVLogTestFailed(1, 'OK', response.Status.Message)
-        return
-    }
-
-    NAVLogTestPassed(1)
-
-    // Test 2: Parse 404 Not Found response
-    buffer = "'HTTP/1.1 404 Not Found', NAV_CR, NAV_LF,
-              'Content-Type: text/plain', NAV_CR, NAV_LF,
-              'Content-Length: 14', NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF,
-              'Page not found'"
-
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
-
-    if (!result || response.Status.Code != 404) {
-        NAVLogTestFailed(2, 'Should parse 404 response', 'Parse failed or wrong code')
-        return
-    }
-
-    if (response.Status.Message != 'Not Found') {
-        NAVLogTestFailed(2, 'Not Found', response.Status.Message)
-        return
-    }
-
-    NAVLogTestPassed(2)
-
-    // Test 3: Parse response with multiple headers
-    buffer = "'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
-              'Content-Type: text/html', NAV_CR, NAV_LF,
-              'Content-Length: 13', NAV_CR, NAV_LF,
-              'Server: NAVFoundation/1.0', NAV_CR, NAV_LF,
-              'Cache-Control: no-cache', NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF,
-              '<html></html>'"
-
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
-
-    if (!result || response.Headers.Count < 4) {
-        NAVLogTestFailed(3, 'Should parse multiple headers', "'Got ', itoa(response.Headers.Count), ' headers'")
-        return
-    }
-
-    NAVLogTestPassed(3)
-
-    // Test 4: Parse response with empty body
-    buffer = "'HTTP/1.1 204 No Content', NAV_CR, NAV_LF,
-              'Content-Length: 0', NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF"
-
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
-
-    if (!result || response.Status.Code != 204) {
-        NAVLogTestFailed(4, 'Should parse 204 with no body', 'Parse failed')
-        return
-    }
-
-    if (length_array(response.Body) != 0) {
-        NAVLogTestFailed(4, 'Empty body', "'Body length: ', itoa(length_array(response.Body))")
-        return
-    }
-
-    NAVLogTestPassed(4)
-
-    // Test 5: Parse response with JSON body
-    buffer = "'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
-              'Content-Type: application/json', NAV_CR, NAV_LF,
-              'Content-Length: 38', NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF,
-              '{"status":"success","data":{"id":123}}'"
-
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
-
-    if (!result) {
-        NAVLogTestFailed(5, 'Should parse JSON response', 'Parse failed')
-        return
-    }
-
-    if (response.Body != '{"status":"success","data":{"id":123}}') {
-        NAVLogTestFailed(5, 'JSON body preserved', response.Body)
-        return
-    }
-
-    NAVLogTestPassed(5)
-
-    // Test 6: Parse 500 Internal Server Error
-    buffer = "'HTTP/1.1 500 Internal Server Error', NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF"
-
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
-
-    if (!result || response.Status.Code != 500) {
-        NAVLogTestFailed(6, 'Should parse 500 response', 'Parse failed')
-        return
-    }
-
-    NAVLogTestPassed(6)
-
-    // Test 7: Parse response with chunked transfer encoding (should handle or skip)
-    buffer = "'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
-              'Transfer-Encoding: chunked', NAV_CR, NAV_LF,
-              'Content-Length: 9', NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF,
-              'test body'"
-
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
-
-    // At minimum, should parse status line
-    if (!result || response.Status.Code != 200) {
-        NAVLogTestFailed(7, 'Should handle chunked encoding', 'Parse failed')
-        return
-    }
-
-    NAVLogTestPassed(7)
-
-    {
-        stack_var integer x
-
-        buffer = ''
-
-        for (x = 1; x <= 900; x++) {
-            buffer = "buffer, 'A'"
+        if (!NAVAssertBooleanEqual('Should parse response',
+                                   RESPONSE_PARSE_EXPECTED_RESULT[x],
+                                   result)) {
+            NAVLogTestFailed(x,
+                            NAVBooleanToString(RESPONSE_PARSE_EXPECTED_RESULT[x]),
+                            NAVBooleanToString(result))
+            continue
         }
+
+        if (!RESPONSE_PARSE_EXPECTED_RESULT[x]) {
+            NAVLogTestPassed(x)
+            continue
+        }
+
+        // Verify status code
+        if (!NAVAssertIntegerEqual('Status code should match',
+                                   RESPONSE_PARSE_EXPECTED_CODE[x],
+                                   response.Status.Code)) {
+            NAVLogTestFailed(x,
+                            "itoa(RESPONSE_PARSE_EXPECTED_CODE[x])",
+                            "itoa(response.Status.Code)")
+            continue
+        }
+
+        // Verify content length
+        if (!NAVAssertLongEqual('Content-Length should match',
+                               RESPONSE_PARSE_EXPECTED_CONTENT_LENGTH[x],
+                               response.ContentLength)) {
+            NAVLogTestFailed(x,
+                            "itoa(RESPONSE_PARSE_EXPECTED_CONTENT_LENGTH[x])",
+                            "itoa(response.ContentLength)")
+            continue
+        }
+
+        // Verify header count (at minimum)
+        if (response.Headers.Count < RESPONSE_PARSE_EXPECTED_HEADER_COUNT[x]) {
+            NAVLogTestFailed(x,
+                            "'At least ', itoa(RESPONSE_PARSE_EXPECTED_HEADER_COUNT[x]), ' headers'",
+                            "'Got ', itoa(response.Headers.Count)")
+            continue
+        }
+
+        // Special test for Test 5 - parse body separately
+        if (x == 5) {
+            stack_var char bodyData[NAV_MAX_BUFFER]
+            bodyData = '{"status":"success","data":{"id":123}}'
+
+            result = NAVHttpParseResponseBody(bodyData, response)
+
+            if (!NAVAssertBooleanEqual('Should parse body', true, result)) {
+                NAVLogTestFailed(x, 'Body parse success', 'Body parse failed')
+                continue
+            }
+
+            if (!NAVAssertStringEqual('Body should match',
+                                     '{"status":"success","data":{"id":123}}',
+                                     response.Body)) {
+                NAVLogTestFailed(x, 'JSON body preserved', response.Body)
+                continue
+            }
+        }
+
+        // Special test for Test 11 - parse body with extra data
+        if (x == 11) {
+            stack_var char bodyData[NAV_MAX_BUFFER]
+            bodyData = '1234567890EXTRADATA'
+
+            result = NAVHttpParseResponseBody(bodyData, response)
+
+            if (!NAVAssertBooleanEqual('Should parse body', true, result)) {
+                NAVLogTestFailed(x, 'Body parse success', 'Body parse failed')
+                continue
+            }
+
+            if (!NAVAssertStringEqual('Should extract exact Content-Length bytes',
+                                     '1234567890',
+                                     response.Body)) {
+                NAVLogTestFailed(x, '1234567890', response.Body)
+                continue
+            }
+        }
+
+        NAVLogTestPassed(x)
     }
 
-    // Test 8: Parse response with extremely long header value (250+ chars)
-    buffer = "'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
-              'Content-Length: 0', NAV_CR, NAV_LF,
-              'X-Custom-Header: ', buffer, NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF"
-
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
-
-    if (!result) {
-        NAVLogTestFailed(8, 'Should handle long header values', 'Parse failed')
-        return
-    }
-
-    if (length_array(NAVHttpGetHeaderValue(response.Headers, 'X-Custom-Header')) != 900) {
-        NAVLogTestFailed(8, 'Long header preserved', "'Got ', itoa(length_array(NAVHttpGetHeaderValue(response.Headers, 'X-Custom-Header'))), ' chars'")
-        return
-    }
-
-    NAVLogTestPassed(8)
-
-    // Test 9: Parse response with no headers (just status line)
-    buffer = "'HTTP/1.1 304 Not Modified', NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF"
-
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
-
-    if (!result || response.Status.Code != 304) {
-        NAVLogTestFailed(9, 'Should parse response with no headers', 'Parse failed')
-        return
-    }
-
-    if (response.Headers.Count != 0) {
-        NAVLogTestFailed(9, 'No headers', "'Got ', itoa(response.Headers.Count), ' headers'")
-        return
-    }
-
-    NAVLogTestPassed(9)
-
-    // Test 10: Parse response with header that has no value
-    buffer = "'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
-              'Content-Length: 0', NAV_CR, NAV_LF,
-              'X-Empty:', NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF"
-
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
-
-    if (!result) {
-        NAVLogTestFailed(10, 'Should handle empty header value', 'Parse failed')
-        return
-    }
-
-    NAVLogTestPassed(10)
-
-    // Test 11: Parse response with body larger than Content-Length (should only take specified bytes)
-    buffer = "'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
-              'Content-Length: 10', NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF,
-              '1234567890EXTRADATA'"
-
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
-
-    if (!result) {
-        NAVLogTestFailed(11, 'Should extract exact Content-Length bytes', 'Parse failed')
-        return
-    }
-
-    if (response.Body != '1234567890') {
-        NAVLogTestFailed(11, '1234567890', response.Body)
-        return
-    }
-
-    NAVLogTestPassed(11)
-
-    // Test 12: Parse response with maximum number of headers
-    buffer = "'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
-              'Header-1: Value1', NAV_CR, NAV_LF,
-              'Header-2: Value2', NAV_CR, NAV_LF,
-              'Header-3: Value3', NAV_CR, NAV_LF,
-              'Header-4: Value4', NAV_CR, NAV_LF,
-              'Header-5: Value5', NAV_CR, NAV_LF,
-              'Header-6: Value6', NAV_CR, NAV_LF,
-              'Header-7: Value7', NAV_CR, NAV_LF,
-              'Header-8: Value8', NAV_CR, NAV_LF,
-              'Header-9: Value9', NAV_CR, NAV_LF,
-              'Header-10: Value10', NAV_CR, NAV_LF,
-              'Header-11: Value11', NAV_CR, NAV_LF,
-              'Header-12: Value12', NAV_CR, NAV_LF,
-              'Header-13: Value13', NAV_CR, NAV_LF,
-              'Header-14: Value14', NAV_CR, NAV_LF,
-              'Header-15: Value15', NAV_CR, NAV_LF,
-              'Header-16: Value16', NAV_CR, NAV_LF,
-              'Header-17: Value17', NAV_CR, NAV_LF,
-              'Header-18: Value18', NAV_CR, NAV_LF,
-              'Header-19: Value19', NAV_CR, NAV_LF,
-              'Content-Length: 0', NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF"
-
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
-
-    if (!result) {
-        NAVLogTestFailed(12, 'Should handle 20 headers', 'Parse failed')
-        return
-    }
-
-    if (response.Headers.Count != 20) {
-        NAVLogTestFailed(12, '20 headers', "'Got ', itoa(response.Headers.Count), ' headers'")
-        return
-    }
-
-    NAVLogTestPassed(12)
-
-    // Test 13: Parse response exceeding maximum headers (should stop at limit)
-    buffer = "'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
-              'Header-1: Value1', NAV_CR, NAV_LF,
-              'Header-2: Value2', NAV_CR, NAV_LF,
-              'Header-3: Value3', NAV_CR, NAV_LF,
-              'Header-4: Value4', NAV_CR, NAV_LF,
-              'Header-5: Value5', NAV_CR, NAV_LF,
-              'Header-6: Value6', NAV_CR, NAV_LF,
-              'Header-7: Value7', NAV_CR, NAV_LF,
-              'Header-8: Value8', NAV_CR, NAV_LF,
-              'Header-9: Value9', NAV_CR, NAV_LF,
-              'Header-10: Value10', NAV_CR, NAV_LF,
-              'Header-11: Value11', NAV_CR, NAV_LF,
-              'Header-12: Value12', NAV_CR, NAV_LF,
-              'Header-13: Value13', NAV_CR, NAV_LF,
-              'Header-14: Value14', NAV_CR, NAV_LF,
-              'Header-15: Value15', NAV_CR, NAV_LF,
-              'Header-16: Value16', NAV_CR, NAV_LF,
-              'Header-17: Value17', NAV_CR, NAV_LF,
-              'Header-18: Value18', NAV_CR, NAV_LF,
-              'Header-19: Value19', NAV_CR, NAV_LF,
-              'Header-20: Value20', NAV_CR, NAV_LF,
-              'Header-21: Value21', NAV_CR, NAV_LF,
-              'Content-Length: 0', NAV_CR, NAV_LF,
-              NAV_CR, NAV_LF"
-
-    NAVHttpResponseInit(response)
-    result = NAVHttpParseResponse(buffer, response)
-
-    if (!result) {
-        NAVLogTestFailed(13, 'Should handle exceeding max headers', 'Parse failed')
-        return
-    }
-
-    // Should stop at 20 headers (NAV_HTTP_MAX_HEADERS)
-    if (response.Headers.Count > 20) {
-        NAVLogTestFailed(13, 'Max 20 headers', "'Got ', itoa(response.Headers.Count), ' headers'")
-        return
-    }
-
-    NAVLogTestPassed(13)
+    NAVLogTestSuiteEnd("'NAVHttpParseResponse'")
 }
 
-/**
- * Tests for NAVHttpParseStatusLine function
- * These tests focus on parsing just the status line
- */
+
 define_function TestNAVHttpParseStatusLine() {
-    stack_var _NAVHttpStatus status
-    stack_var char statusLine[256]
-    stack_var char result
+    stack_var integer x
 
-    NAVLog("'***************** NAVHttpParseStatusLine *****************'")
+    NAVLogTestSuiteStart("'NAVHttpParseStatusLine'")
 
-    // Test 1: Parse standard 200 OK
-    statusLine = 'HTTP/1.1 200 OK'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
+    InitializeNAVHttpParseResponseTestData()
 
-    if (!result || status.Code != 200 || status.Message != 'OK') {
-        NAVLogTestFailed(1, 'Parse 200 OK', "'Code: ', itoa(status.Code), ' Msg: ', status.Message")
-        return
+    for (x = 1; x <= length_array(STATUS_LINE_TEST); x++) {
+        stack_var _NAVHttpStatus status
+        stack_var char result
+
+        NAVHttpStatusInit(status)
+        result = NAVHttpParseStatusLine(STATUS_LINE_TEST[x], status)
+
+        if (!NAVAssertBooleanEqual('Should return expected result',
+                                   STATUS_LINE_EXPECTED_RESULT[x],
+                                   result)) {
+            NAVLogTestFailed(x,
+                            NAVBooleanToString(STATUS_LINE_EXPECTED_RESULT[x]),
+                            NAVBooleanToString(result))
+            continue
+        }
+
+        if (!STATUS_LINE_EXPECTED_RESULT[x]) {
+            NAVLogTestPassed(x)
+            continue
+        }
+
+        // Verify status code
+        if (!NAVAssertIntegerEqual('Status code should match',
+                                   STATUS_LINE_EXPECTED_CODE[x],
+                                   status.Code)) {
+            NAVLogTestFailed(x,
+                            "itoa(STATUS_LINE_EXPECTED_CODE[x])",
+                            "itoa(status.Code)")
+            continue
+        }
+
+        // Verify status message
+        if (!NAVAssertStringEqual('Status message should match',
+                                 STATUS_LINE_EXPECTED_MESSAGE[x],
+                                 status.Message)) {
+            NAVLogTestFailed(x,
+                            STATUS_LINE_EXPECTED_MESSAGE[x],
+                            status.Message)
+            continue
+        }
+
+        NAVLogTestPassed(x)
     }
 
-    NAVLogTestPassed(1)
-
-    // Test 2: Parse 404 Not Found
-    statusLine = 'HTTP/1.1 404 Not Found'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (!result || status.Code != 404 || status.Message != 'Not Found') {
-        NAVLogTestFailed(2, 'Parse 404 Not Found', "'Code: ', itoa(status.Code), ' Msg: ', status.Message")
-        return
-    }
-
-    NAVLogTestPassed(2)
-
-    // Test 3: Parse 201 Created
-    statusLine = 'HTTP/1.1 201 Created'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (!result || status.Code != 201) {
-        NAVLogTestFailed(3, 'Parse 201 Created', "'Code: ', itoa(status.Code)")
-        return
-    }
-
-    NAVLogTestPassed(3)
-
-    // Test 4: Parse 500 Internal Server Error
-    statusLine = 'HTTP/1.1 500 Internal Server Error'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (!result || status.Code != 500) {
-        NAVLogTestFailed(4, 'Parse 500', "'Code: ', itoa(status.Code)")
-        return
-    }
-
-    NAVLogTestPassed(4)
-
-    // Test 5: Parse with HTTP/1.0
-    statusLine = 'HTTP/1.0 200 OK'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (!result || status.Code != 200) {
-        NAVLogTestFailed(5, 'Parse HTTP/1.0 response', "'Code: ', itoa(status.Code)")
-        return
-    }
-
-    NAVLogTestPassed(5)
-
-    // Test 6: Invalid status line (should fail gracefully)
-    statusLine = 'Invalid Status Line'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (result != false) {
-        NAVLogTestFailed(6, 'Should fail on invalid status line', 'Parse succeeded unexpectedly')
-        return
-    }
-
-    NAVLogTestPassed(6)
-
-    // Test 7: Empty status line (should fail)
-    statusLine = ''
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (result != false) {
-        NAVLogTestFailed(7, 'Should fail on empty status line', 'Parse succeeded unexpectedly')
-        return
-    }
-
-    NAVLogTestPassed(7)
-
-    // Test 8: Status line with no message (just code)
-    statusLine = 'HTTP/1.1 204'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (!result || status.Code != 204) {
-        NAVLogTestFailed(8, 'Should parse status without message', "'Code: ', itoa(status.Code)")
-        return
-    }
-
-    if (length_array(status.Message) != 0) {
-        NAVLogTestFailed(8, 'Empty message', status.Message)
-        return
-    }
-
-    NAVLogTestPassed(8)
-
-    // Test 9: Status line with extra spaces
-    statusLine = 'HTTP/1.1  200  OK'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (!result || status.Code != 200) {
-        NAVLogTestFailed(9, 'Should handle extra spaces', "'Code: ', itoa(status.Code)")
-        return
-    }
-
-    NAVLogTestPassed(9)
-
-    // Test 10: Status line with very long message (200 chars)
-    statusLine = "'HTTP/1.1 200 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'"
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (!result || status.Code != 200) {
-        NAVLogTestFailed(10, 'Should handle long message', "'Code: ', itoa(status.Code)")
-        return
-    }
-
-    NAVLogTestPassed(10)
-
-    // Test 11: Boundary status codes (100, 599)
-    statusLine = 'HTTP/1.1 100 Continue'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (!result || status.Code != 100) {
-        NAVLogTestFailed(11, 'Should parse 100', "'Code: ', itoa(status.Code)")
-        return
-    }
-
-    statusLine = 'HTTP/1.1 599 Custom'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (!result || status.Code != 599) {
-        NAVLogTestFailed(11, 'Should parse 599', "'Code: ', itoa(status.Code)")
-        return
-    }
-
-    NAVLogTestPassed(11)
-
-    // Test 12: Invalid status codes (out of range)
-    statusLine = 'HTTP/1.1 99 Too Low'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (result != false) {
-        NAVLogTestFailed(12, 'Should reject code < 100', 'Parse succeeded unexpectedly')
-        return
-    }
-
-    statusLine = 'HTTP/1.1 600 Too High'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (result != false) {
-        NAVLogTestFailed(12, 'Should reject code > 599', 'Parse succeeded unexpectedly')
-        return
-    }
-
-    NAVLogTestPassed(12)
-
-    // Test 13: Status line with message containing multiple spaces
-    statusLine = 'HTTP/1.1 404 Not   Found   Here'
-    NAVHttpStatusInit(status)
-    result = NAVHttpParseStatusLine(statusLine, status)
-
-    if (!result || status.Code != 404) {
-        NAVLogTestFailed(13, 'Should parse message with spaces', "'Code: ', itoa(status.Code)")
-        return
-    }
-
-    if (status.Message != 'Not   Found   Here') {
-        NAVLogTestFailed(13, 'Preserve spaces in message', status.Message)
-        return
-    }
-
-    NAVLogTestPassed(13)
+    NAVLogTestSuiteEnd("'NAVHttpParseStatusLine'")
 }
 
-/**
- * Tests for NAVHttpParseHeaders function
- * These tests focus on parsing header lines
- */
+
 define_function TestNAVHttpParseHeaders() {
-    stack_var _NAVHttpHeaderCollection headers
-    stack_var char headerBlock[NAV_MAX_BUFFER]
-    stack_var char result
+    stack_var integer x
 
-    NAVLog("'***************** NAVHttpParseHeaders *****************'")
+    NAVLogTestSuiteStart("'NAVHttpParseHeaders'")
 
-    // Test 1: Parse single header
-    headerBlock = "'Content-Type: application/json', NAV_CR, NAV_LF"
-    headers.Count = 0
-    result = NAVHttpParseHeaders(headerBlock, headers)
+    InitializeNAVHttpParseResponseTestData()
 
-    if (!result || headers.Count != 1) {
-        NAVLogTestFailed(1, 'Should parse single header', "'Count: ', itoa(headers.Count)")
-        return
+    for (x = 1; x <= length_array(HEADERS_PARSE_TEST); x++) {
+        stack_var _NAVHttpHeaderCollection headers
+        stack_var char result
+
+        headers.Count = 0
+        result = NAVHttpParseHeaders(HEADERS_PARSE_TEST[x], headers)
+
+        if (!NAVAssertBooleanEqual('Should parse headers',
+                                   HEADERS_PARSE_EXPECTED_RESULT[x],
+                                   result)) {
+            NAVLogTestFailed(x,
+                            NAVBooleanToString(HEADERS_PARSE_EXPECTED_RESULT[x]),
+                            NAVBooleanToString(result))
+            continue
+        }
+
+        // Verify header count
+        if (!NAVAssertIntegerEqual('Header count should match',
+                                   HEADERS_PARSE_EXPECTED_COUNT[x],
+                                   headers.Count)) {
+            NAVLogTestFailed(x,
+                            "itoa(HEADERS_PARSE_EXPECTED_COUNT[x])",
+                            "'Got ', itoa(headers.Count)")
+            continue
+        }
+
+        NAVLogTestPassed(x)
     }
 
-    if (headers.Headers[1].Key != 'Content-Type' ||
-        headers.Headers[1].Value != 'application/json') {
-        NAVLogTestFailed(1, 'Content-Type: application/json',
-                        "'', headers.Headers[1].Key, ': ', headers.Headers[1].Value")
-        return
-    }
-
-    NAVLogTestPassed(1)
-
-    // Test 2: Parse multiple headers
-    headerBlock = "'Content-Type: text/html', NAV_CR, NAV_LF,
-                   'Content-Length: 1234', NAV_CR, NAV_LF,
-                   'Server: NAVFoundation', NAV_CR, NAV_LF"
-    headers.Count = 0
-    result = NAVHttpParseHeaders(headerBlock, headers)
-
-    if (!result || headers.Count != 3) {
-        NAVLogTestFailed(2, 'Should parse 3 headers', "'Count: ', itoa(headers.Count)")
-        return
-    }
-
-    NAVLogTestPassed(2)
-
-    // Test 3: Parse header with spaces around colon
-    headerBlock = "'Authorization : Bearer TOKEN123', NAV_CR, NAV_LF"
-    headers.Count = 0
-    result = NAVHttpParseHeaders(headerBlock, headers)
-
-    if (!result || headers.Count != 1) {
-        NAVLogTestFailed(3, 'Should handle spaces around colon', "'Count: ', itoa(headers.Count)")
-        return
-    }
-
-    NAVLogTestPassed(3)
-
-    // Test 4: Parse header with value containing colons
-    headerBlock = "'Date: Mon, 08 Oct 2025 13:30:00 GMT', NAV_CR, NAV_LF"
-    headers.Count = 0
-    result = NAVHttpParseHeaders(headerBlock, headers)
-
-    if (!result || headers.Count != 1) {
-        NAVLogTestFailed(4, 'Should parse header with colons in value', "'Count: ', itoa(headers.Count)")
-        return
-    }
-
-    if (headers.Headers[1].Value != 'Mon, 08 Oct 2025 13:30:00 GMT') {
-        NAVLogTestFailed(4, 'Mon, 08 Oct 2025 13:30:00 GMT', headers.Headers[1].Value)
-        return
-    }
-
-    NAVLogTestPassed(4)
-
-    // Test 5: Empty header block
-    headerBlock = ''
-    headers.Count = 0
-    result = NAVHttpParseHeaders(headerBlock, headers)
-
-    if (!result || headers.Count != 0) {
-        NAVLogTestFailed(5, 'Should handle empty headers', "'Count: ', itoa(headers.Count)")
-        return
-    }
-
-    NAVLogTestPassed(5)
-
-    // Test 6: Header with empty value
-    headerBlock = "'X-Empty-Value:', NAV_CR, NAV_LF"
-    headers.Count = 0
-    result = NAVHttpParseHeaders(headerBlock, headers)
-
-    if (!result || headers.Count != 1) {
-        NAVLogTestFailed(6, 'Should parse header with empty value', "'Count: ', itoa(headers.Count)")
-        return
-    }
-
-    if (length_array(headers.Headers[1].Value) != 0) {
-        NAVLogTestFailed(6, 'Empty value', headers.Headers[1].Value)
-        return
-    }
-
-    NAVLogTestPassed(6)
-
-    // Test 7: Header with very long key (250 chars)
-    headerBlock = "'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX: Value', NAV_CR, NAV_LF"
-    headers.Count = 0
-    result = NAVHttpParseHeaders(headerBlock, headers)
-
-    if (!result || headers.Count != 1) {
-        NAVLogTestFailed(7, 'Should handle long header key', "'Count: ', itoa(headers.Count)")
-        return
-    }
-
-    NAVLogTestPassed(7)
-
-    // Test 8: Header with very long value (500 chars - testing buffer capacity)
-    headerBlock = "'X-Long: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', NAV_CR, NAV_LF"
-    headers.Count = 0
-    result = NAVHttpParseHeaders(headerBlock, headers)
-
-    if (!result || headers.Count != 1) {
-        NAVLogTestFailed(8, 'Should handle long header value', "'Count: ', itoa(headers.Count)")
-        return
-    }
-
-    NAVLogTestPassed(8)
-
-    // Test 9: Multiple headers with varying whitespace
-    headerBlock = "'Content-Type:application/json', NAV_CR, NAV_LF,
-                   'Content-Length :123', NAV_CR, NAV_LF,
-                   'Server: NAVFoundation', NAV_CR, NAV_LF"
-    headers.Count = 0
-    result = NAVHttpParseHeaders(headerBlock, headers)
-
-    if (!result || headers.Count != 3) {
-        NAVLogTestFailed(9, 'Should handle varying whitespace', "'Count: ', itoa(headers.Count)")
-        return
-    }
-
-    NAVLogTestPassed(9)
-
-    // Test 10: Header with special characters in value
-    headerBlock = "'X-Special: !@#$%^&*()_+-=[]{}|;:,.<>?', NAV_CR, NAV_LF"
-    headers.Count = 0
-    result = NAVHttpParseHeaders(headerBlock, headers)
-
-    if (!result || headers.Count != 1) {
-        NAVLogTestFailed(10, 'Should handle special characters', "'Count: ', itoa(headers.Count)")
-        return
-    }
-
-    NAVLogTestPassed(10)
-
-    // Test 11: Header block with trailing CRLF
-    headerBlock = "'Content-Type: text/html', NAV_CR, NAV_LF, NAV_CR, NAV_LF"
-    headers.Count = 0
-    result = NAVHttpParseHeaders(headerBlock, headers)
-
-    if (!result || headers.Count != 1) {
-        NAVLogTestFailed(11, 'Should handle trailing CRLF', "'Count: ', itoa(headers.Count)")
-        return
-    }
-
-    NAVLogTestPassed(11)
-
-    // Test 12: Header block with blank lines in between
-    headerBlock = "'Content-Type: text/html', NAV_CR, NAV_LF,
-                   NAV_CR, NAV_LF,
-                   'Content-Length: 100', NAV_CR, NAV_LF"
-    headers.Count = 0
-    result = NAVHttpParseHeaders(headerBlock, headers)
-
-    // Should parse headers up to first blank line
-    if (!result || headers.Count != 1) {
-        NAVLogTestFailed(12, 'Should stop at blank line', "'Count: ', itoa(headers.Count)")
-        return
-    }
-
-    NAVLogTestPassed(12)
+    NAVLogTestSuiteEnd("'NAVHttpParseHeaders'")
 }
 

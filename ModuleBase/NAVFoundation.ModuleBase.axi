@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.ModuleBase'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Services Limited
+Copyright (c) 2010-2026 Norgate AV
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -86,6 +86,9 @@ define_function NAVModuleInit(_NAVModule module) {
 
     module.Device.SocketConnection.IsConnected = false
     module.Device.SocketConnection.IsAuthenticated = false
+    module.Device.SocketConnection.Interval[1] = 0
+    set_length_array(module.Device.SocketConnection.Interval, 1)
+    module.Device.SocketConnection.RetryCount = 0
 
     module.Enabled = true
     module.CommandBusy = false

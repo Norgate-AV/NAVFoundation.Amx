@@ -1,7 +1,7 @@
 {
     "name": "NAVFoundation.Amx",
     "description": "A collection of libraries for NetLinx software development",
-    "version": "4.1.0",
+    "version": "5.5.1",
     "license": "MIT",
     "files": ["**/*.axi", "SymLink.ps1", "LICENSE", "README.md"],
     "repository": {
@@ -15,10 +15,6 @@
         {
             "version": "~1.2.0",
             "url": "github.com/Norgate-AV/NAVDatabase.Amx.EnovaDVX"
-        },
-        {
-            "version": "~1.0.0",
-            "url": "github.com/Norgate-AV/NAVDatabase.Amx.NtpClient"
         },
         {
             "version": "4.7.21",

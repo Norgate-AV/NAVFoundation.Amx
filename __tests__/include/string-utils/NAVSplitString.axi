@@ -8,7 +8,10 @@ DEFINE_CONSTANT
 constant char SPLIT_STRING_TEST[][][NAV_MAX_BUFFER] = {
     { 'The quick brown fox jumps over the lazy dog', ' ' },
     { 'The,quick,brown,fox,jumps,over,the,lazy,dog', ',' },
-    { 'The-quick-brown-fox-jumps-over-the-lazy-dog', '-' }
+    { 'The-quick-brown-fox-jumps-over-the-lazy-dog', '-' },
+    { '.192.168.1.1', '.' },
+    { '192.168.1.1.', '.' },
+    { 'a,,b', ',' }
 }
 
 constant char SPLIT_STRING_EXPECTED[][][NAV_MAX_BUFFER] = {
@@ -44,6 +47,25 @@ constant char SPLIT_STRING_EXPECTED[][][NAV_MAX_BUFFER] = {
         'the',
         'lazy',
         'dog'
+    },
+    {
+        '',
+        '192',
+        '168',
+        '1',
+        '1'
+    },
+    {
+        '192',
+        '168',
+        '1',
+        '1',
+        ''
+    },
+    {
+        'a',
+        '',
+        'b'
     }
 }
 

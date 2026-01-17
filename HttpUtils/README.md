@@ -9,12 +9,13 @@ HTTP (Hypertext Transfer Protocol) is the foundation of data communication on th
 ## Features
 
 - **HTTP Request Building**: Create properly formatted HTTP requests with methods, headers, and body content
-- **HTTP Response Parsing**: Parse HTTP responses including status codes, headers, and body content
-- **Headers Management**: Add, update, and validate HTTP headers
+- **HTTP Response Parsing**: Two-step parsing process (headers then body) for efficient streaming
+- **Incremental Response Processing**: State machine-based buffer processor with callbacks for real-time response handling
+- **Headers Management**: Add, update, and validate HTTP headers with RFC 7230 compliance
 - **Content Type Handling**: Automatic content type inference based on request body
 - **URL Parsing**: Parse URLs into components (scheme, host, path, port, etc.)
 - **Status Code Handling**: Comprehensive set of HTTP status codes with proper messages
-- **Response Processing**: Parse complete responses or handle responses in chunks for streaming
+- **Response Buffer Management**: Built-in buffer processor for device communication
 - **Utility Functions**: Helper functions for common HTTP-related tasks
 
 ## Constants and Definitions
@@ -47,7 +48,7 @@ NAV_HTTP_VERSION_2_0     = 'HTTP/2.0'
 // Information responses (100-199)
 NAV_HTTP_STATUS_CODE_INFO_CONTINUE             = 100
 NAV_HTTP_STATUS_CODE_INFO_SWITCHING_PROTOCOLS  = 101
-// ... 
+// ...
 
 // Successful responses (200-299)
 NAV_HTTP_STATUS_CODE_SUCCESS_OK                = 200
@@ -141,8 +142,8 @@ Structure for storing a key-value pair of strings.
 
 ```netlinx
 struct _NAVHttpHeader {
-    char Key[256];
-    char Value[1024];
+    char Key[NAV_HTTP_MAX_HEADER_KEY];      // Default: 256
+    char Value[NAV_HTTP_MAX_HEADER_VALUE];  // Default: 2048
 }
 ```
 
@@ -153,7 +154,7 @@ Structure for storing HTTP headers as key-value pairs.
 ```netlinx
 struct _NAVHttpHeaderCollection {
     integer Count;
-    _NAVHttpHeader Headers[NAV_HTTP_MAX_HEADERS];
+    _NAVHttpHeader Headers[NAV_HTTP_MAX_HEADERS];  // Default: 20
 }
 ```
 
@@ -164,11 +165,11 @@ Structure representing an HTTP request.
 ```netlinx
 struct _NAVHttpRequest {
     char Method[7];
-    char Path[256];
+    char Path[NAV_HTTP_MAX_PATH_LENGTH];      // Default: 2048
     char Version[8];
     char Host[256];
     integer Port;
-    char Body[2048];
+    char Body[NAV_HTTP_MAX_REQUEST_BODY];     // Default: 8192
     _NAVHttpHeaderCollection Headers;
 }
 ```
@@ -181,26 +182,22 @@ Structure representing an HTTP response.
 struct _NAVHttpResponse {
     _NAVHttpStatus Status;
     _NAVHttpHeaderCollection Headers;
-    char Body[16384];
+    char Body[NAV_HTTP_MAX_RESPONSE_BODY];    // Default: 65535
     char ContentType[256];
     long ContentLength;
 }
 ```
 
-### \_NAVHttpRequestConfig
+### \_NAVHttpResponseBuffer
 
-Configuration options for HTTP requests.
+Buffer structure for processing HTTP responses incrementally with state management.
 
 ```netlinx
-struct _NAVHttpRequestConfig {
-    integer Timeout;
-    char AuthScheme[32];
-    char AuthToken[1024];
-    char CacheControl[256];
-    integer MaxRedirects;
-    integer ValidateCertificates;
-    integer FollowRedirects;
-    integer UseCompression;
+struct _NAVHttpResponseBuffer {
+    char Data[NAV_HTTP_MAX_RESPONSE_BODY];
+    char Semaphore;
+    integer State;
+    long ContentLength;
 }
 ```
 
@@ -401,6 +398,82 @@ stack_var char responseString[NAV_MAX_BUFFER]
 responseString = NAVHttpBuildResponse(response)
 ```
 
+#### NAVHttpParseResponse
+
+Parses HTTP response status line and headers only. Body parsing is separate.
+
+```netlinx
+define_function char NAVHttpParseResponse(char buffer[], _NAVHttpResponse res)
+```
+
+**Parameters:**
+
+- `buffer`: Buffer containing at least the complete HTTP response headers
+- `res`: The response structure to populate
+
+**Returns:** TRUE if parsing succeeded, FALSE otherwise
+
+**Example:**
+
+```netlinx
+stack_var _NAVHttpResponse response
+stack_var char buffer[NAV_MAX_BUFFER]
+
+// Parse headers only
+if (NAVHttpParseResponse(buffer, response)) {
+    // Check if response may have body
+    if (NAVHttpResponseMayHaveBody(response) && response.ContentLength > 0) {
+        // Body parsing is separate - see NAVHttpParseResponseBody
+    }
+}
+```
+
+#### NAVHttpParseResponseBody
+
+Extracts the response body from buffer based on Content-Length header.
+
+```netlinx
+define_function char NAVHttpParseResponseBody(char buffer[], _NAVHttpResponse res)
+```
+
+**Parameters:**
+
+- `buffer`: Buffer containing the response body data
+- `res`: The response structure with parsed headers
+
+**Returns:** TRUE if extraction succeeded, FALSE otherwise
+
+**Example:**
+
+```netlinx
+// After parsing headers and waiting for body data
+if (NAVHttpParseResponseBody(bodyBuffer, response)) {
+    // response.Body now contains the body
+}
+```
+
+#### NAVHttpResponseMayHaveBody
+
+Determines if an HTTP response may have a body based on status code.
+
+```netlinx
+define_function char NAVHttpResponseMayHaveBody(_NAVHttpResponse res)
+```
+
+**Parameters:**
+
+- `res`: The response structure to check
+
+**Returns:** TRUE if response should have a body, FALSE otherwise
+
+**Example:**
+
+```netlinx
+if (NAVHttpResponseMayHaveBody(response)) {
+    // Wait for body data
+}
+```
+
 ### URL Handling
 
 #### NAVHttpParseUrl
@@ -542,6 +615,91 @@ stack_var char contentType[256]
 contentType = NAVHttpGetHeaderValue(response.Headers, 'Content-Type')
 ```
 
+### Incremental Response Processing
+
+#### NAVHttpResponseBufferInit
+
+Initializes an HTTP response buffer structure.
+
+```netlinx
+define_function NAVHttpResponseBufferInit(_NAVHttpResponseBuffer buffer)
+```
+
+**Parameters:**
+
+- `buffer`: The buffer structure to initialize
+
+**Example:**
+
+```netlinx
+stack_var _NAVHttpResponseBuffer httpBuffer
+NAVHttpResponseBufferInit(httpBuffer)
+```
+
+#### NAVHttpProcessResponseBuffer
+
+Processes HTTP response data from a buffer using a state machine approach. This function implements a callback-based pattern for incremental response processing.
+
+```netlinx
+define_function NAVHttpProcessResponseBuffer(_NAVHttpResponseBuffer buffer)
+```
+
+**Parameters:**
+
+- `buffer`: Buffer structure with received HTTP data
+
+**Returns:** void
+
+**Usage Pattern:**
+
+1. Connect buffer to device with `create_buffer`
+2. Call from `data_event[device] string` handler
+3. Implement callback functions:
+    - `NAVHttpResponseHeadersCallback()` - Called when headers complete
+    - `NAVHttpResponseBodyCallback()` - Called when body complete
+    - `NAVHttpResponseCompleteCallback()` - Called when processing complete
+
+**Example:**
+
+```netlinx
+// In DEFINE_VARIABLE:
+volatile _NAVHttpResponseBuffer httpBuffer
+volatile _NAVHttpResponse myResponse
+
+// In DEFINE_START:
+NAVHttpResponseBufferInit(httpBuffer)
+create_buffer dvSocket, httpBuffer.Data
+
+// In data_event:
+data_event[dvSocket] {
+    string: {
+        NAVHttpProcessResponseBuffer(httpBuffer)
+    }
+}
+
+// Define callbacks:
+#DEFINE USING_NAV_HTTP_RESPONSE_HEADERS_CALLBACK
+define_function NAVHttpResponseHeadersCallback(_NAVHttpResponseHeadersResult result) {
+    // Parse headers
+    if (!NAVHttpParseResponseHeaders(result.Data, myResponse)) {
+        return
+    }
+
+    // Check if body expected
+    if (NAVHttpResponseMayHaveBody(myResponse) && myResponse.ContentLength > 0) {
+        httpBuffer.ContentLength = myResponse.ContentLength
+        httpBuffer.State = NAV_HTTP_STATE_PARSING_BODY
+    }
+}
+
+#DEFINE USING_NAV_HTTP_RESPONSE_BODY_CALLBACK
+define_function NAVHttpResponseBodyCallback(_NAVHttpResponseBodyResult result) {
+    // Parse body
+    NAVHttpParseResponseBody(result.Data, myResponse)
+    // Process complete response...
+}
+```
+
 ### Utility Functions
 
 #### NAVHttpInferContentType
@@ -651,31 +809,38 @@ DEFINE_FUNCTION SendJsonPostRequest(dev socket, char host[], char path[], char j
 ### Handling an HTTP Response
 
 ```netlinx
+DEFINE_VARIABLE
+volatile _NAVHttpResponse response
+volatile char buffer[65535]
+
 DEFINE_EVENT
 DATA_EVENT[vdvTCPClient] {
     ONLINE: {
         // Connection established
+        NAVHttpResponseInit(response)
+        buffer = ''
     }
     STRING: {
-        stack_var _NAVHttpResponse response
+        buffer = "buffer, data.text"
 
-        // Initialize response
-        NAVHttpResponseInit(response)
-
-        // Parse the complete response
-        if (NAVHttpParseResponse(data.text, response)) {
+        // Parse headers (NAVHttpParseResponse only parses headers)
+        if (NAVHttpParseResponse(buffer, response)) {
             // Check status code
             if (response.Status.Code >= 200 && response.Status.Code < 300) {
-                // Success - process the response body
-                NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Request successful: ', response.Body")
+                // Check if response has body
+                if (NAVHttpResponseMayHaveBody(response) && response.ContentLength > 0) {
+                    // Parse body separately
+                    if (NAVHttpParseResponseBody(buffer, response)) {
+                        NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Request successful: ', response.Body")
+                    }
+                }
+                else {
+                    NAVErrorLog(NAV_LOG_LEVEL_INFO, "'Request successful - no body'")
+                }
             }
             else {
-                // Error handling
                 NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Request failed with code ', itoa(response.Status.Code), ': ', response.Status.Message")
             }
-        }
-        else {
-            NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Failed to parse HTTP response'")
         }
     }
     OFFLINE: {
@@ -684,30 +849,93 @@ DATA_EVENT[vdvTCPClient] {
 }
 ```
 
-### Parsing Responses in Chunks
+### Parsing Responses in Two Steps
 
-For real-world applications where responses arrive in chunks:
+HTTP response parsing is separated into two steps: headers and body.
+
+#### Manual Two-Step Parsing
 
 ```netlinx
-DEFINE_FUNCTION HandleHttpResponse(char data[]) {
-    stack_var _NAVHttpResponse response
-    stack_var char headerBuffer[NAV_MAX_BUFFER]
-    stack_var char bodyBuffer[NAV_MAX_BUFFER]
+DEFINE_VARIABLE
+volatile _NAVHttpResponse response
+volatile char deviceBuffer[65535]
+volatile integer parsingState  // 0=idle, 1=headers, 2=body
 
-    NAVHttpResponseInit(response)
+DEFINE_EVENT
+data_event[dvSocket] {
+    string: {
+        deviceBuffer = "deviceBuffer, data.text"
 
-    // First, try to parse headers only
-    if (NAVHttpParseResponseHeaders(data, response)) {
-        // Headers parsed successfully
-        // Now extract body based on Content-Length
-        stack_var integer contentLength
-        contentLength = atoi(NAVHttpGetHeaderValue(response.Headers, 'Content-Length'))
+        switch (parsingState) {
+            case 0:  // Idle - start parsing
+            case 1: {  // Parsing headers
+                // Check if we have complete headers (double CRLF)
+                if (find_string(deviceBuffer, "$0D,$0A,$0D,$0A", 1)) {
+                    // Extract headers up to and including double CRLF
+                    stack_var char headerData[NAV_MAX_BUFFER]
+                    headerData = remove_string(deviceBuffer, "$0D,$0A,$0D,$0A", 1)
 
-        if (contentLength > 0) {
-            // Wait for body data and parse it separately
-            // NAVHttpParseResponseBody(bodyData, response)
+                    if (NAVHttpParseResponse(headerData, response)) {
+                        // Headers parsed successfully
+                        if (NAVHttpResponseMayHaveBody(response)) {
+                            parsingState = 2  // Move to body parsing
+                        }
+                        else {
+                            // No body expected - done
+                            parsingState = 0
+                        }
+                    }
+                }
+            }
+            case 2: {  // Parsing body
+                // Wait for complete body based on Content-Length
+                if (length_array(deviceBuffer) >= response.ContentLength) {
+                    if (NAVHttpParseResponseBody(deviceBuffer, response)) {
+                        // Complete response parsed
+                        ProcessHttpResponse(response)
+                        parsingState = 0  // Reset for next response
+                    }
+                }
+            }
         }
     }
+}
+```
+
+#### Automatic Incremental Processing with NAVHttpProcessResponseBuffer
+
+For easier implementation, use the built-in buffer processor:
+
+```netlinx
+DEFINE_VARIABLE
+volatile _NAVHttpResponseBuffer httpBuffer
+volatile _NAVHttpResponse response
+
+DEFINE_START
+NAVHttpResponseBufferInit(httpBuffer)
+create_buffer dvSocket, httpBuffer.Data
+
+DEFINE_EVENT
+data_event[dvSocket] {
+    string: {
+        NAVHttpProcessResponseBuffer(httpBuffer)
+    }
+}
+
+#DEFINE USING_NAV_HTTP_RESPONSE_HEADERS_CALLBACK
+define_function NAVHttpResponseHeadersCallback(_NAVHttpResponseHeadersResult result) {
+    NAVHttpParseResponseHeaders(result.Data, response)
+
+    if (NAVHttpResponseMayHaveBody(response) && response.ContentLength > 0) {
+        httpBuffer.ContentLength = response.ContentLength
+        httpBuffer.State = NAV_HTTP_STATE_PARSING_BODY
+    }
+}
+
+#DEFINE USING_NAV_HTTP_RESPONSE_BODY_CALLBACK
+define_function NAVHttpResponseBodyCallback(_NAVHttpResponseBodyResult result) {
+    NAVHttpParseResponseBody(result.Data, response)
+    ProcessHttpResponse(response)
 }
 ```
 
@@ -761,4 +989,4 @@ For issues, suggestions, or contributions, please contact Norgate AV Services Li
 
 ## License
 
-MIT License - Copyright (c) 2023 Norgate AV Services Limited
+MIT License - Copyright (c) 2010-2026 Norgate AV

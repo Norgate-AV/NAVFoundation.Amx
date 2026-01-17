@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.Core'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Services Limited
+Copyright (c) 2010-2026 Norgate AV
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -206,7 +206,7 @@ define_function char NAVStringToBoolean(char value[]) {
 
     copy = lower_string(value)
 
-    if (copy == 'true' || copy == '1' || copy == 'on') {
+    if (copy == 'true' || copy == '1' || copy == 'on' || copy == 'yes') {
         return true
     }
 
@@ -882,7 +882,7 @@ define_function NAVPrintBanner(_NAVController controller) {
     NAVLog("'                 |___/'")
     NAVLog("")
     NAVLog("'MIT License'")
-    NAVLog("'Copyright (c) 2010-2025, Norgate AV'")
+    NAVLog("'Copyright (c) 2010-2026, Norgate AV'")
     NAVLog("'https://github.com/Norgate-AV/NAVFoundation.Amx'")
     NAVLog("")
     NAVLog("'============================================================='")

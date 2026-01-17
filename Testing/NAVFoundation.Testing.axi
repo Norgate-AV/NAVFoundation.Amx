@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.Testing'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Services Limited
+Copyright (c) 2010-2026 Norgate AV
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -37,176 +37,44 @@ SOFTWARE.
 #include 'NAVFoundation.Core.axi'
 
 
-DEFINE_CONSTANT
-
-constant integer NAV_MAX_TESTS                          = 50
-
-constant integer NAV_TEST_MAX_STRING_ARRAY_SIZE         = 255
-constant integer NAV_TEST_MAX_INTEGER_ARRAY_SIZE        = 255
-
-constant integer NAV_TEST_TYPE_STRING_RESULT            = 1
-constant integer NAV_TEST_TYPE_STRING_ARRAY_RESULT      = 2
-constant integer NAV_TEST_TYPE_INTEGER_RESULT           = 3
-constant integer NAV_TEST_TYPE_INTEGER_ARRAY_RESULT     = 4
-
-
-DEFINE_TYPE
-
-struct _NAVUnitTestProperties {
-    char Name[NAV_MAX_CHARS]
-    char Description[NAV_MAX_CHARS]
-    char Message[NAV_MAX_CHARS]
-    integer Skip
-    integer Passed
-}
-
-
-struct _NAVUnitTestStringResult {
-    char Expected[NAV_MAX_BUFFER]
-    char Actual[NAV_MAX_BUFFER]
-}
-
-
-struct _NAVUnitTestStringArrayResult {
-    char Expected[NAV_TEST_MAX_STRING_ARRAY_SIZE][NAV_MAX_BUFFER]
-    char Actual[NAV_TEST_MAX_STRING_ARRAY_SIZE][NAV_MAX_BUFFER]
-}
-
-
-struct _NAVUnitTestIntegerResult {
-    integer Expected
-    integer Actual
-}
-
-
-struct _NAVUnitTestIntegerArrayResult {
-    integer Expected[NAV_TEST_MAX_INTEGER_ARRAY_SIZE]
-    integer Actual[NAV_TEST_MAX_INTEGER_ARRAY_SIZE]
-}
-
-
-struct _NAVUnitTestWithStringResult  {
-    _NAVUnitTestProperties Properties
-    _NAVUnitTestStringResult Result
-}
-
-
-struct _NAVUnitTestWithStringArrayResult  {
-    _NAVUnitTestProperties Properties
-    _NAVUnitTestStringArrayResult Result
-}
-
-
-struct _NAVUnitTestWithIntegerResult  {
-    _NAVUnitTestProperties Properties
-    _NAVUnitTestIntegerResult Result
-}
-
-
-struct _NAVUnitTestWithIntegerArrayResult  {
-    _NAVUnitTestProperties Properties
-    _NAVUnitTestIntegerArrayResult Result
-}
-
-
-struct _NAVUnitTestSuite {
-    char Name[NAV_MAX_CHARS]
-    char Description[NAV_MAX_CHARS]
-    char Message[NAV_MAX_CHARS]
-
-    integer Passed
-    integer Total
-    integer PassedCount
-    integer FailedCount
-    integer SkippedCount
-
-    integer Type[NAV_MAX_TESTS]
-    _NAVUnitTestWithStringResult StringResultTest[NAV_MAX_TESTS]
-    _NAVUnitTestWithStringArrayResult StringArrayResultTest[NAV_MAX_TESTS]
-    _NAVUnitTestWithIntegerResult IntegerResultTest[NAV_MAX_TESTS]
-    _NAVUnitTestWithIntegerArrayResult IntegerArrayResultTest[NAV_MAX_TESTS]
-}
-
-
-define_function NAVUnitTestSuiteInit(_NAVUnitTestSuite suite, char name[], char description[]) {
-    suite.Name = name
-    suite.Description = description
-    suite.Message = ""
-    suite.Passed = 0
-    suite.Total = 0
-    suite.PassedCount = 0
-    suite.FailedCount = 0
-    suite.SkippedCount = 0
-}
-
-
-define_function NAVUnitTestSuiteAddTestWithStringResult(_NAVUnitTestSuite suite, _NAVUnitTestWithStringResult test) {
-    if (suite.Total >= NAV_MAX_TESTS) {
-        NAVLog("'NAVUnitTestSuiteAddTestWithStringResult(): Maximum number of tests reached'")
-        return
-    }
-
-    suite.Total++
-    suite.Type[suite.Total] = NAV_TEST_TYPE_STRING_RESULT
-
-    // set_length_array(suite.StringResultTest[suite.Total], suite.Total)
-
-    // suite.StringResultTest[suite.Total].Properties.Name = name
-    // suite.StringResultTest[suite.Total].Properties.Description = description
-    // suite.StringResultTest[suite.Total].Properties.Message = ""
-    // suite.StringResultTest[suite.Total].Properties.Skip = skip
-    // suite.StringResultTest[suite.Total].Properties.Passed = 0
-    // suite.StringResultTest[suite.Total].Result.Expected = expected
-    // suite.StringResultTest[suite.Total].Result.Actual = actual
-
-    suite.StringResultTest[suite.Total] = test
-}
-
-
-define_function NAVUnitTestWithStringResultInit(_NAVUnitTestWithStringResult test, char name[], char description[]) {
-    test.Properties.Name = name
-    test.Properties.Description = description
-    test.Properties.Message = ""
-    test.Properties.Skip = false
-    test.Properties.Passed = false
-}
-
-
-// define_function NAVUnitTestSuiteRun(_NAVUnitTestSuite suite) {
-//     stack_var integer x
-
-//     for (x = 1; x <= suite.Total; x++) {
-//         switch (suite.Type[x]) {
-//             case NAV_TEST_TYPE_STRING_RESULT: {
-//                 stack_var _NAVUnitTestWithStringResult test
-
-//                 test = suite.StringResultTest[x]
-
-//                 NAVUnitTestRunWithStringResult(suite, test)
-//             }
-//         }
-//     }
-// }
-
-
-// define_function NAVUnitTestRunWithStringResult(_NAVUnitTestSuite suite, _NAVUnitTestWithStringResult test) {
-//     if (test.Properties.Skip) {
-//         test.Properties.Message = "Test skipped"
-//         test.Properties.Passed = false
-//         suite.SkippedCount++
-//         return
-//     }
-
-//     // Invoke a callback function to run the test
-//     #IF_DEFINED NAV_TEST_CALLBACK
-//     NAV_TEST_CALLBACK(test)
-//     #END_IF
-
+/**
+ * Log a test pass result.
+ *
+ * Outputs a standardized pass message to the NetLinx diagnostics log.
+ * Used by test suites to report individual test success.
+ *
+ * @param test  The test number (typically 1-based)
+ *
+ * @example
+ *   NAVLogTestPassed(1)
+ *   // Output: "Test 1 passed"
+ */
 define_function NAVLogTestPassed(integer test) {
     NAVLog("'Test ', itoa(test), ' passed'")
 }
 
 
+/**
+ * Log a test failure with expected vs actual values.
+ *
+ * Outputs a standardized failure message including what was expected
+ * and what was actually received. Handles empty string comparisons
+ * gracefully by showing them explicitly in the output.
+ *
+ * @param test      The test number (typically 1-based)
+ * @param expected  The expected value as a string
+ * @param result    The actual result value as a string
+ *
+ * @example
+ *   NAVLogTestFailed(2, '42', '43')
+ *   // Output: "Test 2 failed. Expected: "42", but got: "43"."
+ *
+ *   NAVLogTestFailed(3, 'true', '')
+ *   // Output: "Test 3 failed. Expected: "true", but got: ""."
+ *
+ * @note If both expected and result are empty, the comparison is still
+ *       shown to make the failure explicit
+ */
 define_function NAVLogTestFailed(integer test, char expected[], char result[]) {
     stack_var char message[NAV_MAX_BUFFER]
 
@@ -224,6 +92,77 @@ define_function NAVLogTestFailed(integer test, char expected[], char result[]) {
     }
 
     NAVLog(message)
+}
+
+
+/**
+ * Log the start of a named test suite.
+ *
+ * Outputs a prominent header marker indicating the beginning of a test suite.
+ * Used to group related tests together in the diagnostics log output.
+ *
+ * @param suiteName  The name of the test suite (e.g., "JSMN", "StringUtils")
+ *
+ * @example
+ *   NAVLogTestSuiteStart('JSMN Parser')
+ *   // Output: "================= Starting Test Suite: JSMN Parser ================="
+ *
+ * @see NAVLogTestSuiteEnd
+ */
+define_function NAVLogTestSuiteStart(char suiteName[]) {
+    NAVLog("'================= Starting Test Suite: ', suiteName, ' ================='")
+}
+
+/**
+ * Log the end of a named test suite.
+ *
+ * Outputs a prominent footer marker indicating the completion of a test suite.
+ * Should be called after all tests in the suite have completed.
+ *
+ * @param suiteName  The name of the test suite being completed
+ *
+ * @example
+ *   NAVLogTestSuiteEnd('JSMN Parser')
+ *   // Output: "================= Finished Test Suite: JSMN Parser ================="
+ *
+ * @see NAVLogTestSuiteStart
+ */
+define_function NAVLogTestSuiteEnd(char suiteName[]) {
+    NAVLog("'================= Finished Test Suite: ', suiteName, ' ================='")
+}
+
+/**
+ * Log the start of the overall test run.
+ *
+ * Outputs a prominent header marker indicating the beginning of all tests.
+ * Should be called once at the start of the entire test execution, before
+ * any test suites run.
+ *
+ * @example
+ *   NAVLogTestStart()
+ *   // Output: "================= Starting Tests ================="
+ *
+ * @see NAVLogTestEnd
+ */
+define_function NAVLogTestStart() {
+    NAVLog("'================= Starting Tests ================='")
+}
+
+/**
+ * Log the end of the overall test run.
+ *
+ * Outputs a prominent footer marker indicating the completion of all tests.
+ * Should be called once at the end of the entire test execution, after
+ * all test suites have completed.
+ *
+ * @example
+ *   NAVLogTestEnd()
+ *   // Output: "================= Finished Tests ================="
+ *
+ * @see NAVLogTestStart
+ */
+define_function NAVLogTestEnd() {
+    NAVLog("'================= Finished Tests ================='")
 }
 
 

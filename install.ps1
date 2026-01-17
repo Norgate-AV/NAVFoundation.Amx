@@ -10,7 +10,7 @@
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Services Limited
+Copyright (c) 2010-2026 Norgate AV
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -158,7 +158,7 @@ function Get-GitHubReleases {
     Write-Host "Fetching releases..."
 
     $headers = @{
-        "Accept" = "application/vnd.github+json"
+        "Accept"               = "application/vnd.github+json"
         "X-GitHub-Api-Version" = "2022-11-28"
     }
 
@@ -171,24 +171,24 @@ function Get-GitHubReleases {
     }
 
     $params = @{
-        Uri = $apiUrl
+        Uri             = $apiUrl
         UseBasicParsing = $true
-        Headers = $headers
-        ContentType = "application/json"
+        Headers         = $headers
+        ContentType     = "application/json"
     }
 
     $releases = Invoke-RestMethod @params
 
     # Extract version numbers and sort them
     $versions = @($releases | ForEach-Object {
-        # Try to extract version from tag_name
-        if ($_.tag_name -match 'v?(\d+\.\d+\.\d+)') {
-            @{
-                Version = $matches[1]
-                TagName = $_.tag_name
+            # Try to extract version from tag_name
+            if ($_.tag_name -match 'v?(\d+\.\d+\.\d+)') {
+                @{
+                    Version = $matches[1]
+                    TagName = $_.tag_name
+                }
             }
-        }
-    } | Where-Object { $null -ne $_.Version })
+        } | Where-Object { $null -ne $_.Version })
 
     return $versions
 }
@@ -248,7 +248,7 @@ function New-GenlinxRc {
         build = @{
             nlrc = @{
                 includePath = @()
-                modulePath = @()
+                modulePath  = @()
             }
         }
     }
@@ -345,8 +345,8 @@ function Get-Version {
 
     # Find the best matching version
     $bestMatch = Get-CompatibleVersion -RequiredVersion $requirement.Version `
-                                     -Prefix $requirement.Prefix `
-                                     -AvailableVersions $releases
+        -Prefix $requirement.Prefix `
+        -AvailableVersions $releases
 
     if (!$bestMatch) {
         throw "No compatible updates found for $Version"
@@ -367,8 +367,8 @@ function Get-VersionRequirement {
 
     $requirement = @{
         Original = $Version
-        Prefix = $null
-        Version = $null
+        Prefix   = $null
+        Version  = $null
     }
 
     if ($Version.StartsWith("^")) {
@@ -461,7 +461,8 @@ try {
 
     if ($env:CI) {
         Write-Host "Running in CI environment"
-    } else {
+    }
+    else {
         Write-Host "Running in local environment"
     }
 
@@ -532,7 +533,8 @@ try {
                     -DependencyOwner $repoInfo.Owner `
                     -DependencyUrl $repoInfo.Repo `
                     -DependencyVersion $version
-            } else {
+            }
+            else {
                 # This will allow the NLRC to find the files without having to add them to the .genlinxrc file
                 # This is a workaround until we can figure out how to add the paths to the .genlinxrc file
                 Add-Symlinks -Path $packagePath -Extension "axi" -TargetDirectory "$Path/include" -GitIgnore

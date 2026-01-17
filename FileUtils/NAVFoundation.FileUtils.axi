@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.FileUtils'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Services Limited
+Copyright (c) 2010-2026 Norgate AV
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -116,8 +116,6 @@ define_function char[NAV_MAX_BUFFER] NAVGetFileError(slong error) {
 define_function slong NAVFileOpen(char path[], char mode[]) {
     stack_var slong result
     stack_var long flag
-    stack_var char filePath[NAV_MAX_BUFFER]
-    stack_var char fileName[NAV_MAX_BUFFER]
 
     if (!length_array(path)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
@@ -127,9 +125,6 @@ define_function slong NAVFileOpen(char path[], char mode[]) {
 
         return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
     }
-
-    filePath = NAVPathDirName(path)
-    fileName = NAVPathBaseName(path)
 
     switch (lower_string(mode)) {
         case 'rwa': {
@@ -255,7 +250,61 @@ define_function slong NAVFileRead(char path[], char data[]) {
 
 
 /**
- * @function NAVFileReadLine
+ * @function NAVFileReadHandle
+ * @public
+ * @description Reads raw bytes from an open file.
+ *
+ * @param {long} handle - File handle previously obtained from NAVFileOpen
+ * @param {char[]} data - Output buffer to store the data (modified in-place)
+ *
+ * @returns {slong} Number of bytes read on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileHandle
+ * stack_var char buffer[1024]
+ * stack_var slong bytesRead
+ *
+ * fileHandle = NAVFileOpen('/data.bin', 'r')
+ * if (fileHandle >= 0) {
+ *     bytesRead = NAVFileReadHandle(fileHandle, buffer)
+ *     if (bytesRead > 0) {
+ *         // Process the data
+ *     }
+ *     NAVFileClose(fileHandle)
+ * }
+ *
+ * @note Reads up to the maximum buffer size (max_length_array)
+ * @note Uses AMX file_read function
+ * @see NAVFileOpen
+ * @see NAVFileClose
+ * @see NAVFileReadLineHandle
+ */
+define_function slong NAVFileReadHandle(long handle, char data[]) {
+    stack_var slong result
+
+    if (!handle) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileReadHandle',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : The handle provided is null.'")
+        return NAV_FILE_ERROR_INVALID_FILE_HANDLE
+    }
+
+    result = file_read(handle, data, max_length_array(data))
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileReadHandle',
+                                    "'Error reading from file : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+/**
+ * @function NAVFileReadLineHandle
  * @public
  * @description Reads a single line from an open file.
  *
@@ -273,7 +322,7 @@ define_function slong NAVFileRead(char path[], char data[]) {
  * if (fileHandle >= 0) {
  *     // Read file line by line
  *     while (1) {
- *         result = NAVFileReadLine(fileHandle, line)
+ *         result = NAVFileReadLineHandle(fileHandle, line)
  *         if (result < 0) break;  // End of file or error
  *         // Process the line
  *     }
@@ -281,17 +330,20 @@ define_function slong NAVFileRead(char path[], char data[]) {
  * }
  *
  * @note Returns NAV_FILE_ERROR_EOF_END_OF_FILE_REACHED when end of file is reached
+ * @note Uses AMX file_read_line function
  * @see NAVFileOpen
  * @see NAVFileClose
+ * @see NAVFileReadHandle
  */
-define_function slong NAVFileReadLine(long handle, char data[]) {
+define_function slong NAVFileReadLineHandle(long handle, char data[]) {
     stack_var slong result
 
     if (!handle) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
-                                    'NAVFileReadLine',
+                                    'NAVFileReadLineHandle',
                                     "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : The handle provided is null.'")
+        return NAV_FILE_ERROR_INVALID_FILE_HANDLE
     }
 
     result = file_read_line(handle, data, max_length_array(data))
@@ -299,7 +351,7 @@ define_function slong NAVFileReadLine(long handle, char data[]) {
     if (result < 0) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
-                                    'NAVFileReadLine',
+                                    'NAVFileReadLineHandle',
                                     "'Error reading line in file : ', NAVGetFileError(result)")
     }
 
@@ -367,15 +419,130 @@ define_function slong NAVFileWrite(char path[], char data[]) {
 
 
 /**
+ * @function NAVFileWriteHandle
+ * @public
+ * @description Writes raw bytes to an open file.
+ *
+ * @param {long} handle - File handle previously obtained from NAVFileOpen
+ * @param {char[]} data - Data to write to the file
+ *
+ * @returns {slong} Number of bytes written on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileHandle
+ * stack_var char data[1024]
+ * stack_var slong bytesWritten
+ *
+ * fileHandle = NAVFileOpen('/data.bin', 'rw')
+ * if (fileHandle >= 0) {
+ *     data = 'Binary data...'
+ *     bytesWritten = NAVFileWriteHandle(fileHandle, data)
+ *     NAVFileClose(fileHandle)
+ * }
+ *
+ * @note Writes the entire buffer content (length_array)
+ * @note Uses AMX file_write function
+ * @note Open with 'rw' to overwrite, 'rwa' to append
+ * @see NAVFileOpen
+ * @see NAVFileClose
+ * @see NAVFileWriteLineHandle
+ */
+define_function slong NAVFileWriteHandle(long handle, char data[]) {
+    stack_var slong result
+
+    if (!handle) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileWriteHandle',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : The handle provided is null.'")
+        return NAV_FILE_ERROR_INVALID_FILE_HANDLE
+    }
+
+    result = file_write(handle, data, length_array(data))
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileWriteHandle',
+                                    "'Error writing to file : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+/**
+ * @function NAVFileWriteLineHandle
+ * @public
+ * @description Writes a line to an open file, adding a carriage return and line feed.
+ *
+ * @param {long} handle - File handle previously obtained from NAVFileOpen
+ * @param {char[]} buffer - Line text to write
+ *
+ * @returns {slong} Number of bytes written on success, or negative error code on failure
+ *
+ * @example
+ * stack_var slong fileHandle
+ * stack_var char line[100]
+ * stack_var slong result
+ *
+ * fileHandle = NAVFileOpen('/log.txt', 'rw')
+ * if (fileHandle >= 0) {
+ *     line = 'Log entry 1'
+ *     result = NAVFileWriteLineHandle(fileHandle, line)
+ *     line = 'Log entry 2'
+ *     result = NAVFileWriteLineHandle(fileHandle, line)
+ *     NAVFileClose(fileHandle)
+ * }
+ *
+ * @note Uses AMX file_write_line function which automatically adds CRLF
+ * @note Open with 'rw' to overwrite, 'rwa' to append
+ * @see NAVFileOpen
+ * @see NAVFileClose
+ * @see NAVFileWriteHandle
+ * @see NAVFileReadLineHandle
+ */
+define_function slong NAVFileWriteLineHandle(long handle, char buffer[]) {
+    stack_var slong result
+
+    if (!handle) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileWriteLineHandle',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : The handle provided is null.'")
+        return NAV_FILE_ERROR_INVALID_FILE_HANDLE
+    }
+
+    // For empty lines, file_write_line doesn't work with zero-length buffers
+    // So we use file_write to write just CRLF
+    if (!length_array(buffer)) {
+        result = file_write(handle, "NAV_CR, NAV_LF", 2)
+    }
+    else {
+        result = file_write_line(handle, buffer, length_array(buffer))
+    }
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileWriteLineHandle',
+                                    "'Error writing line to file : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+/**
  * @function NAVFileWriteLine
  * @public
  * @description Writes a line to a file, adding a carriage return and line feed.
  * Opens the file, writes the line with CRLF, and closes it automatically.
  *
  * @param {char[]} path - Full path to the file
- * @param {char[]} buffer - Line text to write
+ * @param {char[]} buffer - Line text to write (can be empty)
  *
- * @returns {slong} 0 on success, or negative error code on failure
+ * @returns {slong} Number of bytes written on success, or negative error code on failure
  *
  * @example
  * stack_var char line[100]
@@ -385,9 +552,15 @@ define_function slong NAVFileWrite(char path[], char data[]) {
  * result = NAVFileWriteLine('/config.txt', line)
  *
  * @note Creates a new file if it doesn't exist, otherwise overwrites existing file
+ * @note Empty buffer is valid - will write just CRLF (2 bytes)
+ * @note Always appends CRLF to the buffer content
  * @see NAVFileWrite
+ * @see NAVFileWriteLineHandle
+ * @see NAVFileAppendLine
  */
 define_function slong NAVFileWriteLine(char path[], char buffer[]) {
+    // Note: Empty buffer is explicitly supported - writes just CRLF (2 bytes)
+    // The concatenation with NAV_CR and NAV_LF ensures we always have content to write
     return NAVFileWrite(path, "buffer, NAV_CR, NAV_LF")
 }
 
@@ -442,7 +615,9 @@ define_function slong NAVFileAppend(char path[], char data[]) {
                                     "'Error appending file "', path, '" : ', NAVGetFileError(result)")
     }
 
-    return NAVFileClose(handle)
+    NAVFileClose(handle)
+
+    return result
 }
 
 
@@ -453,9 +628,9 @@ define_function slong NAVFileAppend(char path[], char data[]) {
  * Opens the file in append mode, writes the line with CRLF, and closes it automatically.
  *
  * @param {char[]} path - Full path to the file
- * @param {char[]} buffer - Line text to append
+ * @param {char[]} buffer - Line text to append (can be empty)
  *
- * @returns {slong} 0 on success, or negative error code on failure
+ * @returns {slong} Number of bytes written on success, or negative error code on failure
  *
  * @example
  * stack_var char logEntry[100]
@@ -465,10 +640,248 @@ define_function slong NAVFileAppend(char path[], char data[]) {
  * result = NAVFileAppendLine('/log.txt', logEntry)
  *
  * @note Creates a new file if it doesn't exist
+ * @note Empty buffer is valid - will append just CRLF (2 bytes)
+ * @note Always appends CRLF to the buffer content
  * @see NAVFileAppend
+ * @see NAVFileWriteLine
+ * @see NAVFileWriteLineHandle
  */
 define_function slong NAVFileAppendLine(char path[], char buffer[]) {
+    // Note: Empty buffer is explicitly supported - appends just CRLF (2 bytes)
+    // The concatenation with NAV_CR and NAV_LF ensures we always have content to write
     return NAVFileAppend(path, "buffer, NAV_CR, NAV_LF")
+}
+
+
+/**
+ * @function NAVFileReadLines
+ * @public
+ * @description Reads all lines from a file into an array.
+ * Opens the file, reads all lines, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[][]} lines - Output array to store lines (modified in-place)
+ *
+ * @returns {slong} Number of lines read on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char configLines[100][NAV_MAX_BUFFER]
+ * stack_var slong lineCount
+ * stack_var integer i
+ *
+ * lineCount = NAVFileReadLines('/config.txt', configLines)
+ * if (lineCount > 0) {
+ *     for (i = 1; i <= lineCount; i++) {
+ *         // Process each line
+ *     }
+ * }
+ *
+ * @note Handles CRLF, LF, and mixed line endings
+ * @note Line endings are stripped from returned lines
+ * @note Returns 0 for empty files (not an error)
+ * @note Maximum lines limited by array size (max_length_array)
+ * @see NAVFileWriteLines
+ * @see NAVFileAppendLines
+ * @see NAVFileReadLineHandle
+ */
+define_function slong NAVFileReadLines(char path[], char lines[][]) {
+    stack_var long handle
+    stack_var slong result
+    stack_var integer lineCount
+    stack_var char line[NAV_MAX_BUFFER]
+
+    // Validate path
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileReadLines',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    // Open file for reading
+    result = NAVFileOpen(path, 'r')
+    if (result < 0) {
+        return result
+    }
+
+    handle = type_cast(result)
+    lineCount = 0
+
+    // Read lines into array
+    while (lineCount < max_length_array(lines)) {
+        line = ''
+        result = NAVFileReadLineHandle(handle, line)
+
+        if (result < 0) {
+            if (result == NAV_FILE_ERROR_EOF_END_OF_FILE_REACHED) {
+                // If EOF but line buffer has content, store it (last line without trailing newline)
+                if (length_array(line) > 0) {
+                    lineCount++
+                    lines[lineCount] = line
+                }
+
+                break  // Normal end of file
+            }
+
+            NAVFileClose(handle)
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_FILEUTILS__,
+                                        'NAVFileReadLines',
+                                        "'Error reading lines from file "', path, '" : ', NAVGetFileError(result)")
+            return result
+        }
+
+        lineCount++
+        lines[lineCount] = line
+    }
+
+    set_length_array(lines, lineCount)
+    NAVFileClose(handle)
+
+    return type_cast(lineCount)
+}
+
+
+/**
+ * @function NAVFileWriteLines
+ * @public
+ * @description Writes an array of lines to a file.
+ * Opens the file, writes all lines with CRLF, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[][]} lines - Array of lines to write
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char configLines[10][NAV_MAX_BUFFER]
+ * stack_var slong result
+ *
+ * configLines[1] = 'Setting1=Value1'
+ * configLines[2] = 'Setting2=Value2'
+ * configLines[3] = 'Setting3=Value3'
+ * set_length_array(configLines, 3)
+ *
+ * result = NAVFileWriteLines('/config.txt', configLines)
+ *
+ * @note Creates a new file if it doesn't exist, otherwise overwrites existing file
+ * @note Each line automatically gets CRLF appended
+ * @note Empty lines (empty strings) are valid and write just CRLF
+ * @note Empty array writes nothing (creates/truncates file to 0 bytes)
+ * @see NAVFileReadLines
+ * @see NAVFileAppendLines
+ * @see NAVFileWriteLineHandle
+ */
+define_function slong NAVFileWriteLines(char path[], char lines[][]) {
+    stack_var long handle
+    stack_var slong result
+    stack_var integer x
+
+    // Validate path
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileWriteLines',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    // Open file in overwrite mode
+    result = NAVFileOpen(path, 'rw')
+    if (result < 0) {
+        return result
+    }
+
+    handle = type_cast(result)
+
+    // Write each line
+    for (x = 1; x <= length_array(lines); x++) {
+        result = NAVFileWriteLineHandle(handle, lines[x])
+
+        if (result < 0) {
+            NAVFileClose(handle)
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_FILEUTILS__,
+                                        'NAVFileWriteLines',
+                                        "'Error writing lines to file "', path, '" : ', NAVGetFileError(result)")
+            return result
+        }
+    }
+
+    NAVFileClose(handle)
+    return 0
+}
+
+
+/**
+ * @function NAVFileAppendLines
+ * @public
+ * @description Appends an array of lines to the end of a file.
+ * Opens the file in append mode, writes all lines with CRLF, and closes it automatically.
+ *
+ * @param {char[]} path - Full path to the file
+ * @param {char[][]} lines - Array of lines to append
+ *
+ * @returns {slong} 0 on success, or negative error code on failure
+ *
+ * @example
+ * stack_var char logEntries[5][NAV_MAX_BUFFER]
+ * stack_var slong result
+ *
+ * logEntries[1] = "NAVGetTimeStamp(), ': System started'"
+ * logEntries[2] = "NAVGetTimeStamp(), ': Config loaded'"
+ * logEntries[3] = "NAVGetTimeStamp(), ': Connection established'"
+ * set_length_array(logEntries, 3)
+ *
+ * result = NAVFileAppendLines('/log.txt', logEntries)
+ *
+ * @note Creates a new file if it doesn't exist
+ * @note Each line automatically gets CRLF appended
+ * @note Empty lines (empty strings) are valid and append just CRLF
+ * @note Empty array appends nothing (no-op, returns success)
+ * @see NAVFileReadLines
+ * @see NAVFileWriteLines
+ * @see NAVFileWriteLineHandle
+ */
+define_function slong NAVFileAppendLines(char path[], char lines[][]) {
+    stack_var long handle
+    stack_var slong result
+    stack_var integer x
+
+    // Validate path
+    if (!length_array(path)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileAppendLines',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The path supplied is empty.'")
+        return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME
+    }
+
+    // Open file in append mode
+    result = NAVFileOpen(path, 'rwa')
+    if (result < 0) {
+        return result
+    }
+
+    handle = type_cast(result)
+
+    // Append each line
+    for (x = 1; x <= length_array(lines); x++) {
+        result = NAVFileWriteLineHandle(handle, lines[x])
+
+        if (result < 0) {
+            NAVFileClose(handle)
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_FILEUTILS__,
+                                        'NAVFileAppendLines',
+                                        "'Error appending lines to file "', path, '" : ', NAVGetFileError(result)")
+            return result
+        }
+    }
+
+    NAVFileClose(handle)
+    return 0
 }
 
 
@@ -517,7 +930,7 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
 
     if (result < 0) {
         if (result == NAV_FILE_ERROR_FILE_PATH_NOT_LOADED) {
-            // Empty directory
+            // Empty directory or non-existent directory
             return 0
         }
 
@@ -529,32 +942,47 @@ define_function slong NAVReadDirectory(char path[], _NAVFileEntity entities[]) {
         return result
     }
 
-    count = type_cast(result)
-    count = count + index
+    // Check if entity buffer is empty - indicates non-existent directory
+    if (length_array(entity) == 0) {
+        // No valid entry returned, directory likely doesn't exist
+        return 0
+    }
+
+    // result contains the number of REMAINING files after index 1
+    // Total files = 1 (current) + result (remaining)
+    count = type_cast(result) + index
     set_length_array(entities, count)
 
+    // Process entries starting from index 1
     while (index <= count) {
-        result = file_dir(path, entity, index)
+        // We already have the data for index 1 from the first call above
+        // For subsequent entries, call file_dir again
+        if (index > 1) {
+            result = file_dir(path, entity, index)
 
-        if (result < 0) {
-            if (result == NAV_FILE_ERROR_FILE_PATH_NOT_LOADED) {
-                // Empty directory
+            if (result < 0) {
+                if (result == NAV_FILE_ERROR_FILE_PATH_NOT_LOADED) {
+                    // No more entries - adjust count and exit
+                    count = index - 1
+                    set_length_array(entities, count)
+                    return type_cast(count)
+                }
+
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                            __NAV_FOUNDATION_FILEUTILS__,
+                                            'NAVReadDirectory',
+                                            "'Error reading directory "', path, '" : ', NAVGetFileError(result)")
+
+                index++
                 continue
             }
-
-            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                        __NAV_FOUNDATION_FILEUTILS__,
-                                        'NAVReadDirectory',
-                                        "'Error reading directory "', path, '" : ', NAVGetFileError(result)")
-
-            continue
         }
 
         entities[index].Name = NAVPathName(entity)
         entities[index].BaseName = NAVPathBaseName(entity)
         entities[index].Extension = NAVPathExtName(entity)
-        entities[index].Path = entity
-        entities[index].Parent = NAVPathDirName(entity)
+        entities[index].Path = NAVPathJoinPath(path, entity, '', '')
+        entities[index].Parent = path
         entities[index].IsDirectory = NAVPathIsDirectory(entity)
 
         index++
@@ -593,11 +1021,15 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
     stack_var _NAVFileEntity entities[1000]
     stack_var slong count
     stack_var integer x
-    local_var integer fileCount
+    stack_var integer fileCount
+    stack_var integer startIndex
 
     if (!length_array(path)) {
         path = '/'
     }
+
+    // Get starting index from current array length
+    startIndex = length_array(files)
 
     count = NAVReadDirectory(path, entities)
     if (count <= 0) {
@@ -612,18 +1044,29 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
         entityPath = NAVPathJoinPath(path, entity.BaseName, '', '')
 
         if (entity.IsDirectory) {
-            fileCount = fileCount + type_cast(NAVWalkDirectory(entityPath, files))
+            stack_var slong result
+
+            // Recursively walk subdirectory - it will append to files array
+            result = NAVWalkDirectory(entityPath, files)
+
+            // Log errors but continue processing other directories
+            if (result < 0) {
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                            __NAV_FOUNDATION_FILEUTILS__,
+                                            'NAVWalkDirectory',
+                                            "'Error walking subdirectory "', entityPath, '" : ', NAVGetFileError(result)")
+            }
         }
         else {
-            fileCount++
+            // Add file to the array
+            fileCount = length_array(files) + 1
+            set_length_array(files, fileCount)
             files[fileCount] = entityPath
         }
     }
 
-    set_length_array(files, fileCount)
-    count = type_cast(fileCount)
-
-    fileCount = 0
+    // Return total number of files added by this call (and recursive calls)
+    count = type_cast(length_array(files) - startIndex)
 
     return count
 }
@@ -632,45 +1075,54 @@ define_function slong NAVWalkDirectory(char path[], char files[][]) {
 /**
  * @function NAVFileExists
  * @public
- * @description Checks if a file exists in the specified directory.
+ * @description Checks if a file exists at the specified path.
  *
- * @param {char[]} path - Directory path to check
- * @param {char[]} fileName - Name of the file to look for
+ * @param {char[]} path - Path to the file (relative or absolute)
  *
- * @returns {integer} true if the file exists, false otherwise
+ * @returns {char} true if the file exists, false otherwise
  *
  * @example
- * stack_var integer exists
+ * stack_var char exists
  *
- * exists = NAVFileExists('/user', 'config.txt')
- * if (exists) {
- *     // File exists, proceed
- * }
+ * // Absolute path
+ * exists = NAVFileExists('/user/config.txt')
  *
- * @note If path is empty, it defaults to the root directory '/'
+ * // Relative path (checked in root directory)
+ * exists = NAVFileExists('config.txt')
  */
-define_function integer NAVFileExists(char path[], char fileName[]) {
+define_function char NAVFileExists(char path[]) {
     stack_var _NAVFileEntity entities[255]
+    stack_var char dirPath[NAV_MAX_BUFFER]
+    stack_var char fileName[NAV_MAX_BUFFER]
     stack_var integer x
+
+    if (!length_array(path)) {
+        return false
+    }
+
+    dirPath = NAVPathDirName(path)
+    fileName = NAVPathBaseName(path)
 
     if (!length_array(fileName)) {
         return false
     }
 
-    if (!length_array(path)) {
-        path = '/'
+    // Handle current directory indicator
+    if (dirPath == '.') {
+        dirPath = '/'
     }
 
-    if (!NAVStartsWith(path, '/')) {
-        path = "'/', path"
+    // Ensure directory path starts with /
+    if (!NAVStartsWith(dirPath, '/')) {
+        dirPath = "'/', dirPath"
     }
 
-    if (NAVReadDirectory(path, entities) <= 0) {
+    if (NAVReadDirectory(dirPath, entities) <= 0) {
         return false
     }
 
     for (x = 1; x <= length_array(entities); x++) {
-        if (entities[x].Name == fileName) {
+        if (entities[x].BaseName == fileName && !entities[x].IsDirectory) {
             return true
         }
     }
@@ -686,10 +1138,10 @@ define_function integer NAVFileExists(char path[], char fileName[]) {
  *
  * @param {char[]} path - Directory path to check
  *
- * @returns {integer} true if the directory exists, false otherwise
+ * @returns {char} true if the directory exists, false otherwise
  *
  * @example
- * stack_var integer exists
+ * stack_var char exists
  *
  * exists = NAVDirectoryExists('/user/data')
  * if (!exists) {
@@ -699,24 +1151,56 @@ define_function integer NAVFileExists(char path[], char fileName[]) {
  *
  * @note If path is empty, it defaults to the root directory '/'
  */
-define_function integer NAVDirectoryExists(char path[]) {
+define_function char NAVDirectoryExists(char path[]) {
     stack_var _NAVFileEntity entities[255]
+    stack_var char dirPath[NAV_MAX_BUFFER]
+    stack_var char parentPath[NAV_MAX_BUFFER]
+    stack_var char dirName[NAV_MAX_BUFFER]
     stack_var integer x
 
     if (!length_array(path)) {
-        path = '/'
-    }
-
-    if (!NAVStartsWith(path, '/')) {
-        path = "'/', path"
-    }
-
-    if (NAVReadDirectory(path, entities) <= 0) {
         return false
     }
 
+    dirPath = path
+
+    // Handle current directory indicator
+    if (dirPath == '.') {
+        dirPath = '/'
+    }
+
+    // Ensure directory path starts with /
+    if (!NAVStartsWith(dirPath, '/')) {
+        dirPath = "'/', dirPath"
+    }
+
+    // Remove trailing slash if present (except for root)
+    if (length_array(dirPath) > 1 && NAVEndsWith(dirPath, '/')) {
+        dirPath = left_string(dirPath, length_array(dirPath) - 1)
+    }
+
+    // Root directory always exists
+    if (dirPath == '/') {
+        return true
+    }
+
+    // Get parent directory and directory name
+    parentPath = NAVPathDirName(dirPath)
+    dirName = NAVPathBaseName(dirPath)
+
+    // If parent is '.', convert to root
+    if (parentPath == '.') {
+        parentPath = '/'
+    }
+
+    // Read parent directory to check if this directory exists in it
+    if (NAVReadDirectory(parentPath, entities) <= 0) {
+        return false
+    }
+
+    // Search for the directory name in parent's contents
     for (x = 1; x <= length_array(entities); x++) {
-        if (entities[x].Name == path && entities[x].IsDirectory) {
+        if (entities[x].BaseName == dirName && entities[x].IsDirectory) {
             return true
         }
     }
@@ -814,6 +1298,65 @@ define_function slong NAVDirectoryDelete(char path[]) {
 
 
 /**
+ * @function NAVFileSeek
+ * @public
+ * @description Seeks to a specific position in an open file.
+ *
+ * @param {long} handle - File handle returned by NAVFileOpen
+ * @param {slong} position - Byte position to seek to:
+ *                           0 = beginning of file
+ *                           -1 = end of file (use NAV_FILE_SEEK_END constant)
+ *                           N = absolute byte position
+ *
+ * @returns {slong} New position in file on success, or negative error code on failure
+ *
+ * @example
+ * stack_var long handle
+ * stack_var slong position
+ *
+ * handle = type_cast(NAVFileOpen('/data.txt', 'r'))
+ *
+ * // Seek to beginning
+ * position = NAVFileSeek(handle, 0)
+ *
+ * // Seek to end (get file size)
+ * position = NAVFileSeek(handle, NAV_FILE_SEEK_END)
+ *
+ * // Seek to specific byte
+ * position = NAVFileSeek(handle, 100)
+ *
+ * NAVFileClose(handle)
+ *
+ * @note AMX file_seek only supports absolute positioning, not relative
+ * @see NAVFileOpen
+ * @see NAVFileClose
+ */
+define_function slong NAVFileSeek(long handle, slong position) {
+    stack_var slong result
+
+    if (!handle) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileSeek',
+                                    "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_HANDLE), ' : Invalid file handle (0)'")
+
+        return NAV_FILE_ERROR_INVALID_FILE_HANDLE
+    }
+
+    result = file_seek(handle, type_cast(position))
+
+    if (result < 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_FILEUTILS__,
+                                    'NAVFileSeek',
+                                    "'Error seeking to position ', itoa(position), ' : ', NAVGetFileError(result)")
+    }
+
+    return result
+}
+
+
+/**
  * @function NAVFileGetSize
  * @public
  * @description Gets the size of a file in bytes.
@@ -833,7 +1376,6 @@ define_function slong NAVDirectoryDelete(char path[]) {
 define_function slong NAVFileGetSize(char path[]) {
     stack_var slong result
     stack_var long handle
-    stack_var slong count
 
     result = NAVFileOpen(path, 'r')
 
@@ -843,47 +1385,12 @@ define_function slong NAVFileGetSize(char path[]) {
 
     handle = type_cast(result)
 
-    /**
-     * Ref: NetLinx Keywords Help
-     *
-     * SLONG FILE_SEEK (LONG HFile, LONG Pos)
-     *
-     * Parameters:
-     *      HFile - handle to the file returned by FILE_OPEN.
-     *      Pos - The byte position to set the file pointer (0 = beginning of file, -1 = end of file)
-     */
-    // I need to seek staright to the end of the file to get the size.
-    // The help docs for "file_seek" say that -1 is the end of the file.
-    // However, the function takes an argument of type LONG for the position.
-    // Passing -1 to the function results in the compiler warning 10571.
-    // The function does work as expected, but the warning is annoying.
-    // Should the position argument be changed to type SLONG AMX?
-    // I tried to use this compiler directive,
-    // since I'm unable to suppress the warning using "type_cast".
-    // #DISABLE_WARNING 10571
-    // However, this disables all type mismatch warnings globally,
-    // which is not desirable.
-    result = file_seek(handle, type_cast(NAV_FILE_SEEK_END))
+    // Use NAVFileSeek to get file size by seeking to end
+    result = NAVFileSeek(handle, NAV_FILE_SEEK_END)
 
-    if (result < 0) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_FILEUTILS__,
-                                    'NAVFileGetSize',
-                                    "'Error seeking to the end of file "', path, '" : ', NAVGetFileError(result)")
+    NAVFileClose(handle)
 
-        NAVFileClose(handle)
-        return result
-    }
-
-    count = result
-
-    result = NAVFileClose(handle)
-
-    if (result < 0) {
-        return result
-    }
-
-    return count
+    return result
 }
 
 
@@ -912,7 +1419,7 @@ define_function slong NAVFileRename(char source[], char destination[]) {
     if (!length_array(source)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_FILEUTILS__,
-                                    'NAVRenameFile',
+                                    'NAVFileRename',
                                     "NAVGetFileError(NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME), ' : The source path supplied is empty.'")
 
         return NAV_FILE_ERROR_INVALID_FILE_PATH_OR_NAME

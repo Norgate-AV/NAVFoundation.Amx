@@ -10,7 +10,7 @@ PROGRAM_NAME='NAVFoundation.SocketUtils.h'
 
 MIT License
 
-Copyright (c) 2023 Norgate AV Services Limited
+Copyright (c) 2010-2026 Norgate AV
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -143,6 +143,44 @@ constant slong NAV_SOCKET_ERROR_TOO_MANY_OPEN_SOCKETS           = 16
  * @description Error: The specified local port is not open
  */
 constant slong NAV_SOCKET_ERROR_LOCAL_PORT_NOT_OPEN             = 17
+
+
+/**
+ * @section Socket Retry and Backoff Constants
+ * @description Configuration constants for socket connection retry behavior and exponential backoff
+ */
+
+/**
+ * @constant NAV_MAX_SOCKET_CONNECTION_RETRIES
+ * @description Maximum number of connection retry attempts before starting exponential backoff.
+ *              The first 10 attempts will use the base delay, then exponential backoff begins.
+ * @default 10
+ */
+#IF_NOT_DEFINED NAV_MAX_SOCKET_CONNECTION_RETRIES
+constant integer NAV_MAX_SOCKET_CONNECTION_RETRIES = 10
+#END_IF
+
+/**
+ * @constant NAV_SOCKET_CONNECTION_INTERVAL_BASE_DELAY
+ * @description Base delay in milliseconds between socket connection retry attempts.
+ *              This delay is used for the first N attempts (where N = NAV_MAX_SOCKET_CONNECTION_RETRIES),
+ *              and serves as the base for exponential backoff calculations on subsequent attempts.
+ * @default 5000 (5 seconds)
+ */
+#IF_NOT_DEFINED NAV_SOCKET_CONNECTION_INTERVAL_BASE_DELAY
+constant long NAV_SOCKET_CONNECTION_INTERVAL_BASE_DELAY = 5000          // 5 seconds
+#END_IF
+
+/**
+ * @constant NAV_SOCKET_CONNECTION_INTERVAL_MAX_DELAY
+ * @description Maximum delay in milliseconds between socket connection retry attempts.
+ *              This value caps the exponential backoff to prevent excessively long wait times.
+ *              Even with exponential growth, the delay will never exceed this value.
+ * @default 300000 (5 minutes)
+ */
+#IF_NOT_DEFINED NAV_SOCKET_CONNECTION_INTERVAL_MAX_DELAY
+constant long NAV_SOCKET_CONNECTION_INTERVAL_MAX_DELAY = 300000         // 5 minutes
+#END_IF
 
 
 #END_IF // __NAV_FOUNDATION_SOCKETUTILS_H__

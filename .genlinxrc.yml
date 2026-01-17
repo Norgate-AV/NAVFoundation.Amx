@@ -4,7 +4,6 @@ build:
       - ./ArrayUtils
       - ./Assert
       - ./BinaryUtils
-      - ./Console
       - ./Core
       - ./Cryptography
       - ./CsvUtils
@@ -13,6 +12,7 @@ build:
       - ./ErrorLogUtils
       - ./Encoding
       - ./Enova
+      - ./Figlet
       - ./FileUtils
       - ./HashTable
       - ./HttpUtils
@@ -20,12 +20,12 @@ build:
       - ./Int64
       - ./InterModuleApi
       - ./Jsmn
-      - ./Json
       - ./Lexer
       - ./LogicEngine
       - ./Math
       - ./McpBase
-      - ./NtpClient
+      - ./NetUtils
+      - ./NtpUtils
       - ./PathUtils
       - ./Queue
       - ./Regex
@@ -70,3 +70,7 @@ build:
       - ./__tests__/include/date-time-utils
       - ./__tests__/include/snapi-helpers
       - ./__tests__/include/dns-utils
+      - ./__tests__/include/file-utils
+      - ./__tests__/include/binary-utils
+      - ./__tests__/include/figlet
+      - ./__tests__/include/net-utils

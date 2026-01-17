@@ -11,6 +11,7 @@ Working with strings in NetLinx can be challenging due to limited built-in funct
 - **String Manipulation**: Trimming, substring extraction, replacing, etc.
 - **String Testing**: Contains, startsWith, endsWith, etc.
 - **String Searching**: Find index of substrings, count occurrences
+- **String Parsing**: Parse integers, signed integers, longs, signed longs, and floats with validation
 - **Case Conversion**: Upper/lower case, camelCase, PascalCase, etc.
 - **Character Operations**: Check character types, convert case
 - **String Splitting and Joining**: Split strings into arrays, join arrays into strings
@@ -203,6 +204,59 @@ result = NAVStringTrainCase('hello world')  // Returns 'Hello-World'
 result = NAVStringScreamKebabCase('hello world')  // Returns 'HELLO-WORLD'
 ```
 
+### String Parsing and Conversion
+
+```netlinx
+// Parse unsigned integer (0-65535)
+stack_var integer value
+stack_var char success
+success = NAVParseInteger('12345', value)     // Returns true, value = 12345
+success = NAVParseInteger('99999', value)     // Returns false (out of range)
+success = NAVParseInteger('-100', value)      // Returns false (negative)
+success = NAVParseInteger('Volume=50', value) // Returns true, value = 50 (extracts first number)
+success = NAVParseInteger('   42  99   ', value) // Returns true, value = 42 (stops at space)
+
+// Parse signed integer (-32768 to 32767)
+stack_var sinteger svalue
+success = NAVParseSignedInteger('-12345', svalue)  // Returns true, svalue = -12345
+success = NAVParseSignedInteger('50000', svalue)   // Returns false (out of range)
+success = NAVParseSignedInteger('Offset=-100', svalue) // Returns true, svalue = -100
+success = NAVParseSignedInteger('   -10  20   ', svalue) // Returns true, svalue = -10
+
+// Parse unsigned long (0-4294967295)
+stack_var long lvalue
+success = NAVParseLong('1234567890', lvalue)   // Returns true, lvalue = 1234567890
+success = NAVParseLong('4294967295', lvalue)   // Returns true (max LONG value)
+success = NAVParseLong('5000000000', lvalue)   // Returns false (overflow)
+success = NAVParseLong('-1000', lvalue)        // Returns false (negative)
+success = NAVParseLong('   100  200   ', lvalue) // Returns true, lvalue = 100
+
+// Parse signed long (-2147483648 to 2147483647)
+stack_var slong slvalue
+success = NAVParseSignedLong('-1234567890', slvalue)  // Returns true, slvalue = -1234567890
+success = NAVParseSignedLong('2147483647', slvalue)   // Returns true (max SLONG)
+success = NAVParseSignedLong('3000000000', slvalue)   // Returns false (overflow)
+success = NAVParseSignedLong('xyz-123', slvalue)     // Returns true, slvalue = -123 (extracts number)
+success = NAVParseSignedLong('   -100  200   ', slvalue) // Returns true, slvalue = -100
+
+// Parse floating-point number
+stack_var float fvalue
+success = NAVParseFloat('3.14159', fvalue)      // Returns true, fvalue = 3.14159
+success = NAVParseFloat('-1.25e-3', fvalue)     // Returns true, fvalue = -0.00125
+success = NAVParseFloat('Temp=22.5', fvalue)    // Returns true, fvalue = 22.5 (extracts first number)
+success = NAVParseFloat('   10.5  20.3   ', fvalue) // Returns true, fvalue = 10.5
+```
+
+**Parsing Behavior Notes:**
+- All parsing functions skip leading whitespace
+- They parse the first valid number encountered
+- Parsing stops at the first space or non-digit character after the number (matching ATOI/ATOF behavior)
+- Example: `'   10  20   '` parses as `10`, not `20` or `1020`
+- The functions validate ranges and return `false` if the value is out of bounds
+- `NAVParseInteger` and `NAVParseSignedInteger` use ATOI internally
+- `NAVParseLong` and `NAVParseSignedLong` use manual digit-by-digit parsing for full range support and overflow detection
+- `NAVParseFloat` uses ATOF internally
+
 ### Time and Duration Functions
 
 ```netlinx
@@ -305,6 +359,52 @@ age = NAVGetStringBetween(data, '[age=', ']')    // '30'
 city = NAVGetStringBetween(data, '[city=', ']')  // 'New York'
 ```
 
+## Example: Parsing Numbers from User Input
+
+```netlinx
+// Parse a volume level from a command string
+stack_var char command[50]
+stack_var integer volume
+stack_var char success
+
+command = 'VOLUME=75'
+success = NAVParseInteger(command, volume)
+if (success) {
+    // volume = 75, valid range 0-65535
+    send_command dvAudioDevice, "'VOLUME-', itoa(volume)"
+}
+
+// Parse temperature with negative values
+stack_var char tempStr[20]
+stack_var sinteger temperature
+
+tempStr = 'TEMP=-15'
+success = NAVParseSignedInteger(tempStr, temperature)
+if (success) {
+    // temperature = -15, valid range -32768 to 32767
+}
+
+// Parse large numbers like timestamps
+stack_var char timestampStr[20]
+stack_var long timestamp
+
+timestampStr = '1672531200'
+success = NAVParseLong(timestampStr, timestamp)
+if (success) {
+    // timestamp = 1672531200 (Unix timestamp)
+}
+
+// Handle mixed content - extracts first number
+stack_var char response[50]
+stack_var float value
+
+response = 'Temperature: 22.5 degrees'
+success = NAVParseFloat(response, value)
+if (success) {
+    // value = 22.5
+}
+```
+
 ## Performance Tips
 
 - For operations on large strings, be aware of NetLinx's memory limitations
@@ -318,4 +418,4 @@ For issues, suggestions, or contributions, please contact Norgate AV Services Li
 
 ## License
 
-MIT License - Copyright (c) 2023 Norgate AV Services Limited
+MIT License - Copyright (c) 2010-2026 Norgate AV
