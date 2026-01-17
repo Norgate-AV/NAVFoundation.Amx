@@ -88,14 +88,42 @@ constant char NAV_HTTP_SCHEMES[][20]  =   {
 /**
  * @constant NAV_HTTP_MAX_REQUEST_LENGTH
  * @description Maximum allowed length for HTTP request
+ * Can be overridden by defining before including this header.
+ * Default: 4096 bytes
  */
+#IF_NOT_DEFINED NAV_HTTP_MAX_REQUEST_LENGTH
 constant integer NAV_HTTP_MAX_REQUEST_LENGTH    = 4096
+#END_IF
 
 /**
  * @constant NAV_HTTP_MAX_RESPONSE_LENGTH
  * @description Maximum allowed length for HTTP response
+ * Can be overridden by defining before including this header.
+ * Default: 16384 bytes
  */
+#IF_NOT_DEFINED NAV_HTTP_MAX_RESPONSE_LENGTH
 constant integer NAV_HTTP_MAX_RESPONSE_LENGTH   = 16384
+#END_IF
+
+/**
+ * @constant NAV_HTTP_MAX_REQUEST_BODY
+ * @description Maximum size for HTTP request body in bytes.
+ * Can be overridden by defining before including this header.
+ * Default: 8192 bytes
+ */
+#IF_NOT_DEFINED NAV_HTTP_MAX_REQUEST_BODY
+constant long NAV_HTTP_MAX_REQUEST_BODY = 8192
+#END_IF
+
+/**
+ * @constant NAV_HTTP_MAX_RESPONSE_BODY
+ * @description Maximum size for HTTP response body in bytes.
+ * Can be overridden by defining before including this header.
+ * Default: 65535 bytes
+ */
+#IF_NOT_DEFINED NAV_HTTP_MAX_RESPONSE_BODY
+constant long NAV_HTTP_MAX_RESPONSE_BODY = 65535
+#END_IF
 
 /**
  * @constant NAV_HTTP_METHOD_*
@@ -166,7 +194,7 @@ constant integer NAV_HTTP_STATUS_CODE_SUCCESS_RESET_CONTENT             = 205
 constant integer NAV_HTTP_STATUS_CODE_SUCCESS_PARTIAL_CONTENT           = 206
 constant integer NAV_HTTP_STATUS_CODE_SUCCESS_MULTI_STATUS              = 207
 constant integer NAV_HTTP_STATUS_CODE_SUCCESS_ALREADY_REPORTED          = 208
-constant integer NAV_HTTP_STATUS_CODE_SUCCESS_IM_USED                   = 209
+constant integer NAV_HTTP_STATUS_CODE_SUCCESS_IM_USED                   = 226
 
 constant char NAV_HTTP_STATUS_MESSAGE_SUCCESS_OK[]                        = 'OK'
 constant char NAV_HTTP_STATUS_MESSAGE_SUCCESS_CREATED[]                   = 'Created'
@@ -274,19 +302,19 @@ constant integer NAV_HTTP_STATUS_CODE_SERVER_ERROR_LOOP_DETECTED                
 constant integer NAV_HTTP_STATUS_CODE_SERVER_ERROR_NOT_EXTENDED                     = 510
 // constant integer NAV_HTTP_STATUS_CODE_SERVER_ERROR_NETWORK_AUTHENTICATION_REQUIRED  = 511
 
-constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_SERVER_ERROR[]                     = 'Server Error'
+constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_SERVER_ERROR[]                     = 'Internal Server Error'
 constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_NOT_IMPLEMENTED[]                  = 'Not Implemented'
 constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_BAD_GATEWAY[]                      = 'Bad Gateway'
 constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_SERVICE_UNAVAILABLE[]              = 'Service Unavailable'
-constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_SERVER_TIMEOUT[]                   = 'Server Timeout'
-constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_VERSION_NOT_SUPPORTED[]            = 'Version Not Supported'
+constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_SERVER_TIMEOUT[]                   = 'Gateway Timeout'
+constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_VERSION_NOT_SUPPORTED[]            = 'HTTP Version Not Supported'
 constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_VARIANT_ALSO_NEGOTIATES[]          = 'Variant Also Negotiates'
 constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_INSUFFICIENT_STORAGE[]             = 'Insufficient Storage'
 constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_LOOP_DETECTED[]                    = 'Loop Detected'
 constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_NOT_EXTENDED[]                     = 'Not Extended'
 // constant char NAV_HTTP_STATUS_MESSAGE_SERVER_ERROR_NETWORK_AUTHENTICATION_REQUIRED[]  = 'Network Authentication Required'
 
-constant char NAV_HTTP_STATUS_MESSAGE_UNKNOWN[]                                         = 'Unknown Error'
+constant char NAV_HTTP_STATUS_MESSAGE_UNKNOWN[]                                         = 'Unknown'
 
 
 constant char NAV_HTTP_CONTENT_TYPE_APPLICATION_1D_INTERLEAVED_PARTYFEC[] = 'application/1d-interleaved-parityfec'
@@ -772,8 +800,14 @@ constant char NAV_HTTP_CONNECTION_CLOSE[]            = 'close'
 constant char NAV_HTTP_CONNECTION_KEEP_ALIVE[]       = 'keep-alive'
 constant char NAV_HTTP_CONNECTION_UPGRADE[]          = 'upgrade'
 
+// HTTP Response Buffer States
+constant integer NAV_HTTP_STATE_IDLE                 = 0
+constant integer NAV_HTTP_STATE_PARSING_HEADERS      = 1
+constant integer NAV_HTTP_STATE_PARSING_BODY         = 2
+
 // Common Character Constants
-constant char NAV_HTTP_CRLF[]                        = '$0D,$0A'
+constant char NAV_HTTP_CRLF[]                        = {$0D,$0A}
+constant char NAV_HTTP_HEADER_DELIMITER[]            = {$0D,$0A,$0D,$0A}
 constant char NAV_HTTP_HEADER_SEPARATOR[]            = ': '
 constant char NAV_HTTP_QUERY_SEPARATOR[]             = '?'
 constant char NAV_HTTP_FRAGMENT_SEPARATOR[]          = '#'
@@ -806,24 +840,89 @@ constant integer NAV_HTTP_TIMEOUT_QUICK             = 5
 constant integer NAV_HTTP_TIMEOUT_LONG              = 120
 
 // Maximum Sizes
-constant integer NAV_HTTP_MAX_HEADER_SIZE           = 8192
-constant integer NAV_HTTP_MAX_URL_LENGTH            = 2048
-constant integer NAV_HTTP_MAX_PATH_LENGTH           = 1024
-constant integer NAV_HTTP_MAX_QUERY_LENGTH          = 1024
-constant integer NAV_HTTP_MAX_HEADERS              = 20
-constant integer NAV_HTTP_MAX_COOKIES              = 20
-
-// Websocket Related
-constant char NAV_HTTP_WEBSOCKET_VERSION[]          = '13'
-constant char NAV_HTTP_WEBSOCKET_PROTOCOL[]         = 'websocket'
+/**
+ * @constant NAV_HTTP_MAX_HEADER_SIZE
+ * @description Maximum size for a single HTTP header line.
+ * Can be overridden by defining before including this header.
+ * Default: 8192 bytes
+ */
+#IF_NOT_DEFINED NAV_HTTP_MAX_HEADER_SIZE
+constant integer NAV_HTTP_MAX_HEADER_SIZE = 8192
+#END_IF
 
 /**
- * Maximum number of HTTP headers allowed in a request or response.
- * Can be overridden before including this file if a different limit is needed.
+ * @constant NAV_HTTP_MAX_URL_LENGTH
+ * @description Maximum length for complete URLs.
+ * Can be overridden by defining before including this header.
+ * Default: 2048 bytes
+ */
+#IF_NOT_DEFINED NAV_HTTP_MAX_URL_LENGTH
+constant integer NAV_HTTP_MAX_URL_LENGTH = 2048
+#END_IF
+
+/**
+ * @constant NAV_HTTP_MAX_PATH_LENGTH
+ * @description Maximum length for HTTP request paths (including query string).
+ * Can be overridden by defining before including this header.
+ * Default: 2048 bytes
+ */
+#IF_NOT_DEFINED NAV_HTTP_MAX_PATH_LENGTH
+constant integer NAV_HTTP_MAX_PATH_LENGTH = 2048
+#END_IF
+
+/**
+ * @constant NAV_HTTP_MAX_QUERY_LENGTH
+ * @description Maximum length for URL query strings.
+ * Can be overridden by defining before including this header.
+ * Default: 1024 bytes
+ */
+#IF_NOT_DEFINED NAV_HTTP_MAX_QUERY_LENGTH
+constant integer NAV_HTTP_MAX_QUERY_LENGTH = 1024
+#END_IF
+
+/**
+ * @constant NAV_HTTP_MAX_HEADER_KEY
+ * @description Maximum length for HTTP header keys/names.
+ * Can be overridden by defining before including this header.
+ * Default: 256 bytes
+ */
+#IF_NOT_DEFINED NAV_HTTP_MAX_HEADER_KEY
+constant integer NAV_HTTP_MAX_HEADER_KEY = 256
+#END_IF
+
+/**
+ * @constant NAV_HTTP_MAX_HEADER_VALUE
+ * @description Maximum length for HTTP header values.
+ * Can be overridden by defining before including this header.
+ * Default: 2048 bytes (sufficient for JWT tokens, long cookies, etc.)
+ */
+#IF_NOT_DEFINED NAV_HTTP_MAX_HEADER_VALUE
+constant integer NAV_HTTP_MAX_HEADER_VALUE = 2048
+#END_IF
+
+/**
+ * @constant NAV_HTTP_MAX_HEADERS
+ * @description Maximum number of HTTP headers allowed in a request or response.
+ * Can be overridden by defining before including this header.
+ * Default: 20
  */
 #IF_NOT_DEFINED NAV_HTTP_MAX_HEADERS
 constant integer NAV_HTTP_MAX_HEADERS = 20
 #END_IF
+
+/**
+ * @constant NAV_HTTP_MAX_COOKIES
+ * @description Maximum number of cookies that can be stored.
+ * Can be overridden by defining before including this header.
+ * Default: 20
+ */
+#IF_NOT_DEFINED NAV_HTTP_MAX_COOKIES
+constant integer NAV_HTTP_MAX_COOKIES = 20
+#END_IF
+
+// Websocket Related
+constant char NAV_HTTP_WEBSOCKET_VERSION[]          = '13'
+constant char NAV_HTTP_WEBSOCKET_PROTOCOL[]         = 'websocket'
 
 
 DEFINE_TYPE
@@ -847,14 +946,14 @@ struct _NAVHttpStatus {
  * @struct _NAVHttpHeader
  * @description Structure for storing a key-value pair of strings.
  *
- * @property {char[256]} Key - The key string
- * @property {char[1024]} Value - The value string
+ * @property {char[NAV_HTTP_MAX_HEADER_KEY]} Key - The key string
+ * @property {char[NAV_HTTP_MAX_HEADER_VALUE]} Value - The value string
  *
  * @see NAVHttpHeaderAdd
  */
 struct _NAVHttpHeader {
-    char Key[256];
-    char Value[1024];
+    char Key[NAV_HTTP_MAX_HEADER_KEY];
+    char Value[NAV_HTTP_MAX_HEADER_VALUE];
 }
 
 /**
@@ -877,22 +976,22 @@ struct _NAVHttpHeaderCollection {
  * @description Structure representing an HTTP request.
  *
  * @property {char[7]} Method - HTTP method (GET, POST, PUT, etc.)
- * @property {char[256]} Path - Request path including query string
+ * @property {char[NAV_HTTP_MAX_PATH_LENGTH]} Path - Request path including query string
  * @property {char[8]} Version - HTTP version
  * @property {char[256]} Host - Target host
  * @property {integer} Port - Target port
- * @property {char[2048]} Body - Request body content
+ * @property {char[NAV_HTTP_MAX_REQUEST_BODY]} Body - Request body content
  * @property {_NAVHttpHeader} Headers - Request headers
  *
  * @see NAVHttpRequestInit
  */
 struct _NAVHttpRequest {
     char Method[7];
-    char Path[256];
+    char Path[NAV_HTTP_MAX_PATH_LENGTH];
     char Version[8];
     char Host[256];
     integer Port;
-    char Body[2048];
+    char Body[NAV_HTTP_MAX_REQUEST_BODY];
 
     _NAVHttpHeaderCollection Headers;
 }
@@ -903,7 +1002,7 @@ struct _NAVHttpRequest {
  *
  * @property {_NAVHttpStatus} Status - Response status code and message
  * @property {_NAVHttpHeader} Headers - Response headers
- * @property {char[16384]} Body - Response body content
+ * @property {char[NAV_HTTP_MAX_RESPONSE_BODY]} Body - Response body content
  * @property {char[256]} ContentType - Content-Type of the response
  * @property {long} ContentLength - Length of response body in bytes
  *
@@ -912,9 +1011,70 @@ struct _NAVHttpRequest {
 struct _NAVHttpResponse {
     _NAVHttpStatus Status;
     _NAVHttpHeaderCollection Headers;
-    char Body[16384];
+    char Body[NAV_HTTP_MAX_RESPONSE_BODY];
     char ContentType[256];
     long ContentLength;
+}
+
+/**
+ * @struct _NAVHttpResponseBuffer
+ * @description Buffer structure for processing HTTP responses with state management.
+ *
+ * Used with NAVHttpProcessResponseBuffer for incremental response processing.
+ * Connect the Data field to a device buffer using create_buffer, then call
+ * NAVHttpProcessResponseBuffer from your data_event string handler.
+ *
+ * @property {char[]} Data - Buffer containing received HTTP data
+ * @property {char} Semaphore - Prevents concurrent access to buffer
+ * @property {integer} State - Current parsing state (IDLE, PARSING_HEADERS, PARSING_BODY)
+ * @property {long} ContentLength - Expected body length (set by user after parsing headers)
+ *
+ * @see NAVHttpProcessResponseBuffer
+ * @see NAVHttpResponseBufferInit
+ */
+struct _NAVHttpResponseBuffer {
+    char Data[NAV_HTTP_MAX_RESPONSE_BODY];
+    char Semaphore;
+    integer State;
+    long ContentLength;
+}
+
+/**
+ * @struct _NAVHttpResponseHeadersResult
+ * @description Result structure passed to headers callback.
+ *
+ * @property {char[]} Data - Raw header data extracted from buffer
+ *
+ * @see NAVHttpResponseHeadersCallback
+ * @see NAVHttpParseResponseHeaders
+ */
+struct _NAVHttpResponseHeadersResult {
+    char Data[NAV_HTTP_MAX_RESPONSE_BODY];
+}
+
+/**
+ * @struct _NAVHttpResponseBodyResult
+ * @description Result structure passed to body callback.
+ *
+ * @property {char[]} Data - Raw body data extracted from buffer
+ *
+ * @see NAVHttpResponseBodyCallback
+ * @see NAVHttpParseResponseBody
+ */
+struct _NAVHttpResponseBodyResult {
+    char Data[NAV_HTTP_MAX_RESPONSE_BODY];
+}
+
+/**
+ * @struct _NAVHttpResponseCompleteResult
+ * @description Result structure passed to complete callback.
+ *
+ * @property {integer} State - The state that completed (PARSING_HEADERS or PARSING_BODY)
+ *
+ * @see NAVHttpResponseCompleteCallback
+ */
+struct _NAVHttpResponseCompleteResult {
+    integer State;
 }
 
 #END_IF // __NAV_FOUNDATION_HTTPUTILS_H__

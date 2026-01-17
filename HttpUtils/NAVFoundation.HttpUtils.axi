@@ -50,6 +50,7 @@ SOFTWARE.
 #include 'NAVFoundation.HttpUtils.h.axi'
 #include 'NAVFoundation.ArrayUtils.axi'
 #include 'NAVFoundation.Url.axi'
+#include 'NAVFoundation.StringUtils.axi'
 
 
 /**
@@ -172,20 +173,19 @@ define_function NAVHttpResponseInit(_NAVHttpResponse res) {
  * @internal
  * @description Initializes an HTTP header key-value pair.
  *
- * This converts the header name to train case (capitalized words separated by hyphens).
+ * Per RFC 7230, header field names are case-insensitive but the original
+ * case is preserved. This function stores the key exactly as provided.
  *
  * @param {_NAVHttpHeader} header - The header structure to initialize
  * @param {char[]} key - Header name
  * @param {char[]} value - Header value
  *
  * @returns {void}
- *
- * @see NAVStringTrainCase
  */
 define_function NAVHttpHeaderInit(_NAVHttpHeader header,
                                     char key[],
                                     char value[]) {
-    header.Key = NAVStringTrainCase(key)
+    header.Key = key
     header.Value = value
 }
 
@@ -205,7 +205,7 @@ define_function NAVHttpHeaderInit(_NAVHttpHeader header,
  * port = NAVHttpGetDefaultPort('https')  // Returns 443
  */
 define_function integer NAVHttpGetDefaultPort(char scheme[]) {
-    switch (scheme) {
+    switch (lower_string(scheme)) {
         case NAV_URL_SCHEME_HTTP: {
             return NAV_HTTP_PORT
         }
@@ -611,7 +611,7 @@ define_function char[NAV_MAX_BUFFER] NAVHttpBuildHeaders(_NAVHttpHeaderCollectio
 define_function char[NAV_MAX_BUFFER] NAVHttpBuildResponse(_NAVHttpResponse res) {
     stack_var char result[NAV_MAX_BUFFER]
 
-    result = "res.Status.Code, ' ', NAVHttpGetStatusMessage(res.Status.Code), NAV_CR, NAV_LF"
+    result = "NAV_HTTP_VERSION_1_1, ' ', itoa(res.Status.Code), ' ', NAVHttpGetStatusMessage(res.Status.Code), NAV_CR, NAV_LF"
     result = "result, NAVHttpBuildHeaders(res.Headers), NAV_CR, NAV_LF"
 
     if (!length_array(res.Body)) {
@@ -1125,14 +1125,60 @@ define_function char NAVHttpParseHeaders(char headerBlock[], _NAVHttpHeaderColle
 
 
 /**
+ * @function NAVHttpResponseMayHaveBody
+ * @public
+ * @description Determines if an HTTP response may have a body based on status code.
+ *
+ * Certain status codes never have response bodies according to HTTP specification:
+ * - 1xx (Informational): 100-199
+ * - 204 (No Content)
+ * - 304 (Not Modified)
+ *
+ * @param {_NAVHttpResponse} res - The response structure to check
+ *
+ * @returns {char} TRUE if response should have a body, FALSE otherwise
+ *
+ * @example
+ * stack_var _NAVHttpResponse response
+ * stack_var char hasBody
+ *
+ * // After parsing headers
+ * hasBody = NAVHttpResponseMayHaveBody(response)
+ *
+ * @see NAVHttpParseResponseHeaders
+ */
+define_function char NAVHttpResponseMayHaveBody(_NAVHttpResponse res) {
+    // 1xx informational responses never have bodies
+    if (res.Status.Code >= 100 && res.Status.Code < 200) {
+        return false
+    }
+
+    // 204 No Content never has a body
+    if (res.Status.Code == 204) {
+        return false
+    }
+
+    // 304 Not Modified never has a body
+    if (res.Status.Code == 304) {
+        return false
+    }
+
+    // All other status codes may have bodies
+    return true
+}
+
+
+/**
  * @function NAVHttpParseResponseHeaders
  * @public
  * @description Parses HTTP response status line and headers.
  *
- * This function is designed for real-world NetLinx device communication where
- * the response arrives in chunks. Use NAVStringGather to extract data up to and
- * including the double CRLF (13,10,13,10), then parse the headers. The body can
- * be processed separately once Content-Length bytes have been received.
+ * This function parses the status line and headers from an HTTP response buffer.
+ * The buffer should contain at least the complete headers (up to and including
+ * the double CRLF: 13,10,13,10). Body parsing is handled separately.
+ *
+ * For incremental response processing, use NAVHttpProcessResponseBuffer which
+ * handles state management and callbacks.
  *
  * @param {char[]} buffer - Response buffer containing status line and headers (up to double CRLF)
  * @param {_NAVHttpResponse} res - The response structure to populate
@@ -1141,20 +1187,27 @@ define_function char NAVHttpParseHeaders(char headerBlock[], _NAVHttpHeaderColle
  *
  * @example
  * stack_var _NAVHttpResponse response
- * stack_var char headers[NAV_MAX_BUFFER]
+ * stack_var char buffer[NAV_MAX_BUFFER]
  * stack_var char result
  *
- * // Use NAVStringGather to extract headers from device buffer
- * headers = NAVStringGather(deviceBuffer, "13,10,13,10", true)
- * result = NAVHttpParseResponseHeaders(headers, response)
+ * // Parse headers from complete header buffer
+ * buffer = "'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
+ *           'Content-Type: application/json', NAV_CR, NAV_LF,
+ *           NAV_CR, NAV_LF"
+ * result = NAVHttpParseResponseHeaders(buffer, response)
  *
  * // Now you have response.Status and response.Headers
  * // Body can be extracted separately based on Content-Length
+ *
+ * NOTE: This library only supports responses with Content-Length headers.
+ * Responses using Transfer-Encoding (e.g., chunked) are not supported.
  *
  * @see NAVHttpParseResponseBody
  * @see NAVHttpParseResponse
  * @see NAVHttpParseStatusLine
  * @see NAVHttpParseHeaders
+ * @see NAVHttpResponseMayHaveBody
+ * @see NAVHttpProcessResponseBuffer
  */
 define_function char NAVHttpParseResponseHeaders(char buffer[], _NAVHttpResponse res) {
     stack_var integer firstLineEnd
@@ -1202,6 +1255,29 @@ define_function char NAVHttpParseResponseHeaders(char buffer[], _NAVHttpResponse
         return false
     }
 
+    // Warn if Transfer-Encoding is present (not supported)
+    if (NAVHttpHeaderKeyExists(res.Headers, 'Transfer-Encoding')) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                    __NAV_FOUNDATION_HTTPUTILS__,
+                                    'NAVHttpParseResponseHeaders',
+                                    "'Transfer-Encoding header detected - this library only supports Content-Length'")
+    }
+
+    // Populate the common headers
+    if (NAVHttpHeaderKeyExists(res.Headers, NAV_HTTP_HEADER_CONTENT_TYPE)) {
+        res.ContentType = NAVHttpGetHeaderValue(res.Headers, NAV_HTTP_HEADER_CONTENT_TYPE)
+    }
+
+    if (NAVHttpHeaderKeyExists(res.Headers, NAV_HTTP_HEADER_CONTENT_LENGTH)) {
+        if (!NAVParseLong(NAVHttpGetHeaderValue(res.Headers, NAV_HTTP_HEADER_CONTENT_LENGTH), res.ContentLength)) {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_HTTPUTILS__,
+                                        'NAVHttpParseResponseHeaders',
+                                        "'Invalid Content-Length header value'")
+            return false
+        }
+    }
+
     return true
 }
 
@@ -1209,69 +1285,52 @@ define_function char NAVHttpParseResponseHeaders(char buffer[], _NAVHttpResponse
 /**
  * @function NAVHttpParseResponseBody
  * @public
- * @description Extracts and validates the HTTP response body.
+ * @description Extracts the response body from buffer based on Content-Length header.
  *
- * This function is designed to be called after NAVHttpParseResponseHeaders once
- * the body data has been received from the device. If Content-Length header is
- * present, it validates that the body matches the expected length.
+ * This function reads the Content-Length header from the response structure
+ * and extracts exactly that many bytes from the buffer. The response must
+ * have headers already parsed via NAVHttpParseResponseHeaders.
  *
- * @param {char[]} buffer - Buffer containing the response body
- * @param {_NAVHttpResponse} res - The response structure to populate with body
+ * This library only supports responses with Content-Length headers.
  *
- * @returns {char} TRUE if body extraction succeeded, FALSE otherwise
+ * @param {char[]} buffer - Buffer containing the response body data
+ * @param {_NAVHttpResponse} res - The response structure with parsed headers
+ *
+ * @returns {char} TRUE if extraction succeeded, FALSE otherwise
  *
  * @example
  * stack_var _NAVHttpResponse response
  * stack_var char buffer[NAV_MAX_BUFFER]
- * stack_var integer length
  * stack_var char result
  *
- * // After parsing headers, get Content-Length
- * length = atoi(NAVHttpGetHeaderValue(response.Headers, 'Content-Length'))
+ * // After parsing headers
+ * NAVHttpParseResponseHeaders(headerData, response)
  *
- * // Wait until we have enough data in device buffer
- * if (length_array(deviceBuffer) >= length) {
- *     buffer = get_buffer_string(deviceBuffer, length)
- *     result = NAVHttpParseResponseBody(buffer, response)
- * }
+ * // Wait until we have enough body data in device buffer
+ * // Then extract body
+ * result = NAVHttpParseResponseBody(bodyData, response)
  *
  * @see NAVHttpParseResponseHeaders
- * @see NAVHttpParseResponse
+ * @see NAVHttpResponseMayHaveBody
  */
 define_function char NAVHttpParseResponseBody(char buffer[], _NAVHttpResponse res) {
-    stack_var integer length
-
-    // Validate against Content-Length if present
-    if (!NAVHttpHeaderKeyExists(res.Headers, NAV_HTTP_HEADER_CONTENT_LENGTH)) {
+    // Content-Length is already validated and cached in res.ContentLength
+    if (res.ContentLength == 0) {
         res.Body = ''
         return true
     }
 
-    length = atoi(NAVHttpGetHeaderValue(res.Headers, NAV_HTTP_HEADER_CONTENT_LENGTH))
-
-    if (length < 0) {
+    // Validate buffer has enough data
+    if (length_array(buffer) < res.ContentLength) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_HTTPUTILS__,
                                     'NAVHttpParseResponseBody',
-                                    "'Invalid Content-Length header value'")
+                                    "'Buffer length ', itoa(length_array(buffer)), ' is less than Content-Length ', itoa(res.ContentLength)")
         return false
     }
 
-    if (length_array(buffer) < length) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_HTTPUTILS__,
-                                    'NAVHttpParseResponseBody',
-                                    "'Buffer length ', itoa(length_array(buffer)), ' is less than Content-Length ', itoa(length)")
-        return false
-    }
-
-    if (length == 0) {
-        res.Body = ''
-        return true
-    }
-
-    res.Body = NAVRemoveStringByLength(buffer, length)
-
+    // Extract exactly ContentLength bytes from buffer
+    res.Body = get_buffer_string(buffer, res.ContentLength)
     return true
 }
 
@@ -1279,14 +1338,21 @@ define_function char NAVHttpParseResponseBody(char buffer[], _NAVHttpResponse re
 /**
  * @function NAVHttpParseResponse
  * @public
- * @description Parses a complete HTTP response into a response structure.
+ * @description Parses HTTP response status line and headers only.
  *
- * This is a convenience function that parses the status line, headers, and body
- * from a complete HTTP response string. For real-world device communication where
- * responses arrive in chunks, use NAVHttpParseResponseHeaders followed by
- * NAVHttpParseResponseBody instead.
+ * This function parses only the status line and headers from an HTTP response.
+ * It does NOT parse the body - body parsing is a completely separate step.
  *
- * @param {char[]} buffer - Complete raw HTTP response string
+ * After calling this function:
+ * 1. Check if response may have body: NAVHttpResponseMayHaveBody()
+ * 2. Check body length: response.ContentLength
+ * 3. Wait for body data in your device buffer
+ * 4. Extract body: NAVHttpParseResponseBody()
+ *
+ * The buffer should contain at least the complete headers (up to and including
+ * the double CRLF). Any data after the double CRLF is ignored.
+ *
+ * @param {char[]} buffer - Buffer containing at least the complete HTTP response headers
  * @param {_NAVHttpResponse} res - The response structure to populate
  *
  * @returns {char} TRUE if parsing succeeded, FALSE otherwise
@@ -1294,24 +1360,29 @@ define_function char NAVHttpParseResponseBody(char buffer[], _NAVHttpResponse re
  * @example
  * stack_var _NAVHttpResponse response
  * stack_var char buffer[NAV_MAX_BUFFER]
+ * stack_var long bodyLength
  * stack_var char result
  *
+ * // Parse headers only
  * buffer = "'HTTP/1.1 200 OK', NAV_CR, NAV_LF,
  *           'Content-Type: application/json', NAV_CR, NAV_LF,
- *           NAV_CR, NAV_LF,
- *           '{"status":"ok"}'"
+ *           'Content-Length: 15', NAV_CR, NAV_LF,
+ *           NAV_CR, NAV_LF"
  * result = NAVHttpParseResponse(buffer, response)
+ *
+ * // Now separately handle body
+ * if (NAVHttpResponseMayHaveBody(response)) {
+ *     if (response.ContentLength > 0) {
+ *         // ... wait for response.ContentLength bytes ...
+ *         // NAVHttpParseResponseBody(bodyData, response)
+ *     }
+ * }
  *
  * @see NAVHttpParseResponseHeaders
  * @see NAVHttpParseResponseBody
- * @see NAVHttpParseStatusLine
- * @see NAVHttpParseHeaders
+ * @see NAVHttpResponseMayHaveBody
  */
 define_function char NAVHttpParseResponse(char buffer[], _NAVHttpResponse res) {
-    stack_var integer headerEnd
-    stack_var char headerBuffer[NAV_MAX_BUFFER]
-    stack_var char bodyBuffer[NAV_MAX_BUFFER]
-
     if (!length_array(buffer)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_HTTPUTILS__,
@@ -1320,47 +1391,235 @@ define_function char NAVHttpParseResponse(char buffer[], _NAVHttpResponse res) {
         return false
     }
 
-    // Find end of headers (double CRLF)
-    headerEnd = NAVIndexOf(buffer, "NAV_CR, NAV_LF, NAV_CR, NAV_LF", 1)
+    // Just parse headers - body parsing is separate
+    return NAVHttpParseResponseHeaders(buffer, res)
+}
 
-    if (!headerEnd) {
-        // No double CRLF found - might just be headers without body
-        headerBuffer = buffer
-        bodyBuffer = ''
+
+/**
+ * HTTP Response Buffer Processing Functions
+ *
+ * These functions provide a high-level buffer processing pattern for HTTP responses.
+ * They handle state management, incremental data arrival, and callbacks for headers,
+ * body, and completion events.
+ *
+ * Use NAVHttpProcessResponseBuffer for automatic incremental response processing
+ * from device buffers. It manages state transitions and calls your callbacks when
+ * headers or body data is available.
+ */
+
+// Callback function prototypes - users implement these in their code:
+// #DEFINE USING_NAV_HTTP_RESPONSE_HEADERS_CALLBACK
+// define_function NAVHttpResponseHeadersCallback(_NAVHttpResponseHeadersResult result) {}
+//
+// #DEFINE USING_NAV_HTTP_RESPONSE_BODY_CALLBACK
+// define_function NAVHttpResponseBodyCallback(_NAVHttpResponseBodyResult result) {}
+//
+// #DEFINE USING_NAV_HTTP_RESPONSE_COMPLETE_CALLBACK
+// define_function NAVHttpResponseCompleteCallback(_NAVHttpResponseCompleteResult result) {}
+
+
+/**
+ * @function NAVHttpResponseBufferInit
+ * @public
+ * @description Initializes an HTTP response buffer structure.
+ *
+ * Call this before using the buffer to process HTTP responses.
+ *
+ * @param {_NAVHttpResponseBuffer} buffer - The buffer structure to initialize
+ *
+ * @returns {void}
+ *
+ * @example
+ * stack_var _NAVHttpResponseBuffer buffer
+ * NAVHttpResponseBufferInit(buffer)
+ *
+ * @see NAVHttpProcessResponseBuffer
+ */
+define_function NAVHttpResponseBufferInit(_NAVHttpResponseBuffer buffer) {
+    buffer.Data = ''
+    buffer.Semaphore = false
+    buffer.State = NAV_HTTP_STATE_IDLE
+    buffer.ContentLength = 0
+}
+
+
+/**
+ * @function NAVHttpProcessResponseBuffer
+ * @public
+ * @description Processes HTTP response data from a buffer using a state machine approach.
+ *
+ * This function implements a callback-based pattern for processing HTTP responses
+ * incrementally as data arrives. It extracts raw data and passes it to callbacks
+ * where users parse and process it.
+ *
+ * The function handles:
+ * - State management (IDLE -> PARSING_HEADERS -> PARSING_BODY)
+ * - Data extraction based on delimiters (headers) or byte counts (body)
+ * - Callbacks with raw data for user processing
+ * - Automatic buffer cleanup and reset after complete response
+ *
+ * The buffer should be connected to a device using create_buffer in your code.
+ * This function is typically called from a data_event[device] string handler.
+ *
+ * Users must implement callback functions and enable them with #DEFINE:
+ * - #DEFINE USING_NAV_HTTP_RESPONSE_HEADERS_CALLBACK
+ * - #DEFINE USING_NAV_HTTP_RESPONSE_BODY_CALLBACK (optional)
+ * - #DEFINE USING_NAV_HTTP_RESPONSE_COMPLETE_CALLBACK (optional)
+ *
+ * State transitions:
+ * - User sets buffer.State = NAV_HTTP_STATE_PARSING_BODY in headers callback if body expected
+ * - User sets buffer.ContentLength in headers callback to specify body length
+ * - Buffer automatically resets to IDLE after body processing
+ *
+ * @param {_NAVHttpResponseBuffer} buffer - Buffer structure with received HTTP data
+ *
+ * @returns {void}
+ *
+ * @example
+ * // In DEFINE_VARIABLE:
+ * volatile _NAVHttpResponseBuffer httpBuffer
+ * volatile _NAVHttpResponse myResponse
+ *
+ * // In DEFINE_START:
+ * NAVHttpResponseBufferInit(httpBuffer)
+ * create_buffer dvSocket, httpBuffer.Data
+ *
+ * // In data_event:
+ * data_event[dvSocket] {
+ *     string: {
+ *         NAVHttpProcessResponseBuffer(httpBuffer)
+ *     }
+ * }
+ *
+ * // Define callbacks:
+ * #DEFINE USING_NAV_HTTP_RESPONSE_HEADERS_CALLBACK
+ * define_function NAVHttpResponseHeadersCallback(_NAVHttpResponseHeadersResult result) {
+ *     // Parse headers
+ *     if (!NAVHttpParseResponseHeaders(result.Data, myResponse)) {
+ *         return
+ *     }
+ *
+ *     // Check if body expected
+ *     if (NAVHttpResponseMayHaveBody(myResponse) && myResponse.ContentLength > 0) {
+ *         httpBuffer.ContentLength = myResponse.ContentLength
+ *         httpBuffer.State = NAV_HTTP_STATE_PARSING_BODY
+ *     }
+ * }
+ *
+ * #DEFINE USING_NAV_HTTP_RESPONSE_BODY_CALLBACK
+ * define_function NAVHttpResponseBodyCallback(_NAVHttpResponseBodyResult result) {
+ *     // Parse body
+ *     NAVHttpParseResponseBody(result.Data, myResponse)
+ *     // Process complete response...
+ * }
+ *
+ * #DEFINE USING_NAV_HTTP_RESPONSE_COMPLETE_CALLBACK
+ * define_function NAVHttpResponseCompleteCallback(_NAVHttpResponseCompleteResult result) {
+ *     // Cleanup, notifications, restart timelines, etc.
+ * }
+ *
+ * @see NAVHttpResponseBufferInit
+ * @see _NAVHttpResponseBuffer
+ */
+define_function NAVHttpProcessResponseBuffer(_NAVHttpResponseBuffer buffer) {
+    stack_var char data[NAV_HTTP_MAX_RESPONSE_BODY]
+
+    // Prevent concurrent access
+    if (buffer.Semaphore) {
+        return
     }
-    else {
-        // Split into headers and body
-        headerBuffer = left_string(buffer, headerEnd + 3)  // Include double CRLF
 
-        if (headerEnd + 3 < length_array(buffer)) {
-            bodyBuffer = right_string(buffer, length_array(buffer) - headerEnd - 3)
+    buffer.Semaphore = true
+
+    // Initialize state if needed
+    if (buffer.State == NAV_HTTP_STATE_IDLE) {
+        buffer.State = NAV_HTTP_STATE_PARSING_HEADERS
+    }
+
+    // Process buffer while data available
+    while (length_array(buffer.Data)) {
+        switch (buffer.State) {
+            case NAV_HTTP_STATE_PARSING_HEADERS: {
+                // Wait for complete headers (CRLF CRLF delimiter)
+                if (!NAVContains(buffer.Data, NAV_HTTP_HEADER_DELIMITER)) {
+                    // Not enough data yet - wait for more
+                    break
+                }
+
+                // Extract headers up to and including delimiter
+                data = remove_string(buffer.Data, NAV_HTTP_HEADER_DELIMITER, 1)
+
+                if (!length_array(data)) {
+                    continue
+                }
+
+                // Fire headers callback with raw data
+                // User parses and decides if body expected
+                #IF_DEFINED USING_NAV_HTTP_RESPONSE_HEADERS_CALLBACK
+                {
+                    stack_var _NAVHttpResponseHeadersResult headersResult
+                    headersResult.Data = data
+                    NAVHttpResponseHeadersCallback(headersResult)
+                }
+                #END_IF
+
+                // Check if user transitioned to body parsing state
+                if (buffer.State == NAV_HTTP_STATE_PARSING_BODY) {
+                    continue  // Keep processing
+                }
+
+                // No body expected - fire complete callback and reset
+                #IF_DEFINED USING_NAV_HTTP_RESPONSE_COMPLETE_CALLBACK
+                {
+                    stack_var _NAVHttpResponseCompleteResult completeResult
+                    completeResult.State = NAV_HTTP_STATE_PARSING_HEADERS
+                    NAVHttpResponseCompleteCallback(completeResult)
+                }
+                #END_IF
+
+                // Reset buffer for next response
+                NAVHttpResponseBufferInit(buffer)
+                break
+            }
+
+            case NAV_HTTP_STATE_PARSING_BODY: {
+                // Wait for complete body based on ContentLength
+                if (length_array(buffer.Data) < buffer.ContentLength) {
+                    // Not enough data yet - wait for more
+                    break
+                }
+
+                // Fire body callback with raw buffer
+                // User calls NAVHttpParseResponseBody which extracts exact ContentLength bytes
+                #IF_DEFINED USING_NAV_HTTP_RESPONSE_BODY_CALLBACK
+                {
+                    stack_var _NAVHttpResponseBodyResult bodyResult
+                    bodyResult.Data = buffer.Data
+                    NAVHttpResponseBodyCallback(bodyResult)
+                }
+                #END_IF
+
+                // Fire complete callback
+                #IF_DEFINED USING_NAV_HTTP_RESPONSE_COMPLETE_CALLBACK
+                {
+                    stack_var _NAVHttpResponseCompleteResult completeResult
+                    completeResult.State = NAV_HTTP_STATE_PARSING_BODY
+                    NAVHttpResponseCompleteCallback(completeResult)
+                }
+                #END_IF
+
+                // Reset buffer for next response
+                NAVHttpResponseBufferInit(buffer)
+                break
+            }
         }
-        else {
-            bodyBuffer = ''
-        }
+
+        // If we broke out of the switch, exit the while loop
+        break
     }
 
-    // Parse headers first
-    if (!NAVHttpParseResponseHeaders(headerBuffer, res)) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_HTTPUTILS__,
-                                    'NAVHttpParseResponse',
-                                    "'Failed to parse headers'")
-        return false
-    }
-
-    // Parse body if present
-    if (length_array(bodyBuffer)) {
-        if (!NAVHttpParseResponseBody(bodyBuffer, res)) {
-            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                        __NAV_FOUNDATION_HTTPUTILS__,
-                                        'NAVHttpParseResponse',
-                                        "'Failed to parse body'")
-            return false
-        }
-    }
-
-    return true
+    buffer.Semaphore = false
 }
 
 

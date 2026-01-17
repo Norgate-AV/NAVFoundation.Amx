@@ -2,455 +2,429 @@ PROGRAM_NAME='HttpRequestHeaders'
 
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.Assert.axi'
-#include 'NAVFoundation.Testing.axi'
+
+DEFINE_CONSTANT
+
+// Test vectors for NAVHttpRequestAddHeader
+constant char REQUEST_ADD_HEADER_TEST[][2][2048] = {
+    // Key, Value
+    {'Content-Type', 'application/json'},
+    {'Authorization', 'Bearer TOKEN123'},
+    {'', 'value'},  // Empty key - should fail
+    {'X-Empty-Header', ''},  // Empty value - should fail
+    {'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', 'value'},  // Long key
+    {'X-Long-Value', 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'},  // Long value
+    {'X-Special-Key_123', 'test-value'},  // Special chars in key
+    {'123', 'numeric-key'}  // Numeric key
+}
+
+constant char REQUEST_ADD_HEADER_EXPECTED[] = {
+    true,   // Test 1: Normal header
+    true,   // Test 2: Second header
+    false,  // Test 3: Empty key should fail
+    false,  // Test 4: Empty value should fail
+    true,   // Test 5: Long key should succeed
+    true,   // Test 6: Long value should succeed
+    true,   // Test 7: Special chars should succeed
+    true    // Test 8: Numeric key should succeed
+}
+
+// Test vectors for NAVHttpRequestUpdateHeader
+constant char REQUEST_UPDATE_HEADER_TEST[][3][2048] = {
+    // Key, Initial Value, New Value
+    {'Content-Type', 'text/plain', 'application/json'},
+    {'Authorization', 'Bearer OLD_TOKEN', 'Bearer NEW_TOKEN'},
+    {'X-Non-Existent', '', 'value'},  // Non-existent key - should fail
+    {'', 'value', 'new-value'},  // Empty key - should fail
+    {'User-Agent', 'Old-Agent/1.0', 'New-Agent/2.0'},  // Normal update
+    {'Content-Type', 'application/json', 'application/xml'},  // Update again
+    {'X-Custom', 'old', 'new'}  // Custom header update
+}
+
+constant char REQUEST_UPDATE_HEADER_EXPECTED[] = {
+    true,   // Test 1: Normal update
+    true,   // Test 2: Authorization update
+    false,  // Test 3: Non-existent key should fail
+    false,  // Test 4: Empty key should fail
+    true,   // Test 5: Normal update
+    true,   // Test 6: Update again
+    true    // Test 7: Custom header update
+}
+
+// Test vectors for NAVHttpHeaderHelpers
+constant char HEADER_HELPER_TEST[][3][2048] = {
+    // Operation, Key, Expected Value
+    {'exists', 'Content-Type', '1'},  // Check if header exists
+    {'value', 'Content-Type', 'application/json'},  // Get header value
+    {'exists', 'Authorization', '1'},  // Check another header
+    {'value', 'Authorization', 'Bearer TOKEN'},  // Get auth value
+    {'exists', 'X-Missing', '0'},  // Non-existent header
+    {'value', 'X-Custom', 'custom-value'},  // Custom header value
+    {'value', 'X-Missing', ''},  // Missing header returns empty
+    {'exists', 'X-Custom', '1'},  // Custom header exists
+    {'exists', 'Host', '1'},  // Host header exists
+    {'value', 'Host', 'example.com'}  // Host value
+}
+
+constant char HEADER_HELPER_SETUP[][2][2048] = {
+    // Key, Value
+    {'Content-Type', 'application/json'},
+    {'Authorization', 'Bearer TOKEN'},
+    {'X-Custom', 'custom-value'}
+}
+
+// Test vectors for NAVHttpResponseAddHeader
+constant char RESPONSE_ADD_HEADER_TEST[][2][2048] = {
+    // Key, Value
+    {'Content-Type', 'application/json'},
+    {'Content-Length', '1234'},
+    {'', 'value'},  // Empty key - should fail
+    {'X-Empty', ''}  // Empty value - should fail
+}
+
+constant char RESPONSE_ADD_HEADER_EXPECTED[] = {
+    true,   // Test 1: Normal header
+    true,   // Test 2: Content-Length
+    false,  // Test 3: Empty key should fail
+    false   // Test 4: Empty value should fail
+}
+
+// Test vectors for NAVHttpResponseUpdateHeader
+constant char RESPONSE_UPDATE_HEADER_TEST[][3][2048] = {
+    // Key, Initial Value, New Value
+    {'Content-Type', 'text/plain', 'application/json'},
+    {'X-NonExistent', '', 'value'},  // Non-existent key - should fail
+    {'', 'value', 'new'}  // Empty key - should fail
+}
+
+constant char RESPONSE_UPDATE_HEADER_EXPECTED[] = {
+    true,   // Test 1: Normal update
+    false,  // Test 2: Non-existent key should fail
+    false   // Test 3: Empty key should fail
+}
+
+// Test vectors for Header Edge Cases
+constant char HEADER_EDGE_CASE_TEST[][2][2048] = {
+    // Description, Test Data
+    {'max-headers', 'Content-Type'},  // Test max headers limit
+    {'case-sensitive-lookup', 'Content-Type'},  // Case sensitive lookup test
+    {'update-preserves-order', 'Accept'},  // Update header preserves order
+    {'get-first-header', 'Host'},  // Get header value for first header
+    {'trailing-spaces', 'X-Trailing  '},  // Trailing spaces in value
+    {'special-chars', 'X-Special!@#$%'}  // Special chars in value
+}
+
+constant char HEADER_EDGE_CASE_EXPECTED[] = {
+    true,   // Test 1: Should handle max headers
+    false,  // Test 2: Case-sensitive lookup should fail (content-type != Content-Type)
+    true,   // Test 3: Update should preserve order
+    true,   // Test 4: Should get first header
+    true,   // Test 5: Trailing spaces should work
+    true    // Test 6: Special chars should work
+}
+
+// Test vectors for Header Validation
+constant char HEADER_VALIDATION_TEST[][3][2048] = {
+    // Key, Value, Description
+    {'Content-Type', 'application/json', 'valid'},
+    {'Content-Length', '1234', 'valid number'},
+    {'X-Custom', 'any-value-here', 'custom header'},
+    {'Authorization', 'Bearer abc123', 'auth token'},
+    {'Accept', '*/*', 'wildcard accept'},
+    {'Cache-Control', 'no-cache, no-store, must-revalidate', 'complex value'},
+    {'Set-Cookie', 'sessionId=abc123; Path=/; HttpOnly', 'cookie with semicolons'},
+    {'User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'complex user agent'},
+    {'X-Forwarded-For', '203.0.113.195, 70.41.3.18, 150.172.238.178', 'multiple IPs'}
+}
+
+constant char HEADER_VALIDATION_EXPECTED[] = {
+    true,  // Test 1
+    true,  // Test 2
+    true,  // Test 3
+    true,  // Test 4
+    true,  // Test 5
+    true,  // Test 6
+    true,  // Test 7
+    true,  // Test 8
+    true   // Test 9
+}
 
 define_function TestNAVHttpRequestAddHeader() {
-    stack_var _NAVHttpRequest request
-    stack_var _NAVUrl url
-    stack_var char result
+    stack_var integer x
     stack_var integer initialHeaderCount
 
-    NAVLog("'***************** NAVHttpRequestAddHeader *****************'")
+    NAVLogTestSuiteStart("'NAVHttpRequestAddHeader'")
 
-    // Initialize a request (this adds Host header automatically)
-    NAVParseUrl('http://example.com/test', url)
-    NAVHttpRequestInit(request, 'GET', url, '')
-    initialHeaderCount = request.Headers.Count  // Should be 1 (Host header)
+    for (x = 1; x <= length_array(REQUEST_ADD_HEADER_TEST); x++) {
+        stack_var _NAVHttpRequest request
+        stack_var _NAVUrl url
+        stack_var char result
 
-    // Test 1: Add first header
-    result = NAVHttpRequestAddHeader(request, 'Content-Type', 'application/json')
+        // Initialize a request (this adds Host header automatically)
+        NAVParseUrl('http://example.com/test', url)
+        NAVHttpRequestInit(request, 'GET', url, '')
+        initialHeaderCount = request.Headers.Count
 
-    if (result != true || request.Headers.Count != (initialHeaderCount + 1) ||
-        request.Headers.Headers[request.Headers.Count].Key != 'Content-Type' ||
-        request.Headers.Headers[request.Headers.Count].Value != 'application/json') {
-        NAVLogTestFailed(1, 'Header added successfully', 'Header add failed')
-        return
+        result = NAVHttpRequestAddHeader(request,
+                                         REQUEST_ADD_HEADER_TEST[x][1],
+                                         REQUEST_ADD_HEADER_TEST[x][2])
+
+        if (!NAVAssertBooleanEqual('Should return expected result',
+                                   REQUEST_ADD_HEADER_EXPECTED[x],
+                                   result)) {
+            NAVLogTestFailed(x,
+                            NAVBooleanToString(REQUEST_ADD_HEADER_EXPECTED[x]),
+                            NAVBooleanToString(result))
+            continue
+        }
+
+        // Verify header count changed appropriately
+        if (REQUEST_ADD_HEADER_EXPECTED[x]) {
+            if (!NAVAssertIntegerEqual('Header count should increase',
+                                      initialHeaderCount + 1,
+                                      request.Headers.Count)) {
+                NAVLogTestFailed(x, 'Count increased', "'Count: ', itoa(request.Headers.Count)")
+                continue
+            }
+
+            // Verify the header was added correctly
+            if (!NAVAssertStringEqual('Header key should match',
+                                     REQUEST_ADD_HEADER_TEST[x][1],
+                                     request.Headers.Headers[request.Headers.Count].Key)) {
+                NAVLogTestFailed(x,
+                                REQUEST_ADD_HEADER_TEST[x][1],
+                                request.Headers.Headers[request.Headers.Count].Key)
+                continue
+            }
+
+            if (!NAVAssertStringEqual('Header value should match',
+                                     REQUEST_ADD_HEADER_TEST[x][2],
+                                     request.Headers.Headers[request.Headers.Count].Value)) {
+                NAVLogTestFailed(x,
+                                REQUEST_ADD_HEADER_TEST[x][2],
+                                request.Headers.Headers[request.Headers.Count].Value)
+                continue
+            }
+        }
+        else {
+            // Failed operations should not change count
+            if (!NAVAssertIntegerEqual('Header count should not change',
+                                      initialHeaderCount,
+                                      request.Headers.Count)) {
+                NAVLogTestFailed(x, 'Count unchanged', "'Count: ', itoa(request.Headers.Count)")
+                continue
+            }
+        }
+
+        NAVLogTestPassed(x)
     }
 
-    NAVLogTestPassed(1)
-
-    // Test 2: Add second header
-    result = NAVHttpRequestAddHeader(request, 'Authorization', 'Bearer TOKEN123')
-
-    if (result != true || request.Headers.Count != (initialHeaderCount + 2) ||
-        request.Headers.Headers[request.Headers.Count].Key != 'Authorization' ||
-        request.Headers.Headers[request.Headers.Count].Value != 'Bearer TOKEN123') {
-        NAVLogTestFailed(2, 'Second header added', 'Second header add failed')
-        return
-    }
-
-    NAVLogTestPassed(2)
-
-    // Test 3: Add header with empty key (should fail)
-    result = NAVHttpRequestAddHeader(request, '', 'value')
-
-    if (result != false || request.Headers.Count != (initialHeaderCount + 2)) {
-        NAVLogTestFailed(3, 'Add with empty key should fail', 'Add succeeded')
-        return
-    }
-
-    NAVLogTestPassed(3)
-
-    // Test 4: Add header with empty value (should fail)
-    result = NAVHttpRequestAddHeader(request, 'X-Empty-Header', '')
-
-    if (result != false || request.Headers.Count != (initialHeaderCount + 2)) {
-        NAVLogTestFailed(4, 'Add with empty value should fail', 'Add succeeded')
-        return
-    }
-
-    NAVLogTestPassed(4)
-
-    // Test 5: Add header with very long key (200+ chars)
-    result = NAVHttpRequestAddHeader(request, 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', 'value')
-
-    if (result == true && request.Headers.Count == (initialHeaderCount + 3)) {
-        NAVLogTestPassed(5)
-    }
-    else {
-        NAVLogTestFailed(5, 'Long key should succeed', 'Add failed')
-        return
-    }
-
-    // Test 6: Add header with very long value (300+ chars)
-    result = NAVHttpRequestAddHeader(request, 'X-Long-Value', 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-
-    if (result == true && request.Headers.Count == (initialHeaderCount + 4)) {
-        NAVLogTestPassed(6)
-    }
-    else {
-        NAVLogTestFailed(6, 'Long value should succeed', 'Add failed')
-        return
-    }
-
-    // Test 7: Add header with special characters in key
-    result = NAVHttpRequestAddHeader(request, 'X-Special-Key_123', 'test-value')
-
-    if (result == true && request.Headers.Count == (initialHeaderCount + 5)) {
-        NAVLogTestPassed(7)
-    }
-    else {
-        NAVLogTestFailed(7, 'Special chars in key should succeed', 'Add failed')
-        return
-    }
-
-    // Test 8: Add header with numeric key
-    result = NAVHttpRequestAddHeader(request, '123', 'numeric-key')
-
-    if (result == true && request.Headers.Count == (initialHeaderCount + 6)) {
-        NAVLogTestPassed(8)
-    }
-    else {
-        NAVLogTestFailed(8, 'Numeric key should succeed', 'Add failed')
-        return
-    }
+    NAVLogTestSuiteEnd("'NAVHttpRequestAddHeader'")
 }
 
-/**
- * Tests for NAVHttpRequestUpdateHeader function
- */
+
 define_function TestNAVHttpRequestUpdateHeader() {
-    stack_var _NAVHttpRequest request
-    stack_var _NAVUrl url
-    stack_var char result
-    stack_var integer contentTypeIndex
-    stack_var integer authIndex
+    stack_var integer x
 
-    NAVLog("'***************** NAVHttpRequestUpdateHeader *****************'")
+    NAVLogTestSuiteStart("'NAVHttpRequestUpdateHeader'")
 
-    // Initialize a request with headers
-    NAVParseUrl('http://example.com/test', url)
-    NAVHttpRequestInit(request, 'GET', url, '')
-    NAVHttpRequestAddHeader(request, 'Content-Type', 'text/plain')
-    NAVHttpRequestAddHeader(request, 'Authorization', 'Bearer OLD_TOKEN')
+    for (x = 1; x <= length_array(REQUEST_UPDATE_HEADER_TEST); x++) {
+        stack_var _NAVHttpRequest request
+        stack_var _NAVUrl url
+        stack_var char result
 
-    // Find the indices of our headers
-    contentTypeIndex = NAVHttpFindHeader(request.Headers, 'Content-Type')
-    authIndex = NAVHttpFindHeader(request.Headers, 'Authorization')
+        // Initialize request
+        NAVParseUrl('http://example.com/test', url)
+        NAVHttpRequestInit(request, 'GET', url, '')
 
-    // Test 1: Update existing header
-    result = NAVHttpRequestUpdateHeader(request, 'Content-Type', 'application/json')
+        // Add initial header if key is not empty
+        if (length_array(REQUEST_UPDATE_HEADER_TEST[x][1])) {
+            NAVHttpRequestAddHeader(request,
+                                   REQUEST_UPDATE_HEADER_TEST[x][1],
+                                   REQUEST_UPDATE_HEADER_TEST[x][2])
+        }
 
-    if (result != true || request.Headers.Headers[contentTypeIndex].Value != 'application/json') {
-        NAVLogTestFailed(1, 'Header updated', 'Update failed')
-        return
+        // Try to update
+        result = NAVHttpRequestUpdateHeader(request,
+                                           REQUEST_UPDATE_HEADER_TEST[x][1],
+                                           REQUEST_UPDATE_HEADER_TEST[x][3])
+
+        if (!NAVAssertBooleanEqual('Should return expected result',
+                                   REQUEST_UPDATE_HEADER_EXPECTED[x],
+                                   result)) {
+            NAVLogTestFailed(x,
+                            NAVBooleanToString(REQUEST_UPDATE_HEADER_EXPECTED[x]),
+                            NAVBooleanToString(result))
+            continue
+        }
+
+        // Verify value was updated if expected to succeed
+        if (REQUEST_UPDATE_HEADER_EXPECTED[x]) {
+            stack_var char value[2048]
+            value = NAVHttpGetHeaderValue(request.Headers, REQUEST_UPDATE_HEADER_TEST[x][1])
+
+            if (!NAVAssertStringEqual('Value should be updated',
+                                     REQUEST_UPDATE_HEADER_TEST[x][3],
+                                     value)) {
+                NAVLogTestFailed(x, REQUEST_UPDATE_HEADER_TEST[x][3], value)
+                continue
+            }
+        }
+
+        NAVLogTestPassed(x)
     }
 
-    NAVLogTestPassed(1)
-
-    // Test 2: Update second header
-    result = NAVHttpRequestUpdateHeader(request, 'Authorization', 'Bearer NEW_TOKEN')
-
-    if (result != true || request.Headers.Headers[authIndex].Value != 'Bearer NEW_TOKEN') {
-        NAVLogTestFailed(2, 'Second header updated', 'Update failed')
-        return
-    }
-
-    NAVLogTestPassed(2)
-
-    // Test 3: Update non-existent header (should fail)
-    result = NAVHttpRequestUpdateHeader(request, 'X-Non-Existent', 'value')
-
-    if (result != false) {
-        NAVLogTestFailed(3, 'Update should fail for non-existent header', 'Update succeeded')
-        return
-    }
-
-    NAVLogTestPassed(3)
-
-    // Test 4: Update with empty key (should fail)
-    result = NAVHttpRequestUpdateHeader(request, '', 'value')
-
-    if (result != false) {
-        NAVLogTestFailed(4, 'Update with empty key should fail', 'Update succeeded')
-        return
-    }
-
-    NAVLogTestPassed(4)
-
-    // Test 5: Update with very long value (300+ chars)
-    result = NAVHttpRequestUpdateHeader(request, 'Content-Type', 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB')
-
-    if (result == true && find_string(request.Headers.Headers[contentTypeIndex].Value, 'BBBB', 1) > 0) {
-        NAVLogTestPassed(5)
-    }
-    else {
-        NAVLogTestFailed(5, 'Update with long value should succeed', 'Update failed')
-        return
-    }
-
-    // Test 6: Update Host header
-    result = NAVHttpRequestUpdateHeader(request, 'Host', 'newhost.com')
-
-    if (result == true && NAVHttpGetHeaderValue(request.Headers, 'Host') == 'newhost.com') {
-        NAVLogTestPassed(6)
-    }
-    else {
-        NAVLogTestFailed(6, 'Host header update should succeed', 'Update failed')
-        return
-    }
-
-    // Test 7: Update same header multiple times
-    NAVHttpRequestUpdateHeader(request, 'Authorization', 'Token1')
-    NAVHttpRequestUpdateHeader(request, 'Authorization', 'Token2')
-    result = NAVHttpRequestUpdateHeader(request, 'Authorization', 'Token3')
-
-    if (result == true && request.Headers.Headers[authIndex].Value == 'Token3') {
-        NAVLogTestPassed(7)
-    }
-    else {
-        NAVLogTestFailed(7, 'Multiple updates should succeed', "'Value: ', request.Headers.Headers[authIndex].Value")
-        return
-    }
+    NAVLogTestSuiteEnd("'NAVHttpRequestUpdateHeader'")
 }
 
-/**
- * Tests for NAVHttpFindHeader, NAVHttpHeaderKeyExists, and NAVHttpGetHeaderValue
- */
+
 define_function TestNAVHttpHeaderHelpers() {
+    stack_var integer x
+    stack_var integer i
     stack_var _NAVHttpRequest request
     stack_var _NAVUrl url
-    stack_var integer index
-    stack_var integer contentTypeIndex
-    stack_var integer authIndex
-    stack_var char exists
-    stack_var char value[256]
 
-    NAVLog("'***************** NAVHttpHeaderHelpers *****************'")
+    NAVLogTestSuiteStart("'NAVHttpHeaderHelpers'")
 
-    // Setup (NAVHttpRequestInit adds Host header automatically)
+    // Setup: Initialize request and add test headers
     NAVParseUrl('http://example.com/test', url)
     NAVHttpRequestInit(request, 'GET', url, '')
-    NAVHttpRequestAddHeader(request, 'Content-Type', 'application/json')
-    NAVHttpRequestAddHeader(request, 'Authorization', 'Bearer TOKEN')
-    NAVHttpRequestAddHeader(request, 'Accept', '*/*')
 
-    // Get the actual indices of our headers
-    contentTypeIndex = NAVHttpFindHeader(request.Headers, 'Content-Type')
-    authIndex = NAVHttpFindHeader(request.Headers, 'Authorization')
-
-    // Test 1: Find existing header (should find Content-Type)
-    index = NAVHttpFindHeader(request.Headers, 'Content-Type')
-
-    if (index == 0) {
-        NAVLogTestFailed(1, 'Header found', 'Header not found')
-        return
+    for (i = 1; i <= length_array(HEADER_HELPER_SETUP); i++) {
+        NAVHttpRequestAddHeader(request,
+                               HEADER_HELPER_SETUP[i][1],
+                               HEADER_HELPER_SETUP[i][2])
     }
 
-    NAVLogTestPassed(1)
+    // Run tests
+    for (x = 1; x <= length_array(HEADER_HELPER_TEST); x++) {
+        stack_var char operation[50]
+        stack_var char key[2048]
+        stack_var char expectedValue[2048]
+        stack_var char result[2048]
 
-    // Test 2: Find second header (should find Authorization)
-    index = NAVHttpFindHeader(request.Headers, 'Authorization')
+        operation = HEADER_HELPER_TEST[x][1]
+        key = HEADER_HELPER_TEST[x][2]
+        expectedValue = HEADER_HELPER_TEST[x][3]
 
-    if (index == 0) {
-        NAVLogTestFailed(2, 'Header found', 'Header not found')
-        return
+        if (operation == 'exists') {
+            stack_var char exists
+            exists = NAVHttpHeaderKeyExists(request.Headers, key)
+
+            if (!NAVAssertBooleanEqual('Header existence should match',
+                                       atoi(expectedValue),
+                                       exists)) {
+                NAVLogTestFailed(x, expectedValue, NAVBooleanToString(exists))
+                continue
+            }
+        }
+        else if (operation == 'value') {
+            result = NAVHttpGetHeaderValue(request.Headers, key)
+
+            if (!NAVAssertStringEqual('Header value should match',
+                                     expectedValue,
+                                     result)) {
+                NAVLogTestFailed(x, expectedValue, result)
+                continue
+            }
+        }
+
+        NAVLogTestPassed(x)
     }
 
-    NAVLogTestPassed(2)
-
-    // Test 3: Find non-existent header
-    index = NAVHttpFindHeader(request.Headers, 'X-Non-Existent')
-
-    if (index != 0) {
-        NAVLogTestFailed(3, '0', itoa(index))
-        return
-    }
-
-    NAVLogTestPassed(3)
-
-    // Test 4: Check if header exists
-    exists = NAVHttpHeaderKeyExists(request.Headers, 'Accept')
-
-    if (exists != true) {
-        NAVLogTestFailed(4, 'true', NAVBooleanToString(exists))
-        return
-    }
-
-    NAVLogTestPassed(4)
-
-    // Test 5: Check non-existent header
-    exists = NAVHttpHeaderKeyExists(request.Headers, 'X-Missing')
-
-    if (exists != false) {
-        NAVLogTestFailed(5, 'false', NAVBooleanToString(exists))
-        return
-    }
-
-    NAVLogTestPassed(5)
-
-    // Test 6: Get header value
-    value = NAVHttpGetHeaderValue(request.Headers, 'Authorization')
-
-    if (value != 'Bearer TOKEN') {
-        NAVLogTestFailed(6, 'Bearer TOKEN', value)
-        return
-    }
-
-    NAVLogTestPassed(6)
-
-    // Test 7: Get non-existent header value
-    value = NAVHttpGetHeaderValue(request.Headers, 'X-Missing')
-
-    if (value != '') {
-        NAVLogTestFailed(7, '(empty)', value)
-        return
-    }
-
-    NAVLogTestPassed(7)
-
-    // Test 8: Find header with different case (should be case-sensitive)
-    index = NAVHttpFindHeader(request.Headers, 'authorization')
-
-    if (index == 0) {
-        NAVLogTestPassed(8)
-    }
-    else {
-        NAVLogTestFailed(8, 'Case-sensitive search should return 0', "'Index: ', itoa(index)")
-        return
-    }
-
-    // Test 9: Get value from first header in collection
-    value = NAVHttpGetHeaderValue(request.Headers, 'Host')
-
-    if (length_string(value) > 0) {
-        NAVLogTestPassed(9)
-    }
-    else {
-        NAVLogTestFailed(9, 'Should return host value', '(empty)')
-        return
-    }
-
-    // Test 10: Check header exists with trailing/leading spaces
-    NAVHttpRequestAddHeader(request, 'X-Spaces', 'value')
-    exists = NAVHttpHeaderKeyExists(request.Headers, 'X-Spaces')
-
-    if (exists == true) {
-        NAVLogTestPassed(10)
-    }
-    else {
-        NAVLogTestFailed(10, 'Header should exist', 'Not found')
-        return
-    }
+    NAVLogTestSuiteEnd("'NAVHttpHeaderHelpers'")
 }
 
-/**
- * Tests for NAVHttpResponseAddHeader function
- */
+
 define_function TestNAVHttpResponseAddHeader() {
-    stack_var _NAVHttpResponse response
-    stack_var char result
+    stack_var integer x
 
-    NAVLog("'***************** NAVHttpResponseAddHeader *****************'")
+    NAVLogTestSuiteStart("'NAVHttpResponseAddHeader'")
 
-    // Initialize response
-    NAVHttpResponseInit(response)
+    for (x = 1; x <= length_array(RESPONSE_ADD_HEADER_TEST); x++) {
+        stack_var _NAVHttpResponse response
+        stack_var char result
+        stack_var integer initialCount
 
-    // Test 1: Add first header to response
-    result = NAVHttpResponseAddHeader(response, 'Content-Type', 'application/json')
+        NAVHttpResponseInit(response)
+        initialCount = response.Headers.Count
 
-    if (result != true || response.Headers.Count != 1 ||
-        response.Headers.Headers[1].Key != 'Content-Type' ||
-        response.Headers.Headers[1].Value != 'application/json') {
-        NAVLogTestFailed(1, 'Response header added', 'Add failed')
-        return
+        result = NAVHttpResponseAddHeader(response,
+                                          RESPONSE_ADD_HEADER_TEST[x][1],
+                                          RESPONSE_ADD_HEADER_TEST[x][2])
+
+        if (!NAVAssertBooleanEqual('Should return expected result',
+                                   RESPONSE_ADD_HEADER_EXPECTED[x],
+                                   result)) {
+            NAVLogTestFailed(x,
+                            NAVBooleanToString(RESPONSE_ADD_HEADER_EXPECTED[x]),
+                            NAVBooleanToString(result))
+            continue
+        }
+
+        if (RESPONSE_ADD_HEADER_EXPECTED[x]) {
+            if (!NAVAssertIntegerEqual('Header count should increase',
+                                      initialCount + 1,
+                                      response.Headers.Count)) {
+                NAVLogTestFailed(x, 'Count increased', "'Count: ', itoa(response.Headers.Count)")
+                continue
+            }
+        }
+
+        NAVLogTestPassed(x)
     }
 
-    NAVLogTestPassed(1)
-
-    // Test 2: Add second header
-    result = NAVHttpResponseAddHeader(response, 'Server', 'NAVFoundation/1.0')
-
-    if (result != true || response.Headers.Count != 2 ||
-        response.Headers.Headers[2].Key != 'Server' ||
-        response.Headers.Headers[2].Value != 'NAVFoundation/1.0') {
-        NAVLogTestFailed(2, 'Second response header added', 'Add failed')
-        return
-    }
-
-    NAVLogTestPassed(2)
-
-    // Test 3: Add header with empty key (should fail)
-    result = NAVHttpResponseAddHeader(response, '', 'value')
-
-    if (result != false || response.Headers.Count != 2) {
-        NAVLogTestFailed(3, 'Add with empty key should fail', 'Add succeeded')
-        return
-    }
-
-    NAVLogTestPassed(3)
-
-    // Test 4: Add header with empty value (should fail)
-    result = NAVHttpResponseAddHeader(response, 'X-Custom', '')
-
-    if (result != false || response.Headers.Count != 2) {
-        NAVLogTestFailed(4, 'Add with empty value should fail', 'Add succeeded')
-        return
-    }
-
-    NAVLogTestPassed(4)
+    NAVLogTestSuiteEnd("'NAVHttpResponseAddHeader'")
 }
 
-/**
- * Tests for NAVHttpResponseUpdateHeader function
- */
+
 define_function TestNAVHttpResponseUpdateHeader() {
-    stack_var _NAVHttpResponse response
-    stack_var char result
-    stack_var integer contentTypeIndex
+    stack_var integer x
 
-    NAVLog("'***************** NAVHttpResponseUpdateHeader *****************'")
+    NAVLogTestSuiteStart("'NAVHttpResponseUpdateHeader'")
 
-    // Initialize response with headers
-    NAVHttpResponseInit(response)
-    NAVHttpResponseAddHeader(response, 'Content-Type', 'text/plain')
-    NAVHttpResponseAddHeader(response, 'Server', 'OldServer/1.0')
+    for (x = 1; x <= length_array(RESPONSE_UPDATE_HEADER_TEST); x++) {
+        stack_var _NAVHttpResponse response
+        stack_var char result
 
-    contentTypeIndex = NAVHttpFindHeader(response.Headers, 'Content-Type')
+        NAVHttpResponseInit(response)
 
-    // Test 1: Update existing header
-    result = NAVHttpResponseUpdateHeader(response, 'Content-Type', 'application/json')
+        // Add initial header if key exists
+        if (length_array(RESPONSE_UPDATE_HEADER_TEST[x][1])) {
+            NAVHttpResponseAddHeader(response,
+                                    RESPONSE_UPDATE_HEADER_TEST[x][1],
+                                    RESPONSE_UPDATE_HEADER_TEST[x][2])
+        }
 
-    if (result != true || response.Headers.Headers[contentTypeIndex].Value != 'application/json') {
-        NAVLogTestFailed(1, 'Response header updated', 'Update failed')
-        return
+        result = NAVHttpResponseUpdateHeader(response,
+                                            RESPONSE_UPDATE_HEADER_TEST[x][1],
+                                            RESPONSE_UPDATE_HEADER_TEST[x][3])
+
+        if (!NAVAssertBooleanEqual('Should return expected result',
+                                   RESPONSE_UPDATE_HEADER_EXPECTED[x],
+                                   result)) {
+            NAVLogTestFailed(x,
+                            NAVBooleanToString(RESPONSE_UPDATE_HEADER_EXPECTED[x]),
+                            NAVBooleanToString(result))
+            continue
+        }
+
+        NAVLogTestPassed(x)
     }
 
-    NAVLogTestPassed(1)
-
-    // Test 2: Update non-existent header (should fail)
-    result = NAVHttpResponseUpdateHeader(response, 'X-NonExistent', 'value')
-
-    if (result != false) {
-        NAVLogTestFailed(2, 'Update non-existent should fail', 'Update succeeded')
-        return
-    }
-
-    NAVLogTestPassed(2)
-
-    // Test 3: Update with empty key (should fail)
-    result = NAVHttpResponseUpdateHeader(response, '', 'value')
-
-    if (result != false) {
-        NAVLogTestFailed(3, 'Update with empty key should fail', 'Update succeeded')
-        return
-    }
-
-    NAVLogTestPassed(3)
+    NAVLogTestSuiteEnd("'NAVHttpResponseUpdateHeader'")
 }
 
-/**
- * Tests for multiple header operations and edge cases
- */
+
 define_function TestNAVHttpHeaderEdgeCases() {
     stack_var _NAVHttpRequest request
     stack_var _NAVUrl url
-    stack_var char result
     stack_var integer i
     stack_var integer maxHeaders
+    stack_var char result
     stack_var char headerKeys[9][50]
 
-    NAVLog("'***************** NAVHttpHeaderEdgeCases *****************'")
+    NAVLogTestSuiteStart("'NAVHttpHeaderEdgeCases'")
 
     // Test 1: Add maximum number of headers (10 max)
     NAVParseUrl('http://example.com/test', url)
@@ -479,24 +453,22 @@ define_function TestNAVHttpHeaderEdgeCases() {
 
     if (request.Headers.Count > 10) {
         NAVLogTestFailed(1, 'Should not exceed 10 headers', "'Exceeded with ', itoa(request.Headers.Count), ' headers'")
-        return
+    }
+    else {
+        NAVLogTestPassed(1)
     }
 
-    NAVLogTestPassed(1)
-
-    // Test 2: Case sensitivity in header lookup
+    // Test 2: Case-sensitive header lookup (should NOT find with different case)
     NAVParseUrl('http://example.com/test', url)
     NAVHttpRequestInit(request, 'GET', url, '')
     NAVHttpRequestAddHeader(request, 'Content-Type', 'application/json')
 
-    // Try to find with different case
+    // Try to find with different case (lookup is case-sensitive)
     if (NAVHttpFindHeader(request.Headers, 'content-type') == 0) {
-        // Case-sensitive lookup - should not find
         NAVLogTestPassed(2)
     }
     else {
         NAVLogTestFailed(2, 'Case-sensitive lookup expected', 'Found with different case')
-        return
     }
 
     // Test 3: Update header preserves order
@@ -511,12 +483,12 @@ define_function TestNAVHttpHeaderEdgeCases() {
 
     if (NAVHttpFindHeader(request.Headers, 'Accept') != i) {
         NAVLogTestFailed(3, 'Header position preserved', 'Position changed')
-        return
+    }
+    else {
+        NAVLogTestPassed(3)
     }
 
-    NAVLogTestPassed(3)
-
-    // Test 4: Get header value for first header in list
+    // Test 4: Get header value for first header in list (Host header)
     NAVParseUrl('http://example.com/test', url)
     NAVHttpRequestInit(request, 'GET', url, '')
 
@@ -525,142 +497,66 @@ define_function TestNAVHttpHeaderEdgeCases() {
     }
     else {
         NAVLogTestFailed(4, 'example.com', NAVHttpGetHeaderValue(request.Headers, 'Host'))
-        return
     }
 
-    // Test 5: Add duplicate header keys
+    // Test 5: Headers with trailing spaces in value
     NAVParseUrl('http://example.com/test', url)
     NAVHttpRequestInit(request, 'GET', url, '')
-    NAVHttpRequestAddHeader(request, 'Set-Cookie', 'cookie1=value1')
-    result = NAVHttpRequestAddHeader(request, 'Set-Cookie', 'cookie2=value2')
 
-    // Should allow duplicate keys or handle appropriately
-    if (result == true || result == false) {
+    result = NAVHttpRequestAddHeader(request, 'X-Trailing', 'value  ')
+
+    if (result == true) {
         NAVLogTestPassed(5)
     }
     else {
-        NAVLogTestFailed(5, 'Duplicate key handling', 'Unexpected behavior')
-        return
+        NAVLogTestFailed(5, 'Should allow trailing spaces', 'Failed')
     }
 
-    // Test 6: Remove all headers (if supported) or verify header count
+    // Test 6: Headers with special characters in value
     NAVParseUrl('http://example.com/test', url)
     NAVHttpRequestInit(request, 'GET', url, '')
-    NAVHttpRequestAddHeader(request, 'X-Test', 'value')
-    i = request.Headers.Count
 
-    if (i > 1) {
+    result = NAVHttpRequestAddHeader(request, 'X-Special', 'value!@#$%')
+
+    if (result == true) {
         NAVLogTestPassed(6)
     }
     else {
-        NAVLogTestFailed(6, 'Header count > 1', "'Count: ', itoa(i)")
-        return
+        NAVLogTestFailed(6, 'Should allow special chars', 'Failed')
     }
+
+    NAVLogTestSuiteEnd("'NAVHttpHeaderEdgeCases'")
 }
 
-/**
- * Tests for header validation
- */
+
 define_function TestNAVHttpHeaderValidation() {
-    stack_var _NAVHttpRequest request
-    stack_var _NAVUrl url
-    stack_var char result
-    stack_var integer finalCount
+    stack_var integer x
 
-    NAVLog("'***************** NAVHttpHeaderValidation *****************'")
+    NAVLogTestSuiteStart("'NAVHttpHeaderValidation'")
 
-    NAVParseUrl('http://example.com/test', url)
-    NAVHttpRequestInit(request, 'GET', url, '')
+    for (x = 1; x <= length_array(HEADER_VALIDATION_TEST); x++) {
+        stack_var _NAVHttpRequest request
+        stack_var _NAVUrl url
+        stack_var char result
 
-    // Test 1: Add header with special characters in value
-    result = NAVHttpRequestAddHeader(request, 'User-Agent', 'Mozilla/5.0 (Windows; U; en-US)')
+        NAVParseUrl('http://example.com/test', url)
+        NAVHttpRequestInit(request, 'GET', url, '')
 
-    if (result != true) {
-        NAVLogTestFailed(1, 'Special chars in value should succeed', 'Add failed')
-        return
+        result = NAVHttpRequestAddHeader(request,
+                                         HEADER_VALIDATION_TEST[x][1],
+                                         HEADER_VALIDATION_TEST[x][2])
+
+        if (!NAVAssertBooleanEqual('Should validate header',
+                                   HEADER_VALIDATION_EXPECTED[x],
+                                   result)) {
+            NAVLogTestFailed(x,
+                            NAVBooleanToString(HEADER_VALIDATION_EXPECTED[x]),
+                            NAVBooleanToString(result))
+            continue
+        }
+
+        NAVLogTestPassed(x)
     }
 
-    NAVLogTestPassed(1)
-
-    // Test 2: Add header with numeric value
-    result = NAVHttpRequestAddHeader(request, 'Content-Length', '12345')
-
-    if (result != true) {
-        NAVLogTestFailed(2, 'Numeric value should succeed', 'Add failed')
-        return
-    }
-
-    NAVLogTestPassed(2)
-
-    // Test 3: Check if non-existent header exists
-    if (NAVHttpHeaderKeyExists(request.Headers, 'X-DoesNotExist') == false) {
-        NAVLogTestPassed(3)
-    }
-    else {
-        NAVLogTestFailed(3, 'Header should not exist', 'Header exists')
-        return
-    }
-
-    // Test 4: Check if existing header exists
-    if (NAVHttpHeaderKeyExists(request.Headers, 'User-Agent') == true) {
-        NAVLogTestPassed(4)
-    }
-    else {
-        NAVLogTestFailed(4, 'Header should exist', 'Header does not exist')
-        return
-    }
-
-    // Test 5: Validate that Host header exists
-    if (NAVHttpHeaderKeyExists(request.Headers, 'Host') == true) {
-        NAVLogTestPassed(5)
-    }
-    else {
-        NAVLogTestFailed(5, 'Host header should exist', 'Host header missing')
-        return
-    }
-
-    // Test 6: Add header with colon in value
-    result = NAVHttpRequestAddHeader(request, 'X-Time', '12:34:56')
-
-    if (result == true) {
-        NAVLogTestPassed(6)
-    }
-    else {
-        NAVLogTestFailed(6, 'Colon in value should succeed', 'Add failed')
-        return
-    }
-
-    // Test 7: Add header with equals sign in value
-    result = NAVHttpRequestAddHeader(request, 'Authorization', 'key=value&other=data')
-
-    if (result == true) {
-        NAVLogTestPassed(7)
-    }
-    else {
-        NAVLogTestFailed(7, 'Equals in value should succeed', 'Add failed')
-        return
-    }
-
-    // Test 8: Add header with quotes in value
-    result = NAVHttpRequestAddHeader(request, 'X-Quoted', 'He said "hello"')
-
-    if (result == true) {
-        NAVLogTestPassed(8)
-    }
-    else {
-        NAVLogTestFailed(8, 'Quotes in value should succeed', 'Add failed')
-        return
-    }
-
-    // Test 9: Verify header count doesn't exceed limit
-    finalCount = request.Headers.Count
-
-    if (finalCount <= NAV_HTTP_MAX_HEADERS) {
-        NAVLogTestPassed(9)
-    }
-    else {
-        NAVLogTestFailed(9, 'Should not exceed max headers', "'Count: ', itoa(finalCount), ' Max: ', itoa(NAV_HTTP_MAX_HEADERS)")
-        return
-    }
+    NAVLogTestSuiteEnd("'NAVHttpHeaderValidation'")
 }
-

@@ -6,7 +6,7 @@ PROGRAM_NAME='NAVHttpRequestInit'
 define_function TestNAVHttpRequestInit() {
     stack_var integer x
 
-    NAVLog("'***************** NAVHttpRequestInit *****************'")
+    NAVLogTestSuiteStart("'NAVHttpRequestInit'")
 
     for (x = 1; x <= length_array(HTTP_TEST); x++) {
         stack_var _NAVUrl url
@@ -61,4 +61,6 @@ define_function TestNAVHttpRequestInit() {
 
         NAVLogTestPassed(x)
     }
+
+    NAVLogTestSuiteEnd("'NAVHttpRequestInit'")
 }

@@ -211,7 +211,7 @@ define_function TestNAVHttpBuildRequest() {
     stack_var integer x
     stack_var char expectedRequestPayload[50][NAV_HTTP_MAX_REQUEST_LENGTH]
 
-    NAVLog("'***************** NAVHttpBuildRequest *****************'")
+    NAVLogTestSuiteStart("'NAVHttpBuildRequest'")
 
     HttpExpectedRequestPayloadInit(expectedRequestPayload)
 
@@ -280,4 +280,6 @@ define_function TestNAVHttpBuildRequest() {
 
         NAVLogTestPassed(x)
     }
+
+    NAVLogTestSuiteEnd("'NAVHttpParseResponse'")
 }
