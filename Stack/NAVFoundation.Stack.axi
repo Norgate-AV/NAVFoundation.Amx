@@ -44,11 +44,12 @@ SOFTWARE.
  * @public
  * @description Initializes a string stack with the specified capacity.
  *              Sets up the stack for use by resetting the top pointer and establishing
- *              the maximum capacity. If an invalid capacity is provided (<=0 or > NAV_MAX_STACK_SIZE),
+ *              the maximum capacity. The capacity parameter is copied internally to support
+ *              constant values. If an invalid capacity is provided (<=0 or > NAV_MAX_STACK_SIZE),
  *              it defaults to NAV_MAX_STACK_SIZE.
  *
  * @param {_NAVStackString} stack - Stack instance to initialize (passed by reference)
- * @param {integer} capacity - Maximum number of items the stack can hold
+ * @param {integer} initCapacity - Maximum number of items the stack can hold
  *
  * @returns {void}
  *
@@ -56,8 +57,12 @@ SOFTWARE.
  * stack_var _NAVStackString myStack
  * NAVStackInitString(myStack, 10)  // Initialize with capacity of 10
  */
-define_function NAVStackInitString(_NAVStackString stack, integer capacity) {
+define_function NAVStackInitString(_NAVStackString stack, integer initCapacity) {
     stack_var integer x
+    stack_var integer capacity
+
+    // Make a copy in case a constant is passed
+    capacity = initCapacity
 
     if (capacity <= 0 || capacity > NAV_MAX_STACK_SIZE) {
         capacity = NAV_MAX_STACK_SIZE
@@ -197,11 +202,12 @@ define_function char[NAV_MAX_BUFFER] NAVStackPeekString(_NAVStackString stack) {
  * @public
  * @description Initializes an integer stack with the specified capacity.
  *              Sets up the stack for use by resetting the top pointer and establishing
- *              the maximum capacity. If an invalid capacity is provided (<=0 or > NAV_MAX_STACK_SIZE),
+ *              the maximum capacity. The capacity parameter is copied internally to support
+ *              constant values. If an invalid capacity is provided (<=0 or > NAV_MAX_STACK_SIZE),
  *              it defaults to NAV_MAX_STACK_SIZE.
  *
  * @param {_NAVStackInteger} stack - Stack instance to initialize (passed by reference)
- * @param {integer} capacity - Maximum number of items the stack can hold
+ * @param {integer} initCapacity - Maximum number of items the stack can hold
  *
  * @returns {void}
  *
@@ -209,8 +215,12 @@ define_function char[NAV_MAX_BUFFER] NAVStackPeekString(_NAVStackString stack) {
  * stack_var _NAVStackInteger myStack
  * NAVStackInitInteger(myStack, 10)  // Initialize with capacity of 10
  */
-define_function NAVStackInitInteger(_NAVStackInteger stack, integer capacity) {
+define_function NAVStackInitInteger(_NAVStackInteger stack, integer initCapacity) {
     stack_var integer x
+    stack_var integer capacity
+
+    // Make a copy in case a constant is passed
+    capacity = initCapacity
 
     if (capacity <= 0 || capacity > NAV_MAX_STACK_SIZE) {
         capacity = NAV_MAX_STACK_SIZE
