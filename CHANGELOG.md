@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.7.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.6.0...v5.7.0) (2026-01-18)
+
+### 🌟 Features
+
+- **list:** add initial implementation ([2be4974](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/2be497468d60c31b5bde9b2e5e87824b8d69d41f))
+
+### 🐛 Bug Fixes
+
+- **queue:** copy initCapacity param to support constants ([31dc607](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/31dc607dc531c53628a8aa09ea036777a259628f))
+- **stack:** copy initCapacity param to support constants ([4cac588](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/4cac588b07a4107e37070bd30ca41e36a0715f03))
+
 ## [5.6.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.5.1...v5.6.0) (2026-01-17)
 
 ### 🌟 Features
