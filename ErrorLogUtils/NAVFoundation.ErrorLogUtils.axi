@@ -176,8 +176,8 @@ define_function NAVErrorLog(long level, char value[]) {
         case NAV_LOG_LEVEL_DEBUG: {
             amx_log(level, NAVFormatLog(level, value))
 
-            #IF_DEFINED __NAV_FOUNDATION_DEBUGCONSOLE__
-            NAVDebugConsoleLog(NAVFormatLog(level, value))
+            #IF_DEFINED USING_NAV_ERRORLOG_EVENT_CALLBACK
+            NAVErrorLogEventCallback(level, value)
             #END_IF
 
             #IF_DEFINED __NAV_FOUNDATION_LOGTOFILE__
