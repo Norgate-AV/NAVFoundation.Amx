@@ -260,7 +260,7 @@ define_function TestNAVDateTimeGetTimespec() {
 
         // Validate Timezone (should not be empty)
         if (!NAVAssertTrue('Timezone should be populated',
-                          (length_string(timespec.Timezone) > 0))) {
+                          (length_array(timespec.Timezone) > 0))) {
             NAVLogTestFailed(x, 'non-empty string', timespec.Timezone)
             continue
         }

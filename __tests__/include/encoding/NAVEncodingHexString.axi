@@ -255,8 +255,8 @@ define_function TestNAVByteToHexString() {
     }
 
     // Verify result length
-    if (!NAVAssertIntegerEqual('Result should be 2 characters', 2, length_string(result))) {
-        NAVLogTestFailed(5, '2', itoa(length_string(result)))
+    if (!NAVAssertIntegerEqual('Result should be 2 characters', 2, length_array(result))) {
+        NAVLogTestFailed(5, '2', itoa(length_array(result)))
     }
     else {
         NAVLogTestPassed(5)

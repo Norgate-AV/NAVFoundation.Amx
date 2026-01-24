@@ -489,4 +489,110 @@ define_function char[2] NAVByteToHexString(char byte) {
 }
 
 
+/**
+ * @function NAVByteArrayToIntegerBE
+ * @public
+ * @description Parses a 16-bit integer from a byte array in big-endian order.
+ *
+ * @param {char[]} data - Byte array containing the integer
+ * @param {integer} offset - Starting position in the array (1-based)
+ *
+ * @returns {integer} The parsed 16-bit integer
+ *
+ * @example
+ * stack_var char data[10]
+ * stack_var integer value
+ *
+ * data = "$12, $34, $56, $78"
+ * value = NAVByteArrayToIntegerBE(data, 1)  // Returns $1234
+ * value = NAVByteArrayToIntegerBE(data, 3)  // Returns $5678
+ *
+ * @note Expects at least 2 bytes starting at offset
+ */
+define_function integer NAVByteArrayToIntegerBE(char data[], integer offset) {
+    return type_cast((type_cast(data[offset]) << 8) bor type_cast(data[offset + 1]))
+}
+
+
+/**
+ * @function NAVByteArrayToIntegerLE
+ * @public
+ * @description Parses a 16-bit integer from a byte array in little-endian order.
+ *
+ * @param {char[]} data - Byte array containing the integer
+ * @param {integer} offset - Starting position in the array (1-based)
+ *
+ * @returns {integer} The parsed 16-bit integer
+ *
+ * @example
+ * stack_var char data[10]
+ * stack_var integer value
+ *
+ * data = "$12, $34, $56, $78"
+ * value = NAVByteArrayToIntegerLE(data, 1)  // Returns $3412
+ * value = NAVByteArrayToIntegerLE(data, 3)  // Returns $7856
+ *
+ * @note Expects at least 2 bytes starting at offset
+ */
+define_function integer NAVByteArrayToIntegerLE(char data[], integer offset) {
+    return type_cast((type_cast(data[offset + 1]) << 8) bor type_cast(data[offset]))
+}
+
+
+/**
+ * @function NAVByteArrayToLongBE
+ * @public
+ * @description Parses a 32-bit long from a byte array in big-endian order.
+ *
+ * @param {char[]} data - Byte array containing the long
+ * @param {integer} offset - Starting position in the array (1-based)
+ *
+ * @returns {long} The parsed 32-bit long
+ *
+ * @example
+ * stack_var char data[10]
+ * stack_var long value
+ *
+ * data = "$12, $34, $56, $78, $9A, $BC"
+ * value = NAVByteArrayToLongBE(data, 1)  // Returns $12345678
+ * value = NAVByteArrayToLongBE(data, 3)  // Returns $56789ABC
+ *
+ * @note Expects at least 4 bytes starting at offset
+ */
+define_function long NAVByteArrayToLongBE(char data[], integer offset) {
+    return (type_cast(data[offset]) << 24) bor
+           (type_cast(data[offset + 1]) << 16) bor
+           (type_cast(data[offset + 2]) << 8) bor
+           type_cast(data[offset + 3])
+}
+
+
+/**
+ * @function NAVByteArrayToLongLE
+ * @public
+ * @description Parses a 32-bit long from a byte array in little-endian order.
+ *
+ * @param {char[]} data - Byte array containing the long
+ * @param {integer} offset - Starting position in the array (1-based)
+ *
+ * @returns {long} The parsed 32-bit long
+ *
+ * @example
+ * stack_var char data[10]
+ * stack_var long value
+ *
+ * data = "$12, $34, $56, $78, $9A, $BC"
+ * value = NAVByteArrayToLongLE(data, 1)  // Returns $78563412
+ * value = NAVByteArrayToLongLE(data, 3)  // Returns $BC9A7856
+ *
+ * @note Expects at least 4 bytes starting at offset
+ */
+define_function long NAVByteArrayToLongLE(char data[], integer offset) {
+    return (type_cast(data[offset + 3]) << 24) bor
+           (type_cast(data[offset + 2]) << 16) bor
+           (type_cast(data[offset + 1]) << 8) bor
+           type_cast(data[offset])
+}
+
+
 #END_IF // __NAV_FOUNDATION_ENCODING__

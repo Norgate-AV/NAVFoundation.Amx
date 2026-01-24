@@ -56,12 +56,12 @@ NAVQueueClear(commandQueue)
 
 ### Memory Usage
 
-| Capacity | Memory per Queue | Typical Use Case |
-|----------|------------------|------------------|
-| 10 items | ~2.5 KB | Command buffering |
-| 50 items | ~12.5 KB | Message queuing |
-| 100 items | ~25 KB | Event buffering |
-| 500 items (max) | ~125 KB | High-volume data |
+| Capacity        | Memory per Queue | Typical Use Case  |
+| --------------- | ---------------- | ----------------- |
+| 10 items        | ~2.5 KB          | Command buffering |
+| 50 items        | ~12.5 KB         | Message queuing   |
+| 100 items       | ~25 KB           | Event buffering   |
+| 500 items (max) | ~125 KB          | High-volume data  |
 
 ### Complexity
 
@@ -76,34 +76,46 @@ NAVQueueClear(commandQueue)
 ### Initialization
 
 #### `NAVQueueInit`
+
 **Purpose**: Initialize a queue with a specified capacity.
 
-**Signature**: `NAVQueueInit(_NAVQueue queue, integer capacity)`
+**Signature**: `NAVQueueInit(_NAVQueue queue, integer initCapacity)`
 
 **Parameters**:
+
 - `queue` - Queue structure to initialize
-- `capacity` - Maximum number of items (1-500)
+- `initCapacity` - Maximum number of items (1-500). If <= 0 or > NAV_MAX_QUEUE_ITEMS, defaults to NAV_MAX_QUEUE_ITEMS
+
+**Notes**:
+
+- The parameter is copied internally to handle constant values passed at initialization
+- Capacity is clamped to valid range automatically
 
 **Example**:
+
 ```netlinx
 stack_var _NAVQueue myQueue
 NAVQueueInit(myQueue, 20)  // Queue can hold up to 20 items
+NAVQueueInit(myQueue, 0)   // Defaults to NAV_MAX_QUEUE_ITEMS (500)
 ```
 
 ### Adding Items
 
 #### `NAVQueueEnqueue`
+
 **Purpose**: Add an item to the end of the queue.
 
 **Signature**: `sinteger NAVQueueEnqueue(_NAVQueue queue, char item[NAV_MAX_BUFFER])`
 
 **Parameters**:
+
 - `queue` - Queue to add to
 - `item[]` - String item to add (max 4096 characters)
 
 **Returns**: `1` on success, `0` if queue is full
 
 **Example**:
+
 ```netlinx
 if (NAVQueueEnqueue(myQueue, 'POWER=ON')) {
     // Successfully added
@@ -116,16 +128,19 @@ if (NAVQueueEnqueue(myQueue, 'POWER=ON')) {
 ### Removing Items
 
 #### `NAVQueueDequeue`
+
 **Purpose**: Remove and return the item at the front of the queue.
 
 **Signature**: `char[NAV_MAX_BUFFER] NAVQueueDequeue(_NAVQueue queue)`
 
 **Parameters**:
+
 - `queue` - Queue to remove from
 
 **Returns**: Front item string, or empty string if queue is empty
 
 **Example**:
+
 ```netlinx
 stack_var char nextCommand[NAV_MAX_BUFFER]
 nextCommand = NAVQueueDequeue(myQueue)
@@ -140,16 +155,19 @@ if (length_array(nextCommand)) {
 ### Inspecting Items
 
 #### `NAVQueuePeek`
+
 **Purpose**: View the front item without removing it.
 
 **Signature**: `char[NAV_MAX_BUFFER] NAVQueuePeek(_NAVQueue queue)`
 
 **Parameters**:
+
 - `queue` - Queue to inspect
 
 **Returns**: Front item string, or empty string if queue is empty
 
 **Example**:
+
 ```netlinx
 stack_var char nextItem[NAV_MAX_BUFFER]
 nextItem = NAVQueuePeek(myQueue)
@@ -159,17 +177,20 @@ if (length_array(nextItem)) {
 ```
 
 #### `NAVQueueContains`
+
 **Purpose**: Check if a specific item exists anywhere in the queue.
 
 **Signature**: `sinteger NAVQueueContains(_NAVQueue queue, char item[NAV_MAX_BUFFER])`
 
 **Parameters**:
+
 - `queue` - Queue to search
 - `item[]` - Item to search for
 
 **Returns**: `1` if item exists, `0` if not found
 
 **Example**:
+
 ```netlinx
 if (NAVQueueContains(myQueue, 'EMERGENCY_STOP')) {
     // Emergency stop command is queued
@@ -181,16 +202,19 @@ if (NAVQueueContains(myQueue, 'EMERGENCY_STOP')) {
 ### State Queries
 
 #### `NAVQueueIsEmpty`
+
 **Purpose**: Check if the queue has no items.
 
 **Signature**: `sinteger NAVQueueIsEmpty(_NAVQueue queue)`
 
 **Parameters**:
+
 - `queue` - Queue to check
 
 **Returns**: `1` if empty, `0` if has items
 
 **Example**:
+
 ```netlinx
 if (NAVQueueIsEmpty(myQueue)) {
     send_string 0, "'No commands pending'"
@@ -198,16 +222,19 @@ if (NAVQueueIsEmpty(myQueue)) {
 ```
 
 #### `NAVQueueHasItems`
+
 **Purpose**: Check if the queue contains one or more items.
 
 **Signature**: `sinteger NAVQueueHasItems(_NAVQueue queue)`
 
 **Parameters**:
+
 - `queue` - Queue to check
 
 **Returns**: `1` if has items, `0` if empty
 
 **Example**:
+
 ```netlinx
 if (NAVQueueHasItems(myQueue)) {
     // Process next item
@@ -216,16 +243,19 @@ if (NAVQueueHasItems(myQueue)) {
 ```
 
 #### `NAVQueueIsFull`
+
 **Purpose**: Check if the queue has reached maximum capacity.
 
 **Signature**: `sinteger NAVQueueIsFull(_NAVQueue queue)`
 
 **Parameters**:
+
 - `queue` - Queue to check
 
 **Returns**: `1` if full, `0` if space available
 
 **Example**:
+
 ```netlinx
 if (!NAVQueueIsFull(myQueue)) {
     NAVQueueEnqueue(myQueue, newCommand)
@@ -235,16 +265,19 @@ if (!NAVQueueIsFull(myQueue)) {
 ```
 
 #### `NAVQueueGetCount`
+
 **Purpose**: Get the current number of items in the queue.
 
 **Signature**: `integer NAVQueueGetCount(_NAVQueue queue)`
 
 **Parameters**:
+
 - `queue` - Queue to query
 
 **Returns**: Current item count (0 to capacity)
 
 **Example**:
+
 ```netlinx
 stack_var integer count
 count = NAVQueueGetCount(myQueue)
@@ -252,16 +285,19 @@ send_string 0, "'Queue has ', itoa(count), ' items'"
 ```
 
 #### `NAVQueueGetCapacity`
+
 **Purpose**: Get the maximum capacity of the queue.
 
 **Signature**: `integer NAVQueueGetCapacity(_NAVQueue queue)`
 
 **Parameters**:
+
 - `queue` - Queue to query
 
 **Returns**: Maximum capacity set during initialization
 
 **Example**:
+
 ```netlinx
 stack_var integer capacity, count
 capacity = NAVQueueGetCapacity(myQueue)
@@ -272,14 +308,17 @@ send_string 0, "'Queue usage: ', itoa(count), '/', itoa(capacity)"
 ### Utility Functions
 
 #### `NAVQueueClear`
+
 **Purpose**: Remove all items from the queue.
 
 **Signature**: `NAVQueueClear(_NAVQueue queue)`
 
 **Parameters**:
+
 - `queue` - Queue to clear
 
 **Example**:
+
 ```netlinx
 // Clear all pending commands
 NAVQueueClear(myQueue)
@@ -287,16 +326,19 @@ send_string 0, "'All queued commands cleared'"
 ```
 
 #### `NAVQueueToString`
+
 **Purpose**: Get a string representation of the queue for debugging.
 
 **Signature**: `char[NAV_MAX_BUFFER] NAVQueueToString(_NAVQueue queue)`
 
 **Parameters**:
+
 - `queue` - Queue to represent
 
 **Returns**: String showing count, capacity, and all items
 
 **Example**:
+
 ```netlinx
 send_string 0, NAVQueueToString(myQueue)
 // Output: "Queue [3/10]: item1, item2, item3"
@@ -317,7 +359,7 @@ DEFINE_FUNCTION sendToDevice(char cmd[]) {
     if (!NAVQueueIsFull(deviceCommands)) {
         NAVQueueEnqueue(deviceCommands, cmd)
     }
-    
+
     if (!deviceBusy) {
         processNextCommand()
     }
@@ -325,11 +367,11 @@ DEFINE_FUNCTION sendToDevice(char cmd[]) {
 
 DEFINE_FUNCTION processNextCommand() {
     stack_var char cmd[NAV_MAX_BUFFER]
-    
+
     if (!NAVQueueHasItems(deviceCommands)) {
         return
     }
-    
+
     cmd = NAVQueueDequeue(deviceCommands)
     send_string dvDevice, cmd
     deviceBusy = true
@@ -372,12 +414,12 @@ DEFINE_FUNCTION char[NAV_MAX_BUFFER] getNextEvent() {
     if (NAVQueueHasItems(priorityQueue)) {
         return NAVQueueDequeue(priorityQueue)
     }
-    
+
     // Then check regular queue
     if (NAVQueueHasItems(eventQueue)) {
         return NAVQueueDequeue(eventQueue)
     }
-    
+
     return ''
 }
 ```
@@ -400,14 +442,14 @@ DEFINE_FUNCTION queueMessage(char msg[]) {
 timeline_event[TL_RATE_LIMITER] {
     stack_var char msg[NAV_MAX_BUFFER]
     stack_var long currentTime
-    
+
     currentTime = get_timer
-    
+
     // Enforce 100ms minimum between messages
     if ((currentTime - lastSendTime) < 100) {
         return
     }
-    
+
     if (NAVQueueHasItems(messageQueue)) {
         msg = NAVQueueDequeue(messageQueue)
         send_string dvOutput, msg
@@ -437,6 +479,7 @@ All error conditions are logged but non-fatal - functions return safe values (0,
 ## Best Practices
 
 ### 1. **Choose Appropriate Capacity**
+
 ```netlinx
 // For command buffering (typically 10-20 items)
 NAVQueueInit(cmdQueue, 20)
@@ -446,6 +489,7 @@ NAVQueueInit(eventQueue, 100)
 ```
 
 ### 2. **Always Check Return Values**
+
 ```netlinx
 // Good - checks if enqueue succeeded
 if (NAVQueueEnqueue(queue, item)) {
@@ -463,6 +507,7 @@ if (length_array(item)) {
 ```
 
 ### 3. **Monitor Queue Depth**
+
 ```netlinx
 // Warn if queue is getting full
 if (NAVQueueGetCount(queue) > (NAVQueueGetCapacity(queue) * 0.8)) {
@@ -471,6 +516,7 @@ if (NAVQueueGetCount(queue) > (NAVQueueGetCapacity(queue) * 0.8)) {
 ```
 
 ### 4. **Use Peek for Non-Destructive Inspection**
+
 ```netlinx
 // Look ahead without removing
 stack_var char nextItem[NAV_MAX_BUFFER]
@@ -529,7 +575,7 @@ timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE] {
 // When device responds successfully
 string_event[dvDevice] {
     // Process the response...
-    
+
     // Mark as good response and send next item
     NAVDevicePriorityQueueGoodResponse(deviceQueue)
 }
@@ -541,10 +587,10 @@ string_event[dvDevice] {
 
 The DevicePriorityQueue maintains two internal queues:
 
-| Queue Type | Capacity | Priority | Use Case |
-|------------|----------|----------|----------|
-| **Command Queue** | 50 items | High (true) | Critical commands that must execute first |
-| **Query Queue** | 100 items | Low (false) | Status queries that can wait |
+| Queue Type        | Capacity  | Priority    | Use Case                                  |
+| ----------------- | --------- | ----------- | ----------------------------------------- |
+| **Command Queue** | 50 items  | High (true) | Critical commands that must execute first |
+| **Query Queue**   | 100 items | Low (false) | Status queries that can wait              |
 
 Commands are always processed before queries. When `SendNextItem()` is called, it checks the command queue first, then the query queue.
 
@@ -593,14 +639,17 @@ Commands are always processed before queries. When `SendNextItem()` is called, i
 ### Initialization
 
 #### `NAVDevicePriorityQueueInit`
+
 **Purpose**: Initialize a device priority queue with default settings.
 
 **Signature**: `NAVDevicePriorityQueueInit(_NAVDevicePriorityQueue queue)`
 
 **Parameters**:
+
 - `queue` - Device priority queue structure to initialize
 
 **Behavior**:
+
 - Sets `Busy = false`, `FailedCount = 0`, `Resend = false`
 - Initializes `MaxFailedCount = 3` (configurable constant)
 - Clears `LastMessage`
@@ -608,6 +657,7 @@ Commands are always processed before queries. When `SendNextItem()` is called, i
 - Configures failed response timeline
 
 **Example**:
+
 ```netlinx
 stack_var _NAVDevicePriorityQueue queue
 NAVDevicePriorityQueueInit(queue)
@@ -616,11 +666,13 @@ NAVDevicePriorityQueueInit(queue)
 ### Queue Operations
 
 #### `NAVDevicePriorityQueueEnqueue`
+
 **Purpose**: Add an item to the appropriate priority queue and auto-send if idle.
 
 **Signature**: `sinteger NAVDevicePriorityQueueEnqueue(_NAVDevicePriorityQueue queue, char item[NAV_MAX_BUFFER], integer priority)`
 
 **Parameters**:
+
 - `queue` - Device priority queue
 - `item` - Message to enqueue (max 65535 characters)
 - `priority` - `NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND` (true) for high priority, `NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY` (false) for low priority
@@ -628,11 +680,13 @@ NAVDevicePriorityQueueInit(queue)
 **Returns**: `1` on success, `0` if target queue is full
 
 **Behavior**:
+
 - Routes item to command queue (high priority) or query queue (low priority)
 - **Auto-send**: If both queues are empty AND `Busy = false`, automatically calls `SendNextItem()`
 - Returns success/failure based on target queue capacity
 
 **Example**:
+
 ```netlinx
 // High-priority command
 NAVDevicePriorityQueueEnqueue(queue, 'POWER=ON', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
@@ -642,6 +696,7 @@ NAVDevicePriorityQueueEnqueue(queue, '?STATUS', NAV_DEVICE_PRIORITY_QUEUE_PRIORI
 ```
 
 #### `NAVDevicePriorityQueueDequeue`
+
 **Purpose**: Remove and return the next item based on priority.
 
 **Signature**: `char[NAV_MAX_BUFFER] NAVDevicePriorityQueueDequeue(_NAVDevicePriorityQueue queue)`
@@ -649,12 +704,14 @@ NAVDevicePriorityQueueEnqueue(queue, '?STATUS', NAV_DEVICE_PRIORITY_QUEUE_PRIORI
 **Returns**: Next item (commands before queries), or empty string if both queues are empty
 
 **Example**:
+
 ```netlinx
 stack_var char nextItem[NAV_MAX_BUFFER]
 nextItem = NAVDevicePriorityQueueDequeue(queue)
 ```
 
 #### `NAVDevicePriorityQueueHasItems`
+
 **Purpose**: Check if either queue has items.
 
 **Signature**: `sinteger NAVDevicePriorityQueueHasItems(_NAVDevicePriorityQueue queue)`
@@ -662,6 +719,7 @@ nextItem = NAVDevicePriorityQueueDequeue(queue)
 **Returns**: `1` if either queue has items, `0` if both are empty
 
 **Example**:
+
 ```netlinx
 if (NAVDevicePriorityQueueHasItems(queue)) {
     // Process items
@@ -669,6 +727,7 @@ if (NAVDevicePriorityQueueHasItems(queue)) {
 ```
 
 #### `NAVDevicePriorityQueueGetCount`
+
 **Purpose**: Get total number of items across both queues.
 
 **Signature**: `sinteger NAVDevicePriorityQueueGetCount(_NAVDevicePriorityQueue queue)`
@@ -676,6 +735,7 @@ if (NAVDevicePriorityQueueHasItems(queue)) {
 **Returns**: Combined count of command queue + query queue
 
 **Example**:
+
 ```netlinx
 send_string 0, "'Total queued: ', itoa(NAVDevicePriorityQueueGetCount(queue))"
 ```
@@ -683,11 +743,13 @@ send_string 0, "'Total queued: ', itoa(NAVDevicePriorityQueueGetCount(queue))"
 ### Message Handling
 
 #### `NAVDevicePriorityQueueSendNextItem`
+
 **Purpose**: Dequeue and send the next item based on priority.
 
 **Signature**: `NAVDevicePriorityQueueSendNextItem(_NAVDevicePriorityQueue queue)`
 
 **Behavior**:
+
 - If `Resend = true`: Re-sends `LastMessage` without dequeuing
 - Otherwise: Dequeues next item (commands before queries) and sends it
 - Sets `Busy = true` and stores message in `LastMessage`
@@ -698,23 +760,27 @@ send_string 0, "'Total queued: ', itoa(NAVDevicePriorityQueueGetCount(queue))"
 **Timeline**: Starts `TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE` to detect response timeout
 
 **Example**:
+
 ```netlinx
 // Typically called internally, but can be called manually
 NAVDevicePriorityQueueSendNextItem(queue)
 ```
 
 #### `NAVDevicePriorityQueueGoodResponse`
+
 **Purpose**: Mark the current message as successfully responded to.
 
 **Signature**: `NAVDevicePriorityQueueGoodResponse(_NAVDevicePriorityQueue queue)`
 
 **Behavior**:
+
 - Stops failed response timeline
 - Resets `FailedCount = 0`
 - Sets `Busy = false`, `Resend = false`, clears `LastMessage`
 - Automatically calls `SendNextItem()` if more items are queued
 
 **Example**:
+
 ```netlinx
 string_event[dvDevice] {
     if (find_string(string.text, 'OK', 1)) {
@@ -726,21 +792,24 @@ string_event[dvDevice] {
 ### Failure Handling
 
 #### `NAVDevicePriorityQueueFailedResponse`
+
 **Purpose**: Handle a failed or timed-out response.
 
 **Signature**: `NAVDevicePriorityQueueFailedResponse(_NAVDevicePriorityQueue queue)`
 
 **Behavior**:
+
 - Does nothing if `Busy = false`
 - If `FailedCount < MaxFailedCount` (default 3):
-  - Increments `FailedCount`
-  - Sets `Resend = true`
-  - Calls `SendNextItem()` to retry
+    - Increments `FailedCount`
+    - Sets `Resend = true`
+    - Calls `SendNextItem()` to retry
 - If `FailedCount >= MaxFailedCount`:
-  - Triggers optional `FailedResponseEventCallback` if enabled
-  - Calls `Init()` to reset the queue (clears all state and items)
+    - Triggers optional `FailedResponseEventCallback` if enabled
+    - Calls `Init()` to reset the queue (clears all state and items)
 
 **Example**:
+
 ```netlinx
 // Typically called from timeline event
 timeline_event[TL_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE] {
@@ -758,6 +827,7 @@ string_event[dvDevice] {
 ### Utility Functions
 
 #### `NAVDevicePriorityQueueToString`
+
 **Purpose**: Get a human-readable representation for debugging.
 
 **Signature**: `char[NAV_MAX_CHARS] NAVDevicePriorityQueueToString(_NAVDevicePriorityQueue queue)`
@@ -765,6 +835,7 @@ string_event[dvDevice] {
 **Returns**: String showing queue counts and state
 
 **Example**:
+
 ```netlinx
 send_string 0, NAVDevicePriorityQueueToString(queue)
 // Output: "DevicePriorityQueue [Commands: 3/50, Queries: 5/100, Busy: true]"
@@ -820,11 +891,13 @@ The library supports optional callbacks for advanced event handling. Callbacks m
 **Signature**: `define_function NAVDevicePriorityQueueSendNextItemEventCallback(_NAVDevicePriorityQueue queue, char message[NAV_MAX_BUFFER], integer isResend)`
 
 **Parameters**:
+
 - `queue` - The device priority queue
 - `message` - The message being sent
 - `isResend` - `1` if this is a retry, `0` if new message
 
 **Example**:
+
 ```netlinx
 #DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK
 #include 'NAVFoundation.DevicePriorityQueue.axi'
@@ -835,7 +908,7 @@ define_function NAVDevicePriorityQueueSendNextItemEventCallback(_NAVDevicePriori
     } else {
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Sending: ', message")
     }
-    
+
     // Send to device
     send_string dvDevice, message
 }
@@ -850,9 +923,11 @@ define_function NAVDevicePriorityQueueSendNextItemEventCallback(_NAVDevicePriori
 **Signature**: `define_function NAVDevicePriorityQueueFailedResponseEventCallback(_NAVDevicePriorityQueue queue)`
 
 **Parameters**:
+
 - `queue` - The device priority queue (contains `FailedCount`, `LastMessage` before reset)
 
 **Example**:
+
 ```netlinx
 #DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_FAILED_RESPONSE_EVENT_CALLBACK
 #include 'NAVFoundation.DevicePriorityQueue.axi'
@@ -860,7 +935,7 @@ define_function NAVDevicePriorityQueueSendNextItemEventCallback(_NAVDevicePriori
 define_function NAVDevicePriorityQueueFailedResponseEventCallback(_NAVDevicePriorityQueue queue) {
     NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Device failed to respond after ', itoa(queue.FailedCount), ' attempts'")
     NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Last message: ', queue.LastMessage")
-    
+
     // Notify user or trigger recovery actions
     send_command dvTP, "'@PPN-Device Communication Failed'"
 }
@@ -886,7 +961,7 @@ define_function NAVDevicePriorityQueueSendNextItemEventCallback(_NAVDevicePriori
     if (isResend) {
         NAVErrorLog(NAV_LOG_LEVEL_WARNING, "'[Projector] Retry #', itoa(queue.FailedCount), ': ', message")
     }
-    
+
     send_string dvProjector, "message, $0D"  // Add carriage return
 }
 
@@ -894,7 +969,7 @@ define_function NAVDevicePriorityQueueSendNextItemEventCallback(_NAVDevicePriori
 define_function NAVDevicePriorityQueueFailedResponseEventCallback(_NAVDevicePriorityQueue queue) {
     NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'[Projector] Communication failed after ', itoa(queue.FailedCount), ' attempts'")
     send_command dvTP, "'@PPN-Projector Not Responding'"
-    
+
     // Try power cycling the device
     pulse[dvProjectorRelay, 1]
 }
@@ -940,7 +1015,7 @@ NAVDevicePriorityQueueInit(projQueue)
 DEFINE_FUNCTION powerOnProjector() {
     // Send power command (high priority)
     NAVDevicePriorityQueueEnqueue(projQueue, 'PWR ON', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
-    
+
     // Follow with status queries (low priority - will wait for command to complete)
     NAVDevicePriorityQueueEnqueue(projQueue, '?PWR', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
     NAVDevicePriorityQueueEnqueue(projQueue, '?LAMP', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
@@ -1020,7 +1095,7 @@ DEFINE_FUNCTION startPresentation() {
     NAVDevicePriorityQueueEnqueue(projectorQueue, 'PWR ON', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
     NAVDevicePriorityQueueEnqueue(audioQueue, 'MUTE OFF', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
     NAVDevicePriorityQueueEnqueue(lightsQueue, 'PRESET 1', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)
-    
+
     // Low-priority status queries - execute after commands
     NAVDevicePriorityQueueEnqueue(projectorQueue, '?STATUS', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
     NAVDevicePriorityQueueEnqueue(audioQueue, '?VOLUME', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_QUERY)
@@ -1117,9 +1192,9 @@ The library includes built-in error recovery:
 ### Memory Usage
 
 - **Per Queue Instance**: ~40 KB
-  - Command Queue: 50 items × ~250 bytes = ~12.5 KB
-  - Query Queue: 100 items × ~250 bytes = ~25 KB
-  - Overhead: ~2.5 KB
+    - Command Queue: 50 items × ~250 bytes = ~12.5 KB
+    - Query Queue: 100 items × ~250 bytes = ~25 KB
+    - Overhead: ~2.5 KB
 
 ### Timing
 
@@ -1142,11 +1217,13 @@ The library includes built-in error recovery:
 **Symptoms**: Items enqueue but never send
 
 **Causes**:
+
 1. Missing timeline event handler
 2. `Busy` flag stuck as `true`
 3. Timeline not triggering
 
 **Solutions**:
+
 ```netlinx
 // 1. Ensure timeline event is defined
 DEFINE_EVENT
@@ -1170,6 +1247,7 @@ if (queue.Busy) {
 **Cause**: Using wrong priority constant
 
 **Solution**:
+
 ```netlinx
 // Use the defined constants, not magic numbers
 NAVDevicePriorityQueueEnqueue(queue, 'CMD', NAV_DEVICE_PRIORITY_QUEUE_PRIORITY_COMMAND)  // ✓ Correct
@@ -1185,12 +1263,14 @@ NAVDevicePriorityQueueEnqueue(queue, 'QRY', 0)  // ✗ Wrong
 **Symptoms**: Library keeps retrying, eventually reinitializes
 
 **Causes**:
+
 1. Device not connected
 2. Wrong baud rate / protocol
 3. Not calling `GoodResponse()` when device responds
 4. Timeline timeout too short
 
 **Solutions**:
+
 ```netlinx
 // 1. Verify device connection
 send_string 0, "'Device online: ', itoa(device_id(dvDevice))"
@@ -1216,11 +1296,13 @@ string_event[dvDevice] {
 **Symptoms**: Callback define is set but function never executes
 
 **Causes**:
+
 1. `#DEFINE` placed after `#include`
 2. Callback function not defined
 3. Wrong function signature
 
 **Solution**:
+
 ```netlinx
 // ✓ CORRECT ORDER
 #DEFINE USING_NAV_DEVICE_PRIORITY_QUEUE_SEND_NEXT_ITEM_EVENT_CALLBACK
@@ -1244,6 +1326,7 @@ The DevicePriorityQueue library has been extensively tested:
 - **Total Coverage**: 22 comprehensive tests validating all functionality
 
 Test categories:
+
 - Basic operations (init, enqueue, dequeue)
 - Priority handling (command vs query order)
 - State management (busy flag, counters)

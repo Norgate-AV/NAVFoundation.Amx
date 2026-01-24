@@ -21,6 +21,7 @@ build:
       - ./InterModuleApi
       - ./Jsmn
       - ./Lexer
+      - ./List
       - ./LogicEngine
       - ./Math
       - ./McpBase
@@ -40,6 +41,7 @@ build:
       - ./Tui
       - ./UIUtils
       - ./Url
+      - ./WebSocket
       - ./__tests__/include/aes128
       - ./__tests__/include/hash-table
       - ./__tests__/include/path-utils
@@ -74,3 +76,5 @@ build:
       - ./__tests__/include/binary-utils
       - ./__tests__/include/figlet
       - ./__tests__/include/net-utils
+      - ./__tests__/include/list
+      - ./__tests__/include/websocket

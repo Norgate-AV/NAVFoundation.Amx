@@ -265,7 +265,7 @@ define_function TestNAVIniLexerTokenTypes() {
         result = NAVIniLexerGetTokenType(tokenType)
 
         // For now, just test that the function returns something
-        if (length_string(result) > 0) {
+        if (length_array(result) > 0) {
             NAVLogTestPassed(x)
         } else {
             NAVLogTestFailed(x, expectedName, result)

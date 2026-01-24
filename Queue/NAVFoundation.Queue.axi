@@ -49,18 +49,23 @@ SOFTWARE.
  * @description Initialize a queue with the specified capacity. The queue uses a circular
  *              buffer implementation for efficient FIFO (First In, First Out) operations.
  *              This function must be called before using any other queue operations.
+ *              The capacity parameter is copied internally to support constant values.
  *
  * @param {_NAVQueue} queue - The queue structure to initialize
- * @param {integer} capacity - The maximum number of items the queue can hold.
- *                             If capacity is <= 0 or > NAV_MAX_QUEUE_ITEMS,
- *                             it will be set to NAV_MAX_QUEUE_ITEMS
+ * @param {integer} initCapacity - The maximum number of items the queue can hold.
+ *                                 If initCapacity is <= 0 or > NAV_MAX_QUEUE_ITEMS,
+ *                                 it will be set to NAV_MAX_QUEUE_ITEMS
  *
  * @example
  * stack_var _NAVQueue myQueue
  * NAVQueueInit(myQueue, 100)  // Initialize queue with capacity of 100 items
  */
-define_function NAVQueueInit(_NAVQueue queue, integer capacity) {
+define_function NAVQueueInit(_NAVQueue queue, integer initCapacity) {
     stack_var integer x
+    stack_var integer capacity
+
+    // Make a copy in case a constant is passed
+    capacity = initCapacity
 
     if (capacity <= 0 || capacity > NAV_MAX_QUEUE_ITEMS) {
         capacity = NAV_MAX_QUEUE_ITEMS

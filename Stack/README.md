@@ -66,53 +66,65 @@ value = NAVStackPopInteger(numberStack)  // Returns 100
 
 ### Memory Usage
 
-| Stack Type | Item Size | Max Capacity | Memory per Stack |
-|-----------|-----------|--------------|------------------|
-| String | NAV_MAX_BUFFER | 500 (default) | ~500KB |
-| Integer | 2 bytes | 500 (default) | ~1KB |
+| Stack Type | Item Size      | Max Capacity  | Memory per Stack |
+| ---------- | -------------- | ------------- | ---------------- |
+| String     | NAV_MAX_BUFFER | 500 (default) | ~500KB           |
+| Integer    | 2 bytes        | 500 (default) | ~1KB             |
 
 ### Time Complexity
 
-| Operation | Complexity | Notes |
-|-----------|-----------|-------|
-| Push | O(1) | Constant time |
-| Pop | O(1) | Constant time |
-| Peek | O(1) | Constant time |
-| IsEmpty | O(1) | Constant time |
-| IsFull | O(1) | Constant time |
-| GetCount | O(1) | Constant time |
+| Operation | Complexity | Notes         |
+| --------- | ---------- | ------------- |
+| Push      | O(1)       | Constant time |
+| Pop       | O(1)       | Constant time |
+| Peek      | O(1)       | Constant time |
+| IsEmpty   | O(1)       | Constant time |
+| IsFull    | O(1)       | Constant time |
+| GetCount  | O(1)       | Constant time |
 
 ## API Reference
 
 ### String Stack Functions
 
 #### `NAVStackInitString`
+
 **Purpose**: Initialize a string stack with specified capacity.
 
-**Signature**: `NAVStackInitString(_NAVStackString stack, integer capacity)`
+**Signature**: `NAVStackInitString(_NAVStackString stack, integer initCapacity)`
 
 **Parameters**:
+
 - `stack` - Stack instance to initialize (passed by reference)
-- `capacity` - Maximum number of items the stack can hold (defaults to NAV_MAX_STACK_SIZE if invalid)
+- `initCapacity` - Maximum number of items the stack can hold. If <= 0 or > NAV_MAX_STACK_SIZE, defaults to NAV_MAX_STACK_SIZE
+
+**Notes**:
+
+- The parameter is copied internally to handle constant values passed at initialization
+- Capacity is clamped to valid range automatically
 
 **Example**:
+
 ```netlinx
 stack_var _NAVStackString myStack
 NAVStackInitString(myStack, 25)  // Initialize with capacity of 25
+NAVStackInitString(myStack, 0)   // Defaults to NAV_MAX_STACK_SIZE (500)
 ```
 
 #### `NAVStackPushString`
+
 **Purpose**: Push a string item onto the top of the stack.
 
 **Signature**: `char NAVStackPushString(_NAVStackString stack, char item[])`
 
 **Parameters**:
+
 - `stack` - Stack instance to push to (passed by reference)
 - `item` - String item to push onto the stack
 
 **Returns**: `true` if successful, `false` if stack is full
 
 **Example**:
+
 ```netlinx
 if (NAVStackPushString(myStack, 'New Command')) {
     send_string 0, "'Command added to stack'"
@@ -122,16 +134,19 @@ if (NAVStackPushString(myStack, 'New Command')) {
 ```
 
 #### `NAVStackPopString`
+
 **Purpose**: Pop and remove the top item from the stack.
 
 **Signature**: `char[NAV_MAX_BUFFER] NAVStackPopString(_NAVStackString stack)`
 
 **Parameters**:
+
 - `stack` - Stack instance to pop from (passed by reference)
 
 **Returns**: Top item from the stack, or empty string if stack is empty
 
 **Example**:
+
 ```netlinx
 stack_var char cmd[NAV_MAX_BUFFER]
 
@@ -142,16 +157,19 @@ if (NAVStackHasItems(myStack.Properties)) {
 ```
 
 #### `NAVStackPeekString`
+
 **Purpose**: View the top item without removing it from the stack.
 
 **Signature**: `char[NAV_MAX_BUFFER] NAVStackPeekString(_NAVStackString stack)`
 
 **Parameters**:
+
 - `stack` - Stack instance to peek at
 
 **Returns**: Top item from the stack, or empty string if stack is empty
 
 **Example**:
+
 ```netlinx
 stack_var char nextCmd[NAV_MAX_BUFFER]
 nextCmd = NAVStackPeekString(myStack)
@@ -161,32 +179,44 @@ send_string 0, "'Next command will be: ', nextCmd"
 ### Integer Stack Functions
 
 #### `NAVStackInitInteger`
+
 **Purpose**: Initialize an integer stack with specified capacity.
 
-**Signature**: `NAVStackInitInteger(_NAVStackInteger stack, integer capacity)`
+**Signature**: `NAVStackInitInteger(_NAVStackInteger stack, integer initCapacity)`
 
 **Parameters**:
+
 - `stack` - Stack instance to initialize (passed by reference)
-- `capacity` - Maximum number of items the stack can hold (defaults to NAV_MAX_STACK_SIZE if invalid)
+- `initCapacity` - Maximum number of items the stack can hold. If <= 0 or > NAV_MAX_STACK_SIZE, defaults to NAV_MAX_STACK_SIZE
+
+**Notes**:
+
+- The parameter is copied internally to handle constant values passed at initialization
+- Capacity is clamped to valid range automatically
 
 **Example**:
+
 ```netlinx
 stack_var _NAVStackInteger myStack
 NAVStackInitInteger(myStack, 50)  // Initialize with capacity of 50
+NAVStackInitInteger(myStack, 0)   // Defaults to NAV_MAX_STACK_SIZE (500)
 ```
 
 #### `NAVStackPushInteger`
+
 **Purpose**: Push an integer item onto the top of the stack.
 
 **Signature**: `char NAVStackPushInteger(_NAVStackInteger stack, integer item)`
 
 **Parameters**:
+
 - `stack` - Stack instance to push to (passed by reference)
 - `item` - Integer item to push onto the stack
 
 **Returns**: `true` if successful, `false` if stack is full
 
 **Example**:
+
 ```netlinx
 if (NAVStackPushInteger(myStack, 42)) {
     send_string 0, "'Value added to stack'"
@@ -196,16 +226,19 @@ if (NAVStackPushInteger(myStack, 42)) {
 ```
 
 #### `NAVStackPopInteger`
+
 **Purpose**: Pop and remove the top item from the stack.
 
 **Signature**: `integer NAVStackPopInteger(_NAVStackInteger stack)`
 
 **Parameters**:
+
 - `stack` - Stack instance to pop from (passed by reference)
 
 **Returns**: Top item from the stack, or 0 if stack is empty
 
 **Example**:
+
 ```netlinx
 stack_var integer value
 
@@ -216,16 +249,19 @@ if (NAVStackHasItems(myStack.Properties)) {
 ```
 
 #### `NAVStackPeekInteger`
+
 **Purpose**: View the top item without removing it from the stack.
 
 **Signature**: `integer NAVStackPeekInteger(_NAVStackInteger stack)`
 
 **Parameters**:
+
 - `stack` - Stack instance to peek at
 
 **Returns**: Top item from the stack, or 0 if stack is empty
 
 **Example**:
+
 ```netlinx
 stack_var integer nextValue
 nextValue = NAVStackPeekInteger(myStack)
@@ -237,16 +273,19 @@ send_string 0, "'Next value will be: ', itoa(nextValue)"
 These functions work with both string and integer stacks by accepting the `_NAVStackProperties` structure.
 
 #### `NAVStackIsEmpty`
+
 **Purpose**: Check if the stack is empty.
 
 **Signature**: `sinteger NAVStackIsEmpty(_NAVStackProperties properties)`
 
 **Parameters**:
+
 - `properties` - Stack properties structure
 
 **Returns**: `1` if empty, `0` if has items
 
 **Example**:
+
 ```netlinx
 if (NAVStackIsEmpty(myStack.Properties)) {
     send_string 0, "'Stack is empty'"
@@ -254,16 +293,19 @@ if (NAVStackIsEmpty(myStack.Properties)) {
 ```
 
 #### `NAVStackHasItems`
+
 **Purpose**: Check if the stack contains one or more items.
 
 **Signature**: `sinteger NAVStackHasItems(_NAVStackProperties properties)`
 
 **Parameters**:
+
 - `properties` - Stack properties structure
 
 **Returns**: `1` if has items, `0` if empty
 
 **Example**:
+
 ```netlinx
 if (NAVStackHasItems(myStack.Properties)) {
     processTopItem()
@@ -271,16 +313,19 @@ if (NAVStackHasItems(myStack.Properties)) {
 ```
 
 #### `NAVStackIsFull`
+
 **Purpose**: Check if the stack has reached maximum capacity.
 
 **Signature**: `sinteger NAVStackIsFull(_NAVStackProperties properties)`
 
 **Parameters**:
+
 - `properties` - Stack properties structure
 
 **Returns**: `1` if full, `0` if space available
 
 **Example**:
+
 ```netlinx
 if (!NAVStackIsFull(myStack.Properties)) {
     NAVStackPushString(myStack, newItem)
@@ -290,16 +335,19 @@ if (!NAVStackIsFull(myStack.Properties)) {
 ```
 
 #### `NAVStackGetCount`
+
 **Purpose**: Get the current number of items in the stack.
 
 **Signature**: `integer NAVStackGetCount(_NAVStackProperties properties)`
 
 **Parameters**:
+
 - `properties` - Stack properties structure
 
 **Returns**: Current item count (0 to capacity)
 
 **Example**:
+
 ```netlinx
 stack_var integer count
 count = NAVStackGetCount(myStack.Properties)
@@ -307,16 +355,19 @@ send_string 0, "'Stack has ', itoa(count), ' items'"
 ```
 
 #### `NAVStackGetCapacity`
+
 **Purpose**: Get the maximum capacity of the stack.
 
 **Signature**: `integer NAVStackGetCapacity(_NAVStackProperties properties)`
 
 **Parameters**:
+
 - `properties` - Stack properties structure
 
 **Returns**: Maximum capacity set during initialization
 
 **Example**:
+
 ```netlinx
 stack_var integer capacity, count
 capacity = NAVStackGetCapacity(myStack.Properties)
@@ -339,16 +390,16 @@ NAVStackInitString(redoStack, 50)
 
 DEFINE_FUNCTION executeAction(char action[]) {
     stack_var char previousState[NAV_MAX_BUFFER]
-    
+
     // Save current state to undo stack
     previousState = getCurrentState()
     NAVStackPushString(undoStack, previousState)
-    
+
     // Clear redo stack when new action is performed
     while (NAVStackHasItems(redoStack.Properties)) {
         NAVStackPopString(redoStack)
     }
-    
+
     // Execute the action
     applyAction(action)
 }
@@ -356,16 +407,16 @@ DEFINE_FUNCTION executeAction(char action[]) {
 DEFINE_FUNCTION undo() {
     stack_var char previousState[NAV_MAX_BUFFER]
     stack_var char currentState[NAV_MAX_BUFFER]
-    
+
     if (!NAVStackHasItems(undoStack.Properties)) {
         send_string 0, "'Nothing to undo'"
         return
     }
-    
+
     // Save current state to redo stack
     currentState = getCurrentState()
     NAVStackPushString(redoStack, currentState)
-    
+
     // Restore previous state
     previousState = NAVStackPopString(undoStack)
     restoreState(previousState)
@@ -374,16 +425,16 @@ DEFINE_FUNCTION undo() {
 DEFINE_FUNCTION redo() {
     stack_var char nextState[NAV_MAX_BUFFER]
     stack_var char currentState[NAV_MAX_BUFFER]
-    
+
     if (!NAVStackHasItems(redoStack.Properties)) {
         send_string 0, "'Nothing to redo'"
         return
     }
-    
+
     // Save current state to undo stack
     currentState = getCurrentState()
     NAVStackPushString(undoStack, currentState)
-    
+
     // Apply next state
     nextState = NAVStackPopString(redoStack)
     restoreState(nextState)
@@ -403,21 +454,21 @@ NAVStackInitString(functionNames, 100)
 
 DEFINE_FUNCTION integer factorial(integer n) {
     stack_var integer result
-    
+
     // Push current function call onto stack
     NAVStackPushInteger(callStack, n)
     NAVStackPushString(functionNames, "'factorial(', itoa(n), ')'")
-    
+
     if (n <= 1) {
         result = 1
     } else {
         result = n * factorial(n - 1)
     }
-    
+
     // Pop function call from stack
     NAVStackPopInteger(callStack)
     NAVStackPopString(functionNames)
-    
+
     return result
 }
 
@@ -425,7 +476,7 @@ DEFINE_FUNCTION showCallStack() {
     stack_var integer depth
     depth = NAVStackGetCount(callStack.Properties)
     send_string 0, "'Call stack depth: ', itoa(depth)"
-    
+
     if (depth > 0) {
         send_string 0, "'Top of stack: ', NAVStackPeekString(functionNames)"
     }
@@ -452,43 +503,43 @@ DEFINE_FUNCTION addCommand(char cmd[]) {
 
 DEFINE_FUNCTION char[NAV_MAX_BUFFER] getPreviousCommand() {
     stack_var char cmd[NAV_MAX_BUFFER]
-    
+
     if (!NAVStackHasItems(commandHistory.Properties)) {
         return ''
     }
-    
+
     // Move command from history to temp stack
     cmd = NAVStackPopString(commandHistory)
     NAVStackPushString(tempStack, cmd)
     historyPosition++
-    
+
     return cmd
 }
 
 DEFINE_FUNCTION char[NAV_MAX_BUFFER] getNextCommand() {
     stack_var char cmd[NAV_MAX_BUFFER]
-    
+
     if (!NAVStackHasItems(tempStack.Properties)) {
         return ''
     }
-    
+
     // Move command from temp back to history
     cmd = NAVStackPopString(tempStack)
     NAVStackPushString(commandHistory, cmd)
     historyPosition--
-    
+
     return cmd
 }
 
 DEFINE_FUNCTION resetHistoryPosition() {
     stack_var char cmd[NAV_MAX_BUFFER]
-    
+
     // Move all commands back to history stack
     while (NAVStackHasItems(tempStack.Properties)) {
         cmd = NAVStackPopString(tempStack)
         NAVStackPushString(commandHistory, cmd)
     }
-    
+
     historyPosition = 0
 }
 ```
@@ -505,16 +556,16 @@ NAVStackInitInteger(parenStack, 50)
 DEFINE_FUNCTION char isBalanced(char expression[]) {
     stack_var integer i
     stack_var char ch
-    
+
     // Clear stack
     while (NAVStackHasItems(parenStack.Properties)) {
         NAVStackPopInteger(parenStack)
     }
-    
+
     // Process each character
     for (i = 1; i <= length_string(expression); i++) {
         ch = expression[i]
-        
+
         switch (ch) {
             case '(':
             case '[':
@@ -522,26 +573,26 @@ DEFINE_FUNCTION char isBalanced(char expression[]) {
                 NAVStackPushInteger(parenStack, ch)
             }
             case ')': {
-                if (NAVStackIsEmpty(parenStack.Properties) || 
+                if (NAVStackIsEmpty(parenStack.Properties) ||
                     NAVStackPopInteger(parenStack) != '(') {
                     return false
                 }
             }
             case ']': {
-                if (NAVStackIsEmpty(parenStack.Properties) || 
+                if (NAVStackIsEmpty(parenStack.Properties) ||
                     NAVStackPopInteger(parenStack) != '[') {
                     return false
                 }
             }
             case '}': {
-                if (NAVStackIsEmpty(parenStack.Properties) || 
+                if (NAVStackIsEmpty(parenStack.Properties) ||
                     NAVStackPopInteger(parenStack) != '{') {
                     return false
                 }
             }
         }
     }
-    
+
     // Expression is balanced if stack is empty
     return NAVStackIsEmpty(parenStack.Properties)
 }
@@ -568,7 +619,7 @@ currentState = STATE_IDLE
 DEFINE_FUNCTION pushState(integer newState) {
     // Save current state
     NAVStackPushInteger(stateStack, currentState)
-    
+
     // Transition to new state
     currentState = newState
     send_string 0, "'State changed to: ', itoa(currentState)"
@@ -576,12 +627,12 @@ DEFINE_FUNCTION pushState(integer newState) {
 
 DEFINE_FUNCTION popState() {
     stack_var integer previousState
-    
+
     if (!NAVStackHasItems(stateStack.Properties)) {
         send_string 0, "'No previous state available'"
         return
     }
-    
+
     // Restore previous state
     previousState = NAVStackPopInteger(stateStack)
     currentState = previousState
@@ -590,7 +641,7 @@ DEFINE_FUNCTION popState() {
 
 DEFINE_FUNCTION handleConnection() {
     pushState(STATE_CONNECTING)
-    
+
     // Simulate connection attempt
     wait 30 {
         if (connectionSuccessful) {
@@ -608,41 +659,49 @@ DEFINE_FUNCTION handleConnection() {
 
 While both are linear data structures, they differ in their access patterns:
 
-| Feature | Stack (LIFO) | Queue (FIFO) |
-|---------|-------------|--------------|
-| Order | Last-In-First-Out | First-In-First-Out |
-| Add Operation | Push (top) | Enqueue (rear) |
-| Remove Operation | Pop (top) | Dequeue (front) |
-| Best For | Undo/Redo, Recursion, Backtracking | Task Processing, Buffering, Scheduling |
+| Feature          | Stack (LIFO)                       | Queue (FIFO)                           |
+| ---------------- | ---------------------------------- | -------------------------------------- |
+| Order            | Last-In-First-Out                  | First-In-First-Out                     |
+| Add Operation    | Push (top)                         | Enqueue (rear)                         |
+| Remove Operation | Pop (top)                          | Dequeue (front)                        |
+| Best For         | Undo/Redo, Recursion, Backtracking | Task Processing, Buffering, Scheduling |
 
 ## Constants
 
 ### `NAV_MAX_STACK_SIZE`
+
 Maximum capacity for a stack instance. Defaults to 500 items.
 
 ### `NAV_STACK_EMPTY`
+
 Value indicating an empty stack (0). When `Top` equals this value, the stack contains no items.
 
 ## Types
 
 ### `_NAVStackString`
+
 Stack structure for storing string items in LIFO order.
 
 **Fields**:
+
 - `Properties` - Stack state information
 - `Items[NAV_MAX_STACK_SIZE][NAV_MAX_BUFFER]` - Array of string items
 
 ### `_NAVStackInteger`
+
 Stack structure for storing integer items in LIFO order.
 
 **Fields**:
+
 - `Properties` - Stack state information
 - `Items[NAV_MAX_STACK_SIZE]` - Array of integer items
 
 ### `_NAVStackProperties`
+
 Internal structure maintaining stack state.
 
 **Fields**:
+
 - `Top` - Current position of top element (0 = empty)
 - `Capacity` - Maximum number of items the stack can hold
 

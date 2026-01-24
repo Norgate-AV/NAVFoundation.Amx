@@ -86,11 +86,11 @@ define_function TestMaxStringLengths() {
     data = "'[test]', 10, longKey, '=', longValue"
 
     if (NAVIniFileParse(data, iniFile) && iniFile.sectionCount > 0) {
-        if (length_string(iniFile.sections[1].properties[1].key) == 64 &&
-            length_string(iniFile.sections[1].properties[1].value) == 255) {
+        if (length_array(iniFile.sections[1].properties[1].key) == 64 &&
+            length_array(iniFile.sections[1].properties[1].value) == 255) {
             NAVLogTestPassed(3)
         } else {
-            NAVLogTestFailed(3, '64,255', "'lengths: ', itoa(length_string(iniFile.sections[1].properties[1].key)), ',', itoa(length_string(iniFile.sections[1].properties[1].value))")
+            NAVLogTestFailed(3, '64,255', "'lengths: ', itoa(length_array(iniFile.sections[1].properties[1].key)), ',', itoa(length_array(iniFile.sections[1].properties[1].value))")
         }
     } else {
         NAVLogTestFailed(3, 'parse success', 'parse failed')
@@ -110,7 +110,7 @@ define_function TestLargeFileParsing() {
         data = "data, 'property2=another value with additional content', 10"
     }
 
-    NAVLog("'Large file parsing test - data size: ', itoa(length_string(data)), ' bytes'")
+    NAVLog("'Large file parsing test - data size: ', itoa(length_array(data)), ' bytes'")
 
     if (NAVIniFileParse(data, iniFile)) {
         if (iniFile.sectionCount >= 40) { // Allow some flexibility

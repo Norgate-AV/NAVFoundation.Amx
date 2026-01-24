@@ -522,6 +522,10 @@ constant char NAV_HTTP_HEADER_SEC_FETCH_USER[]                      = 'Sec-Fetch
 constant char NAV_HTTP_HEADER_SEC_GPC[]                             = 'Sec-GPC'
 constant char NAV_HTTP_HEADER_SEC_PURPOSE[]                         = 'Sec-Purpose'
 constant char NAV_HTTP_HEADER_SEC_WEBSOCKET_ACCEPT[]                = 'Sec-WebSocket-Accept'
+constant char NAV_HTTP_HEADER_SEC_WEBSOCKET_EXTENSIONS[]            = 'Sec-WebSocket-Extensions'
+constant char NAV_HTTP_HEADER_SEC_WEBSOCKET_KEY[]                   = 'Sec-WebSocket-Key'
+constant char NAV_HTTP_HEADER_SEC_WEBSOCKET_PROTOCOL[]              = 'Sec-WebSocket-Protocol'
+constant char NAV_HTTP_HEADER_SEC_WEBSOCKET_VERSION[]               = 'Sec-WebSocket-Version'
 constant char NAV_HTTP_HEADER_SERVER[]                              = 'Server'
 constant char NAV_HTTP_HEADER_SERVER_TIMING[]                       = 'Server-Timing'
 constant char NAV_HTTP_HEADER_SERVICE_WORKER_NAVIGATION_PRELOAD[]   = 'Service-Worker-Navigation-Preload'
@@ -717,6 +721,10 @@ constant char NAV_HTTP_HEADERS[][255] = {
     'Sec-Purpose',
     'Sec-Token-Binding',
     'Sec-WebSocket-Accept',
+    'Sec-WebSocket-Extensions',
+    'Sec-WebSocket-Key',
+    'Sec-WebSocket-Protocol',
+    'Sec-WebSocket-Version',
     'Server',
     'Server-Timing',
     'Server-Timing-Allow-Origin',

@@ -420,7 +420,7 @@ define_function TestBasicLongFieldValue() {
 
     if (NAVCsvParserParse(parser, data) &&
         length_array(data[1]) == 1 &&
-        length_string(data[1][1]) > 100) {
+        length_array(data[1][1]) > 100) {
         NAVLogTestPassed(10)
     }
     else {
@@ -1846,7 +1846,7 @@ define_function TestQuotedLongValue() {
 
     if (NAVCsvParserParse(parser, data) &&
         length_array(data[1]) == 1 &&
-        length_string(data[1][1]) > 50) {
+        length_array(data[1][1]) > 50) {
         NAVLogTestPassed(46)
     }
     else {

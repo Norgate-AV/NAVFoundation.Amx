@@ -412,7 +412,7 @@ define_function char[NAV_MAX_BUFFER] NAVCenterText(char text[], integer width) {
     stack_var integer textLength
     stack_var integer padding
 
-    textLength = length_string(text)
+    textLength = length_array(text)
     if (textLength >= width) {
         return left_string(text, width)
     }
