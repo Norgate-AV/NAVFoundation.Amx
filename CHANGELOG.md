@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.8.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.7.0...v5.8.0) (2026-01-24)
+
+### 🌟 Features
+
+- **encoding:** add byte array to number functions ([23661bf](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/23661bfaab6642c28e2fa59775816ebff6aac4f1))
+- **error-log-utils:** add error log callback function ([071d347](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/071d347d7bdff0792bdcb4d6e7b3750ae3521f8e))
+- **encoding:** add UTF-8 library ([338c9e4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/338c9e4af07d2443291676f0d792c28142edc59a))
+- **websocket:** add websocket library ([9bb60ae](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9bb60ae54f02592bf20c51a37a6ae50da414cf03))
+
+### 🐛 Bug Fixes
+
+- **http-utils:** use case-insensitive search for headers ([c85f4e8](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c85f4e8b5523bf5786b35bc990b66be9cdc8b344))
+
 ## [5.7.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.6.0...v5.7.0) (2026-01-18)
 
 ### 🌟 Features
