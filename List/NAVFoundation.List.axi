@@ -34,7 +34,6 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_LIST__
 #DEFINE __NAV_FOUNDATION_LIST__ 'NAVFoundation.List'
 
-// #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.List.h.axi'
 #include 'NAVFoundation.ErrorLogUtils.axi'
 
