@@ -641,7 +641,7 @@ define_function integer NAVHttpFindHeader(_NAVHttpHeaderCollection headers, char
     stack_var integer x
 
     for (x = 1; x <= headers.Count; x++) {
-        if (headers.Headers[x].Key != key) {
+        if (lower_string(headers.Headers[x].Key) != lower_string(key)) {
             continue
         }
 
