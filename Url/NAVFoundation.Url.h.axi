@@ -43,6 +43,8 @@ SOFTWARE.
 #IF_NOT_DEFINED __NAV_FOUNDATION_URL_H__
 #DEFINE __NAV_FOUNDATION_URL_H__ 'NAVFoundation.Url.h'
 
+#include 'NAVFoundation.Core.h.axi'
+
 
 DEFINE_CONSTANT
 
