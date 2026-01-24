@@ -228,7 +228,7 @@ define_function char NAVIniParserParseSection(_NAVIniParser parser, _NAVIniFile 
     }
 
     // Validate section name length
-    if (length_string(name) > NAV_INI_PARSER_MAX_SECTION_NAME_LENGTH) {
+    if (length_array(name) > NAV_INI_PARSER_MAX_SECTION_NAME_LENGTH) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_INIFILE_PARSER__,
                                     'NAVIniParserParseSection',
@@ -328,7 +328,7 @@ define_function char NAVIniParserParseProperty(_NAVIniParser parser, _NAVIniFile
     }
 
     // Validate property key and value lengths
-    if (length_string(key) > NAV_INI_PARSER_MAX_KEY_LENGTH) {
+    if (length_array(key) > NAV_INI_PARSER_MAX_KEY_LENGTH) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_INIFILE_PARSER__,
                                     'NAVIniParserParseProperty',
@@ -336,7 +336,7 @@ define_function char NAVIniParserParseProperty(_NAVIniParser parser, _NAVIniFile
         return false
     }
 
-    if (length_string(value) > NAV_INI_PARSER_MAX_VALUE_LENGTH) {
+    if (length_array(value) > NAV_INI_PARSER_MAX_VALUE_LENGTH) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                     __NAV_FOUNDATION_INIFILE_PARSER__,
                                     'NAVIniParserParseProperty',

@@ -280,7 +280,7 @@ define_function TestNAVCsvLexerTokenTypes() {
         result = NAVCsvLexerGetTokenType(tokenType)
 
         // For now, just test that the function returns something
-        if (length_string(result) > 0) {
+        if (length_array(result) > 0) {
             NAVLogTestPassed(x)
         } else {
             NAVLogTestFailed(x, expectedName, result)
@@ -685,12 +685,12 @@ define_function TestNAVCsvLexerEpsilonFields() {
     } else if (lexer.tokenCount != 4) {
         NAVLogTestFailed(6, '4 tokens expected', itoa(lexer.tokenCount))
     } else if (lexer.tokens[1].type != NAV_CSV_TOKEN_TYPE_STRING ||
-               length_string(lexer.tokens[1].value) != 0) {
+               length_array(lexer.tokens[1].value) != 0) {
         NAVLogTestFailed(6, 'first token should be empty STRING', NAVCsvLexerTokenSerialize(lexer.tokens[1]))
     } else if (lexer.tokens[2].type != NAV_CSV_TOKEN_TYPE_COMMA) {
         NAVLogTestFailed(6, 'second token should be COMMA', NAVCsvLexerTokenSerialize(lexer.tokens[2]))
     } else if (lexer.tokens[3].type != NAV_CSV_TOKEN_TYPE_STRING ||
-               length_string(lexer.tokens[3].value) != 0) {
+               length_array(lexer.tokens[3].value) != 0) {
         NAVLogTestFailed(6, 'third token should be empty STRING', NAVCsvLexerTokenSerialize(lexer.tokens[3]))
     } else if (lexer.tokens[4].type != NAV_CSV_TOKEN_TYPE_EOF) {
         NAVLogTestFailed(6, 'fourth token should be EOF', NAVCsvLexerTokenSerialize(lexer.tokens[4]))

@@ -1139,7 +1139,7 @@ define_function TestParseLongField() {
 
     if (result &&
         length_array(data[1]) == 2 &&
-        length_string(data[1][1]) >= 100 &&
+        length_array(data[1][1]) >= 100 &&
         data[1][2] == 'short') {
         NAVLogTestPassed(5)
     }
