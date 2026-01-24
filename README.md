@@ -74,6 +74,8 @@ For more detailed guides and documentation, please refer the `README.md` files i
     - Provides functions for binary data manipulation and conversion.
 - [Cryptography](./Cryptography)
     - Provides cryptographic functions and utilities for secure data handling.
+- [CsvUtils](./CsvUtils)
+    - Provides functions for parsing and generating CSV data.
 - [DateTimeUtils](./DateTimeUtils)
     - Provides utility functions for date and time manipulation.
 - [Encoding](./Encoding)
@@ -82,6 +84,8 @@ For more detailed guides and documentation, please refer the `README.md` files i
     - Provides functions for interacting with Enova switchers.
 - [ErrorLogUtils](./ErrorLogUtils)
     - Provides functions for error logging and handling.
+- [Figlet](./Figlet)
+    - Provides functions for generating ASCII art text using FIGlet fonts.
 - [FileUtils](./FileUtils)
     - Provides utility functions for file operations and management.
 - [HashTable](./HashTable)
@@ -94,15 +98,20 @@ For more detailed guides and documentation, please refer the `README.md` files i
 - [InterModuleApi](./InterModuleApi)
 - [Jsmn](./Jsmn)
     - Provides a JSON parser for AMX.
+- [List](./List)
 - [LogicEngine](./LogicEngine)
 - [Math](./Math)
     - Provides mathematical functions and utilities.
 - [McpBase](./McpBase)
 - [ModuleBase](./ModuleBase)
+- [NetUtils](./NetUtils)
+    - Provides network-related utility functions.
 - [NtpUtils](./NtpUtils)
 - [PathUtils](./PathUtils)
     - Provides utility functions for file path manipulation.
 - [Queue](./Queue)
+- [Regex](./Regex)
+    - Provides regular expression matching and manipulation functions.
 - [Redis](./Redis)
 - [RmsBase](./RmsBase)
 - [SnapiHelpers](./SnapiHelpers)
@@ -120,6 +129,8 @@ For more detailed guides and documentation, please refer the `README.md` files i
 - [UIUtils](./UIUtils)
 - [Url](./Url)
     - Provides functions for URL manipulation and encoding.
+- [WebSocket](./WebSocket)
+    - Provides a WebSocket client implementation for AMX.
 
 ## Support :question:
 
