@@ -548,6 +548,31 @@ define_function char NAVIsAlphaNumeric(char byte) {
 
 
 /**
+ * @function NAVIsHexDigit
+ * @public
+ * @description Determines if a character is a valid hexadecimal digit (0-9, A-F, a-f).
+ *
+ * @param {char} byte - Character to test
+ *
+ * @returns {char} True if the character is a valid hex digit, false otherwise
+ *
+ * @example
+ * stack_var char isHex
+ * isHex = NAVIsHexDigit('A')   // Returns true
+ * isHex = NAVIsHexDigit('f')   // Returns true
+ * isHex = NAVIsHexDigit('5')   // Returns true
+ * isHex = NAVIsHexDigit('G')   // Returns false
+ */
+define_function char NAVIsHexDigit(char byte) {
+    return (
+        (byte >= '0' && byte <= '9') ||
+        (byte >= 'A' && byte <= 'F') ||
+        (byte >= 'a' && byte <= 'f')
+    )
+}
+
+
+/**
  * @function NAVTrimStringLeft
  * @public
  * @description Removes all leading whitespace characters from a string.
