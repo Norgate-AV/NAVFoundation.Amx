@@ -19,6 +19,7 @@ build:
       - ./Int64
       - ./InterModuleApi
       - ./Jsmn
+      - ./Json
       - ./Lexer
       - ./List
       - ./LogicEngine
@@ -76,3 +77,4 @@ build:
       - ./__tests__/include/net-utils
       - ./__tests__/include/list
       - ./__tests__/include/websocket
+      - ./__tests__/include/json

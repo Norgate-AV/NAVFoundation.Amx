@@ -98,6 +98,8 @@ For more detailed guides and documentation, please refer the `README.md` files i
 - [InterModuleApi](./InterModuleApi)
 - [Jsmn](./Jsmn)
     - Provides a JSON parser for AMX.
+- [Json](./Json)
+    - Provides functions for working with JSON data.
 - [List](./List)
 - [LogicEngine](./LogicEngine)
 - [Math](./Math)
