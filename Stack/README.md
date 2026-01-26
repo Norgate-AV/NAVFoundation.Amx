@@ -563,7 +563,7 @@ DEFINE_FUNCTION char isBalanced(char expression[]) {
     }
 
     // Process each character
-    for (i = 1; i <= length_string(expression); i++) {
+    for (i = 1; i <= length_array(expression); i++) {
         ch = expression[i]
 
         switch (ch) {
