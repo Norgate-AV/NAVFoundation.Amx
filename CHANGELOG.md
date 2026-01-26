@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.9.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.8.0...v5.9.0) (2026-01-26)
+
+### 🌟 Features
+
+- **json:** add initial json library implementation ([50060cf](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/50060cf38540f9cb8f136859ccb16c8856f96877))
+- **string-utils:** add NAVIsHexDigit function ([cea9df4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/cea9df438ff4ea88a1ba783f533a2642bc867872))
+
 ## [5.8.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.7.0...v5.8.0) (2026-01-24)
 
 ### 🌟 Features
