@@ -91,16 +91,16 @@ DEFINE_TYPE
  * @property {char[512]} message - The actual log message content
  */
 struct _NAVCloudLog {
-    char id[40]
-    char timestamp[32]
-    char clientId[128]
-    char hostName[128]
-    char firmwareVersion[64]
-    char systemType[64]
-    char ipAddress[45]
-    char roomName[128]
-    char level[8]
-    char message[512]
+    char id[NAV_CLOUDLOG_SIZE_ID]
+    char timestamp[NAV_CLOUDLOG_SIZE_TIMESTAMP]
+    char clientId[NAV_CLOUDLOG_SIZE_CLIENT_ID]
+    char hostName[NAV_CLOUDLOG_SIZE_HOST_NAME]
+    char firmwareVersion[NAV_CLOUDLOG_SIZE_FIRMWARE_VERSION]
+    char systemType[NAV_CLOUDLOG_SIZE_SYSTEM_TYPE]
+    char ipAddress[NAV_CLOUDLOG_SIZE_IP_ADDRESS]
+    char roomName[NAV_CLOUDLOG_SIZE_ROOM_NAME]
+    char level[NAV_CLOUDLOG_SIZE_LEVEL]
+    char message[NAV_CLOUDLOG_SIZE_MESSAGE]
 }
 
 

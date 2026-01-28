@@ -115,30 +115,39 @@ define_function char NAVCloudLogValidate(char clientId[], char roomName[], char 
 
 
 /**
- * @function NAVCloudLogBuild
+ * @function NAVCloudLogCreate
  * @public
- * @description Builds a comprehensive cloud log entry with system metadata and serializes it to JSON.
+ * @description Creates a cloud log structure with system metadata.
  *              Automatically collects system information including hostname, firmware version,
  *              IP address, and generates a unique UUID and timestamp for the log entry.
+ *              Use this when you want to store the log structure (e.g., in a queue) before serialization.
+ *              Validates input parameters before creating the log structure.
  *
  * @param {char[]} clientId - Client identifier for the application or service
  * @param {char[]} roomName - Name of the room or location generating the log
  * @param {long} level - Log level constant (NAV_LOG_LEVEL_ERROR, NAV_LOG_LEVEL_WARNING, etc.)
  * @param {char[]} message - The log message content
+ * @param {_NAVCloudLog} log - Reference to log structure that will be populated (output parameter)
  *
- * @returns {char[NAV_CLOUDLOG_JSON_BUFFER_SIZE]} JSON string representation of the complete log entry
+ * @returns {char} True if log was created successfully, false if validation failed
  *
  * @example
- * stack_var char logJson[NAV_CLOUDLOG_JSON_BUFFER_SIZE]
- * logJson = NAVCloudLogBuild('MyApp', 'Conference Room A', NAV_LOG_LEVEL_INFO, 'System started')
- * // Returns: {"id":"...","timestamp":"...","clientId":"MyApp",...}
+ * stack_var _NAVCloudLog log
+ * if (NAVCloudLogCreate('MyApp', 'Conference Room A', NAV_LOG_LEVEL_INFO, 'System started', log)) {
+ *     // log structure is now populated and ready to queue or serialize
+ * }
  */
-define_function char[NAV_CLOUDLOG_JSON_BUFFER_SIZE] NAVCloudLogBuild(char clientId[],
-                                            char roomName[],
-                                            long level,
-                                            char message[]) {
+define_function char NAVCloudLogCreate(char clientId[],
+                                       char roomName[],
+                                       long level,
+                                       char message[],
+                                       _NAVCloudLog log) {
     stack_var _NAVController controller
-    stack_var _NAVCloudLog log
+
+    // Validate input parameters
+    if (!NAVCloudLogValidate(clientId, roomName, message)) {
+        return false
+    }
 
     log.id = NAVGetNewGuid()
     log.timestamp = NAVDateTimeGetTimestampNow()
@@ -154,6 +163,45 @@ define_function char[NAV_CLOUDLOG_JSON_BUFFER_SIZE] NAVCloudLogBuild(char client
     log.roomName = NAVTrimString(roomName)
     log.level = NAVGetLogLevel(level)
     log.message = message
+
+    return true
+}
+
+
+/**
+ * @function NAVCloudLogBuild
+ * @public
+ * @description Builds a comprehensive cloud log entry with system metadata and serializes it to JSON.
+ *              Automatically collects system information including hostname, firmware version,
+ *              IP address, and generates a unique UUID and timestamp for the log entry.
+ *              Returns an empty string if validation fails (e.g., if parameters exceed size limits).
+ *              Always check that the returned string has a length greater than 0 before using.
+ *
+ * @param {char[]} clientId - Client identifier for the application or service
+ * @param {char[]} roomName - Name of the room or location generating the log
+ * @param {long} level - Log level constant (NAV_LOG_LEVEL_ERROR, NAV_LOG_LEVEL_WARNING, etc.)
+ * @param {char[]} message - The log message content
+ *
+ * @returns {char[NAV_CLOUDLOG_JSON_BUFFER_SIZE]} JSON string representation of the complete log entry,
+ *                                                 or empty string if validation failed
+ *
+ * @example
+ * stack_var char logJson[NAV_CLOUDLOG_JSON_BUFFER_SIZE]
+ * logJson = NAVCloudLogBuild('MyApp', 'Conference Room A', NAV_LOG_LEVEL_INFO, 'System started')
+ * if (length_array(logJson) > 0) {
+ *     // Returns: {"id":"...","timestamp":"...","clientId":"MyApp",...}
+ *     send_string device, logJson
+ * }
+ */
+define_function char[NAV_CLOUDLOG_JSON_BUFFER_SIZE] NAVCloudLogBuild(char clientId[],
+                                            char roomName[],
+                                            long level,
+                                            char message[]) {
+    stack_var _NAVCloudLog log
+
+    if (!NAVCloudLogCreate(clientId, roomName, level, message, log)) {
+        return ''
+    }
 
     return NAVCloudLogJsonSerialize(log)
 }
