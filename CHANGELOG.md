@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.11.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.10.0...v5.11.0) (2026-01-28)
+
+### 🌟 Features
+
+- **errorlog-utils:** add NAVCloudLogCreate function ([900a2b4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/900a2b45eb4f20ffe35cf716bbda37aa2b730957))
+
 ## [5.10.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.9.0...v5.10.0) (2026-01-27)
 
 ### 🌟 Features
