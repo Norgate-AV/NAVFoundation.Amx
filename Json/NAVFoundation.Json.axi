@@ -222,4 +222,237 @@ define_function char[NAV_JSON_PARSER_MAX_STRING_LENGTH] NAVJsonEscapeString(char
 }
 
 
+/**
+ * @function NAVJsonSerializeIndent
+ * @private
+ * @description Generate indentation string for pretty printing.
+ *
+ * @param {integer} level - The indentation level
+ * @param {integer} spacesPerLevel - Number of spaces per indentation level
+ *
+ * @returns {char[255]} The indentation string
+ */
+define_function char[255] NAVJsonSerializeIndent(integer level, integer spacesPerLevel) {
+    stack_var integer i
+    stack_var char result[255]
+
+    result = ''
+
+    if (spacesPerLevel == 0) {
+        return result
+    }
+
+    for (i = 1; i <= (level * spacesPerLevel); i++) {
+        result = "result, ' '"
+    }
+
+    return result
+}
+
+
+/**
+ * @function NAVJsonSerializeNode
+ * @private
+ * @description Recursively serialize a JSON node and its children.
+ *
+ * @param {_NAVJson} json - The parsed JSON structure
+ * @param {integer} nodeIndex - Index of the node to serialize
+ * @param {integer} indent - Number of spaces per indent level (0 = no pretty print)
+ * @param {integer} level - Current indentation level
+ * @param {char[]} result - Output buffer (modified in place)
+ *
+ * @returns {void}
+ */
+define_function NAVJsonSerializeNode(_NAVJson json, integer nodeIndex, integer indent, integer level, char result[]) {
+    stack_var _NAVJsonNode node
+    stack_var integer childIndex
+    stack_var char needsComma
+    stack_var char newline[2]
+    stack_var char space[1]
+
+    if (!NAVJsonGetNode(json, nodeIndex, node)) {
+        return
+    }
+
+    // Setup pretty-print characters
+    if (indent > 0) {
+        newline = "$0D, $0A"
+        space = ' '
+    }
+    else {
+        newline = ''
+        space = ''
+    }
+
+    switch (node.type) {
+        case NAV_JSON_VALUE_TYPE_OBJECT: {
+            result = "result, '{'"
+
+            if (node.firstChild != 0) {
+                if (indent > 0) {
+                    result = "result, newline"
+                }
+
+                childIndex = node.firstChild
+                needsComma = false
+
+                while (childIndex != 0) {
+                    stack_var _NAVJsonNode child
+
+                    if (needsComma) {
+                        result = "result, ','"
+                        if (indent > 0) {
+                            result = "result, newline"
+                        }
+                    }
+
+                    if (!NAVJsonGetNode(json, childIndex, child)) {
+                        break
+                    }
+
+                    // Print indentation for property
+                    if (indent > 0) {
+                        result = "result, NAVJsonSerializeIndent(level + 1, indent)"
+                    }
+
+                    // Print key
+                    result = "result, '"', NAVJsonEscapeString(child.key), '":', space"
+
+                    // Print value
+                    NAVJsonSerializeNode(json, childIndex, indent, level + 1, result)
+
+                    childIndex = child.nextSibling
+                    needsComma = true
+                }
+
+                if (indent > 0) {
+                    result = "result, newline, NAVJsonSerializeIndent(level, indent)"
+                }
+            }
+
+            result = "result, '}'"
+        }
+
+        case NAV_JSON_VALUE_TYPE_ARRAY: {
+            result = "result, '['"
+
+            if (node.firstChild != 0) {
+                if (indent > 0) {
+                    result = "result, newline"
+                }
+
+                childIndex = node.firstChild
+                needsComma = false
+
+                while (childIndex != 0) {
+                    stack_var _NAVJsonNode child
+
+                    if (needsComma) {
+                        result = "result, ','"
+                        if (indent > 0) {
+                            result = "result, newline"
+                        }
+                    }
+
+                    if (!NAVJsonGetNode(json, childIndex, child)) {
+                        break
+                    }
+
+                    // Print indentation for element
+                    if (indent > 0) {
+                        result = "result, NAVJsonSerializeIndent(level + 1, indent)"
+                    }
+
+                    // Print value
+                    NAVJsonSerializeNode(json, childIndex, indent, level + 1, result)
+
+                    childIndex = child.nextSibling
+                    needsComma = true
+                }
+
+                if (indent > 0) {
+                    result = "result, newline, NAVJsonSerializeIndent(level, indent)"
+                }
+            }
+
+            result = "result, ']'"
+        }
+
+        case NAV_JSON_VALUE_TYPE_STRING: {
+            result = "result, '"', NAVJsonEscapeString(node.value), '"'"
+        }
+
+        case NAV_JSON_VALUE_TYPE_NUMBER: {
+            result = "result, node.value"
+        }
+
+        case NAV_JSON_VALUE_TYPE_TRUE: {
+            result = "result, 'true'"
+        }
+
+        case NAV_JSON_VALUE_TYPE_FALSE: {
+            result = "result, 'false'"
+        }
+
+        case NAV_JSON_VALUE_TYPE_NULL: {
+            result = "result, 'null'"
+        }
+    }
+}
+
+
+/**
+ * @function NAVJsonSerialize
+ * @public
+ * @description Serialize a JSON structure to a JSON string.
+ *
+ * This function walks the JSON tree and serializes it back to JSON format.
+ * Supports both compact (single-line) and pretty-printed (multi-line with indentation) output.
+ *
+ * @param {_NAVJson} json - The parsed JSON structure to serialize
+ * @param {integer} indent - Number of spaces per indent level (0 = compact, no pretty print)
+ * @param {char[]} output - Output buffer to receive the JSON string (modified in place)
+ *
+ * @returns {char} True (1) if successful, False (0) if no valid root node
+ *
+ * @example
+ * stack_var _NAVJson json
+ * stack_var char output[4096]
+ *
+ * NAVJsonParse('{"name":"John","age":30}', json)
+ *
+ * // Compact output (no pretty print)
+ * NAVJsonSerialize(json, 0, output)
+ * // Returns: {"name":"John","age":30}
+ *
+ * // Pretty print with 2 spaces per indent
+ * NAVJsonSerialize(json, 2, output)
+ * // Returns:
+ * // {
+ * //   "name": "John",
+ * //   "age": 30
+ * // }
+ *
+ * // Pretty print with 4 spaces per indent
+ * NAVJsonSerialize(json, 4, output)
+ */
+define_function char NAVJsonSerialize(_NAVJson json, integer indent, char output[]) {
+    output = ''
+
+    // Check if we have a valid root node
+    if (json.rootIndex == 0 || json.nodeCount == 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_JSON__,
+                                    'NAVJsonSerialize',
+                                    'No valid JSON structure to serialize')
+        return false
+    }
+
+    // Serialize the root node recursively
+    NAVJsonSerializeNode(json, json.rootIndex, indent, 0, output)
+
+    return true
+}
+
+
 #END_IF // __NAV_FOUNDATION_JSON__
