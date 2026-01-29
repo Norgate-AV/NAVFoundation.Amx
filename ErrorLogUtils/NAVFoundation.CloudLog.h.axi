@@ -104,4 +104,24 @@ struct _NAVCloudLog {
 }
 
 
+/**
+ * @struct _NAVCloudLogResponse
+ * @description Structure representing the response from the cloud logging service.
+ *              Indicates success or failure of log submission along with relevant details.
+ *
+ * @property {char[10]} status - Status of the log submission ("success" or "error")
+ * @property {char[40]} id - Unique identifier for the log entry (UUID v4 format, 36 chars)
+ * @property {char[32]} timestamp - ISO 8601 formatted timestamp of when the response was generated (~24 chars)
+ * @property {char[15]} type - Type of log ("control_system" or "generic")
+ * @property {char[512]} message - Error message if status is "error"
+ */
+struct _NAVCloudLogResponse {
+    char status[10]
+    char id[NAV_CLOUDLOG_SIZE_ID]
+    char timestamp[NAV_CLOUDLOG_SIZE_TIMESTAMP]
+    char type[15]
+    char message[NAV_CLOUDLOG_SIZE_MESSAGE]
+}
+
+
 #END_IF // __NAV_FOUNDATION_CLOUDLOG_H__

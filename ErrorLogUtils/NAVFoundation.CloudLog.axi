@@ -268,4 +268,81 @@ define_function NAVCloudLog(dev device, long level, char message[]) {
 }
 
 
+/**
+ * @function NAVCloudLogResponseInit
+ * @public
+ * @description Initializes a _NAVCloudLogResponse structure with empty values.
+ *              Useful for creating a clean response structure before parsing.
+ *
+ * @param {_NAVCloudLogResponse} response - The response structure to initialize
+ *
+ * @example
+ * stack_var _NAVCloudLogResponse response
+ * NAVCloudLogResponseInit(response)
+ */
+define_function NAVCloudLogResponseInit(_NAVCloudLogResponse response) {
+    response.status = ''
+    response.id = ''
+    response.timestamp = ''
+    response.type = ''
+    response.message = ''
+}
+
+
+/**
+ * @function NAVCloudLogResponseParse
+ * @public
+ * @description Parses a JSON response from the cloud logging service into a structured format.
+ *              Automatically initializes the response structure and extracts all fields
+ *              from the JSON payload (status, id, timestamp, type, message).
+ *
+ * @param {char[]} payload - JSON string containing the cloud logging service response
+ * @param {_NAVCloudLogResponse} response - Output parameter to receive the parsed response data
+ *
+ * @returns {char} True if parsing succeeded, false if JSON parsing failed
+ *
+ * @example
+ * stack_var _NAVCloudLogResponse response
+ * stack_var char jsonPayload[1024]
+ * jsonPayload = '{"status":"success","id":"abc-123","timestamp":"2026-01-29T10:30:00Z","type":"control_system"}'
+ * if (NAVCloudLogResponseParse(jsonPayload, response)) {
+ *     // Response successfully parsed
+ *     if (response.status == 'success') {
+ *         send_string 0, "'Log submitted successfully: ', response.id"
+ *     }
+ * }
+ */
+define_function char NAVCloudLogResponseParse(char payload[], _NAVCloudLogResponse response) {
+    stack_var _NAVJson json
+
+    if (!NAVJsonParse(payload, json)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_CLOUDLOG__,
+                                'NAVCloudLogResponseParse',
+                                'Failed to parse JSON response')
+        return false
+    }
+
+    NAVCloudLogResponseInit(response)
+
+    // Query all response fields
+    NAVJsonQueryString(json, '.status', response.status)
+    NAVJsonQueryString(json, '.id', response.id)
+    NAVJsonQueryString(json, '.timestamp', response.timestamp)
+    NAVJsonQueryString(json, '.type', response.type)
+    NAVJsonQueryString(json, '.message', response.message)
+
+    // Validate that critical fields were found
+    if (!length_array(response.status)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_CLOUDLOG__,
+                                'NAVCloudLogResponseParse',
+                                'Response missing required field: status')
+        return false
+    }
+
+    return true
+}
+
+
 #END_IF // __NAV_FOUNDATION_CLOUDLOG__
