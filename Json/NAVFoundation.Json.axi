@@ -455,4 +455,52 @@ define_function char NAVJsonSerialize(_NAVJson json, integer indent, char output
 }
 
 
+/**
+ * @function NAVJsonLog
+ * @public
+ * @description Log a JSON structure to the console for debugging.
+ *
+ * This function serializes the JSON structure with 4-space indentation and outputs it
+ * to the console using NAVLog. Each line is logged separately for better readability.
+ *
+ * @param {_NAVJson} json - The parsed JSON structure to log
+ *
+ * @example
+ * stack_var _NAVJson json
+ *
+ * NAVJsonParse('{"name":"John","age":30,"active":true}', json)
+ *
+ * // Log pretty-printed JSON
+ * NAVJsonLog(json)
+ * // Output:
+ * // {
+ * //     "name": "John",
+ * //     "age": 30,
+ * //     "active": true
+ * // }
+ */
+define_function NAVJsonLog(_NAVJson json) {
+    stack_var char output[8192]
+    stack_var char lines[256][255]
+    stack_var integer lineCount
+    stack_var integer i
+
+    // Serialize the JSON with 4-space indent
+    if (!NAVJsonSerialize(json, 4, output)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_JSON__,
+                                    'NAVJsonLog',
+                                    'Failed to serialize JSON for logging')
+        return
+    }
+
+    // Split by newlines and log each line
+    lineCount = NAVSplitString(output, "$0D, $0A", lines)
+
+    for (i = 1; i <= lineCount; i++) {
+        NAVLog(lines[i])
+    }
+}
+
+
 #END_IF // __NAV_FOUNDATION_JSON__
