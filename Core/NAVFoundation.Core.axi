@@ -836,6 +836,22 @@ define_function char[NAV_GUID_LENGTH] NAVGetNewGuid() {
 
 
 /**
+ * @function NAVGetNewUuid
+ * @public
+ * @description Generates a new random UUID (GUID) in standard format.
+ *
+ * @returns {char[]} Generated UUID string in the format "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+ *
+ * @example
+ * stack_var char uuid[NAV_MAX_CHARS]
+ * uuid = NAVGetNewUuid()  // Returns something like "b4e12e58-c720-4b9d-a7f3-21a8a6490c14"
+ */
+define_function char[NAV_GUID_LENGTH] NAVGetNewUuid() {
+    return NAVGetNewGuid()
+}
+
+
+/**
  * @function NAVZeroBase
  * @public
  * @description Converts a 1-based index to a 0-based index.
