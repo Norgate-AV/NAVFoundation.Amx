@@ -2066,8 +2066,8 @@ define_function NAVWebSocketProcessBuffer(_NAVWebSocket ws) {
                     }
 
                     case NAV_WEBSOCKET_OPCODE_PING: {
-                        // Auto-respond with pong
-                        if (NAVWebSocketBuildPongFrame(parseResult.Frame.Payload, NAV_WEBSOCKET_UNMASKED, pongFrame)) {
+                        // Auto-respond with pong (RFC 6455 §5.3: client MUST mask all frames sent to server)
+                        if (NAVWebSocketBuildPongFrame(parseResult.Frame.Payload, NAV_WEBSOCKET_MASKED, pongFrame)) {
                             NAVWebSocketSendFrame(ws.Device, pongFrame)
                         }
                     }
