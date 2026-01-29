@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.13.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.12.0...v5.13.0) (2026-01-29)
+
+### 🌟 Features
+
+- **core:** add NAVCharIsPrintable function ([75ac743](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/75ac7433b4366dd96fb0a0e2de8b3e968768d58f))
+- **core:** add NAVGetNewUuid function alias ([b2d46f5](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b2d46f53faec725d042b5cfb5c226ee0c952ca6d))
+- **core:** add NAVParseDevice function ([39dff5a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/39dff5adf1632ac6ba5cae071734ca68ce960bda))
+
+### 🐛 Bug Fixes
+
+- **websocket:** ensure pong frames are properly masked in response ([b6e0221](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b6e02215c2681268b7470968fbaeb8e07d3f8687))
+- **core:** fix issues with NAVGetNewGuid function ([3a8fcda](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3a8fcdadb01db3184c1b65c90a19e57a743c0f6f))
+
 ## [5.12.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.11.0...v5.12.0) (2026-01-29)
 
 ### 🌟 Features
