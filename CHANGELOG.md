@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.12.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.11.0...v5.12.0) (2026-01-29)
+
+### 🌟 Features
+
+- **json:** add NAVJsonLog ([bc6ab1a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/bc6ab1a609d9cb4ee00889b2e0e680d00dce3b0e))
+- **json:** add NAVJsonSerialize ([f7a1b28](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/f7a1b2828cd27eb1cce0c830a339791edfb449e5))
+- **cloudlog:** add response parsing for cloud logging service ([a6d3e67](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a6d3e677925042b8be3658d4e02bcca50e27099f))
+
 ## [5.11.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.10.0...v5.11.0) (2026-01-28)
 
 ### 🌟 Features
