@@ -196,13 +196,13 @@ constant integer NAV_LOG_CHUNK_SIZE             = 100
 /////////////////////////////////////////////////////////////
 // Events
 /////////////////////////////////////////////////////////////
-constant char NAV_EVENT_ONLINE[NAV_MAX_CHARS]       = 'online'
-constant char NAV_EVENT_OFFLINE[NAV_MAX_CHARS]      = 'offline'
-constant char NAV_EVENT_ONERROR[NAV_MAX_CHARS]      = 'onerror'
-constant char NAV_EVENT_STRING[NAV_MAX_CHARS]       = 'string'
-constant char NAV_EVENT_COMMAND[NAV_MAX_CHARS]      = 'command'
-constant char NAV_EVENT_STANDBY[NAV_MAX_CHARS]      = 'standby'
-constant char NAV_EVENT_AWAKE[NAV_MAX_CHARS]        = 'awake'
+constant char NAV_EVENT_ONLINE[]    = 'online'
+constant char NAV_EVENT_OFFLINE[]   = 'offline'
+constant char NAV_EVENT_ONERROR[]   = 'onerror'
+constant char NAV_EVENT_STRING[]    = 'string'
+constant char NAV_EVENT_COMMAND[]   = 'command'
+constant char NAV_EVENT_STANDBY[]   = 'standby'
+constant char NAV_EVENT_AWAKE[]     = 'awake'
 
 
 /////////////////////////////////////////////////////////////
