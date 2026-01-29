@@ -786,26 +786,26 @@ define_function char[NAV_MAX_BUFFER] NAVFormatHex(char value[]) {
  *
  * @note Follows UUID v4 format with fixed version (4) and variant (8-B)
  */
-define_function char[NAV_MAX_CHARS] NAVGetNewGuid() {
+define_function char[NAV_GUID_LENGTH] NAVGetNewGuid() {
     stack_var integer x
-    stack_var integer length
-    stack_var integer random
-    stack_var char byte
-    stack_var char result[NAV_MAX_CHARS]
+    stack_var char result[NAV_GUID_LENGTH]
 
-    length = length_array(NAV_GUID)
+    for (x = 1; x <= NAV_GUID_LENGTH; x++) {
+        stack_var integer random
+        stack_var char byte
 
-    for (x = 1; x <= length; x++) {
         random = (random_number(65535) % 16) + 1
 
         switch (NAV_GUID[x]) {
             case 'x': { byte = NAV_GUID_HEX[random] }
-            case 'y': { byte = NAV_GUID_HEX[random] & $03 | $08 }
+            case 'y': { byte = NAV_GUID_HEX[((random & $03) | $08) + 1] }
             case '-': { byte = '-' }
             case '4': { byte = '4' }
         }
 
-        result = "result, byte"
+        if (byte > 0) {
+            result = "result, byte"
+        }
     }
 
     return result

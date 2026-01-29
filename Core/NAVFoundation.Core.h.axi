@@ -208,8 +208,9 @@ constant char NAV_EVENT_AWAKE[NAV_MAX_CHARS]        = 'awake'
 /////////////////////////////////////////////////////////////
 // Guid
 /////////////////////////////////////////////////////////////
-constant char    NAV_GUID[NAV_MAX_CHARS] = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
-constant char    NAV_GUID_HEX[NAV_MAX_CHARS] = '0123456789abcdef-'
+constant integer NAV_GUID_LENGTH      = 36
+constant char NAV_GUID[]              = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+constant char NAV_GUID_HEX[]          = '0123456789abcdef-'
 
 
 /////////////////////////////////////////////////////////////
