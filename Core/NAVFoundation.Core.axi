@@ -709,9 +709,32 @@ define_function NAVGetControllerInformation(_NAVController controller) {
 
 
 /**
+ * @function NAVCharIsPrintable
+ * @public
+ * @description Determines if a character represents a printable ASCII character.
+ *
+ * @param {char} c - Character to check
+ *
+ * @returns {char} true if the character is a printable ASCII character, false otherwise
+ *
+ * @example
+ * stack_var char result
+ * result = NAVCharIsPrintable($41)  // 'A', Returns true
+ * result = NAVCharIsPrintable($0D)  // CR, Returns false
+ *
+ * @note Printable characters are in the range 32-126 (0x20-0x7E)
+ */
+define_function char NAVCharIsPrintable(char c) {
+    return (c > $1F && c < $7F)
+}
+
+
+/**
  * @function NAVByteIsHumanReadable
  * @public
+ * @deprecated Use NAVCharIsPrintable instead
  * @description Determines if a byte represents a human-readable ASCII character.
+ * This is an alias for NAVCharIsPrintable.
  *
  * @param {char} byte - Byte to check
  *
@@ -725,7 +748,7 @@ define_function NAVGetControllerInformation(_NAVController controller) {
  * @note Human-readable bytes are in the range 32-126 (0x20-0x7E)
  */
 define_function char NAVByteIsHumanReadable(char byte) {
-    return (byte > $1F && byte < $7F);
+    return NAVCharIsPrintable(byte)
 }
 
 
@@ -760,7 +783,7 @@ define_function char[NAV_MAX_BUFFER] NAVFormatHex(char value[]) {
     for(x = 1; x <= length_array(value); x++) {
         byte = value[x];
 
-        if(NAVByteIsHumanReadable(byte)) {
+        if(NAVCharIsPrintable(byte)) {
             result = "result, byte"
         }
         else {
