@@ -139,7 +139,7 @@ define_function char NAVCloudLogValidate(char clientId[], char roomName[], char 
  */
 define_function char NAVCloudLogCreate(char clientId[],
                                        char roomName[],
-                                       long level,
+                                       char level[],
                                        char message[],
                                        _NAVCloudLog log) {
     stack_var _NAVController controller
@@ -161,7 +161,7 @@ define_function char NAVCloudLogCreate(char clientId[],
     log.ipAddress = controller.IP.IPAddress
 
     log.roomName = NAVTrimString(roomName)
-    log.level = NAVGetLogLevel(level)
+    log.level = NAVTrimString(level)
     log.message = message
 
     return true
@@ -195,7 +195,7 @@ define_function char NAVCloudLogCreate(char clientId[],
  */
 define_function char[NAV_CLOUDLOG_JSON_BUFFER_SIZE] NAVCloudLogBuild(char clientId[],
                                             char roomName[],
-                                            long level,
+                                            char level[],
                                             char message[]) {
     stack_var _NAVCloudLog log
 
@@ -239,7 +239,7 @@ define_function char[NAV_CLOUDLOG_JSON_BUFFER_SIZE] NAVCloudLogJsonSerialize(_NA
     data = "data, ',"', NAV_CLOUDLOG_FIELD_FIRMWARE_VERSION, '":"', NAVJsonEscapeString(log.firmwareVersion), '"'"
     data = "data, ',"', NAV_CLOUDLOG_FIELD_IP_ADDRESS, '":"', log.ipAddress, '"'"
     data = "data, ',"', NAV_CLOUDLOG_FIELD_ROOM_NAME, '":"', NAVJsonEscapeString(log.roomName), '"'"
-    data = "data, ',"', NAV_CLOUDLOG_FIELD_LEVEL, '":"', log.level, '"'"
+    data = "data, ',"', NAV_CLOUDLOG_FIELD_LEVEL, '":"', lower_string(log.level), '"'"
     data = "data, ',"', NAV_CLOUDLOG_FIELD_MESSAGE, '":"', NAVJsonEscapeString(log.message), '"'"
     data = "data, '}'"
 
@@ -264,6 +264,22 @@ define_function char[NAV_CLOUDLOG_JSON_BUFFER_SIZE] NAVCloudLogJsonSerialize(_NA
  * // Sends command: "LOG-error,Connection failed"
  */
 define_function NAVCloudLog(dev device, long level, char message[]) {
+    if (!NAVDeviceIsOnline(device)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_CLOUDLOG__,
+                                'NAVCloudLog',
+                                'Device is offline, cannot send log')
+        return
+    }
+
+    if (!length_array(message)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                __NAV_FOUNDATION_CLOUDLOG__,
+                                'NAVCloudLog',
+                                'Message is empty, cannot send log')
+        return
+    }
+
     NAVCommand(device, "NAV_CLOUDLOG_COMMAND_PREFIX, '-', NAVGetLogLevel(level), ',', message")
 }
 
