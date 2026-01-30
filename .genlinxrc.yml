@@ -80,3 +80,4 @@ build:
       - ./__tests__/include/json
       - ./__tests__/include/cloudlog
       - ./__tests__/include/core
+      - ./__tests__/include/socket-utils

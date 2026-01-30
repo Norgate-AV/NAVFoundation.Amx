@@ -511,6 +511,8 @@ define_function long NAVSocketGetExponentialBackoff(integer attempt,
                                                     long maxDelay) {
     stack_var long interval
     stack_var long jitter
+    stack_var integer exponent
+    stack_var long multiplier
 
     // For first N attempts, use base delay
     if (attempt <= maxRetries) {
@@ -518,15 +520,35 @@ define_function long NAVSocketGetExponentialBackoff(integer attempt,
     }
     else {
         // After N attempts, start exponential backoff
-        // Use native POWER_VALUE function for 2^n calculation
-        interval = baseDelay * power_value(2, attempt - maxRetries)
+        exponent = attempt - maxRetries
 
-        // Add jitter (100-1000ms) to prevent thundering herd
-        jitter = random_number(10) * 100  // 1-10 * 100ms = 100-1000ms
-        interval = interval + jitter
+        // Cap exponent to prevent integer overflow
+        // 2^20 = 1,048,576 - beyond this we'll hit maxDelay anyway
+        if (exponent > 20) {
+            exponent = 20
+        }
 
-        // Cap at maximum delay (after jitter)
-        interval = min_value(interval, maxDelay)
+        // Calculate 2^exponent
+        multiplier = power_value(2, exponent)
+        interval = baseDelay * multiplier
+
+        // If we've already exceeded maxDelay, cap it before adding jitter
+        if (interval > maxDelay) {
+            interval = maxDelay
+        }
+        else {
+            // Add jitter (100-1000ms) to prevent thundering herd
+            // Note: random_number can return 0 on first call, so ensure minimum jitter
+            jitter = random_number(10) * 100  // Should be 1-10 * 100ms = 100-1000ms
+            if (jitter == 0) {
+                jitter = 100  // Minimum jitter if random_number returns 0
+            }
+
+            interval = interval + jitter
+
+            // Cap at maximum delay (after jitter)
+            interval = min_value(interval, maxDelay)
+        }
     }
 
     return interval
