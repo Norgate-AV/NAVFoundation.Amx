@@ -71,7 +71,7 @@ function Write-Log {
     Write-Host "[$timestamp] [$Level] $Message" -ForegroundColor $color
 }
 
-function Parse-CpuUsage {
+function ConvertFrom-CpuUsage {
     param([string]$Output)
 
     if ($Output -match 'CPU usage = ([\d.]+)%') {
@@ -80,7 +80,7 @@ function Parse-CpuUsage {
     return $null
 }
 
-function Parse-MemoryStats {
+function ConvertFrom-MemoryStats {
     param([string]$Output)
 
     $stats = @{}
@@ -138,20 +138,20 @@ function Show-Statistics {
         return
     }
 
-    Write-Host "`n" -NoNewline
-    Write-Host ("=" * 80) -ForegroundColor Cyan
+    Write-Host "`n"
     Write-Host "PROFILING STATISTICS" -ForegroundColor Cyan
-    Write-Host ("=" * 80) -ForegroundColor Cyan
+    Write-Host "====================" -ForegroundColor Cyan
     Write-Host ""
 
     $duration = ($Samples[-1].Timestamp - $Samples[0].Timestamp).TotalSeconds
-    Write-Host "Duration       : " -NoNewline -ForegroundColor Gray
-    Write-Host ("{0:N0} seconds" -f $duration) -ForegroundColor White
-    Write-Host "Samples        : " -NoNewline -ForegroundColor Gray
-    Write-Host $Samples.Count -ForegroundColor White
-    Write-Host "Interval       : " -NoNewline -ForegroundColor Gray
-    Write-Host ("{0:N1} seconds (avg)" -f ($duration / ($Samples.Count - 1))) -ForegroundColor White
-    Write-Host ""
+    $avgInterval = if ($Samples.Count -gt 1) { $duration / ($Samples.Count - 1) } else { 0 }
+
+    # Summary object
+    [PSCustomObject]@{
+        Duration    = "{0:N0} seconds" -f $duration
+        Samples     = $Samples.Count
+        AvgInterval = "{0:N1} seconds" -f $avgInterval
+    } | Format-Table -AutoSize | Out-Host
 
     # CPU Usage Statistics
     $cpuSamples = $Samples | Where-Object { $null -ne $_.CpuUsage }
@@ -162,53 +162,21 @@ function Show-Statistics {
         $cpuAvg = ($cpuValues | Measure-Object -Average).Average
 
         Write-Host "CPU USAGE" -ForegroundColor Yellow
-        Write-Host "---------" -ForegroundColor Yellow
-        Write-Host "  Minimum      : " -NoNewline -ForegroundColor Gray
-        Write-Host ("{0:N2}%" -f $cpuMin) -ForegroundColor Green
-        Write-Host "  Maximum      : " -NoNewline -ForegroundColor Gray
-        Write-Host ("{0:N2}%" -f $cpuMax) -ForegroundColor Red
-        Write-Host "  Average      : " -NoNewline -ForegroundColor Gray
-        Write-Host ("{0:N2}%" -f $cpuAvg) -ForegroundColor Cyan
-        Write-Host ""
+        [PSCustomObject]@{
+            Minimum = "{0:N2}%" -f $cpuMin
+            Maximum = "{0:N2}%" -f $cpuMax
+            Average = "{0:N2}%" -f $cpuAvg
+        } | Format-Table -AutoSize | Out-Host
     }
 
     # Memory Statistics
     $memSamples = $Samples | Where-Object { $null -ne $_.Memory }
     if ($memSamples.Count -gt 0) {
-        Write-Host "VOLATILE MEMORY (RAM)" -ForegroundColor Yellow
-        Write-Host "---------------------" -ForegroundColor Yellow
-
         $volFree = $memSamples | ForEach-Object { $_.Memory.VolatileFree }
         $volMin = ($volFree | Measure-Object -Minimum).Minimum
         $volMax = ($volFree | Measure-Object -Maximum).Maximum
         $volAvg = ($volFree | Measure-Object -Average).Average
         $volMaxTotal = $memSamples[0].Memory.VolatileMax
-
-        Write-Host "  Free (min)   : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $volMin) -ForegroundColor Red
-        Write-Host "  Free (max)   : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $volMax) -ForegroundColor Green
-        Write-Host "  Free (avg)   : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $volAvg) -ForegroundColor Cyan
-        Write-Host "  Total        : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $volMaxTotal) -ForegroundColor White
-
-        # Volatile memory leak detection
-        if ($memSamples.Count -ge 3) {
-            $volRate = ($volFree[0] - $volFree[-1]) / $duration
-            if ($volRate -gt 100) {
-                # Only show if > 100 bytes/sec
-                Write-Host "  Leak rate    : " -NoNewline -ForegroundColor Gray
-                Write-Host ("{0}/second" -f (Format-Bytes $volRate)) -ForegroundColor Red
-                $timeToEmpty = $volFree[-1] / $volRate
-                Write-Host "  Time to full : " -NoNewline -ForegroundColor Gray
-                Write-Host ("{0:N1} hours" -f ($timeToEmpty / 3600)) -ForegroundColor Red
-            }
-        }
-        Write-Host ""
-
-        Write-Host "NON-VOLATILE MEMORY (Flash)" -ForegroundColor Yellow
-        Write-Host "---------------------------" -ForegroundColor Yellow
 
         $nonVolFree = $memSamples | ForEach-Object { $_.Memory.NonVolatileFree }
         $nonVolMin = ($nonVolFree | Measure-Object -Minimum).Minimum
@@ -216,63 +184,58 @@ function Show-Statistics {
         $nonVolAvg = ($nonVolFree | Measure-Object -Average).Average
         $nonVolMaxTotal = $memSamples[0].Memory.NonVolatileMax
 
-        Write-Host "  Free (min)   : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $nonVolMin) -ForegroundColor Red
-        Write-Host "  Free (max)   : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $nonVolMax) -ForegroundColor Green
-        Write-Host "  Free (avg)   : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $nonVolAvg) -ForegroundColor Cyan
-        Write-Host "  Total        : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $nonVolMaxTotal) -ForegroundColor White
-
-        # Non-volatile memory leak detection
-        if ($memSamples.Count -ge 3) {
-            $nonVolRate = ($nonVolFree[0] - $nonVolFree[-1]) / $duration
-            if ($nonVolRate -gt 100) {
-                # Only show if > 100 bytes/sec
-                Write-Host "  Leak rate    : " -NoNewline -ForegroundColor Gray
-                Write-Host ("{0}/second" -f (Format-Bytes $nonVolRate)) -ForegroundColor Red
-                $timeToEmpty = $nonVolFree[-1] / $nonVolRate
-                Write-Host "  Time to full : " -NoNewline -ForegroundColor Gray
-                Write-Host ("{0:N1} hours" -f ($timeToEmpty / 3600)) -ForegroundColor Red
-            }
-        }
-        Write-Host ""
-
-        Write-Host "DUET MEMORY" -ForegroundColor Yellow
-        Write-Host "-----------" -ForegroundColor Yellow
-
         $duetFree = $memSamples | ForEach-Object { $_.Memory.DuetMemoryFree }
         $duetMin = ($duetFree | Measure-Object -Minimum).Minimum
         $duetMax = ($duetFree | Measure-Object -Maximum).Maximum
         $duetAvg = ($duetFree | Measure-Object -Average).Average
         $duetMaxTotal = $memSamples[0].Memory.DuetMemoryMax
 
-        Write-Host "  Free (min)   : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $duetMin) -ForegroundColor Red
-        Write-Host "  Free (max)   : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $duetMax) -ForegroundColor Green
-        Write-Host "  Free (avg)   : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $duetAvg) -ForegroundColor Cyan
-        Write-Host "  Total        : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $duetMaxTotal) -ForegroundColor White
-        Write-Host ""
-
-        Write-Host "DISK SPACE" -ForegroundColor Yellow
-        Write-Host "----------" -ForegroundColor Yellow
-
         $diskFree = $memSamples | ForEach-Object { $_.Memory.DiskFree }
         $diskAvg = ($diskFree | Measure-Object -Average).Average
         $diskMaxTotal = $memSamples[0].Memory.DiskMax
 
-        Write-Host "  Free (avg)   : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $diskAvg) -ForegroundColor Cyan
-        Write-Host "  Total        : " -NoNewline -ForegroundColor Gray
-        Write-Host (Format-Bytes $diskMaxTotal) -ForegroundColor White
-        Write-Host ""
+        Write-Host "MEMORY" -ForegroundColor Yellow
+        [PSCustomObject]@{
+            Type    = "Volatile (RAM)"
+            FreeMin = Format-Bytes $volMin
+            FreeMax = Format-Bytes $volMax
+            FreeAvg = Format-Bytes $volAvg
+            Total   = Format-Bytes $volMaxTotal
+            Trend   = if ($memSamples.Count -ge 3) {
+                $volRate = ($volFree[0] - $volFree[-1]) / $duration
+                if ($volRate -gt 100) { (Format-Bytes $volRate) + "/sec" } else { "-" }
+            }
+            else { "-" }
+        },
+        [PSCustomObject]@{
+            Type    = "Non-Volatile (Flash)"
+            FreeMin = Format-Bytes $nonVolMin
+            FreeMax = Format-Bytes $nonVolMax
+            FreeAvg = Format-Bytes $nonVolAvg
+            Total   = Format-Bytes $nonVolMaxTotal
+            Trend   = if ($memSamples.Count -ge 3) {
+                $nonVolRate = ($nonVolFree[0] - $nonVolFree[-1]) / $duration
+                if ($nonVolRate -gt 100) { (Format-Bytes $nonVolRate) + "/sec" } else { "-" }
+            }
+            else { "-" }
+        },
+        [PSCustomObject]@{
+            Type    = "Duet"
+            FreeMin = Format-Bytes $duetMin
+            FreeMax = Format-Bytes $duetMax
+            FreeAvg = Format-Bytes $duetAvg
+            Total   = Format-Bytes $duetMaxTotal
+            Trend   = "-"
+        },
+        [PSCustomObject]@{
+            Type    = "Disk"
+            FreeMin = "-"
+            FreeMax = "-"
+            FreeAvg = Format-Bytes $diskAvg
+            Total   = Format-Bytes $diskMaxTotal
+            Trend   = "-"
+        } | Format-Table -AutoSize | Out-Host
     }
-
-    Write-Host ("=" * 80) -ForegroundColor Cyan
 }
 
 function Start-InterruptibleSleep {
@@ -396,7 +359,7 @@ try {
         $script:Stream.WriteLine("cpu usage")
         Start-Sleep -Milliseconds 11000  # Wait for 10s measurement + buffer
         $cpuOutput = $script:Stream.Read()
-        $cpuUsage = Parse-CpuUsage -Output $cpuOutput
+        $cpuUsage = ConvertFrom-CpuUsage -Output $cpuOutput
 
         if ($null -ne $cpuUsage) {
             Write-Host ("{0:N2}%" -f $cpuUsage) -ForegroundColor Yellow
@@ -410,7 +373,7 @@ try {
         $script:Stream.WriteLine("show mem")
         Start-Sleep -Milliseconds 500
         $memOutput = $script:Stream.Read()
-        $memStats = Parse-MemoryStats -Output $memOutput
+        $memStats = ConvertFrom-MemoryStats -Output $memOutput
 
         if ($memStats.Count -gt 0) {
             Write-Host "Volatile: $(Format-Bytes $memStats.VolatileFree) free, Non-Volatile: $(Format-Bytes $memStats.NonVolatileFree) free" -ForegroundColor Yellow
