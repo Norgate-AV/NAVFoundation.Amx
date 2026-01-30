@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.13.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.13.1...v5.13.2) (2026-01-30)
+
+### 🐛 Bug Fixes
+
+- **websocket:** ensure socket cleanup on protocol errors ([ac66c79](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/ac66c798fd7fdb2011e362ae355e9e5e1d211364))
+- **socket-utils:** prevent integer overflow in exponential backoff calculation ([d5b44cc](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/d5b44cc0542d1a2f8df1075acd55d4bac568f576))
+
 ## [5.13.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.13.0...v5.13.1) (2026-01-30)
 
 ### 🐛 Bug Fixes
