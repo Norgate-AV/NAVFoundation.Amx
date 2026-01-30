@@ -139,9 +139,9 @@ function Show-Statistics {
     }
 
     Write-Host "`n" -NoNewline
-    Write-Host "=" * 80 -ForegroundColor Cyan
+    Write-Host ("=" * 80) -ForegroundColor Cyan
     Write-Host "PROFILING STATISTICS" -ForegroundColor Cyan
-    Write-Host "=" * 80 -ForegroundColor Cyan
+    Write-Host ("=" * 80) -ForegroundColor Cyan
     Write-Host ""
 
     $duration = ($Samples[-1].Timestamp - $Samples[0].Timestamp).TotalSeconds
@@ -272,7 +272,7 @@ function Show-Statistics {
         Write-Host ""
     }
 
-    Write-Host "=" * 80 -ForegroundColor Cyan
+    Write-Host ("=" * 80) -ForegroundColor Cyan
 }
 
 function Start-InterruptibleSleep {
