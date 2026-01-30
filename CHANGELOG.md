@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.13.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.13.0...v5.13.1) (2026-01-30)
+
+### 🐛 Bug Fixes
+
+- **errorlog-utils:** ensure NAVCloudLogCreate take level as string ([1377883](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/13778835148e531ac1ca7526d04346029809e9c4))
+
 ## [5.13.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.12.0...v5.13.0) (2026-01-29)
 
 ### 🌟 Features
