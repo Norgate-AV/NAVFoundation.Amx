@@ -285,17 +285,10 @@ function Start-InterruptibleSleep {
     }
 }
 
-# Global flag for Ctrl-C handling
-$script:StopRequested = $false
+# Global variables for cleanup
 $script:Samples = @()
 $script:Session = $null
 $script:Stream = $null
-
-# Register Ctrl-C handler
-$null = Register-ObjectEvent -InputObject ([Console]) -EventName CancelKeyPress -Action {
-    $event.SourceEventArgs.Cancel = $true
-    $script:StopRequested = $true
-}
 
 try {
     # Load .env file if it exists
@@ -384,12 +377,7 @@ try {
     Write-Host "`nStarting profiling... (Ctrl-C to stop)`n" -ForegroundColor Green
 
     while ($true) {
-        # Check if we should stop
-        if ($script:StopRequested) {
-            Write-Log "Stop requested by user (Ctrl-C)" "WARNING"
-            break
-        }
-
+        # Check timeout
         if ($Timeout -gt 0) {
             $elapsed = ((Get-Date) - $startTime).TotalSeconds
             if ($elapsed -ge $Timeout) {
@@ -406,7 +394,7 @@ try {
         # Get CPU usage
         Write-Host "  Measuring CPU... " -NoNewline
         $script:Stream.WriteLine("cpu usage")
-        Start-InterruptibleSleep -Milliseconds 11000  # Wait for 10s measurement + buffer
+        Start-Sleep -Milliseconds 11000  # Wait for 10s measurement + buffer
         $cpuOutput = $script:Stream.Read()
         $cpuUsage = Parse-CpuUsage -Output $cpuOutput
 
@@ -420,7 +408,7 @@ try {
         # Get memory stats
         Write-Host "  Measuring Memory... " -NoNewline
         $script:Stream.WriteLine("show mem")
-        Start-InterruptibleSleep -Milliseconds 500
+        Start-Sleep -Milliseconds 500
         $memOutput = $script:Stream.Read()
         $memStats = Parse-MemoryStats -Output $memOutput
 
@@ -444,54 +432,44 @@ try {
 
         if ($waitTime -gt 0) {
             Write-Host ""
-            for ($i = 0; $i -lt $waitTime; $i++) {
-                if ($script:StopRequested) { break }
-                Start-Sleep -Seconds 1
-            }
+            Start-Sleep -Seconds $waitTime
         }
     }
 
+    # Normal completion
     Write-Host ""
-
-    if ($script:StopRequested) {
-        Write-Log "Profiling interrupted by user (Ctrl-C)" "WARNING"
-    }
-    else {
-        Write-Log "Profiling stopped. Collected $($script:Samples.Count) samples." "SUCCESS"
-    }
-
-    # Close stream and session
-    $script:Stream.Dispose()
-    Remove-SSHSession -SessionId $script:Session.SessionId | Out-Null
-    Write-Log "SSH session closed" "SUCCESS"
-
-    # Show statistics
-    if ($script:Samples.Count -gt 0) {
-        Show-Statistics -Samples $script:Samples
-    }
+    Write-Log "Profiling completed. Collected $($script:Samples.Count) samples." "SUCCESS"
 
 }
 catch {
-    Write-Log "Error: $_" "ERROR"
-    Write-Log "Stack trace: $($_.ScriptStackTrace)" "ERROR"
-
-    # Show statistics even if error occurred
-    if ($script:Samples.Count -gt 0) {
-        Write-Host ""
-        Show-Statistics -Samples $script:Samples
+    # Ctrl-C or other error
+    Write-Host ""
+    if ($_.Exception -is [System.Management.Automation.PipelineStoppedException]) {
+        Write-Log "Profiling interrupted by user (Ctrl-C)" "WARNING"
     }
-
-    exit 1
+    else {
+        Write-Log "Error: $_" "ERROR"
+        Write-Log "Stack trace: $($_.ScriptStackTrace)" "ERROR"
+    }
 }
 finally {
-    # Cleanup
+    # Always runs - cleanup and show statistics
     if ($null -ne $script:Stream) {
         try { $script:Stream.Dispose() } catch { }
     }
     if ($null -ne $script:Session) {
-        try { Remove-SSHSession -SessionId $script:Session.SessionId -ErrorAction SilentlyContinue | Out-Null } catch { }
+        try {
+            Remove-SSHSession -SessionId $script:Session.SessionId -ErrorAction SilentlyContinue | Out-Null
+            Write-Log "SSH session closed" "SUCCESS"
+        }
+        catch { }
     }
 
-    # Unregister Ctrl-C handler
-    Get-EventSubscriber | Where-Object { $_.SourceObject -is [System.Console] } | Unregister-Event -ErrorAction SilentlyContinue
+    # Show statistics if we collected samples
+    if ($script:Samples.Count -gt 0) {
+        Show-Statistics -Samples $script:Samples
+    }
+    else {
+        Write-Log "No samples collected" "WARNING"
+    }
 }
