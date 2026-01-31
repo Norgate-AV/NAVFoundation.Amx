@@ -403,12 +403,12 @@ struct _NAVContact {
 /**
  * @struct _NAVStateBoolean
  * @description Tracks boolean state with required and actual values plus initialization status.
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  * @property {char} Required - The desired boolean state (0=false, non-zero=true)
  * @property {char} Actual - The current boolean state (0=false, non-zero=true)
  */
 struct _NAVStateBoolean {
-    integer Initialized
+    char Initialized
     char Required
     char Actual
 }
@@ -417,12 +417,12 @@ struct _NAVStateBoolean {
 /**
  * @struct _NAVStateInteger
  * @description Tracks integer state with required and actual values plus initialization status.
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  * @property {integer} Required - The desired integer state value
  * @property {integer} Actual - The current integer state value
  */
 struct _NAVStateInteger {
-    integer Initialized
+    char Initialized
     integer Required
     integer Actual
 }
@@ -431,12 +431,12 @@ struct _NAVStateInteger {
 /**
  * @struct _NAVStateSignedInteger
  * @description Tracks signed integer state with required and actual values plus initialization status.
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  * @property {sinteger} Required - The desired signed integer state value
  * @property {sinteger} Actual - The current signed integer state value
  */
 struct _NAVStateSignedInteger {
-    integer Initialized
+    char Initialized
     sinteger Required
     sinteger Actual
 }
@@ -447,12 +447,12 @@ struct _NAVStateSignedInteger {
  * @description Tracks long integer state with required and actual values plus initialization status.
  * @property {long} Required - The desired long integer state value
  * @property {long} Actual - The current long integer state value
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  */
 struct _NAVStateLong {
     long Required
     long Actual
-    integer Initialized
+    char Initialized
 }
 
 
@@ -461,12 +461,12 @@ struct _NAVStateLong {
  * @description Tracks signed long integer state with required and actual values plus initialization status.
  * @property {slong} Required - The desired signed long integer state value
  * @property {slong} Actual - The current signed long integer state value
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  */
 struct _NAVStateSignedLong {
     slong Required
     slong Actual
-    integer Initialized
+    char Initialized
 }
 
 
@@ -475,12 +475,12 @@ struct _NAVStateSignedLong {
  * @description Tracks double precision floating-point state with required and actual values plus initialization status.
  * @property {double} Required - The desired double state value
  * @property {double} Actual - The current double state value
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  */
 struct _NAVStateDouble {
     double Required
     double Actual
-    integer Initialized
+    char Initialized
 }
 
 
@@ -489,24 +489,24 @@ struct _NAVStateDouble {
  * @description Tracks single precision floating-point state with required and actual values plus initialization status.
  * @property {float} Required - The desired float state value
  * @property {float} Actual - The current float state value
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  */
 struct _NAVStateFloat {
     float Required
     float Actual
-    integer Initialized
+    char Initialized
 }
 
 
 /**
  * @struct _NAVStateString
  * @description Tracks string state with required and actual values plus initialization status.
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  * @property {char[]} Required - The desired string state value
  * @property {char[]} Actual - The current string state value
  */
 struct _NAVStateString {
-    integer Initialized
+    char Initialized
     char Required[NAV_MAX_BUFFER]
     char Actual[NAV_MAX_BUFFER]
 }
@@ -574,7 +574,7 @@ struct _NAVProjector {
  * @property {_NAVDevice} Device - The base device information and connection details
  * @property {_NAVVolume} Volume - The audio volume and mute settings
  * @property {_NAVStateInteger[][][]} Output - 3D array of output states [type][output number]
- * @property {integer[][]} PendingRequired - Array tracking pending output changes
+ * @property {char[][]} PendingRequired - Array tracking pending output changes
  * @property {integer} NumberOfInputs - The number of available inputs on the switcher
  * @property {char[]} InputHasSignal - Array indicating which inputs have active signals
  * @property {char} Pending - Flag indicating if there are pending changes
@@ -585,7 +585,7 @@ struct _NAVSwitcher {
     // integer OutputRequired[3][128]
     // integer OutputActual[3][128]
     _NAVStateInteger Output[3][128]
-    integer PendingRequired[3][128]
+    char PendingRequired[3][128]
     integer NumberOfInputs
     char InputHasSignal[128]
     char Pending
@@ -658,15 +658,15 @@ struct _NAVSocketConnection {
  * @struct _NAVDevice
  * @description Represents a networked device with connection and status information.
  * @property {_NAVSocketConnection} SocketConnection - The network connection details
- * @property {integer} IsOnline - Flag indicating online status (0=offline, non-zero=online)
- * @property {integer} IsCommunicating - Flag indicating active communication (0=no, non-zero=yes)
- * @property {integer} IsInitialized - Flag indicating if the device is initialized (0=no, non-zero=yes)
+ * @property {char} IsOnline - Flag indicating online status (0=offline, non-zero=online)
+ * @property {char} IsCommunicating - Flag indicating active communication (0=no, non-zero=yes)
+ * @property {char} IsInitialized - Flag indicating if the device is initialized (0=no, non-zero=yes)
  */
 struct _NAVDevice {
     _NAVSocketConnection SocketConnection
-    integer IsOnline
-    integer IsCommunicating
-    integer IsInitialized
+    char IsOnline
+    char IsCommunicating
+    char IsInitialized
 }
 
 
@@ -675,15 +675,15 @@ struct _NAVDevice {
  * @description Represents a NetLinx module with device and communication properties.
  * @property {_NAVDevice} Device - The base device information and connection details
  * @property {_NAVRxBuffer} RxBuffer - Buffer for receiving data
- * @property {integer} Enabled - Flag indicating if the module is enabled (0=disabled, non-zero=enabled)
- * @property {integer} CommandBusy - Flag indicating if the module is processing commands (0=not busy, non-zero=busy)
+ * @property {char} Enabled - Flag indicating if the module is enabled (0=disabled, non-zero=enabled)
+ * @property {char} CommandBusy - Flag indicating if the module is processing commands (0=not busy, non-zero=busy)
  * @property {dev[]} VirtualDevice - Array of virtual devices associated with the module
  */
 struct _NAVModule {
     _NAVDevice Device
     _NAVRxBuffer RxBuffer
-    integer Enabled
-    integer CommandBusy
+    char Enabled
+    char CommandBusy
     dev VirtualDevice[10]
 }
 
