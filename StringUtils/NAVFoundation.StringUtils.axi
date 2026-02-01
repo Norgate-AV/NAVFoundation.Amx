@@ -1911,6 +1911,73 @@ define_function char NAVParseFloat(char data[], float result) {
 
 
 /**
+ * @function NAVParseBoolean
+ * @public
+ * @description Parses and validates a string representation of a boolean value.
+ *
+ * Recognizes multiple boolean representations (case-insensitive):
+ * - True values: "1", "true", "yes", "on"
+ * - False values: "0", "false", "no", "off"
+ *
+ * This function validates that the input string is one of the recognized
+ * boolean representations before parsing. Unlike NAVStringToBoolean which
+ * defaults unrecognized values to false, this function returns false to
+ * indicate parsing failure.
+ *
+ * @param {char[]} data - String to parse and validate
+ * @param {char} result - Variable to populate with the parsed boolean value
+ *
+ * @returns {char} true if parsing succeeded (valid boolean string), false otherwise
+ *
+ * @example
+ * stack_var char value
+ * stack_var char result
+ * result = NAVParseBoolean('true', value)    // Returns true, value = true
+ * result = NAVParseBoolean('off', value)     // Returns true, value = false
+ * result = NAVParseBoolean('invalid', value) // Returns false (not recognized)
+ * result = NAVParseBoolean('yes', value)     // Returns true, value = true
+ *
+ * @see NAVStringToBoolean
+ */
+define_function char NAVParseBoolean(char data[], char result) {
+    stack_var char normalized[NAV_MAX_BUFFER]
+
+    // Initialize result
+    result = false
+
+    // Validate non-empty input
+    if (!length_array(data)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_STRINGUTILS__,
+                                    'NAVParseBoolean',
+                                    'Invalid argument. The provided string is empty')
+        return false
+    }
+
+    // Normalize to lowercase for comparison
+    normalized = lower_string(data)
+
+    // Validate it's a recognized boolean value
+    if (normalized == '1' || normalized == 'true' || normalized == 'yes' || normalized == 'on') {
+        result = true
+        return true
+    }
+
+    if (normalized == '0' || normalized == 'false' || normalized == 'no' || normalized == 'off') {
+        result = false
+        return true
+    }
+
+    // Not a recognized boolean value
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                __NAV_FOUNDATION_STRINGUTILS__,
+                                'NAVParseBoolean',
+                                "'Invalid boolean value: ', data, ' (expected: 1, true, yes, on, 0, false, no, off)'")
+    return false
+}
+
+
+/**
  * @function NAVGetTimeSpan
  * @public
  * @description Converts a duration in milliseconds to a human-readable time span string.

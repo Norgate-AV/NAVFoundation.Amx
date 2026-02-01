@@ -11,7 +11,7 @@ Working with strings in NetLinx can be challenging due to limited built-in funct
 - **String Manipulation**: Trimming, substring extraction, replacing, etc.
 - **String Testing**: Contains, startsWith, endsWith, etc.
 - **String Searching**: Find index of substrings, count occurrences
-- **String Parsing**: Parse integers, signed integers, longs, signed longs, and floats with validation
+- **String Parsing**: Parse integers, signed integers, longs, signed longs, floats, and booleans with validation
 - **Case Conversion**: Upper/lower case, camelCase, PascalCase, etc.
 - **Character Operations**: Check character types, convert case
 - **String Splitting and Joining**: Split strings into arrays, join arrays into strings
@@ -245,9 +245,23 @@ success = NAVParseFloat('3.14159', fvalue)      // Returns true, fvalue = 3.1415
 success = NAVParseFloat('-1.25e-3', fvalue)     // Returns true, fvalue = -0.00125
 success = NAVParseFloat('Temp=22.5', fvalue)    // Returns true, fvalue = 22.5 (extracts first number)
 success = NAVParseFloat('   10.5  20.3   ', fvalue) // Returns true, fvalue = 10.5
+
+// Parse boolean values (case-insensitive)
+stack_var char bvalue
+success = NAVParseBoolean('true', bvalue)   // Returns true, bvalue = 1
+success = NAVParseBoolean('FALSE', bvalue)  // Returns true, bvalue = 0
+success = NAVParseBoolean('1', bvalue)      // Returns true, bvalue = 1
+success = NAVParseBoolean('0', bvalue)      // Returns true, bvalue = 0
+success = NAVParseBoolean('yes', bvalue)    // Returns true, bvalue = 1
+success = NAVParseBoolean('no', bvalue)     // Returns true, bvalue = 0
+success = NAVParseBoolean('ON', bvalue)     // Returns true, bvalue = 1
+success = NAVParseBoolean('off', bvalue)    // Returns true, bvalue = 0
+success = NAVParseBoolean('maybe', bvalue)  // Returns false (invalid)
+success = NAVParseBoolean('', bvalue)       // Returns false (empty string)
 ```
 
 **Parsing Behavior Notes:**
+
 - All parsing functions skip leading whitespace
 - They parse the first valid number encountered
 - Parsing stops at the first space or non-digit character after the number (matching ATOI/ATOF behavior)
@@ -256,6 +270,10 @@ success = NAVParseFloat('   10.5  20.3   ', fvalue) // Returns true, fvalue = 10
 - `NAVParseInteger` and `NAVParseSignedInteger` use ATOI internally
 - `NAVParseLong` and `NAVParseSignedLong` use manual digit-by-digit parsing for full range support and overflow detection
 - `NAVParseFloat` uses ATOF internally
+- `NAVParseBoolean` performs case-insensitive matching of valid boolean strings:
+    - **True values**: `'1'`, `'true'`, `'yes'`, `'on'`
+    - **False values**: `'0'`, `'false'`, `'no'`, `'off'`
+    - Returns `false` for any other input (including empty strings, partial matches like `'tr'` or `'fals'`, or numeric values other than `'1'` or `'0'`)
 
 ### Time and Duration Functions
 
@@ -402,6 +420,31 @@ response = 'Temperature: 22.5 degrees'
 success = NAVParseFloat(response, value)
 if (success) {
     // value = 22.5
+}
+
+// Parse boolean configuration values
+stack_var char enabledStr[10]
+stack_var char boolValue
+
+enabledStr = 'true'
+success = NAVParseBoolean(enabledStr, boolValue)
+if (success) {
+    if (boolValue) {
+        // Feature is enabled
+        send_command dvDevice, "'FEATURE-ON'"
+    } else {
+        // Feature is disabled
+        send_command dvDevice, "'FEATURE-OFF'"
+    }
+}
+
+// Handle configuration from INI files or user input
+stack_var char config[20]
+config = 'DEBUG=yes'
+config = NAVGetStringAfter(config, '=')  // Extract 'yes'
+success = NAVParseBoolean(config, boolValue)
+if (success && boolValue) {
+    // Enable debug mode
 }
 ```
 
