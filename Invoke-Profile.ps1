@@ -130,6 +130,34 @@ function Format-Bytes {
     }
 }
 
+function Format-Delta {
+    param([long]$Delta)
+
+    # Return null if no change
+    if ($Delta -eq 0) {
+        return $null
+    }
+
+    $sign = if ($Delta -gt 0) { "+" } else { "-" }
+    $absValue = [Math]::Abs($Delta)
+    $color = if ($Delta -gt 0) { "Green" } else { "Red" }
+
+    $formatted = if ($absValue -ge 1MB) {
+        "$sign{0:N2} MB" -f ($absValue / 1MB)
+    }
+    elseif ($absValue -ge 1KB) {
+        "$sign{0:N2} KB" -f ($absValue / 1KB)
+    }
+    else {
+        "$sign$absValue bytes"
+    }
+
+    return @{
+        Text  = $formatted
+        Color = $color
+    }
+}
+
 function Show-Statistics {
     param([array]$Samples)
 
@@ -336,6 +364,7 @@ try {
     $script:Samples = @()
     $startTime = Get-Date
     $sampleCount = 0
+    $previousMemStats = $null
 
     Write-Host "`nStarting profiling... (Ctrl-C to stop)`n" -ForegroundColor Green
 
@@ -376,7 +405,37 @@ try {
         $memStats = ConvertFrom-MemoryStats -Output $memOutput
 
         if ($memStats.Count -gt 0) {
-            Write-Host "Volatile: $(Format-Bytes $memStats.VolatileFree) free, Non-Volatile: $(Format-Bytes $memStats.NonVolatileFree) free" -ForegroundColor Yellow
+            Write-Host "Volatile: $(Format-Bytes $memStats.VolatileFree) free" -NoNewline -ForegroundColor Yellow
+
+            # Calculate and display deltas if we have previous data
+            if ($null -ne $previousMemStats) {
+                $volatileDelta = $memStats.VolatileFree - $previousMemStats.VolatileFree
+                $volatileDeltaInfo = Format-Delta $volatileDelta
+
+                if ($null -ne $volatileDeltaInfo) {
+                    Write-Host " (" -NoNewline
+                    Write-Host $volatileDeltaInfo.Text -NoNewline -ForegroundColor $volatileDeltaInfo.Color
+                    Write-Host ")" -NoNewline
+                }
+            }
+
+            Write-Host ", Non-Volatile: $(Format-Bytes $memStats.NonVolatileFree) free" -NoNewline -ForegroundColor Yellow
+
+            if ($null -ne $previousMemStats) {
+                $nonVolatileDelta = $memStats.NonVolatileFree - $previousMemStats.NonVolatileFree
+                $nonVolatileDeltaInfo = Format-Delta $nonVolatileDelta
+
+                if ($null -ne $nonVolatileDeltaInfo) {
+                    Write-Host " (" -NoNewline
+                    Write-Host $nonVolatileDeltaInfo.Text -NoNewline -ForegroundColor $nonVolatileDeltaInfo.Color
+                    Write-Host ")" -NoNewline
+                }
+            }
+
+            Write-Host ""  # Newline
+
+            # Store current stats for next iteration
+            $previousMemStats = $memStats
         }
         else {
             Write-Host "Failed" -ForegroundColor Red
