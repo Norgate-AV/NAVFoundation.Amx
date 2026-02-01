@@ -113,7 +113,7 @@ define_function TestNAVNetParseIPAddr() {
     stack_var integer x
     stack_var integer validCount
 
-    NAVLog("'***************** NAVNetParseIPAddr *****************'")
+    NAVLogTestSuiteStart('NAVNetParseIPAddr')
 
     validCount = 0
 
@@ -183,4 +183,6 @@ define_function TestNAVNetParseIPAddr() {
 
         NAVLogTestPassed(x)
     }
+
+    NAVLogTestSuiteEnd('NAVNetParseIPAddr')
 }

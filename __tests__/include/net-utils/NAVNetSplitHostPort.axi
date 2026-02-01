@@ -96,7 +96,7 @@ define_function TestNAVNetSplitHostPort() {
     stack_var integer x
     stack_var integer validCount
 
-    NAVLog("'***************** NAVNetSplitHostPort *****************'")
+    NAVLogTestSuiteStart('NAVNetSplitHostPort')
 
     validCount = 0
 
@@ -147,4 +147,6 @@ define_function TestNAVNetSplitHostPort() {
 
         NAVLogTestPassed(x)
     }
+
+    NAVLogTestSuiteEnd('NAVNetSplitHostPort')
 }

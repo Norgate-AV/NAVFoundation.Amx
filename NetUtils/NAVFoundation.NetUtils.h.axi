@@ -105,5 +105,42 @@ struct _NAVIPAddr {
     integer Port
 }
 
+/**
+ * @struct _NAVHostname
+ * @description Structure for holding parsed hostname components.
+ *
+ * This structure stores a validated hostname as both individual labels
+ * (components separated by dots) and as a complete string representation.
+ * Designed to support RFC 1123 compliant hostnames.
+ *
+ * RFC 1123/952 Requirements:
+ * - Total length must not exceed 253 characters
+ * - Labels separated by dots
+ * - Each label: 1-63 characters
+ * - Labels must start and end with alphanumeric (a-z, A-Z, 0-9)
+ * - Labels may contain hyphens in the middle
+ * - Hostname must not start or end with a dot
+ *
+ * @property {char[253]} Hostname - The complete validated hostname string
+ * @property {char[127][64]} Labels - Array of hostname labels (e.g., "sub.example.com" → ["sub", "example", "com"])
+ * @property {integer} LabelCount - Number of labels in the hostname
+ *
+ * @see NAVNetParseHostname
+ *
+ * @example
+ * stack_var _NAVHostname host
+ * if (NAVNetParseHostname('example.com', host)) {
+ *     // host.Hostname = 'example.com'
+ *     // host.Labels[1] = 'example'
+ *     // host.Labels[2] = 'com'
+ *     // host.LabelCount = 2
+ * }
+ */
+struct _NAVHostname {
+    char Hostname[253]
+    char Labels[127][64]
+    integer LabelCount
+}
+
 
 #END_IF // __NAV_FOUNDATION_NETUTILS_H__

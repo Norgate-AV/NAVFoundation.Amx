@@ -2,7 +2,8 @@
 #DEFINE TESTING_NAVNETSPLITHOSTPORT
 #DEFINE TESTING_NAVNETPARSEIPADDR
 #DEFINE TESTING_NAVNETJOINHOSTPORT
-
+#DEFINE TESTING_NAVNETPARSEHOSTNAME
+#DEFINE TESTING_NAVNETISMALFORMEDIP
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.NetUtils.axi'
 #include 'NAVFoundation.Assert.axi'
@@ -25,6 +26,14 @@
 #include 'NAVNetJoinHostPort.axi'
 #END_IF
 
+#IF_DEFINED TESTING_NAVNETPARSEHOSTNAME
+#include 'NAVNetParseHostname.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVNETISMALFORMEDIP
+#include 'NAVNetIsMalformedIP.axi'
+#END_IF
+
 define_function RunNetUtilsTests() {
     #IF_DEFINED TESTING_NAVNETPARSEIPV4
     TestNAVNetParseIPv4()
@@ -40,5 +49,13 @@ define_function RunNetUtilsTests() {
 
     #IF_DEFINED TESTING_NAVNETJOINHOSTPORT
     TestNAVNetJoinHostPort()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVNETPARSEHOSTNAME
+    TestNAVNetParseHostname()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVNETISMALFORMEDIP
+    TestNAVNetIsMalformedIP()
     #END_IF
 }

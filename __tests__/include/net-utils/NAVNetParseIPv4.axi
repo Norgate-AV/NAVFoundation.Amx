@@ -146,7 +146,7 @@ define_function TestNAVNetParseIPv4() {
     stack_var integer x
     stack_var integer validCount
 
-    NAVLog("'***************** NAVNetParseIPv4 *****************'")
+    NAVLogTestSuiteStart('NAVNetParseIPv4')
 
     validCount = 0
 
@@ -200,4 +200,6 @@ define_function TestNAVNetParseIPv4() {
 
         NAVLogTestPassed(x)
     }
+
+    NAVLogTestSuiteEnd('NAVNetParseIPv4')
 }

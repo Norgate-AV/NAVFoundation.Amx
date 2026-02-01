@@ -5,20 +5,26 @@ PROGRAM_NAME='net-utils'
 
 DEFINE_DEVICE
 
-vdvTEST = 33201:1:0
+vdvTest = 33201:1:0
+
+DEFINE_START {
+    set_log_level(NAV_LOG_LEVEL_DEBUG)
+}
 
 DEFINE_EVENT
 
 button_event[vdvTest, 1] {
     push: {
-        set_log_level(NAV_LOG_LEVEL_DEBUG)
+        NAVLogTestStart()
         RunNetUtilsTests()
+        NAVLogTestEnd()
     }
 }
 
 channel_event[vdvTest, 1] {
     on: {
-        set_log_level(NAV_LOG_LEVEL_DEBUG)
+        NAVLogTestStart()
         RunNetUtilsTests()
+        NAVLogTestEnd()
     }
 }
