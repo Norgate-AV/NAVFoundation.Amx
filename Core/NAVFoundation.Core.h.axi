@@ -634,21 +634,53 @@ struct _NAVCredential {
 
 /**
  * @struct _NAVSocketConnection
- * @description Manages a network socket connection with retry and timing functionality.
+ * @description Manages a network socket connection with retry and timing functionality. Supports TCP, SSH, and TLS connections.
+ * @property {dev} Device - The physical device reference
+ * @property {char[]} Id - Identifier for the connection (used in logging). Auto-populated with device string if not explicitly set
  * @property {integer} Socket - The socket identifier
- * @property {integer} Port - The TCP/IP port number
- * @property {integer} IsConnected - Flag indicating connection status (0=disconnected, non-zero=connected)
- * @property {integer} IsAuthenticated - Flag indicating authentication status (0=not authenticated, non-zero=authenticated)
  * @property {char[]} Address - The IP address or hostname for the connection
+ * @property {integer} Port - The TCP/IP port number
+ * @property {integer} Protocol - Protocol type (IP_TCP, IP_UDP, IP_UDP_2WAY)
+ * @property {integer} ConnectionType - Connection type (NAV_SOCKET_CONNECTION_TYPE_TCP_UDP, _SSH, or _TLS)
+ * @property {char} IsConnected - Flag indicating connection status (0=disconnected, non-zero=connected)
+ * @property {char} IsNegotiated - Flag indicating if protocol negotiation is complete (0=no, non-zero=yes)
+ * @property {char} IsAuthenticated - Flag indicating authentication status (0=not authenticated, non-zero=authenticated)
+ * @property {char} AutoReconnect - Flag enabling automatic reconnection (0=disabled, non-zero=enabled)
+ * @property {_NAVCredential} Credential - Username and password for authentication (used by SSH)
+ * @property {char[]} SshPrivateKey - Path to SSH private key file for key-based authentication
+ * @property {char[]} SshPrivateKeyPassphrase - Passphrase for SSH private key (if required)
+ * @property {integer} TlsMode - TLS certificate validation mode (TLS_VALIDATE_CERTIFICATE or TLS_IGNORE_CERTIFICATE_ERRORS)
+ * @property {long} TimelineId - Timeline ID for connection maintenance
  * @property {long[1]} Interval - Array containing the retry interval in milliseconds for connection attempts
  * @property {integer} RetryCount - Current count of connection retry attempts
+ * @property {char} IsInitialized - Flag indicating if the connection has been initialized via NAVSocketConnectionInit (0=no, non-zero=yes)
  */
 struct _NAVSocketConnection {
+    dev Device
+
+    char Id[NAV_MAX_CHARS]
+
     integer Socket
-    integer Port
-    integer IsConnected
-    integer IsAuthenticated
     char Address[NAV_MAX_CHARS]
+    integer Port
+    integer Protocol
+    integer ConnectionType
+
+    char IsConnected
+    char IsNegotiated
+    char IsAuthenticated
+    char IsInitialized
+
+    char AutoReconnect
+
+    _NAVCredential Credential
+
+    char SshPrivateKey[NAV_MAX_BUFFER]
+    char SshPrivateKeyPassphrase[NAV_MAX_CHARS]
+
+    integer TlsMode
+
+    long TimelineId
     long Interval[1]
     integer RetryCount
 }
