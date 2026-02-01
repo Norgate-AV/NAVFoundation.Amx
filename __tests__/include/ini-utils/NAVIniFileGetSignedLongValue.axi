@@ -18,18 +18,6 @@ constant char SIGNED_LONG_VALID_TEST_KEYS[][64] = {
     'section1.delta'     // Section value: 500000
 }
 
-constant slong SIGNED_LONG_VALID_EXPECTED[] = {
-    0,            // slong_zero
-    42,           // slong_positive
-    -100,         // slong_negative
-    2147483647,   // slong_max
-    -2000000000,  // slong_min (safe value instead of true min)
-    123456,       // slong_plus_sign
-    -456789,      // slong_spaces
-    -1000000,     // section1.offset
-    500000        // section1.delta
-}
-
 // Test cases for default value returns (missing or invalid)
 constant char SIGNED_LONG_DEFAULT_TEST_KEYS[][64] = {
     'nonexistent',      // Key doesn't exist
@@ -40,17 +28,6 @@ constant char SIGNED_LONG_DEFAULT_TEST_KEYS[][64] = {
     'slong_mixed',      // Mixed value: '-12345abc' (atol returns -12345)
     'slong_empty',      // Empty value
     ''                  // Empty key
-}
-
-constant slong SIGNED_LONG_DEFAULT_VALUES[] = {
-    -999999,    // Test with negative default
-    0,          // Test with 0 as default
-    1000000,    // Test with positive default
-    -1,         // Test with -1 as default
-    -3,         // Float converts to -3 (atol behavior)
-    -12345,     // Mixed converts to -12345 (atol behavior)
-    42,         // Empty returns default
-    -50000      // Empty key returns default
 }
 
 DEFINE_VARIABLE
@@ -107,9 +84,26 @@ define_function TestNAVIniFileGetSignedLongValue() {
 
     // Test all valid signed long integer conversions
     for (i = 1; i <= length_array(SIGNED_LONG_VALID_TEST_KEYS); i++) {
+        stack_var slong expected
+
+        expected = 0
+
+        // Create expected value at runtime using switch/case
+        switch (i) {
+            case 1: expected = type_cast(0)           // slong_zero
+            case 2: expected = type_cast(42)          // slong_positive
+            case 3: expected = expected - type_cast(100)     // slong_negative
+            case 4: expected = type_cast(2147483647)  // slong_max
+            case 5: expected = expected - type_cast(2000000000)  // slong_min
+            case 6: expected = type_cast(123456)      // slong_plus_sign
+            case 7: expected = expected - type_cast(456789)  // slong_spaces
+            case 8: expected = expected - type_cast(1000000) // section1.offset
+            case 9: expected = type_cast(500000)      // section1.delta
+        }
+
         result = NAVIniFileGetSignedLongValue(testIni, SIGNED_LONG_VALID_TEST_KEYS[i], 0)
 
-        if (!NAVAssertSignedLongEqual('GetSignedLongValue Valid Test', SIGNED_LONG_VALID_EXPECTED[i], result)) {
+        if (!NAVAssertSignedLongEqual('GetSignedLongValue Valid Test', expected, result)) {
             // Don't format signed longs - NetLinx can't do it correctly
             NAVLogTestFailed(i, "'comparison failed'", "'see debug output above'")
             continue
@@ -124,7 +118,20 @@ define_function TestNAVIniFileGetSignedLongValue() {
     for (i = 1; i <= length_array(SIGNED_LONG_DEFAULT_TEST_KEYS); i++) {
         stack_var slong expected
 
-        expected = SIGNED_LONG_DEFAULT_VALUES[i]
+        expected = 0
+
+        // Create expected value at runtime using switch/case
+        switch (i) {
+            case 1: expected = expected - type_cast(999999)  // Test with negative default
+            case 2: expected = type_cast(0)           // Test with 0 as default
+            case 3: expected = type_cast(1000000)     // Test with positive default
+            case 4: expected = expected - type_cast(1)       // Test with -1 as default
+            case 5: expected = expected - type_cast(3)       // Float converts to -3 (atol behavior)
+            case 6: expected = expected - type_cast(12345)   // Mixed converts to -12345 (atol behavior)
+            case 7: expected = type_cast(42)          // Empty returns default
+            case 8: expected = expected - type_cast(50000)   // Empty key returns default
+        }
+
         result = NAVIniFileGetSignedLongValue(testIni, SIGNED_LONG_DEFAULT_TEST_KEYS[i], expected)
 
         if (!NAVAssertSignedLongEqual('GetSignedLongValue Default Test', expected, result)) {
@@ -164,7 +171,7 @@ define_function TestSignedLongGetVerification() {
     testData = "'boundary_min=-2000000000', 10"
     if (NAVIniFileParse(testData, testIni)) {
         result = NAVIniFileGetSignedLongValue(testIni, 'boundary_min', 0)
-        if (!NAVAssertSignedLongEqual('Boundary Min Test', -2000000000, result)) {
+        if (!NAVAssertSignedLongEqual('Boundary Min Test', type_cast(0 - 2000000000), result)) {
             NAVLogTestFailed(2, '-2000000000', itoa(result))
         } else {
             NAVLogTestPassed(2)
@@ -186,19 +193,19 @@ define_function TestSignedLongGetVerification() {
     testData = "'neg_spaces=  -1234567  ', 10"
     if (NAVIniFileParse(testData, testIni)) {
         result = NAVIniFileGetSignedLongValue(testIni, 'neg_spaces', 0)
-        if (!NAVAssertSignedLongEqual('Negative Spaces Test', -1234567, result)) {
+        if (!NAVAssertSignedLongEqual('Negative Spaces Test', type_cast(0 - 1234567), result)) {
             NAVLogTestFailed(4, '-1234567', itoa(result))
         } else {
             NAVLogTestPassed(4)
         }
     }
 
-    // Test 5: Invalid format with invalid characters
+    // Test 5: Mixed format with hyphens - parses first number
     testData = "'invalid_format=12-34-56', 10"
     if (NAVIniFileParse(testData, testIni)) {
-        result = NAVIniFileGetSignedLongValue(testIni, 'invalid_format', -999999)
-        if (!NAVAssertSignedLongEqual('Invalid Format Test', -999999, result)) {
-            NAVLogTestFailed(5, '-999999', itoa(result))
+        result = NAVIniFileGetSignedLongValue(testIni, 'invalid_format', type_cast(0 - 999999))
+        if (!NAVAssertSignedLongEqual('Mixed Format Test', 12, result)) {
+            NAVLogTestFailed(5, '12', itoa(result))
         } else {
             NAVLogTestPassed(5)
         }

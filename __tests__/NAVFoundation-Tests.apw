@@ -502,7 +502,7 @@
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
             <TransSerial>COM1,115200,8,None,1,None</TransSerial>
-            <TransTCPIPEx>192.168.10.37|1319|1|NX-2200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
             <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
             <TransUSBEx>|||||</TransUSBEx>
             <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
