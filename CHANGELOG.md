@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.14.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.13.2...v5.14.0) (2026-02-01)
+
+### 🌟 Features
+
+- **socket-utils:** add high-level connection management API ([3faefc0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3faefc09818ea6f97e7a9b89ecfcc012262cf68c))
+- **net-utils:** add NAVNetIsMalformedIP and NAVNetParseHostname functions ([221903f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/221903fdf3d365fe0c2b404e02012a71d1f5f542))
+- **string-utils:** add NAVParseBoolean function ([2892cf7](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/2892cf72a094a81f68dccea90db22dc0f16b7cb9))
+
 ## [5.13.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.13.1...v5.13.2) (2026-01-30)
 
 ### 🐛 Bug Fixes
