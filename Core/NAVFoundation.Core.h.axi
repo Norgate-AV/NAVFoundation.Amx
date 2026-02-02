@@ -687,6 +687,35 @@ struct _NAVSocketConnection {
 
 
 /**
+ * @struct _NAVOptionalDevice
+ * @description Generic structure for tracking optional device integrations in modules.
+ *              Used when a module needs to optionally integrate with other modules or services
+ *              without creating a hard dependency. Common use cases include CloudLogger integration,
+ *              telemetry services, etc.
+ * @property {dev} Device - The device reference to the optional module/service
+ * @property {char} Initialized - Flag indicating if the device has been configured (0=no, non-zero=yes)
+ *
+ * @example
+ * // Used in _NAVModule for optional CloudLogger:
+ * module.CloudLogger.Device
+ * module.CloudLogger.Initialized
+ *
+ * // Set via PROPERTY command:
+ * case 'CLOUDLOG_DEVICE': {
+ *     if (!NAVParseDevice(NAVTrimString(event.Args[1]), module.CloudLogger.Device)) {
+ *         module.CloudLogger.Initialized = false
+ *         return
+ *     }
+ *     module.CloudLogger.Initialized = true
+ * }
+ */
+struct _NAVOptionalDevice {
+    dev Device
+    char Initialized
+}
+
+
+/**
  * @struct _NAVDevice
  * @description Represents a networked device with connection and status information.
  * @property {_NAVSocketConnection} SocketConnection - The network connection details
@@ -710,6 +739,7 @@ struct _NAVDevice {
  * @property {char} Enabled - Flag indicating if the module is enabled (0=disabled, non-zero=enabled)
  * @property {char} CommandBusy - Flag indicating if the module is processing commands (0=not busy, non-zero=busy)
  * @property {dev[]} VirtualDevice - Array of virtual devices associated with the module
+ * @property {_NAVOptionalDevice} CloudLogger - Optional CloudLogger device for forwarding logs to cloud service
  */
 struct _NAVModule {
     _NAVDevice Device
@@ -717,6 +747,7 @@ struct _NAVModule {
     char Enabled
     char CommandBusy
     dev VirtualDevice[10]
+    _NAVOptionalDevice CloudLogger
 }
 
 
