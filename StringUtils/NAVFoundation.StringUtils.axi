@@ -573,6 +573,45 @@ define_function char NAVIsHexDigit(char byte) {
 
 
 /**
+ * @function NAVIsBinaryDigit
+ * @public
+ * @description Determines if a character is a valid binary digit (0-1).
+ *
+ * @param {char} byte - Character to test
+ *
+ * @returns {char} True if the character is a valid binary digit, false otherwise
+ *
+ * @example
+ * stack_var char isBinary
+ * isBinary = NAVIsBinaryDigit('0')   // Returns true
+ * isBinary = NAVIsBinaryDigit('1')   // Returns true
+ * isBinary = NAVIsBinaryDigit('2')   // Returns false
+ */
+define_function char NAVIsBinaryDigit(char byte) {
+    return (byte >= '0' && byte <= '1')
+}
+
+
+/**
+ * @function NAVIsOctalDigit
+ * @public
+ * @description Determines if a character is a valid octal digit (0-7).
+ *
+ * @param {char} byte - Character to test
+ *
+ * @returns {char} True if the character is a valid octal digit, false otherwise
+ *
+ * @example
+ * stack_var char isOctal
+ * isOctal = NAVIsOctalDigit('7')   // Returns true
+ * isOctal = NAVIsOctalDigit('8')   // Returns false
+ */
+define_function char NAVIsOctalDigit(char byte) {
+    return (byte >= '0' && byte <= '7')
+}
+
+
+/**
  * @function NAVTrimStringLeft
  * @public
  * @description Removes all leading whitespace characters from a string.
@@ -1412,9 +1451,80 @@ define_function long NAVStringToLongMilliseconds(char duration[]) {
 
 
 /**
+ * @function NAVIsValidDigitForBase
+ * @private
+ * @description Checks if a character is a valid digit for the specified base.
+ * Uses existing NAVIsDigit, NAVIsBinaryDigit, NAVIsOctalDigit, and NAVIsHexDigit functions.
+ *
+ * @param {char} ch - The character to check
+ * @param {integer} base - The numeric base (2, 8, 10, or 16)
+ *
+ * @returns {char} true if the character is valid for the base, false otherwise
+ */
+define_function char NAVIsValidDigitForBase(char ch, integer base) {
+    switch (base) {
+        case 2: {
+            return NAVIsBinaryDigit(ch)
+        }
+        case 8: {
+            return NAVIsOctalDigit(ch)
+        }
+        case 10: {
+            return NAVIsDigit(ch)
+        }
+        case 16: {
+            return NAVIsHexDigit(ch)
+        }
+        default: {
+            return false
+        }
+    }
+}
+
+
+/**
+ * @function NAVCharToDigit
+ * @private
+ * @description Converts a character to its numeric digit value (0-15).
+ * Assumes the character has already been validated as a valid digit.
+ * Uses NAVIsDigit for decimal digit validation.
+ *
+ * @param {char} ch - The character to convert ('0'-'9', 'A'-'F', 'a'-'f')
+ *
+ * @returns {integer} The numeric value (0-15)
+ */
+define_function integer NAVCharToDigit(char ch) {
+    select {
+        active (NAVIsDigit(ch)): {
+            return ch - '0'
+        }
+        active (ch >= 'A' && ch <= 'F'): {
+            return ch - 'A' + 10
+        }
+        active (ch >= 'a' && ch <= 'f'): {
+            return ch - 'a' + 10
+        }
+        active (true): {
+            return 0  // Should never reach here if validation was done
+        }
+    }
+}
+
+
+/**
  * @function NAVParseInteger
  * @public
- * @description Parses a string representation of an unsigned integer.
+ * @description Parses a string representation of an unsigned integer with support
+ * for multiple numeric bases (binary, octal, decimal, hexadecimal).
+ *
+ * Supported formats:
+ * - Binary: 0b or 0B prefix (e.g., '0b1010' = 10)
+ * - Octal: 0o or 0O prefix (e.g., '0o755' = 493)
+ * - Hexadecimal: 0x, 0X, or $ prefix (e.g., '0xFF' or '$FF' = 255)
+ * - Decimal: no prefix (e.g., '123')
+ *
+ * Parses the first valid number and stops at whitespace or invalid characters.
+ * Validates that the parsed value is within the valid NetLinx integer range (0-65535).
  *
  * Uses ATOI internally to parse the string. Validates that the parsed value
  * is within the valid NetLinx integer range (0-65535). Parses the first valid
@@ -1428,23 +1538,31 @@ define_function long NAVStringToLongMilliseconds(char duration[]) {
  * @example
  * stack_var integer value
  * stack_var char result
- * result = NAVParseInteger('12345', value)
- * if (result) {
- *     // value = 12345
- * }
- *
+ * result = NAVParseInteger('12345', value)    // Decimal: value = 12345
+ * result = NAVParseInteger('0xFF', value)      // Hex: value = 255
+ * result = NAVParseInteger('$FF', value)       // Hex: value = 255
+ * result = NAVParseInteger('0b11111111', value) // Binary: value = 255
+ * result = NAVParseInteger('0o377', value)     // Octal: value = 255
  * result = NAVParseInteger('99999', value)     // Returns false (out of range)
  * result = NAVParseInteger('-100', value)      // Returns false (negative)
- * result = NAVParseInteger('Volume=50', value) // value = 50 (ATOF extracts first number)
+ * result = NAVParseInteger('Volume=50', value) // value = 50 (extracts first number)
  */
 define_function char NAVParseInteger(char data[], integer result) {
-    stack_var slong tempValue
+    stack_var long accumulator
     stack_var integer x
     stack_var integer length
     stack_var char hasDigit
+    stack_var integer digit
+    stack_var char foundNumber
+    stack_var integer base
+    stack_var char ch
 
-    // Initialize result
+    // Initialize
     result = 0
+    accumulator = 0
+    hasDigit = false
+    foundNumber = false
+    base = 10  // Default to decimal
 
     // Validate non-empty input
     if (!length_array(data)) {
@@ -1455,15 +1573,87 @@ define_function char NAVParseInteger(char data[], integer result) {
         return false
     }
 
-    // Verify the string contains at least one digit
-    // ATOI returns 0 if no valid numeric characters are found
     length = length_array(data)
-    hasDigit = false
 
+    // Manual digit-by-digit parsing to support multiple bases
     for (x = 1; x <= length; x++) {
-        if (NAVIsDigit(data[x])) {
-            hasDigit = true
-            break
+        ch = data[x]
+
+        select {
+            // Detect negative sign before any digits (reject for unsigned type)
+            active (!foundNumber && ch == '-'): {
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                            __NAV_FOUNDATION_STRINGUTILS__,
+                                            'NAVParseInteger',
+                                            "'Value out of range (0-65535): negative value not allowed'")
+                return false
+            }
+            // Skip explicit positive sign
+            active (!foundNumber && ch == '+'): {
+                // Just skip it
+            }
+            // Check for '$' hex prefix (ASCII 36)
+            active (!foundNumber && ch == 36): {
+                base = 16
+            }
+            // Detect base prefix (0x, 0b, 0o)
+            active (!foundNumber && ch == '0' && x < length): {
+                // Look ahead for base prefix
+                select {
+                    active (data[x + 1] == 'x' || data[x + 1] == 'X'): {
+                        base = 16
+                        x = x + 1  // Skip the 'x'
+                    }
+                    active (data[x + 1] == 'b' || data[x + 1] == 'B'): {
+                        base = 2
+                        x = x + 1  // Skip the 'b'
+                    }
+                    active (data[x + 1] == 'o' || data[x + 1] == 'O'): {
+                        base = 8
+                        x = x + 1  // Skip the 'o'
+                    }
+                    active (true): {
+                        // Just a '0' digit
+                        hasDigit = true
+                        foundNumber = true
+                        // accumulator stays 0
+                    }
+                }
+            }
+            // Parse digit based on current base
+            active (NAVIsValidDigitForBase(ch, base)): {
+                hasDigit = true
+                foundNumber = true
+                digit = NAVCharToDigit(ch)
+
+                // Check for overflow before multiplying (max integer is 65535)
+                if (accumulator > (65535 / base)) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_STRINGUTILS__,
+                                                'NAVParseInteger',
+                                                "'Value out of range (0-65535): ', data")
+                    return false
+                }
+
+                accumulator = accumulator * base + digit
+
+                // Final check after addition
+                if (accumulator > 65535) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_STRINGUTILS__,
+                                                'NAVParseInteger',
+                                                "'Value out of range (0-65535): ', data")
+                    return false
+                }
+            }
+            // Found non-digit after parsing started - stop (like ATOI)
+            active (foundNumber): {
+                break
+            }
+            // Skip leading whitespace/non-digits (like ATOI)
+            active (true): {
+                // Continue scanning
+            }
         }
     }
 
@@ -1475,20 +1665,8 @@ define_function char NAVParseInteger(char data[], integer result) {
         return false
     }
 
-    // Parse using ATOI (returns slong, ignores non-numeric characters)
-    tempValue = atoi(data)
-
-    // Validate range for unsigned integer (0-65535)
-    if (tempValue < 0 || tempValue > 65535) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_STRINGUTILS__,
-                                    'NAVParseInteger',
-                                    "'Value out of range (0-65535): ', itoa(tempValue)")
-        return false
-    }
-
     // Success - set the result
-    result = type_cast(tempValue)
+    result = type_cast(accumulator)
     return true
 }
 
@@ -1496,11 +1674,17 @@ define_function char NAVParseInteger(char data[], integer result) {
 /**
  * @function NAVParseSignedInteger
  * @public
- * @description Parses a string representation of a signed integer.
+ * @description Parses a string representation of a signed integer with support
+ * for multiple numeric bases (binary, octal, decimal, hexadecimal).
  *
- * Uses ATOI internally to parse the string. Validates that the parsed value
- * is within the valid NetLinx signed integer range (-32768 to 32767). Parses
- * the first valid number and stops at whitespace or non-digit characters after it.
+ * Supported formats:
+ * - Binary: 0b or 0B prefix (e.g., '-0b1010' = -10)
+ * - Octal: 0o or 0O prefix (e.g., '-0o755' = -493)
+ * - Hexadecimal: 0x, 0X, or $ prefix (e.g., '-0xFF' or '-$FF' = -255)
+ * - Decimal: no prefix (e.g., '-123')
+ *
+ * Parses the first valid number and stops at whitespace or invalid characters.
+ * Validates that the parsed value is within the valid NetLinx signed integer range (-32768 to 32767).
  *
  * @param {char[]} data - The string to parse as a signed integer
  * @param {sinteger} result - Variable to populate with the parsed signed integer value
@@ -1510,21 +1694,30 @@ define_function char NAVParseInteger(char data[], integer result) {
  * @example
  * stack_var sinteger value
  * stack_var char result
- * result = NAVParseSignedInteger('-12345', value)
- * if (result) {
- *     // value = -12345
- * }
- *
- * result = NAVParseSignedInteger('50000', value) // Returns false (out of range)
+ * result = NAVParseSignedInteger('-12345', value)  // Decimal: value = -12345
+ * result = NAVParseSignedInteger('-0xFF', value)   // Hex: value = -255
+ * result = NAVParseSignedInteger('0x7FFF', value)  // Hex: value = 32767
+ * result = NAVParseSignedInteger('-0b10000', value) // Binary: value = -16
+ * result = NAVParseSignedInteger('50000', value)   // Returns false (out of range)
  */
 define_function char NAVParseSignedInteger(char data[], sinteger result) {
-    stack_var slong tempValue
+    stack_var slong accumulator
     stack_var integer x
     stack_var integer length
     stack_var char hasDigit
+    stack_var integer digit
+    stack_var char foundNumber
+    stack_var integer base
+    stack_var char ch
+    stack_var char isNegative
 
-    // Initialize result
+    // Initialize
     result = 0
+    accumulator = 0
+    hasDigit = false
+    foundNumber = false
+    base = 10  // Default to decimal
+    isNegative = false
 
     // Validate non-empty input
     if (!length_array(data)) {
@@ -1535,15 +1728,86 @@ define_function char NAVParseSignedInteger(char data[], sinteger result) {
         return false
     }
 
-    // Verify the string contains at least one digit
-    // ATOI returns 0 if no valid numeric characters are found
     length = length_array(data)
-    hasDigit = false
 
+    // Manual digit-by-digit parsing to support multiple bases
     for (x = 1; x <= length; x++) {
-        if (NAVIsDigit(data[x])) {
-            hasDigit = true
-            break
+        ch = data[x]
+
+        select {
+            // Detect negative sign before any digits
+            active (!foundNumber && ch == '-'): {
+                isNegative = true
+            }
+            // Skip explicit positive sign
+            active (!foundNumber && ch == '+'): {
+                // Just skip it
+            }
+            // Check for '$' hex prefix (ASCII 36)
+            active (!foundNumber && ch == 36): {
+                base = 16
+            }
+            // Detect base prefix (0x, 0b, 0o)
+            active (!foundNumber && ch == '0' && x < length): {
+                // Look ahead for base prefix
+                select {
+                    active (data[x + 1] == 'x' || data[x + 1] == 'X'): {
+                        base = 16
+                        x = x + 1  // Skip the 'x'
+                    }
+                    active (data[x + 1] == 'b' || data[x + 1] == 'B'): {
+                        base = 2
+                        x = x + 1  // Skip the 'b'
+                    }
+                    active (data[x + 1] == 'o' || data[x + 1] == 'O'): {
+                        base = 8
+                        x = x + 1  // Skip the 'o'
+                    }
+                    active (true): {
+                        // Just a '0' digit
+                        hasDigit = true
+                        foundNumber = true
+                        // accumulator stays 0
+                    }
+                }
+            }
+            // Parse digit based on current base
+            active (NAVIsValidDigitForBase(ch, base)): {
+                hasDigit = true
+                foundNumber = true
+                digit = NAVCharToDigit(ch)
+
+                // Check for overflow before multiplying
+                // Allow reaching 32768 for negative (for -32768), but only 32767 for positive
+                if ((isNegative && accumulator > type_cast(32768 / base)) ||
+                    (!isNegative && accumulator > type_cast(32767 / base))) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_STRINGUTILS__,
+                                                'NAVParseSignedInteger',
+                                                "'Value out of range (-32768 to 32767): ', data")
+                    return false
+                }
+
+                accumulator = accumulator * base + digit
+
+                // Final check after addition
+                // Allow accumulator to reach 32768 if negative (for -32768 special case)
+                if (accumulator > 32768 || (accumulator > 32767 && !isNegative)) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_STRINGUTILS__,
+                                                'NAVParseSignedInteger',
+                                                "'Value out of range (-32768 to 32767): ', data")
+                    return false
+                }
+            }
+            // Found non-digit after parsing started - stop (like ATOI)
+            active (foundNumber): {
+                break
+            }
+            // Skip leading whitespace/non-digits (like ATOI)
+            active (true): {
+                // Continue scanning
+            }
         }
     }
 
@@ -1555,20 +1819,29 @@ define_function char NAVParseSignedInteger(char data[], sinteger result) {
         return false
     }
 
-    // Parse using ATOI (returns slong, ignores non-numeric characters)
-    tempValue = atoi(data)
+    // Apply sign
+    if (isNegative) {
+        // Check for special case: -32768 is valid but requires special handling
+        // since accumulator holds positive 32768 which is out of range for signed
+        if (accumulator == 32768) {
+            result = -32768
+            return true
+        }
 
-    // Validate range for signed integer (-32768 to 32767)
-    if (tempValue < -32768 || tempValue > 32767) {
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                    __NAV_FOUNDATION_STRINGUTILS__,
-                                    'NAVParseSignedInteger',
-                                    "'Value out of range (-32768 to 32767): ', itoa(tempValue)")
-        return false
+        if (accumulator > 32768) {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_STRINGUTILS__,
+                                        'NAVParseSignedInteger',
+                                        "'Value out of range (-32768 to 32767): ', data")
+            return false
+        }
+
+        result = type_cast(-accumulator)
+    }
+    else {
+        result = type_cast(accumulator)
     }
 
-    // Success - set the result
-    result = type_cast(tempValue)
     return true
 }
 
@@ -1576,12 +1849,19 @@ define_function char NAVParseSignedInteger(char data[], sinteger result) {
 /**
  * @function NAVParseLong
  * @public
- * @description Parses a string representation of an unsigned long integer.
+ * @description Parses a string representation of an unsigned long integer with
+ * support for multiple numeric bases (binary, octal, decimal, hexadecimal).
+ *
+ * Supported formats:
+ * - Binary: 0b or 0B prefix (e.g., '0b11111111' = 255)
+ * - Octal: 0o or 0O prefix (e.g., '0o777' = 511)
+ * - Hexadecimal: 0x, 0X, or $ prefix (e.g., '0xFFFFFFFF' = 4294967295)
+ * - Decimal: no prefix (e.g., '1234567890')
  *
  * Uses manual digit-by-digit parsing to handle the full LONG range (0 to 4294967295).
  * ATOI cannot be used because it returns SLONG, which maxes out at 2,147,483,647,
  * preventing proper parsing of values above that limit. Parses the first valid number
- * and stops at whitespace or non-digit characters after it (matching ATOI behavior).
+ * and stops at whitespace or invalid characters.
  *
  * @param {char[]} data - The string to parse as an unsigned long
  * @param {long} result - Variable to populate with the parsed long value
@@ -1591,12 +1871,10 @@ define_function char NAVParseSignedInteger(char data[], sinteger result) {
  * @example
  * stack_var long value
  * stack_var char result
- * result = NAVParseLong('1234567890', value)
- * if (result) {
- *     // value = 1234567890
- * }
- *
- * result = NAVParseLong('-100', value) // Returns false (negative)
+ * result = NAVParseLong('1234567890', value)     // Decimal: value = 1234567890
+ * result = NAVParseLong('0xFFFFFFFF', value)     // Hex: value = 4294967295
+ * result = NAVParseLong('0b11111111', value)     // Binary: value = 255
+ * result = NAVParseLong('-100', value)           // Returns false (negative)
  *
  * @note Manual parsing is required because ATOI returns SLONG (max 2,147,483,647),
  *       which cannot represent the full LONG range (0-4,294,967,295).
@@ -1609,6 +1887,8 @@ define_function char NAVParseLong(char data[], long result) {
     stack_var integer digit
     stack_var char foundNumber
     stack_var char isNegative
+    stack_var integer base
+    stack_var char ch
 
     // Initialize result
     result = 0
@@ -1616,6 +1896,7 @@ define_function char NAVParseLong(char data[], long result) {
     hasDigit = false
     foundNumber = false
     isNegative = false
+    base = 10  // Default to decimal
 
     // Validate non-empty input
     if (!length_array(data)) {
@@ -1630,44 +1911,83 @@ define_function char NAVParseLong(char data[], long result) {
 
     // Manual digit-by-digit parsing to handle full LONG range (0 to 4294967295)
     for (x = 1; x <= length; x++) {
+        ch = data[x]
+
         select {
-            active (NAVIsDigit(data[x])): {
-                hasDigit = true
-                foundNumber = true
-                digit = data[x] - '0'
-
-                // Check for overflow before multiplying
-                // Max LONG is 4294967295, so if accumulator > 429496729, multiplication will overflow
-                if (accumulator > 429496729) {
-                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                __NAV_FOUNDATION_STRINGUTILS__,
-                                                'NAVParseLong',
-                                                "'Value out of range (0 to 4294967295): ', data")
-                    return false
-                }
-
-                // Special case: if accumulator == 429496729, check if adding digit would exceed 4294967295
-                if (accumulator == 429496729 && digit > 5) {
-                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                __NAV_FOUNDATION_STRINGUTILS__,
-                                                'NAVParseLong',
-                                                "'Value out of range (0 to 4294967295): ', data")
-                    return false
-                }
-
-                accumulator = accumulator * 10 + digit
-            }
-            active (data[x] == '-' && !foundNumber): {
-                // Found negative sign before any digits
+            // Reject negative sign (unsigned type)
+            active (!foundNumber && ch == '-'): {
                 isNegative = true
             }
+            // Skip explicit positive sign
+            active (!foundNumber && ch == '+'): {
+                // Just skip it
+            }
+            // Check for '$' hex prefix (ASCII 36)
+            active (!foundNumber && ch == 36): {
+                base = 16
+            }
+            // Detect base prefix (0x, 0b, 0o)
+            active (!foundNumber && ch == '0' && x < length): {
+                // Look ahead for base prefix
+                select {
+                    active (data[x + 1] == 'x' || data[x + 1] == 'X'): {
+                        base = 16
+                        x = x + 1  // Skip the 'x'
+                    }
+                    active (data[x + 1] == 'b' || data[x + 1] == 'B'): {
+                        base = 2
+                        x = x + 1  // Skip the 'b'
+                    }
+                    active (data[x + 1] == 'o' || data[x + 1] == 'O'): {
+                        base = 8
+                        x = x + 1  // Skip the 'o'
+                    }
+                    active (true): {
+                        // Just a '0' digit
+                        hasDigit = true
+                        foundNumber = true
+                        // accumulator stays 0
+                    }
+                }
+            }
+            // Parse digit based on current base
+            active (NAVIsValidDigitForBase(ch, base)): {
+                stack_var long oldAccumulator
+
+                hasDigit = true
+                foundNumber = true
+                digit = NAVCharToDigit(ch)
+
+                // Check for overflow before multiplying
+                // Max LONG is 4294967295
+                if (accumulator > (4294967295 / base)) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_STRINGUTILS__,
+                                                'NAVParseLong',
+                                                "'Value out of range (0 to 4294967295): ', data")
+                    return false
+                }
+
+                oldAccumulator = accumulator
+                accumulator = accumulator * base + digit
+
+                // Check for overflow by detecting wraparound
+                // If accumulator wrapped around, it will be less than the old value
+                if (accumulator < oldAccumulator) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_STRINGUTILS__,
+                                                'NAVParseLong',
+                                                "'Value out of range (0 to 4294967295): ', data")
+                    return false
+                }
+            }
+            // Found non-digit after parsing started - stop (like ATOI)
             active (foundNumber): {
-                // Stop parsing after we've found digits and hit a non-digit character
-                // This matches ATOI behavior: '   100  200' -> 100
                 break
             }
+            // Skip leading whitespace/non-digits (like ATOI)
             active (true): {
-                // Skip leading non-digit characters (whitespace, letters, etc.)
+                // Continue scanning
             }
         }
     }
@@ -1726,14 +2046,51 @@ define_function char NAVParseLong(char data[], long result) {
  *       (e.g., '3000000000' returns 2,147,483,647 without error), preventing
  *       proper detection of out-of-range inputs.
  */
+/**
+ * @function NAVParseSignedLong
+ * @public
+ * @description Parses a string representation of a signed long integer with
+ * support for multiple numeric bases (binary, octal, decimal, hexadecimal).
+ *
+ * Supported formats:
+ * - Binary: 0b or 0B prefix (e.g., '-0b1111' = -15)
+ * - Octal: 0o or 0O prefix (e.g., '-0o777' = -511)
+ * - Hexadecimal: 0x, 0X, or $ prefix (e.g., '-0x7FFFFFFF' = -2147483647)
+ * - Decimal: no prefix (e.g., '-1234567890')
+ *
+ * Uses manual digit-by-digit parsing to properly validate the full SLONG range
+ * (-2147483648 to 2147483647) and detect overflow/underflow conditions.
+ * ATOI cannot be used because it silently clamps out-of-range values to the
+ * SLONG min/max instead of reporting an error, preventing proper validation.
+ * Parses the first valid number and stops at whitespace or invalid characters.
+ *
+ * @param {char[]} data - The string to parse as a signed long
+ * @param {slong} result - Variable to populate with the parsed signed long value
+ *
+ * @returns {char} true if parsing succeeded and value is in valid range, false otherwise
+ *
+ * @example
+ * stack_var slong value
+ * stack_var char result
+ * result = NAVParseSignedLong('-1234567890', value)  // Decimal: value = -1234567890
+ * result = NAVParseSignedLong('0x7FFFFFFF', value)   // Hex: value = 2147483647
+ * result = NAVParseSignedLong('-0xFF', value)        // Hex: value = -255
+ * result = NAVParseSignedLong('3000000000', value)   // Returns false (out of range)
+ *
+ * @note Manual parsing is required because ATOI silently clamps overflow values
+ *       (e.g., '3000000000' returns 2,147,483,647 without error), preventing
+ *       proper detection of out-of-range inputs.
+ */
 define_function char NAVParseSignedLong(char data[], slong result) {
-    stack_var slong accumulator
+    stack_var long accumulator
     stack_var integer x
     stack_var integer length
     stack_var char hasDigit
     stack_var integer digit
     stack_var char foundNumber
     stack_var char isNegative
+    stack_var integer base
+    stack_var char ch
 
     // Initialize result
     result = 0
@@ -1741,6 +2098,7 @@ define_function char NAVParseSignedLong(char data[], slong result) {
     hasDigit = false
     foundNumber = false
     isNegative = false
+    base = 10  // Default to decimal
 
     // Validate non-empty input
     if (!length_array(data)) {
@@ -1755,72 +2113,83 @@ define_function char NAVParseSignedLong(char data[], slong result) {
 
     // Manual digit-by-digit parsing to handle full SLONG range (-2147483648 to 2147483647)
     for (x = 1; x <= length; x++) {
+        ch = data[x]
+
         select {
-            active (NAVIsDigit(data[x])): {
-                hasDigit = true
-                foundNumber = true
-                digit = data[x] - '0'
-
-                if (isNegative) {
-                    // For negative numbers, check underflow
-                    // Min SLONG is -2147483648, so if accumulator < -214748364, multiplication will underflow
-                    if (accumulator < -214748364) {
-                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                    __NAV_FOUNDATION_STRINGUTILS__,
-                                                    'NAVParseSignedLong',
-                                                    "'Value out of range (-2147483648 to 2147483647): ', data")
-                        return false
-                    }
-
-                    // Special case: if accumulator == -214748364, check if subtracting digit would go below -2147483648
-                    if (accumulator == -214748364 && digit > 8) {
-                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                    __NAV_FOUNDATION_STRINGUTILS__,
-                                                    'NAVParseSignedLong',
-                                                    "'Value out of range (-2147483648 to 2147483647): ', data")
-                        return false
-                    }
-
-                    accumulator = accumulator * 10 - digit
-                }
-                else {
-                    // For positive numbers, check overflow
-                    // Max SLONG is 2147483647, so if accumulator > 214748364, multiplication will overflow
-                    if (accumulator > 214748364) {
-                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                    __NAV_FOUNDATION_STRINGUTILS__,
-                                                    'NAVParseSignedLong',
-                                                    "'Value out of range (-2147483648 to 2147483647): ', data")
-                        return false
-                    }
-
-                    // Special case: if accumulator == 214748364, check if adding digit would exceed 2147483647
-                    if (accumulator == 214748364 && digit > 7) {
-                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                                    __NAV_FOUNDATION_STRINGUTILS__,
-                                                    'NAVParseSignedLong',
-                                                    "'Value out of range (-2147483648 to 2147483647): ', data")
-                        return false
-                    }
-
-                    accumulator = accumulator * 10 + digit
-                }
-            }
-            active (data[x] == '-' && !foundNumber): {
-                // Found negative sign before any digits
+            // Detect negative sign before any digits
+            active (!foundNumber && ch == '-'): {
                 isNegative = true
             }
-            active (data[x] == '+' && !foundNumber): {
-                // Found positive sign before any digits (explicit positive)
-                // Do nothing, already positive by default
+            // Skip explicit positive sign
+            active (!foundNumber && ch == '+'): {
+                // Just skip it
             }
+            // Check for '$' hex prefix (ASCII 36)
+            active (!foundNumber && ch == 36): {
+                base = 16
+            }
+            // Detect base prefix (0x, 0b, 0o)
+            active (!foundNumber && ch == '0' && x < length): {
+                // Look ahead for base prefix
+                select {
+                    active (data[x + 1] == 'x' || data[x + 1] == 'X'): {
+                        base = 16
+                        x = x + 1  // Skip the 'x'
+                    }
+                    active (data[x + 1] == 'b' || data[x + 1] == 'B'): {
+                        base = 2
+                        x = x + 1  // Skip the 'b'
+                    }
+                    active (data[x + 1] == 'o' || data[x + 1] == 'O'): {
+                        base = 8
+                        x = x + 1  // Skip the 'o'
+                    }
+                    active (true): {
+                        // Just a '0' digit
+                        hasDigit = true
+                        foundNumber = true
+                        // accumulator stays 0
+                    }
+                }
+            }
+            // Parse digit based on current base
+            active (NAVIsValidDigitForBase(ch, base)): {
+                hasDigit = true
+                foundNumber = true
+                digit = NAVCharToDigit(ch)
+
+                // Check for overflow/underflow before multiplying
+                // Max SLONG is 2147483647, min is -2147483648
+                // When negative, can reach 2147483648; when positive, only 2147483647
+                if ((isNegative && accumulator > (2147483648 / base)) ||
+                    (!isNegative && accumulator > (2147483647 / base))) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_STRINGUTILS__,
+                                                'NAVParseSignedLong',
+                                                "'Value out of range (-2147483648 to 2147483647): ', data")
+                    return false
+                }
+
+                accumulator = accumulator * base + digit
+
+                // Final check after addition
+                // Allow reaching 2147483648 for negative (for -2147483648), but only 2147483647 for positive
+                if ((isNegative && accumulator > 2147483648) ||
+                    (!isNegative && accumulator > 2147483647)) {
+                    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                __NAV_FOUNDATION_STRINGUTILS__,
+                                                'NAVParseSignedLong',
+                                                "'Value out of range (-2147483648 to 2147483647): ', data")
+                    return false
+                }
+            }
+            // Found non-digit after parsing started - stop (like ATOI)
             active (foundNumber): {
-                // Stop parsing after we've found digits and hit a non-digit character
-                // This matches ATOI behavior: '   -100  200' -> -100
                 break
             }
+            // Skip leading whitespace/non-digits (like ATOI)
             active (true): {
-                // Skip leading non-digit characters (whitespace, letters, etc.)
+                // Continue scanning
             }
         }
     }
@@ -1833,8 +2202,15 @@ define_function char NAVParseSignedLong(char data[], slong result) {
         return false
     }
 
+    // Apply sign with explicit type casts to avoid warnings
+    if (isNegative) {
+        result = type_cast(-accumulator)
+    }
+    else {
+        result = type_cast(accumulator)
+    }
+
     // Success - set the result
-    result = accumulator
     return true
 }
 

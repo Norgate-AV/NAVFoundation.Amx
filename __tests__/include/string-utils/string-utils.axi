@@ -19,6 +19,7 @@
 #DEFINE TESTING_NAVPARSESIGNEDLONG
 #DEFINE TESTING_NAVPARSEFLOAT
 #DEFINE TESTING_NAVPARSEBOOLEAN
+#DEFINE TESTING_NAVHEXTOIEXPLORATION
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.StringUtils.axi'
 #include 'NAVFoundation.Assert.axi'
@@ -107,6 +108,10 @@
 
 #IF_DEFINED TESTING_NAVPARSEBOOLEAN
 #include 'NAVParseBoolean.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVHEXTOIEXPLORATION
+#include 'NAVHextoiExploration.axi'
 #END_IF
 
 define_function RunStringUtilsTests() {
@@ -227,5 +232,9 @@ define_function RunStringUtilsTests() {
 
     #IF_DEFINED TESTING_NAVPARSEBOOLEAN
     TestNAVParseBoolean()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVHEXTOIEXPLORATION
+    TestHextoiExploration()
     #END_IF
 }
