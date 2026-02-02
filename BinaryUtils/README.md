@@ -30,12 +30,14 @@ Include the library in your NetLinx project:
 Rotates bits of a 32-bit value to the left by the specified count. Bits that are rotated off the left end appear at the right end.
 
 **Parameters:**
+
 - `value` (long): The value to rotate
 - `count` (long): Number of positions to rotate left
 
 **Returns:** (long) The rotated value
 
 **Example:**
+
 ```netlinx
 stack_var long original
 stack_var long rotated
@@ -54,6 +56,7 @@ rotated = NAVBinaryRotateLeft(original, 4)  // Binary: 00000000 00000000 0000000
 Alias for `NAVBinaryRotateLeft`. Rotates bits of a 32-bit value to the left.
 
 **Parameters:**
+
 - `value` (long): The value to rotate
 - `count` (long): Number of positions to rotate left
 
@@ -68,12 +71,14 @@ Alias for `NAVBinaryRotateLeft`. Rotates bits of a 32-bit value to the left.
 Rotates bits of a 32-bit value to the right by the specified count. Bits that are rotated off the right end appear at the left end.
 
 **Parameters:**
+
 - `value` (long): The value to rotate
 - `count` (long): Number of positions to rotate right
 
 **Returns:** (long) The rotated value
 
 **Example:**
+
 ```netlinx
 stack_var long original
 stack_var long rotated
@@ -92,6 +97,7 @@ rotated = NAVBinaryRotateRight(original, 4)  // Binary: 00000000 00000000 000000
 Alias for `NAVBinaryRotateRight`. Rotates bits of a 32-bit value to the right.
 
 **Parameters:**
+
 - `value` (long): The value to rotate
 - `count` (long): Number of positions to rotate right
 
@@ -108,12 +114,14 @@ Alias for `NAVBinaryRotateRight`. Rotates bits of a 32-bit value to the right.
 Extracts a single bit from a 32-bit value at the specified position.
 
 **Parameters:**
+
 - `value` (long): The value to extract a bit from
 - `bit` (long): The bit position to extract (0-31)
 
 **Returns:** (long) 1 if the specified bit is set, 0 otherwise
 
 **Example:**
+
 ```netlinx
 stack_var long value
 stack_var long bitValue
@@ -128,6 +136,45 @@ bitValue = NAVBinaryGetBit(value, 2)  // Returns 1 (third bit from right)
 
 ---
 
+#### `NAVBinaryCountLeadingZeros(long value)`
+
+Counts the number of leading zero bits in a 32-bit integer. This is useful for determining the position of the most significant bit or calculating the number of bits required to represent a value.
+
+**Parameters:**
+
+- `value` (long): The value to analyze
+
+**Returns:** (integer) Number of leading zeros (0-32)
+
+**Example:**
+
+```netlinx
+stack_var long value
+stack_var integer leadingZeros
+
+value = $0000000F  // Binary: 00000000 00000000 00000000 00001111
+leadingZeros = NAVBinaryCountLeadingZeros(value)  // Returns 28
+
+value = $80000000  // Binary: 10000000 00000000 00000000 00000000
+leadingZeros = NAVBinaryCountLeadingZeros(value)  // Returns 0
+
+value = $00000000  // Binary: 00000000 00000000 00000000 00000000
+leadingZeros = NAVBinaryCountLeadingZeros(value)  // Returns 32
+
+value = $00FF0000  // Binary: 00000000 11111111 00000000 00000000
+leadingZeros = NAVBinaryCountLeadingZeros(value)  // Returns 8
+```
+
+**Use Cases:**
+
+- Determining bit width requirements for variable-length encoding
+- Finding the position of the most significant bit
+- Calculating logarithm base 2 (floor)
+- Implementing priority encoders
+- Optimizing compression algorithms
+
+---
+
 ### Binary Representation Functions
 
 #### `NAVByteToBitArray(char value)`
@@ -135,11 +182,13 @@ bitValue = NAVBinaryGetBit(value, 2)  // Returns 1 (third bit from right)
 Converts a byte to an array of individual bit values. Each bit is represented as a numeric value (0 or 1) in the returned array.
 
 **Parameters:**
+
 - `value` (char): The byte value to convert
 
 **Returns:** (char[8]) Array of 8 bit values (0 or 1)
 
 **Example:**
+
 ```netlinx
 stack_var char value
 stack_var char result[8]
@@ -150,6 +199,7 @@ result = NAVByteToBitArray(value)
 ```
 
 **Use Cases:**
+
 - Analyzing individual bits of protocol bytes
 - Implementing custom bit-level protocols
 - Debugging binary data structures
@@ -161,11 +211,13 @@ result = NAVByteToBitArray(value)
 Converts a byte to its binary representation as an 8-character string.
 
 **Parameters:**
+
 - `value` (char): The byte value to convert
 
 **Returns:** (char[8]) Binary representation as an 8-character string
 
 **Example:**
+
 ```netlinx
 stack_var char value
 stack_var char result[8]
@@ -176,6 +228,7 @@ result = NAVByteToBinaryString(value)
 ```
 
 **Use Cases:**
+
 - Debugging and logging binary data
 - Display binary values in user interfaces
 - Protocol analysis and troubleshooting
@@ -191,11 +244,13 @@ BCD (Binary Coded Decimal) is a binary encoding where each decimal digit (0-9) i
 Converts a binary integer to BCD (Binary Coded Decimal) format using the double-dabble algorithm.
 
 **Parameters:**
+
 - `value` (integer): The binary integer to convert (0-9999)
 
 **Returns:** (long) BCD representation of the value
 
 **Example:**
+
 ```netlinx
 stack_var integer decimal
 stack_var long bcd
@@ -208,6 +263,7 @@ bcd = NAVBinaryToBcd(decimal)  // Returns $1234 (BCD format)
 ```
 
 **Use Cases:**
+
 - Sending decimal values to hardware that expects BCD encoding
 - Implementing BCD-based protocols
 - Interfacing with seven-segment displays
@@ -221,11 +277,13 @@ bcd = NAVBinaryToBcd(decimal)  // Returns $1234 (BCD format)
 Converts a BCD (Binary Coded Decimal) byte to its binary integer value. Each nibble (4 bits) of the input represents a decimal digit (0-9).
 
 **Parameters:**
+
 - `value` (char): The BCD-encoded byte to convert (0x00-0x99)
 
 **Returns:** (integer) Binary integer representation (0-99)
 
 **Example:**
+
 ```netlinx
 stack_var char bcdValue
 stack_var integer decimal
@@ -238,6 +296,7 @@ decimal = NAVBcdToBinary(bcdValue)  // Returns 99
 ```
 
 **Use Cases:**
+
 - Reading BCD-encoded data from hardware (RTCs, displays, etc.)
 - Parsing BCD protocol responses
 - Converting BCD values for display or calculation
@@ -305,21 +364,23 @@ NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Received byte: ',binaryStr")
 
 If you're updating from an older version of NAVFoundation.BinaryUtils, the following function names have changed:
 
-| Old Function Name | New Function Name | Notes |
-|------------------|-------------------|-------|
-| `NAVCharToDecimalBinaryString()` | `NAVByteToBitArray()` | Returns numeric bit array instead of string |
-| `NAVCharToAsciiBinaryString()` | `NAVByteToBinaryString()` | Returns ASCII string (behavior unchanged) |
-| `NAVDecimalToBinary()` | `NAVBinaryToBcd()` | Corrected naming to reflect BCD conversion |
+| Old Function Name                | New Function Name         | Notes                                       |
+| -------------------------------- | ------------------------- | ------------------------------------------- |
+| `NAVCharToDecimalBinaryString()` | `NAVByteToBitArray()`     | Returns numeric bit array instead of string |
+| `NAVCharToAsciiBinaryString()`   | `NAVByteToBinaryString()` | Returns ASCII string (behavior unchanged)   |
+| `NAVDecimalToBinary()`           | `NAVBinaryToBcd()`        | Corrected naming to reflect BCD conversion  |
 
 **New function:**
+
 - `NAVBcdToBinary()` - Reverse BCD conversion for reading hardware values
 
 **Migration steps:**
+
 1. Search your codebase for the old function names
 2. Replace with the new names according to the table above
 3. For BCD operations, verify you're using the correct direction:
-   - Use `NAVBinaryToBcd()` when sending to hardware
-   - Use `NAVBcdToBinary()` when reading from hardware
+    - Use `NAVBinaryToBcd()` when sending to hardware
+    - Use `NAVBcdToBinary()` when reading from hardware
 
 ## Dependencies
 
