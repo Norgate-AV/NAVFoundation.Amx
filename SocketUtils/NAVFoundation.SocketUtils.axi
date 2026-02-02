@@ -1400,31 +1400,28 @@ define_function NAVSocketConnectionHandleError(_NAVSocketConnection connection, 
 
     connection.RetryCount++
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                               __NAV_FOUNDATION_SOCKETUTILS__,
-                               'NAVSocketConnectionHandleError',
-                               "connection.Id, ': Socket connection error: ', NAVGetSocketError(type_cast(data.number))")
+    // Single consolidated warning with all relevant information
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
                                __NAV_FOUNDATION_SOCKETUTILS__,
                                'NAVSocketConnectionHandleError',
-                               "connection.Id, ': Socket connection failed (attempt ', itoa(connection.RetryCount), ')'")
+                               "connection.Id, ': Connection failed - ', NAVGetSocketError(type_cast(data.number)), ' (retry ', itoa(connection.RetryCount), ' in ', itoa(connection.Interval[1]), 'ms)'")
 
     if (connection.RetryCount <= NAV_MAX_SOCKET_CONNECTION_RETRIES) {
         // Still in base retry phase - timeline already running at base interval
-        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
                                    __NAV_FOUNDATION_SOCKETUTILS__,
                                    'NAVSocketConnectionHandleError',
-                                   "connection.Id, ': Next retry in ', itoa(connection.Interval[1]), 'ms'")
+                                   "connection.Id, ': Using base retry interval: ', itoa(connection.Interval[1]), 'ms'")
         return
     }
 
     // Calculate new exponential backoff interval
     connection.Interval[1] = NAVSocketGetConnectionInterval(connection.RetryCount)
 
-    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
                                __NAV_FOUNDATION_SOCKETUTILS__,
                                'NAVSocketConnectionHandleError',
-                               "connection.Id, ': Next retry in ', itoa(connection.Interval[1]), 'ms'")
+                               "connection.Id, ': Using exponential backoff interval: ', itoa(connection.Interval[1]), 'ms'")
 
     // Restart timeline with new interval
     NAVTimelineReload(connection.TimelineId, connection.Interval)
