@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.15.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.15.0...v5.15.1) (2026-02-02)
+
+### 🐛 Bug Fixes
+
+- **socket-utils:** reduce excessive logging on connection failures ([47e007a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/47e007ae21023ca3001c68f567f29de5497ea46f))
+
 ## [5.15.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.14.0...v5.15.0) (2026-02-02)
 
 ### 🌟 Features
