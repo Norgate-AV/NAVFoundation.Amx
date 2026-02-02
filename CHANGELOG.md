@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.15.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.14.0...v5.15.0) (2026-02-02)
+
+### 🌟 Features
+
+- **core:** add \_NAVOptionalDevice struct for optional module integrations ([896d60f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/896d60f214d6c839f3b99b622554d7092de79f99))
+- **modulebase:** add CLOUDLOG_DEVICE property constant ([f56464e](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/f56464e1b826f109d3eb86e32930434c78089801))
+- **string-utils:** add multi-base parsing and digit validation helpers ([cc3b0e0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/cc3b0e01963a87f7074ffe1e789f9c56b9e13f2d))
+- **binary-utils:** add NAVBinaryCountLeadingZeros function ([8519d84](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/8519d84ed87dca6bf61fb5582d3678395df21666))
+
 ## [5.14.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.13.2...v5.14.0) (2026-02-01)
 
 ### 🌟 Features
