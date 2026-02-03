@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to this project! Any contribution is welcome and invited! 🙌
 
-If you are proposing a new feature, make sure to [open an issue](https://github.com/Norgate-AV-Solutions-Ltd/NAVFoundation.Amx/issues/new/choose) to make sure it is inline with the project goals.
+If you are proposing a new feature, make sure to [open an issue](https://github.com/Norgate-AV/NAVFoundation.Amx/issues/new/choose) to make sure it is inline with the project goals.
 
 ## Setup :technologist:
 
