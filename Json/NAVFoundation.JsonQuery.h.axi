@@ -139,7 +139,7 @@ DEFINE_TYPE
  * // Query ".user.items[2]" produces tokens:
  * // DOT, IDENTIFIER("user"), DOT, IDENTIFIER("items"), LEFT_BRACKET, NUMBER(2), RIGHT_BRACKET
  */
-structure _NAVJsonQueryToken {
+struct _NAVJsonQueryToken {
     integer type
     char identifier[NAV_JSON_QUERY_MAX_IDENTIFIER_LENGTH]
     integer number
@@ -158,7 +158,7 @@ structure _NAVJsonQueryToken {
  * // Query ".user.items[2]" produces path steps:
  * // PROPERTY("user"), PROPERTY("items"), ARRAY_INDEX(2)
  */
-structure _NAVJsonQueryPathStep {
+struct _NAVJsonQueryPathStep {
     integer type
     char propertyKey[NAV_JSON_QUERY_MAX_IDENTIFIER_LENGTH]
     integer arrayIndex

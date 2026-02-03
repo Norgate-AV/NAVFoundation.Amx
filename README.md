@@ -154,6 +154,8 @@ For more detailed guides and documentation, please refer the `README.md` files i
     - Provides functions for URL manipulation and encoding.
 - [WebSocket](./WebSocket)
     - Provides a WebSocket client implementation for AMX.
+- [Xml](./Xml)
+    - Provides functions for working with XML data.
 
 ## Support :question:
 
