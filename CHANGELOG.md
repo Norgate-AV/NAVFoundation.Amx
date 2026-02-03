@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.16.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.15.1...v5.16.0) (2026-02-03)
+
+### 🌟 Features
+
+- **xml:** add initial XML 1.0 parser with dot-notation query system ([3982b35](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3982b35fcca1db85352d1760ba36dbbf199b503b))
+
 ## [5.15.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.15.0...v5.15.1) (2026-02-02)
 
 ### 🐛 Bug Fixes
