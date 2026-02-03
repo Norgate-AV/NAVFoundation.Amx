@@ -67,13 +67,13 @@ To use the NAVFoundation.Amx libraries in your NetLinx project, simply include t
 To use the `StringUtils` library, you would include it as follows:
 
 ```c
-#include "NAVFoundation.StringUtils.axi"
+#include 'NAVFoundation.StringUtils.axi'
 ```
 
 To use the `ArrayUtils` library, you would include it as follows:
 
 ```c
-#include "NAVFoundation.ArrayUtils.axi"
+#include 'NAVFoundation.ArrayUtils.axi'
 ```
 
 ## Documentation :page_facing_up:
