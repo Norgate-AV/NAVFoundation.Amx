@@ -5,6 +5,7 @@
 ### 🌟 Features
 
 - **yaml:** add initial YAML 1.2 library ([9cb03aa](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9cb03aa6a625917c6166d9b32e9a4e3080413480))
+- **json:** add support for JSONC comments ([5e75223](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/5e752239dc54f5cf2cac737c41f3af23542c13cf))
 
 ## [5.16.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.15.1...v5.16.0) (2026-02-03)
 
