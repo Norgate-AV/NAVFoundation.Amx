@@ -43,6 +43,7 @@ build:
       - ./Url
       - ./WebSocket
       - ./Xml
+      - ./Yaml
       - ./__tests__/include/aes128
       - ./__tests__/include/hash-table
       - ./__tests__/include/path-utils
@@ -83,3 +84,4 @@ build:
       - ./__tests__/include/core
       - ./__tests__/include/socket-utils
       - ./__tests__/include/xml
+      - ./__tests__/include/yaml

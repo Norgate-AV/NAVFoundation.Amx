@@ -156,6 +156,8 @@ For more detailed guides and documentation, please refer the `README.md` files i
     - Provides a WebSocket client implementation for AMX.
 - [Xml](./Xml)
     - Provides functions for working with XML data.
+- [Yaml](./Yaml)
+    - Provides functions for working with YAML data.
 
 ## Support :question:
 
