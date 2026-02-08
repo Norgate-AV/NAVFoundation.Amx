@@ -180,9 +180,9 @@ try {
 
         # For the test trigger command, wait intelligently for completion
         if ($command -match "pulse") {
-            Write-Log "Waiting for test execution (max 60s)..."
+            Write-Log "Waiting for test execution (max 600s)..."
 
-            $maxWaitSeconds = 60
+            $maxWaitSeconds = 600
             $idleTimeoutSeconds = 3
             $pollIntervalMs = 500
 
