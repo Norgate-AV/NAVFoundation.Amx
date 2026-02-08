@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.17.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.16.0...v5.17.0) (2026-02-08)
+
+### 🌟 Features
+
+- **yaml:** add initial YAML 1.2 library ([9cb03aa](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9cb03aa6a625917c6166d9b32e9a4e3080413480))
+
 ## [5.16.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.15.1...v5.16.0) (2026-02-03)
 
 ### 🌟 Features
