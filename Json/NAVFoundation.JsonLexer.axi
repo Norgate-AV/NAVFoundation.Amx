@@ -284,6 +284,81 @@ define_function char NAVJsonLexerCanAddToken(_NAVJsonLexer lexer) {
 
 
 /**
+ * @function NAVJsonLexerConsumeSingleLineComment
+ * @private
+ * @description Consume a single-line comment starting with //
+ * Comments are consumed and ignored, not tokenized (JSONC support).
+ *
+ * @param {_NAVJsonLexer} lexer - The lexer instance
+ *
+ * @returns {char} Always returns True (1) as comments are always valid to skip
+ */
+define_function char NAVJsonLexerConsumeSingleLineComment(_NAVJsonLexer lexer) {
+    // Consume the '//' prefix
+    NAVJsonLexerNext(lexer) // First '/'
+    NAVJsonLexerNext(lexer) // Second '/'
+
+    // Consume until newline or EOF
+    while (!NAVJsonLexerIsEOF(lexer)) {
+        stack_var char ch
+
+        ch = lexer.source[lexer.cursor]
+
+        if (ch == NAV_LF || ch == NAV_CR) {
+            // Stop at newline but don't consume it (NAVJsonLexerNext will handle line tracking)
+            break
+        }
+
+        NAVJsonLexerNext(lexer)
+    }
+
+    // Ignore the comment (don't emit a token)
+    return NAVJsonLexerIgnore(lexer)
+}
+
+
+/**
+ * @function NAVJsonLexerConsumeMultiLineComment
+ * @private
+ * @description Consume a multi-line comment starting with /\* and ending with *\/
+ * Comments are consumed and ignored, not tokenized (JSONC support).
+ *
+ * @param {_NAVJsonLexer} lexer - The lexer instance
+ *
+ * @returns {char} True (1) if comment consumed successfully, False (0) if unterminated
+ */
+define_function char NAVJsonLexerConsumeMultiLineComment(_NAVJsonLexer lexer) {
+    // Consume the '/\*' prefix
+    NAVJsonLexerNext(lexer) // '/'
+    NAVJsonLexerNext(lexer) // '*'
+
+    // Consume until '*\/' or EOF
+    while (!NAVJsonLexerIsEOF(lexer)) {
+        stack_var char ch
+
+        ch = lexer.source[lexer.cursor]
+
+        if (ch == '*') {
+            NAVJsonLexerNext(lexer)
+
+            if (!NAVJsonLexerIsEOF(lexer) && lexer.source[lexer.cursor] == '/') {
+                // Found closing '*\/'
+                NAVJsonLexerNext(lexer)
+                return NAVJsonLexerIgnore(lexer)
+            }
+        }
+        else {
+            NAVJsonLexerNext(lexer)
+        }
+    }
+
+    // Reached EOF without finding closing '*\/'
+    NAVJsonLexerSetError(lexer, 'Unterminated multi-line comment')
+    return false
+}
+
+
+/**
  * @function NAVJsonLexerTokenize
  * @public
  * @description Tokenize the source JSON text into an array of tokens.
@@ -399,6 +474,35 @@ define_function char NAVJsonLexerTokenize(_NAVJsonLexer lexer, char source[]) {
             }
             case 'n': {
                 if (!NAVJsonLexerConsumeNull(lexer)) {
+                    return false
+                }
+            }
+            case '/': {
+                // JSONC comment support
+                stack_var char next
+
+                if (!NAVJsonLexerCanPeek(lexer)) {
+                    NAVJsonLexerSetError(lexer, "'Unexpected character: ', ch, ' (', itoa(type_cast(ch)), ')'")
+                    return false
+                }
+
+                next = NAVJsonLexerPeek(lexer)
+
+                if (next == '/') {
+                    // Single-line comment
+                    if (!NAVJsonLexerConsumeSingleLineComment(lexer)) {
+                        return false
+                    }
+                }
+                else if (next == '*') {
+                    // Multi-line comment
+                    if (!NAVJsonLexerConsumeMultiLineComment(lexer)) {
+                        return false
+                    }
+                }
+                else {
+                    // Just a '/' character, which is not valid in JSON
+                    NAVJsonLexerSetError(lexer, "'Unexpected character: ', ch, ' (', itoa(type_cast(ch)), ')'")
                     return false
                 }
             }

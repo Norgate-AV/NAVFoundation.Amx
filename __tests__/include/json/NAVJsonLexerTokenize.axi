@@ -68,7 +68,28 @@ define_function InitializeJsonLexerTokenizeTestData() {
     // Test 20: Invalid - invalid number format
     JSON_LEXER_TOKENIZE_TEST[20] = '[01]'
 
-    set_length_array(JSON_LEXER_TOKENIZE_TEST, 20)
+    // Test 21: JSONC - Single-line comment at end of line
+    JSON_LEXER_TOKENIZE_TEST[21] = '{"key":"value"} // This is a comment'
+
+    // Test 22: JSONC - Single-line comment on its own line
+    JSON_LEXER_TOKENIZE_TEST[22] = "'// Comment at start', $0D, $0A, '[1,2,3]'"
+
+    // Test 23: JSONC - Multi-line comment
+    JSON_LEXER_TOKENIZE_TEST[23] = '{"x":/* comment */42}'
+
+    // Test 24: JSONC - Multiple comments
+    JSON_LEXER_TOKENIZE_TEST[24] = "'// Start comment', $0D, $0A, '{"a":1, /* mid */ "b":2} // end'"
+
+    // Test 25: JSONC - Comment before value
+    JSON_LEXER_TOKENIZE_TEST[25] = '[/* comment */true]'
+
+    // Test 26: JSONC - Comment with special chars
+    JSON_LEXER_TOKENIZE_TEST[26] = '{"test":123 /* comment: with / and * */}'
+
+    // Test 27: Invalid - Unterminated multi-line comment
+    JSON_LEXER_TOKENIZE_TEST[27] = '[1,/* unterminated comment]'
+
+    set_length_array(JSON_LEXER_TOKENIZE_TEST, 27)
 }
 
 
@@ -94,7 +115,14 @@ constant char JSON_LEXER_TOKENIZE_EXPECTED_RESULT[] = {
     true,   // Test 17: Deeply nested arrays
     true,   // Test 18: Object with whitespace
     true,   // Test 19: Number starting with zero
-    false   // Test 20: Invalid - invalid number format
+    false,  // Test 20: Invalid - invalid number format
+    true,   // Test 21: JSONC - Single-line comment at end
+    true,   // Test 22: JSONC - Single-line comment on own line
+    true,   // Test 23: JSONC - Multi-line comment
+    true,   // Test 24: JSONC - Multiple comments
+    true,   // Test 25: JSONC - Comment before value
+    true,   // Test 26: JSONC - Comment with special chars
+    false   // Test 27: Invalid - Unterminated multi-line comment
 }
 
 constant integer JSON_LEXER_TOKENIZE_EXPECTED_TOKEN_COUNT[] = {
@@ -117,7 +145,14 @@ constant integer JSON_LEXER_TOKENIZE_EXPECTED_TOKEN_COUNT[] = {
     10,     // Test 17: [, [, [, [, 1, ], ], ], ], EOF
     6,      // Test 18: {, "key", :, "value", }, EOF
     8,      // Test 19: [, 0, ,, 0.5, ,, 0.123, ], EOF
-    0       // Test 20: Error case
+    0,      // Test 20: Error case
+    6,      // Test 21: {, "key", :, "value", }, EOF (comment ignored)
+    8,      // Test 22: [, 1, ,, 2, ,, 3, ], EOF (comment ignored)
+    6,      // Test 23: {, "x", :, 42, }, EOF (comment ignored)
+    10,     // Test 24: {, "a", :, 1, ,, "b", :, 2, }, EOF (comments ignored)
+    4,      // Test 25: [, true, ], EOF (comment ignored)
+    6,      // Test 26: {, "test", :, 123, }, EOF (comment ignored)
+    0       // Test 27: Error case - unterminated comment
 }
 
 
@@ -301,6 +336,62 @@ constant integer JSON_LEXER_TOKENIZE_EXPECTED_TYPES[][] = {
         NAV_JSON_TOKEN_TYPE_COMMA,
         NAV_JSON_TOKEN_TYPE_NUMBER,
         NAV_JSON_TOKEN_TYPE_RIGHT_BRACKET,
+        NAV_JSON_TOKEN_TYPE_EOF
+    },
+    {
+        // Error case - no tokens expected
+        0
+    },
+    {
+        NAV_JSON_TOKEN_TYPE_LEFT_BRACE,
+        NAV_JSON_TOKEN_TYPE_STRING,
+        NAV_JSON_TOKEN_TYPE_COLON,
+        NAV_JSON_TOKEN_TYPE_STRING,
+        NAV_JSON_TOKEN_TYPE_RIGHT_BRACE,
+        NAV_JSON_TOKEN_TYPE_EOF
+    },
+    {
+        NAV_JSON_TOKEN_TYPE_LEFT_BRACKET,
+        NAV_JSON_TOKEN_TYPE_NUMBER,
+        NAV_JSON_TOKEN_TYPE_COMMA,
+        NAV_JSON_TOKEN_TYPE_NUMBER,
+        NAV_JSON_TOKEN_TYPE_COMMA,
+        NAV_JSON_TOKEN_TYPE_NUMBER,
+        NAV_JSON_TOKEN_TYPE_RIGHT_BRACKET,
+        NAV_JSON_TOKEN_TYPE_EOF
+    },
+    {
+        NAV_JSON_TOKEN_TYPE_LEFT_BRACE,
+        NAV_JSON_TOKEN_TYPE_STRING,
+        NAV_JSON_TOKEN_TYPE_COLON,
+        NAV_JSON_TOKEN_TYPE_NUMBER,
+        NAV_JSON_TOKEN_TYPE_RIGHT_BRACE,
+        NAV_JSON_TOKEN_TYPE_EOF
+    },
+    {
+        NAV_JSON_TOKEN_TYPE_LEFT_BRACE,
+        NAV_JSON_TOKEN_TYPE_STRING,
+        NAV_JSON_TOKEN_TYPE_COLON,
+        NAV_JSON_TOKEN_TYPE_NUMBER,
+        NAV_JSON_TOKEN_TYPE_COMMA,
+        NAV_JSON_TOKEN_TYPE_STRING,
+        NAV_JSON_TOKEN_TYPE_COLON,
+        NAV_JSON_TOKEN_TYPE_NUMBER,
+        NAV_JSON_TOKEN_TYPE_RIGHT_BRACE,
+        NAV_JSON_TOKEN_TYPE_EOF
+    },
+    {
+        NAV_JSON_TOKEN_TYPE_LEFT_BRACKET,
+        NAV_JSON_TOKEN_TYPE_TRUE,
+        NAV_JSON_TOKEN_TYPE_RIGHT_BRACKET,
+        NAV_JSON_TOKEN_TYPE_EOF
+    },
+    {
+        NAV_JSON_TOKEN_TYPE_LEFT_BRACE,
+        NAV_JSON_TOKEN_TYPE_STRING,
+        NAV_JSON_TOKEN_TYPE_COLON,
+        NAV_JSON_TOKEN_TYPE_NUMBER,
+        NAV_JSON_TOKEN_TYPE_RIGHT_BRACE,
         NAV_JSON_TOKEN_TYPE_EOF
     },
     {
@@ -494,6 +585,62 @@ constant char JSON_LEXER_TOKENIZE_EXPECTED_VALUES[][][NAV_JSON_LEXER_MAX_TOKEN_L
     {
         // Error case - no values expected
         ''
+    },
+    {
+        '{',
+        '"key"',
+        ':',
+        '"value"',
+        '}',
+        ''
+    },
+    {
+        '[',
+        '1',
+        ',',
+        '2',
+        ',',
+        '3',
+        ']',
+        ''
+    },
+    {
+        '{',
+        '"x"',
+        ':',
+        '42',
+        '}',
+        ''
+    },
+    {
+        '{',
+        '"a"',
+        ':',
+        '1',
+        ',',
+        '"b"',
+        ':',
+        '2',
+        '}',
+        ''
+    },
+    {
+        '[',
+        'true',
+        ']',
+        ''
+    },
+    {
+        '{',
+        '"test"',
+        ':',
+        '123',
+        '}',
+        ''
+    },
+    {
+        // Error case - no values expected
+        ''
     }
 }
 
@@ -550,11 +697,11 @@ define_function TestNAVJsonLexerTokenize() {
                 break
             }
 
-            // Assert line number (all current tests are single-line, so line should be 1)
-            if (!NAVAssertIntegerEqual('Token line should be 1',
-                                       1,
-                                       lexer.tokens[j].line)) {
-                NAVLogTestFailed(x, '1', itoa(lexer.tokens[j].line))
+            // Assert line number is positive (tests may be multi-line for JSONC comments)
+            if (!NAVAssertIntegerGreaterThan('Token line should be positive',
+                                             0,
+                                             lexer.tokens[j].line)) {
+                NAVLogTestFailed(x, '> 0', itoa(lexer.tokens[j].line))
                 failed = true
                 break
             }
