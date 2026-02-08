@@ -1120,7 +1120,7 @@ dvDevice = 0:3:0
 
 DEFINE_TYPE
 
-structure _Module {
+struct _Module {
     _NAVSocketConnection SocketConnection
 }
 

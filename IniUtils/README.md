@@ -66,17 +66,20 @@ log_level=info
 ### High-Level Functions
 
 #### `NAVIniFileParse`
+
 **Purpose**: Main parsing function to convert INI text into a structured format.
 
 **Signature**: `char NAVIniFileParse(char data[], _NAVIniFile iniFile)`
 
 **Parameters**:
+
 - `data[]` - The INI file content as a string
 - `iniFile` - Output structure to store parsed data
 
 **Returns**: `1` on success, `0` on failure
 
 **Example**:
+
 ```netlinx
 stack_var char iniText[1024]
 stack_var _NAVIniFile parsedIni
@@ -88,17 +91,20 @@ if (NAVIniFileParse(iniText, parsedIni)) {
 ```
 
 #### `NAVIniFileGetValue`
+
 **Purpose**: Get a property value using dot notation.
 
 **Signature**: `char[NAV_INI_PARSER_MAX_VALUE_LENGTH] NAVIniFileGetValue(_NAVIniFile iniFile, char dotPath[])`
 
 **Parameters**:
+
 - `iniFile` - Parsed INI structure
 - `dotPath` - Path in format "section.key" or just "key" for global
 
 **Returns**: Property value or empty string if not found
 
 **Example**:
+
 ```netlinx
 stack_var char result[NAV_INI_PARSER_MAX_VALUE_LENGTH]
 result = NAVIniFileGetValue(ini, 'database.host')      // section.key format
@@ -108,16 +114,19 @@ result = NAVIniFileGetValue(ini, 'timeout')           // global key format
 ### Section and Property Functions
 
 #### `NAVIniFileGetSectionValue`
+
 **Purpose**: Get a property value from a specific section.
 
 **Signature**: `char[NAV_INI_PARSER_MAX_VALUE_LENGTH] NAVIniFileGetSectionValue(_NAVIniFile iniFile, char sectionName[], char propertyKey[])`
 
 #### `NAVIniFileGetGlobalValue`
+
 **Purpose**: Get a property value from the global (default) section.
 
 **Signature**: `char[NAV_INI_PARSER_MAX_VALUE_LENGTH] NAVIniFileGetGlobalValue(_NAVIniFile iniFile, char propertyKey[])`
 
 #### `NAVIniFileFindSection`
+
 **Purpose**: Find the index of a section by name.
 
 **Signature**: `integer NAVIniFileFindSection(_NAVIniFile iniFile, char sectionName[])`
@@ -125,6 +134,7 @@ result = NAVIniFileGetValue(ini, 'timeout')           // global key format
 **Returns**: 1-based section index, or 0 if not found
 
 #### `NAVIniFileFindProperty`
+
 **Purpose**: Find the index of a property within a section.
 
 **Signature**: `integer NAVIniFileFindProperty(_NAVIniSection section, char propertyKey[])`
@@ -134,18 +144,22 @@ result = NAVIniFileGetValue(ini, 'timeout')           // global key format
 ## Data Structures
 
 ### `_NAVIniFile`
+
 Main structure containing the parsed INI data:
+
 ```netlinx
-structure _NAVIniFile {
+struct _NAVIniFile {
     integer sectionCount
     _NAVIniSection sections[NAV_INI_PARSER_MAX_SECTIONS]
 }
 ```
 
 ### `_NAVIniSection`
+
 Represents a section within the INI file:
+
 ```netlinx
-structure _NAVIniSection {
+struct _NAVIniSection {
     char name[NAV_INI_PARSER_MAX_SECTION_NAME_LENGTH]
     integer propertyCount
     _NAVIniProperty properties[NAV_INI_PARSER_MAX_PROPERTIES]
@@ -153,9 +167,11 @@ structure _NAVIniSection {
 ```
 
 ### `_NAVIniProperty`
+
 Represents a key-value pair:
+
 ```netlinx
-structure _NAVIniProperty {
+struct _NAVIniProperty {
     char key[NAV_INI_PARSER_MAX_KEY_LENGTH]
     char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
 }
@@ -174,7 +190,7 @@ stack_var _NAVIniSection section
 sectionIndex = NAVIniFileFindSection(ini, 'database')
 if (sectionIndex > 0) {
     section = ini.sections[sectionIndex]
-    
+
     // Find a property in that section
     propertyIndex = NAVIniFileFindProperty(section, 'host')
     if (propertyIndex > 0) {
@@ -192,7 +208,7 @@ stack_var integer i, j
 // Iterate through all sections
 for (i = 1; i <= ini.sectionCount; i++) {
     send_string 0, "'Section: [', ini.sections[i].name, ']'"
-    
+
     // Iterate through all properties in this section
     for (j = 1; j <= ini.sections[i].propertyCount; j++) {
         send_string 0, "'  ', ini.sections[i].properties[j].key, ' = ', ini.sections[i].properties[j].value"
@@ -209,6 +225,7 @@ The library provides comprehensive error logging through the NAVFoundation error
 - **Specific Details**: What went wrong and where
 
 Common error scenarios:
+
 - Malformed INI syntax
 - Missing closing brackets in sections
 - Invalid property assignments
@@ -224,6 +241,7 @@ The library uses a robust two-stage parsing approach with enhanced safety featur
 2. **Syntax Analysis** (`NAVFoundation.IniFileParser.axi`): Builds structured data from tokens with cursor safety
 
 **Safety Features:**
+
 - Comprehensive bounds checking prevents array access violations
 - Centralized cursor management with automatic validation
 - Detailed error logging for debugging and troubleshooting
@@ -243,6 +261,7 @@ The library uses a robust two-stage parsing approach with enhanced safety featur
 ### Memory Considerations
 
 The library is designed for NetLinx memory constraints with configurable limits:
+
 - Maximum sections: `NAV_INI_PARSER_MAX_SECTIONS` (default: 100)
 - Maximum properties per section: `NAV_INI_PARSER_MAX_PROPERTIES` (default: 100)
 - Maximum key length: `NAV_INI_PARSER_MAX_KEY_LENGTH` (default: 64)
@@ -258,7 +277,7 @@ The library supports customizable limits through compiler directives. Define the
 ```netlinx
 // Customize limits (optional)
 #DEFINE NAV_INI_PARSER_MAX_SECTIONS 200              // Default: 100
-#DEFINE NAV_INI_PARSER_MAX_PROPERTIES 150            // Default: 100  
+#DEFINE NAV_INI_PARSER_MAX_PROPERTIES 150            // Default: 100
 #DEFINE NAV_INI_PARSER_MAX_KEY_LENGTH 128             // Default: 64
 #DEFINE NAV_INI_PARSER_MAX_VALUE_LENGTH 512          // Default: 255
 #DEFINE NAV_INI_PARSER_MAX_SECTION_NAME_LENGTH 128   // Default: 64

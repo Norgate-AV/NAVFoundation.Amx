@@ -171,7 +171,7 @@ DEFINE_TYPE
  * @property {integer} line - Line number where token appears
  * @property {integer} column - Column number where token starts
  */
-structure _NAVXmlToken {
+struct _NAVXmlToken {
     integer type
     char value[NAV_XML_LEXER_MAX_TOKEN_LENGTH]
     integer start
@@ -198,7 +198,7 @@ structure _NAVXmlToken {
  * @property {char[]} error - Error message if hasError is true
  * @property {char} inTag - Track if we're inside a tag (between < and >)
  */
-structure _NAVXmlLexer {
+struct _NAVXmlLexer {
     char source[NAV_XML_LEXER_MAX_SOURCE]
     integer cursor
     integer start

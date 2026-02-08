@@ -144,7 +144,7 @@ DEFINE_TYPE
  * @property {char[]} prefix - Namespace prefix (empty if no prefix)
  * @property {integer} nextAttr - Index of next attribute (0 if last)
  */
-structure _NAVXmlAttribute {
+struct _NAVXmlAttribute {
     char name[NAV_XML_PARSER_MAX_ATTR_NAME]
     char value[NAV_XML_PARSER_MAX_ATTR_VALUE]
     char namespace[NAV_XML_PARSER_MAX_NAMESPACE]
@@ -172,7 +172,7 @@ structure _NAVXmlAttribute {
  * @property {integer} firstAttr - Index of first attribute (0 if none)
  * @property {integer} childCount - Cached count of children
  */
-structure _NAVXmlNode {
+struct _NAVXmlNode {
     integer type
 
     integer parent
@@ -210,7 +210,7 @@ structure _NAVXmlNode {
  * @property {integer} errorLine - Line number where error occurred
  * @property {integer} errorColumn - Column number where error occurred
  */
-structure _NAVXml {
+struct _NAVXml {
     _NAVXmlNode nodes[NAV_XML_PARSER_MAX_NODES]
     _NAVXmlAttribute attributes[NAV_XML_PARSER_MAX_ATTRIBUTES]
     integer nodeCount
@@ -237,7 +237,7 @@ structure _NAVXml {
  * @property {integer} cursor - Current token position (1-based)
  * @property {integer} depth - Current nesting depth
  */
-structure _NAVXmlParser {
+struct _NAVXmlParser {
     _NAVXmlToken tokens[NAV_XML_LEXER_MAX_TOKENS]
     integer tokenCount
     integer cursor
@@ -255,7 +255,7 @@ structure _NAVXmlParser {
  * @property {char[]} prefix - Namespace prefix
  * @property {char[]} uri - Namespace URI
  */
-structure _NAVXmlNamespace {
+struct _NAVXmlNamespace {
     char prefix[NAV_XML_PARSER_MAX_PREFIX]
     char uri[NAV_XML_PARSER_MAX_NAMESPACE]
 }
