@@ -35,8 +35,8 @@
         "contrib:check": "all-contributors check"
     },
     "devDependencies": {
-        "@commitlint/cli": "^20.4.0",
-        "@commitlint/config-conventional": "^20.4.0",
+        "@commitlint/cli": "^20.4.1",
+        "@commitlint/config-conventional": "^20.4.1",
         "@norgate-av/dropnode": "^1.0.0",
         "@norgate-av/genlinx": "^2.7.0",
         "@semantic-release/changelog": "^6.0.3",
