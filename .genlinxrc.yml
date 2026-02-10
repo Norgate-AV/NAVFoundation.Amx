@@ -38,6 +38,7 @@ build:
       - ./StringUtils
       - ./Testing
       - ./TimelineUtils
+      - ./Toml
       - ./Tui
       - ./UIUtils
       - ./Url
@@ -85,3 +86,4 @@ build:
       - ./__tests__/include/socket-utils
       - ./__tests__/include/xml
       - ./__tests__/include/yaml
+      - ./__tests__/include/toml

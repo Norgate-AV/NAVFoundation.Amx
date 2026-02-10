@@ -148,6 +148,8 @@ For more detailed guides and documentation, please refer the `README.md` files i
     - Provides utility functions for string manipulation.
 - [TimelineUtils](./TimelineUtils)
     - Provides functions for working with timelines.
+- [Toml](./Toml)
+    - Provides functions for parsing and working with TOML configuration files.
 - [Tui](./Tui)
 - [UIUtils](./UIUtils)
 - [Url](./Url)

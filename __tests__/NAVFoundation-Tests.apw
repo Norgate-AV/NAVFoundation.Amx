@@ -876,7 +876,7 @@
                 <Comments></Comments>
             </File>
         </System>
-        <System IsActive="true" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
             <Identifier>Json</Identifier>
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
@@ -1005,6 +1005,28 @@
             <File CompileType="Netlinx" Type="MasterSrc">
                 <Identifier>yaml</Identifier>
                 <FilePathName>src\yaml.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="true" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>Toml</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>toml</Identifier>
+                <FilePathName>src\toml.axs</FilePathName>
                 <Comments></Comments>
             </File>
         </System>
