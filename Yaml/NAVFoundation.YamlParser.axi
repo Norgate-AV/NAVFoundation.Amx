@@ -321,7 +321,7 @@ define_function integer NAVYamlParserParseBlockScalar(_NAVYamlParser parser, _NA
                 // For folded scalars, convert preceding newlines to spaces
                 if (!isLiteral && trailingNewlines > 0) {
                     // Remove the CRLFs we just added
-                    set_length_string(content, length_array(content) - (trailingNewlines * 2))
+                    set_length_array(content, length_array(content) - (trailingNewlines * 2))
                     // Add a single space instead (unless this is the first content)
                     if (length_array(content) > 0) {
                         content = "content, ' '"
@@ -376,7 +376,7 @@ define_function integer NAVYamlParserParseBlockScalar(_NAVYamlParser parser, _NA
             while (length_array(content) >= 2 &&
                    content[length_array(content) - 1] == 13 &&
                    content[length_array(content)] == 10) {
-                set_length_string(content, length_array(content) - 2)
+                set_length_array(content, length_array(content) - 2)
             }
         }
         else if (chompingIndicator != '+') {
@@ -387,7 +387,7 @@ define_function integer NAVYamlParserParseBlockScalar(_NAVYamlParser parser, _NA
                    content[length_array(content) - 2] == 10 &&
                    content[length_array(content) - 1] == 13 &&
                    content[length_array(content)] == 10) {
-                set_length_string(content, length_array(content) - 2)
+                set_length_array(content, length_array(content) - 2)
             }
         }
 
