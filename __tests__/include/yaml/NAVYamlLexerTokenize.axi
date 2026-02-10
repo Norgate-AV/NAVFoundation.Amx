@@ -1395,6 +1395,907 @@ constant integer YAML_LEXER_TOKENIZE_EXPECTED_TOKEN_COUNT[] = {
     11      // Test 70: DIRECTIVE, newline, name, :, test, newline, value, :, 123, newline, EOF
 }
 
+// Expected token values for each test
+constant char YAML_LEXER_TOKENIZE_EXPECTED_VALUES[][][NAV_YAML_LEXER_MAX_TOKEN_LENGTH] = {
+    // Test 1: Empty mapping (flow style) - {}
+    {
+        '{',
+        '}',
+        ''
+    },
+    // Test 2: Simple key-value - name: John
+    {
+        'name',
+        ':',
+        'John',
+        ''
+    },
+    // Test 3: Multiple keys
+    {
+        'name',
+        ':',
+        'John',
+        {$0D, $0A},
+        'age',
+        ':',
+        '30',
+        {$0D, $0A},
+        ''
+    },
+    // Test 4: Empty sequence (flow style) - []
+    {
+        '[',
+        ']',
+        ''
+    },
+    // Test 5: Flow sequence with numbers - [1, 2, 3]
+    {
+        '[',
+        '1',
+        ',',
+        '2',
+        ',',
+        '3',
+        ']',
+        ''
+    },
+    // Test 6: Block sequence
+    {
+        '-',
+        'item1',
+        {$0D, $0A},
+        '-',
+        'item2',
+        {$0D, $0A},
+        '-',
+        'item3',
+        {$0D, $0A},
+        ''
+    },
+    // Test 7: Nested mapping
+    {
+        'user',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT (no value)
+        'name',
+        ':',
+        'John',
+        {$0D, $0A},
+        'age',
+        ':',
+        '30',
+        {$0D, $0A},
+        '',  // DEDENT (no value)
+        ''
+    },
+    // Test 8: Flow mapping - {name: John, age: 30}
+    {
+        '{',
+        'name',
+        ':',
+        'John',
+        ',',
+        'age',
+        ':',
+        '30',
+        '}',
+        ''
+    },
+    // Test 9: Boolean values
+    {
+        'true_val',
+        ':',
+        'true',
+        {$0D, $0A},
+        'false_val',
+        ':',
+        'false',
+        {$0D, $0A},
+        'yes_val',
+        ':',
+        'yes',
+        {$0D, $0A},
+        'no_val',
+        ':',
+        'no',
+        {$0D, $0A},
+        ''
+    },
+    // Test 10: Null values
+    {
+        'null_val',
+        ':',
+        'null',
+        {$0D, $0A},
+        'tilde',
+        ':',
+        '~',
+        {$0D, $0A},
+        'empty',
+        ':',
+        {$0D, $0A},
+        ''
+    },
+    // Test 11: Quoted strings
+    {
+        'single',
+        ':',
+        "'quoted value'",
+        {$0D, $0A},
+        'double',
+        ':',
+        '"quoted value"',
+        {$0D, $0A},
+        ''
+    },
+    // Test 12: Numbers
+    {
+        'integer',
+        ':',
+        '42',
+        {$0D, $0A},
+        'negative',
+        ':',
+        '-10',
+        {$0D, $0A},
+        'float',
+        ':',
+        '3.14',
+        {$0D, $0A},
+        ''
+    },
+    // Test 13: Comment
+    {
+        'key',
+        ':',
+        'value  ',
+        {$0D, $0A},
+        ''
+    },
+    // Test 14: Document marker
+    {
+        '---',
+        {$0D, $0A},
+        'name',
+        ':',
+        'John',
+        {$0D, $0A},
+        ''
+    },
+    // Test 15: Sequence of mappings
+    {
+        '-',
+        'name',
+        ':',
+        'John',
+        {$0D, $0A},
+        '',  // INDENT
+        'age',
+        ':',
+        '30',
+        {$0D, $0A},
+        '',  // DEDENT
+        '-',
+        'name',
+        ':',
+        'Jane',
+        {$0D, $0A},
+        '',  // INDENT
+        'age',
+        ':',
+        '25',
+        {$0D, $0A},
+        '',  // DEDENT
+        ''
+    },
+    // Test 16: Empty lines
+    {
+        'key1',
+        ':',
+        'value1',
+        {$0D, $0A},
+        'key2',
+        ':',
+        'value2',
+        {$0D, $0A},
+        ''
+    },
+    // Test 17: Deeply indented
+    {
+        'level1',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'level2',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'level3',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'key',
+        ':',
+        'value',
+        {$0D, $0A},
+        '',  // DEDENT
+        '',  // DEDENT
+        '',  // DEDENT
+        ''
+    },
+    // Test 18: Mixed flow and block
+    {
+        'items',
+        ':',
+        '[',
+        '1',
+        ',',
+        '2',
+        ',',
+        '3',
+        ']',
+        {$0D, $0A},
+        'nested',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'key',
+        ':',
+        'value',
+        {$0D, $0A},
+        '',  // DEDENT
+        ''
+    },
+    // Test 19: Invalid - inconsistent indentation
+    {''},
+    // Test 20: Colon in value
+    {
+        'url',
+        ':',
+        'http://example.com',
+        ''
+    },
+    // Test 21: Document end marker
+    {
+        'data',
+        ':',
+        'value',
+        {$0D, $0A},
+        '...',
+        {$0D, $0A},
+        ''
+    },
+    // Test 22: Anchor definition
+    {
+        '&',
+        'anchor',
+        'value',
+        ''
+    },
+    // Test 23: Alias reference
+    {
+        'ref',
+        ':',
+        '*',
+        'anchor',
+        ''
+    },
+    // Test 24: Tag
+    {
+        'number',
+        ':',
+        '!!',
+        'int',
+        '42',
+        ''
+    },
+    // Test 25: Literal block scalar
+    {
+        'text',
+        ':',
+        '|',
+        {$0D, $0A},
+        '',  // INDENT
+        'Line 1',
+        {$0D, $0A},
+        'Line 2',
+        {$0D, $0A},
+        '',  // DEDENT
+        ''
+    },
+    // Test 26: Folded block scalar
+    {
+        'text',
+        ':',
+        '>',
+        {$0D, $0A},
+        '',  // INDENT
+        'Folded',
+        {$0D, $0A},
+        'Text',
+        {$0D, $0A},
+        '',  // DEDENT
+        ''
+    },
+    // Test 27: Multiple documents
+    {
+        '---',
+        {$0D, $0A},
+        'doc1',
+        ':',
+        'first',
+        {$0D, $0A},
+        '---',
+        {$0D, $0A},
+        'doc2',
+        ':',
+        'second',
+        {$0D, $0A},
+        ''
+    },
+    // Test 28: Escaped characters in double quotes
+    {
+        'text',
+        ':',
+        {'"', 'L', 'i', 'n', 'e', ' ', '1', $5C, 'n', 'L', 'i', 'n', 'e', ' ', '2', '"'},
+        ''
+    },
+    // Test 29: Single quotes with escaped quote
+    {
+        'text',
+        ':',
+        {'''', 'I', 't', '''', '''', 's', ' ', 'w', 'o', 'r', 'k', 'i', 'n', 'g', ''''},
+        ''
+    },
+    // Test 30: Empty flow sequence
+    {
+        'items',
+        ':',
+        '[',
+        ']',
+        ''
+    },
+    // Test 31: Empty flow mapping
+    {
+        'config',
+        ':',
+        '{',
+        '}',
+        ''
+    },
+    // Test 32: Trailing comma in sequence
+    {
+        '[',
+        '1',
+        ',',
+        '2',
+        ',',
+        '3',
+        ',',
+        ']',
+        ''
+    },
+    // Test 33: Unbalanced left bracket
+    {
+        '[',
+        '1',
+        ',',
+        '2',
+        ',',
+        '3',
+        ''
+    },
+    // Test 34: Unbalanced right bracket
+    {
+        '1',
+        ',',
+        '2',
+        ',',
+        '3',
+        ']',
+        ''
+    },
+    // Test 35: Unbalanced left brace
+    {
+        '{',
+        'key',
+        ':',
+        'value',
+        ''
+    },
+    // Test 36: Unbalanced right brace
+    {
+        'key',
+        ':',
+        'value',
+        '}',
+        ''
+    },
+    // Test 37: Very deep nesting (6 levels)
+    {
+        'l1',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'l2',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'l3',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'l4',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'l5',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'l6',
+        ':',
+        'value',
+        {$0D, $0A},
+        '',  // DEDENT
+        '',  // DEDENT
+        '',  // DEDENT
+        '',  // DEDENT
+        '',  // DEDENT
+        ''
+    },
+    // Test 38: Large flow array
+    {
+        'nums',
+        ':',
+        '[',
+        '1',
+        ',',
+        '2',
+        ',',
+        '3',
+        ',',
+        '4',
+        ',',
+        '5',
+        ',',
+        '6',
+        ',',
+        '7',
+        ',',
+        '8',
+        ',',
+        '9',
+        ',',
+        '10',
+        ']',
+        ''
+    },
+    // Test 39: Comment at start of line
+    {
+        'key',
+        ':',
+        'value',
+        {$0D, $0A},
+        ''
+    },
+    // Test 40: Comment after mapping
+    {
+        'key',
+        ':',
+        'value',
+        {$0D, $0A},
+        ''
+    },
+    // Test 41: Key with special chars (needs quotes)
+    {
+        "'key:with:colons'",
+        ':',
+        'value',
+        ''
+    },
+    // Test 42: Mixed quotes
+    {
+        'single',
+        ':',
+        "'quoted'",
+        {$0D, $0A},
+        'double',
+        ':',
+        '"quoted"',
+        {$0D, $0A},
+        ''
+    },
+    // Test 43: Null value variations
+    {
+        'null1',
+        ':',
+        'null',
+        {$0D, $0A},
+        'null2',
+        ':',
+        'Null',
+        {$0D, $0A},
+        'null3',
+        ':',
+        'NULL',
+        {$0D, $0A},
+        'null4',
+        ':',
+        '~',
+        {$0D, $0A},
+        ''
+    },
+    // Test 44: Boolean value variations
+    {
+        'on_val',
+        ':',
+        'on',
+        {$0D, $0A},
+        'off_val',
+        ':',
+        'off',
+        {$0D, $0A},
+        'ON_val',
+        ':',
+        'ON',
+        {$0D, $0A},
+        'OFF_val',
+        ':',
+        'OFF',
+        {$0D, $0A},
+        ''
+    },
+    // Test 45: Multiple dedents
+    {
+        'level1',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'level2',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'level3',
+        ':',
+        'value',
+        {$0D, $0A},
+        '',  // DEDENT
+        '',  // DEDENT
+        'back_to_root',
+        ':',
+        'value',
+        {$0D, $0A},
+        ''
+    },
+    // Test 46: Complex real-world config
+    {
+        'server',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'host',
+        ':',
+        'localhost',
+        {$0D, $0A},
+        'port',
+        ':',
+        '8080',
+        {$0D, $0A},
+        'ssl',
+        ':',
+        'true',
+        {$0D, $0A},
+        '',  // DEDENT
+        'database',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        'name',
+        ':',
+        'mydb',
+        {$0D, $0A},
+        'user',
+        ':',
+        'admin',
+        {$0D, $0A},
+        '',  // DEDENT
+        ''
+    },
+    // Test 47: Sequence with nested mappings
+    {
+        'users',
+        ':',
+        {$0D, $0A},
+        '',  // INDENT
+        '-',
+        'name',
+        ':',
+        'Alice',
+        {$0D, $0A},
+        '',  // INDENT
+        'role',
+        ':',
+        'admin',
+        {$0D, $0A},
+        '',  // DEDENT
+        '-',
+        'name',
+        ':',
+        'Bob',
+        {$0D, $0A},
+        '',  // INDENT
+        'role',
+        ':',
+        'user',
+        {$0D, $0A},
+        '',  // DEDENT
+        '',  // DEDENT
+        ''
+    },
+    // Test 48: Flow sequence with nested flow mapping
+    {
+        'data',
+        ':',
+        '[',
+        '{',
+        'id',
+        ':',
+        '1',
+        '}',
+        ',',
+        '{',
+        'id',
+        ':',
+        '2',
+        '}',
+        ']',
+        ''
+    },
+    // Test 49: Empty key (invalid in strict YAML)
+    {
+        ':',
+        'value',
+        ''
+    },
+    // Test 50: Whitespace-only line between keys
+    {
+        'key1',
+        ':',
+        'value1',
+        {$0D, $0A},
+        '',  // INDENT
+        '',  // DEDENT
+        'key2',
+        ':',
+        'value2',
+        {$0D, $0A},
+        ''
+    },
+    // Test 51: Invalid - colon without space (lexer accepts as plain scalar)
+    {
+        'name:test',
+        ''
+    },
+    // Test 52: Invalid - dash without space
+    {
+        '-item1',
+        {$0D, $0A},
+        '-',
+        'item2',
+        {$0D, $0A},
+        ''
+    },
+    // Test 53: Invalid - odd indentation
+    {''},
+    // Test 54: Valid - empty string with quotes
+    {
+        'text',
+        ':',
+        '""',
+        ''
+    },
+    // Test 55: Anchor followed by space and value (should split)
+    {
+        'key',
+        ':',
+        '&',
+        'anchor',
+        'value',
+        ''
+    },
+    // Test 56: Alias followed by space and value (should split)
+    {
+        'ref',
+        ':',
+        '*',
+        'alias',
+        'remaining',
+        ''
+    },
+    // Test 57: Anchor with hyphen and underscore in name
+    {
+        'data',
+        ':',
+        '&',
+        'my-anchor_123',
+        'content',
+        ''
+    },
+    // Test 58: Multiple anchors on different lines
+    {
+        'first',
+        ':',
+        '&',
+        'a1',
+        'val1',
+        {$0D, $0A},
+        'second',
+        ':',
+        '&',
+        'b2',
+        'val2',
+        {$0D, $0A},
+        ''
+    },
+    // Test 59: Anchor in flow sequence
+    {
+        '[',
+        '&',
+        'item',
+        'value',
+        ',',
+        'other',
+        ']',
+        ''
+    },
+    // Test 60: Alias in mapping key position
+    {
+        '*',
+        'key',
+        ':',
+        'value',
+        {$0D, $0A},
+        ''
+    },
+    // Test 61: Literal block scalar with one trailing blank line (chomping keep)
+    {
+        'text',
+        ':',
+        '|+',
+        {$0D, $0A},
+        '',  // INDENT
+        'Line 1',
+        {$0D, $0A},
+        {$0D, $0A},  // Blank line
+        '',  // DEDENT
+        ''
+    },
+    // Test 62: Literal block scalar with multiple trailing blank lines
+    {
+        'text',
+        ':',
+        '|+',
+        {$0D, $0A},
+        '',  // INDENT
+        'Line 1',
+        {$0D, $0A},
+        'Line 2',
+        {$0D, $0A},
+        {$0D, $0A},  // Blank line 1
+        {$0D, $0A},  // Blank line 2
+        '',  // DEDENT
+        ''
+    },
+    // Test 63: Folded block scalar with trailing blank line
+    {
+        'text',
+        ':',
+        '>+',
+        {$0D, $0A},
+        '',  // INDENT
+        'Line 1',
+        {$0D, $0A},
+        {$0D, $0A},  // Blank line
+        '',  // DEDENT
+        ''
+    },
+    // Test 64: Literal block scalar with blank line in middle of content
+    {
+        'text',
+        ':',
+        '|',
+        {$0D, $0A},
+        '',  // INDENT
+        'Line 1',
+        {$0D, $0A},
+        {$0D, $0A},  // Blank line
+        'Line 2',
+        {$0D, $0A},
+        '',  // DEDENT
+        ''
+    },
+    // Test 65: Block scalar followed by another key (verifies block mode exit on dedent)
+    {
+        'text',
+        ':',
+        '|',
+        {$0D, $0A},
+        '',  // INDENT
+        'Content',
+        {$0D, $0A},
+        '',  // DEDENT
+        'key2',
+        ':',
+        'value2',
+        {$0D, $0A},
+        ''
+    },
+    // Test 66: YAML version directive
+    {
+        '%YAML 1.2',
+        {$0D, $0A},
+        '---',
+        {$0D, $0A},
+        'key',
+        ':',
+        'value',
+        {$0D, $0A},
+        ''
+    },
+    // Test 67: TAG directive
+    {
+        '%TAG ! tag:yaml.org,2002:',
+        {$0D, $0A},
+        '---',
+        {$0D, $0A},
+        'key',
+        ':',
+        'value',
+        {$0D, $0A},
+        ''
+    },
+    // Test 68: Multiple directives
+    {
+        '%YAML 1.2',
+        {$0D, $0A},
+        '%TAG ! tag:yaml.org,2002:',
+        {$0D, $0A},
+        '---',
+        {$0D, $0A},
+        'data',
+        ':',
+        'test',
+        {$0D, $0A},
+        ''
+    },
+    // Test 69: Directive with comment
+    {
+        '%YAML 1.2  # Comment',
+        {$0D, $0A},
+        'key',
+        ':',
+        'value',
+        {$0D, $0A},
+        ''
+    },
+    // Test 70: Directive followed by document
+    {
+        '%YAML 1.2',
+        {$0D, $0A},
+        'name',
+        ':',
+        'test',
+        {$0D, $0A},
+        'value',
+        ':',
+        '123',
+        {$0D, $0A},
+        ''
+    }
+}
+
 
 define_function TestNAVYamlLexerTokenize() {
     stack_var integer x
@@ -1475,6 +2376,22 @@ define_function TestNAVYamlLexerTokenize() {
                                              0,
                                              lexer.tokens[j].column)) {
                 NAVLogTestFailed(x, '> 0', itoa(lexer.tokens[j].column))
+                failed = true
+                break
+            }
+
+            // Skip value check for EOF token
+            if (lexer.tokens[j].type == NAV_YAML_TOKEN_TYPE_EOF) {
+                continue
+            }
+
+            // Assert token value matches expected
+            if (!NAVAssertStringEqual('Token value should match',
+                                      YAML_LEXER_TOKENIZE_EXPECTED_VALUES[x][j],
+                                      lexer.tokens[j].value)) {
+                NAVLogTestFailed(x,
+                                YAML_LEXER_TOKENIZE_EXPECTED_VALUES[x][j],
+                                lexer.tokens[j].value)
                 failed = true
                 break
             }
