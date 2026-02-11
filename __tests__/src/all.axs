@@ -7,6 +7,7 @@ PROGRAM_NAME='all'
 #DEFINE TESTING_SHA512
 #DEFINE TESTING_MD5
 #DEFINE TESTING_BASE64
+#DEFINE TESTING_BASE64URL
 #DEFINE TESTING_BASE32
 #DEFINE TESTING_INT64
 #DEFINE TESTING_PBKDF2
@@ -42,6 +43,10 @@ PROGRAM_NAME='all'
 
 #IF_DEFINED TESTING_BASE64
 #include 'base64.axi'
+#END_IF
+
+#IF_DEFINED TESTING_BASE64URL
+#include 'base64url.axi'
 #END_IF
 
 #IF_DEFINED TESTING_BASE32
@@ -118,6 +123,11 @@ define_function RunAllTests() {
     #IF_DEFINED TESTING_BASE64
     NAVLog("'***************** NAV BASE64 *****************'")
     RunBase64Tests()
+    #END_IF
+
+    #IF_DEFINED TESTING_BASE64URL
+    NAVLog("'***************** NAV BASE64URL *****************'")
+    RunBase64UrlTests()
     #END_IF
 
     #IF_DEFINED TESTING_BASE32
