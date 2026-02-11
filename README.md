@@ -118,6 +118,8 @@ For more detailed guides and documentation, please refer the `README.md` files i
     - Provides a JSON parser for AMX.
 - [Json](./Json)
     - Provides functions for working with JSON data.
+- [Jwt](./Jwt)
+    - Provides functions for working with JSON Web Tokens (JWT).
 - [List](./List)
     - Provides an array-based list implementation.
 - [LogicEngine](./LogicEngine)

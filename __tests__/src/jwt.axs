@@ -1,0 +1,30 @@
+PROGRAM_NAME='jwt'
+
+#DEFINE __MAIN__
+#include 'jwt.axi'
+
+DEFINE_DEVICE
+
+vdvTest = 33201:1:0
+
+DEFINE_START {
+    set_log_level(NAV_LOG_LEVEL_DEBUG)
+}
+
+DEFINE_EVENT
+
+button_event[vdvTest, 1] {
+    push: {
+        NAVLogTestStart()
+        RunJwtTests()
+        NAVLogTestEnd()
+    }
+}
+
+channel_event[vdvTest, 1] {
+    on: {
+        NAVLogTestStart()
+        RunJwtTests()
+        NAVLogTestEnd()
+    }
+}

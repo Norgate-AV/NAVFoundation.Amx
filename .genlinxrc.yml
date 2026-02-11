@@ -20,6 +20,7 @@ build:
       - ./InterModuleApi
       - ./Jsmn
       - ./Json
+      - ./Jwt
       - ./Lexer
       - ./List
       - ./LogicEngine
@@ -89,3 +90,4 @@ build:
       - ./__tests__/include/toml
       - ./__tests__/include/hmac
       - ./__tests__/include/base64url
+      - ./__tests__/include/jwt

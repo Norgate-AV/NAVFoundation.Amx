@@ -1,0 +1,52 @@
+#DEFINE TESTING_NAVJWTCREATE
+#DEFINE TESTING_NAVJWTVERIFY
+#DEFINE TESTING_NAVJWTDECODE
+#DEFINE TESTING_NAVJWTVERIFYANDDECODE
+#DEFINE TESTING_NAVJWTTIMEVALIDATION
+#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Jwt.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
+#include 'NAVFoundation.Assert.axi'
+#include 'NAVFoundation.Testing.axi'
+
+#IF_DEFINED TESTING_NAVJWTCREATE
+#include 'NAVJwtCreate.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVJWTVERIFY
+#include 'NAVJwtVerify.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVJWTDECODE
+#include 'NAVJwtDecode.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVJWTVERIFYANDDECODE
+#include 'NAVJwtVerifyAndDecode.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVJWTTIMEVALIDATION
+#include 'NAVJwtTimeValidation.axi'
+#END_IF
+
+define_function RunJwtTests() {
+    #IF_DEFINED TESTING_NAVJWTCREATE
+    TestNAVJwtCreate()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVJWTVERIFY
+    TestNAVJwtVerify()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVJWTDECODE
+    TestNAVJwtDecode()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVJWTVERIFYANDDECODE
+    TestNAVJwtVerifyAndDecode()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVJWTTIMEVALIDATION
+    TestNAVJwtTimeValidation()
+    #END_IF
+}
