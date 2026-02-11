@@ -1,4 +1,6 @@
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Assert.axi'
+#include 'NAVFoundation.Testing.axi'
 #include 'NAVFoundation.ErrorLogUtils.axi'
 #include 'NAVFoundation.Cryptography.Sha1.axi'
 
@@ -16,7 +18,9 @@ constant char SHA1_TEST[][2048] = {
     'The quick brown fox jumps over the lazy dog.',
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     'The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.',
-    'This is a longer test case to check the SHA-1 implementation. It should handle longer strings correctly and produce the expected hash value.'
+    'This is a longer test case to check the SHA-1 implementation. It should handle longer strings correctly and produce the expected hash value.',
+    // 84-byte test (HMAC outer hash size) - critical boundary test
+    '1234567890123456789012345678901234567890123456789012345678901234567890123456789012'
 }
 
 
@@ -32,23 +36,27 @@ constant char SHA1_EXPECTED[][20] = {
     {$40, $8D, $94, $38, $42, $16, $F8, $90, $FF, $7A, $0C, $35, $28, $E8, $BE, $D1, $E0, $B0, $16, $21},
     {$AD, $A4, $44, $2F, $42, $00, $4E, $0E, $E7, $62, $09, $38, $BD, $4D, $3E, $8D, $AC, $86, $21, $A4},
     {$78, $23, $70, $6B, $4A, $AF, $A0, $8C, $A5, $01, $70, $F1, $99, $5E, $7A, $EF, $AC, $E8, $88, $CD},
-    {$59, $74, $9D, $06, $44, $1B, $A8, $AD, $69, $F8, $A6, $A0, $C5, $DD, $CE, $0F, $5F, $99, $9B, $8E}
+    {$59, $74, $9D, $06, $44, $1B, $A8, $AD, $69, $F8, $A6, $A0, $C5, $DD, $CE, $0F, $5F, $99, $9B, $8E},
+    {$23, $CF, $99, $45, $8A, $30, $E6, $A1, $56, $DC, $EB, $E3, $E7, $57, $A1, $E7, $E2, $33, $4A, $6D}
 }
 
 define_function RunSha1Tests() {
     stack_var integer x
+
+    NAVLogTestSuiteStart('NAVSha1GetHash')
 
     for (x = 1; x <= length_array(SHA1_TEST); x++) {
         stack_var char result[20]
 
         result = NAVSha1GetHash(SHA1_TEST[x])
 
-        if (result != SHA1_EXPECTED[x]) {
-            NAVErrorLog(NAV_LOG_LEVEL_DEBUG,
-                        "'Test ', itoa(x), ' failed'")
+        if (!NAVAssertStringEqual('Should produce correct SHA-1 hash', SHA1_EXPECTED[x], result)) {
+            NAVLogTestFailed(x, SHA1_EXPECTED[x], result)
             continue
         }
 
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Test ', itoa(x), ' passed'")
+        NAVLogTestPassed(x)
     }
+
+    NAVLogTestSuiteEnd('NAVSha1GetHash')
 }
