@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.18.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.17.0...v5.18.0) (2026-02-11)
+
+### 🌟 Features
+
+- **encoding:** add base64url library ([a8eed65](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a8eed65ec1319e58042aaefebd627ad1628c2e8d))
+- **cryptography:** add hmac library ([57e0066](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/57e0066a23daba003fc089b7ef286ed36a2120f7))
+- **jwt:** add initial jwt library implementation ([3e07b1d](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3e07b1dc1192431282c40090c5507f475737e9f5))
+- **toml:** add initial TOML v1.1.0 parser implementation ([9fa77d2](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9fa77d2769ee15e2674ab339a96345cec2e096e6))
+
 ## [5.17.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.16.0...v5.17.0) (2026-02-08)
 
 ### 🌟 Features
