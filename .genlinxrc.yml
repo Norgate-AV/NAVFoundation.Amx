@@ -87,4 +87,5 @@ build:
       - ./__tests__/include/xml
       - ./__tests__/include/yaml
       - ./__tests__/include/toml
+      - ./__tests__/include/hmac
       - ./__tests__/include/base64url

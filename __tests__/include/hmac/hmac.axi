@@ -1,0 +1,53 @@
+#DEFINE TESTING_NAVHMACMD5
+#DEFINE TESTING_NAVHMACSHA1
+#DEFINE TESTING_NAVHMACSHA256
+#DEFINE TESTING_NAVHMACSHA512
+#DEFINE TESTING_NAVHMACGETDIGEST
+#include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Cryptography.Hmac.axi'
+#include 'NAVFoundation.ErrorLogUtils.axi'
+#include 'NAVFoundation.Assert.axi'
+#include 'NAVFoundation.Testing.axi'
+
+#IF_DEFINED TESTING_NAVHMACMD5
+#include 'NAVHmacMd5.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVHMACSHA1
+#include 'NAVHmacSha1.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVHMACSHA256
+#include 'NAVHmacSha256.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVHMACSHA512
+#include 'NAVHmacSha512.axi'
+#END_IF
+
+#IF_DEFINED TESTING_NAVHMACGETDIGEST
+#include 'NAVHmacGetDigest.axi'
+#END_IF
+
+
+define_function RunHmacTests() {
+    #IF_DEFINED TESTING_NAVHMACMD5
+    TestNAVHmacMd5()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVHMACSHA1
+    TestNAVHmacSha1()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVHMACSHA256
+    TestNAVHmacSha256()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVHMACSHA512
+    TestNAVHmacSha512()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVHMACGETDIGEST
+    TestNAVHmacGetDigest()
+    #END_IF
+}
