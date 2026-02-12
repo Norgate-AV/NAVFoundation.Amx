@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.19.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.18.0...v5.19.0) (2026-02-12)
+
+### 🌟 Features
+
+- **cryptography:** add sha384 hashing ([c9535b5](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c9535b55eea576e538cf087397777fbcd3c0ab1d))
+- **cryptography:** add support for HMAC-SHA384 ([1ccda81](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/1ccda81f772e5880f0287d9f9947b1c7abc705a4))
+- **jwt:** add support for HS384 algorithm ([9264d3a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9264d3a87ce8362305611677a1f7907612fececd))
+
 ## [5.18.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.17.0...v5.18.0) (2026-02-11)
 
 ### 🌟 Features
