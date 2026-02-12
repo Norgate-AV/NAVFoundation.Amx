@@ -1,5 +1,111 @@
 # Changelog
 
+## [5.19.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.18.0...v5.19.0) (2026-02-12)
+
+### 🌟 Features
+
+- **cryptography:** add sha384 hashing ([c9535b5](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/c9535b55eea576e538cf087397777fbcd3c0ab1d))
+- **cryptography:** add support for HMAC-SHA384 ([1ccda81](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/1ccda81f772e5880f0287d9f9947b1c7abc705a4))
+- **jwt:** add support for HS384 algorithm ([9264d3a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9264d3a87ce8362305611677a1f7907612fececd))
+
+## [5.18.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.17.0...v5.18.0) (2026-02-11)
+
+### 🌟 Features
+
+- **encoding:** add base64url library ([a8eed65](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a8eed65ec1319e58042aaefebd627ad1628c2e8d))
+- **cryptography:** add hmac library ([57e0066](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/57e0066a23daba003fc089b7ef286ed36a2120f7))
+- **jwt:** add initial jwt library implementation ([3e07b1d](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3e07b1dc1192431282c40090c5507f475737e9f5))
+- **toml:** add initial TOML v1.1.0 parser implementation ([9fa77d2](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9fa77d2769ee15e2674ab339a96345cec2e096e6))
+
+## [5.17.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.16.0...v5.17.0) (2026-02-08)
+
+### 🌟 Features
+
+- **yaml:** add initial YAML 1.2 library ([9cb03aa](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/9cb03aa6a625917c6166d9b32e9a4e3080413480))
+- **json:** add support for JSONC comments ([5e75223](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/5e752239dc54f5cf2cac737c41f3af23542c13cf))
+
+## [5.16.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.15.1...v5.16.0) (2026-02-03)
+
+### 🌟 Features
+
+- **xml:** add initial XML 1.0 parser with dot-notation query system ([3982b35](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3982b35fcca1db85352d1760ba36dbbf199b503b))
+
+## [5.15.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.15.0...v5.15.1) (2026-02-02)
+
+### 🐛 Bug Fixes
+
+- **socket-utils:** reduce excessive logging on connection failures ([47e007a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/47e007ae21023ca3001c68f567f29de5497ea46f))
+
+## [5.15.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.14.0...v5.15.0) (2026-02-02)
+
+### 🌟 Features
+
+- **core:** add \_NAVOptionalDevice struct for optional module integrations ([896d60f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/896d60f214d6c839f3b99b622554d7092de79f99))
+- **modulebase:** add CLOUDLOG_DEVICE property constant ([f56464e](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/f56464e1b826f109d3eb86e32930434c78089801))
+- **string-utils:** add multi-base parsing and digit validation helpers ([cc3b0e0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/cc3b0e01963a87f7074ffe1e789f9c56b9e13f2d))
+- **binary-utils:** add NAVBinaryCountLeadingZeros function ([8519d84](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/8519d84ed87dca6bf61fb5582d3678395df21666))
+
+## [5.14.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.13.2...v5.14.0) (2026-02-01)
+
+### 🌟 Features
+
+- **socket-utils:** add high-level connection management API ([3faefc0](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3faefc09818ea6f97e7a9b89ecfcc012262cf68c))
+- **net-utils:** add NAVNetIsMalformedIP and NAVNetParseHostname functions ([221903f](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/221903fdf3d365fe0c2b404e02012a71d1f5f542))
+- **string-utils:** add NAVParseBoolean function ([2892cf7](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/2892cf72a094a81f68dccea90db22dc0f16b7cb9))
+
+## [5.13.2](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.13.1...v5.13.2) (2026-01-30)
+
+### 🐛 Bug Fixes
+
+- **websocket:** ensure socket cleanup on protocol errors ([ac66c79](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/ac66c798fd7fdb2011e362ae355e9e5e1d211364))
+- **socket-utils:** prevent integer overflow in exponential backoff calculation ([d5b44cc](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/d5b44cc0542d1a2f8df1075acd55d4bac568f576))
+
+## [5.13.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.13.0...v5.13.1) (2026-01-30)
+
+### 🐛 Bug Fixes
+
+- **errorlog-utils:** ensure NAVCloudLogCreate take level as string ([1377883](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/13778835148e531ac1ca7526d04346029809e9c4))
+
+## [5.13.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.12.0...v5.13.0) (2026-01-29)
+
+### 🌟 Features
+
+- **core:** add NAVCharIsPrintable function ([75ac743](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/75ac7433b4366dd96fb0a0e2de8b3e968768d58f))
+- **core:** add NAVGetNewUuid function alias ([b2d46f5](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b2d46f53faec725d042b5cfb5c226ee0c952ca6d))
+- **core:** add NAVParseDevice function ([39dff5a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/39dff5adf1632ac6ba5cae071734ca68ce960bda))
+
+### 🐛 Bug Fixes
+
+- **websocket:** ensure pong frames are properly masked in response ([b6e0221](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/b6e02215c2681268b7470968fbaeb8e07d3f8687))
+- **core:** fix issues with NAVGetNewGuid function ([3a8fcda](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3a8fcdadb01db3184c1b65c90a19e57a743c0f6f))
+
+## [5.12.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.11.0...v5.12.0) (2026-01-29)
+
+### 🌟 Features
+
+- **json:** add NAVJsonLog ([bc6ab1a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/bc6ab1a609d9cb4ee00889b2e0e680d00dce3b0e))
+- **json:** add NAVJsonSerialize ([f7a1b28](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/f7a1b2828cd27eb1cce0c830a339791edfb449e5))
+- **cloudlog:** add response parsing for cloud logging service ([a6d3e67](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/a6d3e677925042b8be3658d4e02bcca50e27099f))
+
+## [5.11.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.10.0...v5.11.0) (2026-01-28)
+
+### 🌟 Features
+
+- **errorlog-utils:** add NAVCloudLogCreate function ([900a2b4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/900a2b45eb4f20ffe35cf716bbda37aa2b730957))
+
+## [5.10.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.9.0...v5.10.0) (2026-01-27)
+
+### 🌟 Features
+
+- **errorlog-utils:** add cloudlog ([999e7d7](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/999e7d7c2e20a741120ab9076e3278fde542d679))
+
+## [5.9.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.8.0...v5.9.0) (2026-01-26)
+
+### 🌟 Features
+
+- **json:** add initial json library implementation ([50060cf](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/50060cf38540f9cb8f136859ccb16c8856f96877))
+- **string-utils:** add NAVIsHexDigit function ([cea9df4](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/cea9df438ff4ea88a1ba783f533a2642bc867872))
+
 ## [5.8.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.7.0...v5.8.0) (2026-01-24)
 
 ### 🌟 Features

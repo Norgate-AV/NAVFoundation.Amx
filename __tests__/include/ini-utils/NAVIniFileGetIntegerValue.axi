@@ -107,7 +107,7 @@ define_function TestNAVIniFileGetIntegerValue() {
 
     // Test all valid integer conversions
     for (i = 1; i <= length_array(INTEGER_VALID_TEST_KEYS); i++) {
-        result = NAVIniFileGetIntegerValue(testIni, INTEGER_VALID_TEST_KEYS[i], -999)
+        result = NAVIniFileGetIntegerValue(testIni, INTEGER_VALID_TEST_KEYS[i], 999)
 
         if (!NAVAssertIntegerEqual('GetIntegerValue Valid Test', INTEGER_VALID_EXPECTED[i], result)) {
             NAVLogTestFailed(i, itoa(INTEGER_VALID_EXPECTED[i]), itoa(result))
@@ -199,8 +199,8 @@ define_function TestIntegerGetVerification() {
     }
 
     result = NAVIniFileGetIntegerValue(testIni, 'hex1', 65535)
-    if (result == 65535) {
-        NAVLog("'Pass: Hex strings (0xFF) return default (validation rejects)'")
+    if (result == 0) {
+        NAVLog("'Pass: Hex strings (0xFF) parse as 0 (ATOI behavior)'")
     } else {
         NAVLog("'Fail: Hex string conversion unexpected'")
     }
@@ -218,8 +218,8 @@ define_function TestIntegerGetVerification() {
     }
 
     result = NAVIniFileGetIntegerValue(testIni, 'partial1', 999)
-    if (result == 999) {
-        NAVLog("'Pass: Invalid strings with trailing chars return default'")
+    if (result == 123) {
+        NAVLog("'Pass: Strings with trailing chars parse first number (123abc -> 123)'")
     } else {
         NAVLog("'Fail: Partial conversion incorrect'")
     }

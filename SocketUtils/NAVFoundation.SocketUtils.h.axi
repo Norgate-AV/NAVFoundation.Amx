@@ -38,6 +38,30 @@ SOFTWARE.
 DEFINE_CONSTANT
 
 /**
+ * @section Socket Connection Type Constants
+ * @description Constants for identifying socket connection types
+ */
+
+/**
+ * @constant NAV_SOCKET_CONNECTION_TYPE_TCP_UDP
+ * @description Standard TCP/UDP socket connection (protocol set via Protocol field)
+ */
+constant integer NAV_SOCKET_CONNECTION_TYPE_TCP_UDP = 1
+
+/**
+ * @constant NAV_SOCKET_CONNECTION_TYPE_SSH
+ * @description Secure Shell (SSH) socket connection
+ */
+constant integer NAV_SOCKET_CONNECTION_TYPE_SSH = 2
+
+/**
+ * @constant NAV_SOCKET_CONNECTION_TYPE_TLS
+ * @description Transport Layer Security (TLS) socket connection
+ */
+constant integer NAV_SOCKET_CONNECTION_TYPE_TLS = 3
+
+
+/**
  * @section Socket Error Constants
  * @description Error codes returned by socket operations
  */
@@ -181,6 +205,63 @@ constant long NAV_SOCKET_CONNECTION_INTERVAL_BASE_DELAY = 5000          // 5 sec
 #IF_NOT_DEFINED NAV_SOCKET_CONNECTION_INTERVAL_MAX_DELAY
 constant long NAV_SOCKET_CONNECTION_INTERVAL_MAX_DELAY = 300000         // 5 minutes
 #END_IF
+
+
+DEFINE_TYPE
+
+/**
+ * @struct _NAVSocketConnectionOptions
+ * @description Options structure for initializing a socket connection
+ *
+ * @property {char[NAV_MAX_CHARS]} Id - Identifier for the connection (used in logging). If empty, automatically set to device string (e.g., "0:3:0")
+ * @property {dev} Device - Physical device for the socket
+ * @property {integer} ConnectionType - Connection type (NAV_SOCKET_CONNECTION_TYPE_TCP_UDP/SSH/TLS)
+ * @property {integer} Protocol - Protocol type (IP_TCP, IP_UDP, IP_UDP_2WAY) - only for TCP_UDP connections
+ * @property {integer} Port - Port number for the connection
+ * @property {integer} TlsMode - TLS mode (TLS_VALIDATE_CERTIFICATE or TLS_IGNORE_CERTIFICATE_ERRORS) - only for TLS connections
+ * @property {char[]} SshUsername - SSH username for authentication - only for SSH connections
+ * @property {char[]} SshPassword - SSH password for authentication - only for SSH connections
+ * @property {char[]} SshPrivateKey - Path to SSH private key file - only for SSH connections
+ * @property {char[]} SshPrivateKeyPassphrase - Passphrase for SSH private key - only for SSH connections
+ * @property {long} TimelineId - Timeline ID for connection maintenance
+ *
+ * @example
+ * // TCP connection with automatic Id (will use device string "0:3:0")
+ * stack_var _NAVSocketConnectionOptions options
+ * options.Device = dvPort
+ * options.ConnectionType = NAV_SOCKET_CONNECTION_TYPE_TCP_UDP
+ * options.Protocol = IP_TCP
+ * options.Port = 23
+ * options.TimelineId = TL_SOCKET_MAINTAIN
+ * NAVSocketConnectionInit(connection, options)
+ *
+ * // TCP connection with custom Id for multiple instances
+ * options.Id = 'Camera 1'
+ * options.Device = dvCamera1
+ * options.Port = 80
+ * NAVSocketConnectionInit(connection, options)
+ *
+ * // SSH connection
+ * options.Device = dvSSH
+ * options.ConnectionType = NAV_SOCKET_CONNECTION_TYPE_SSH
+ * options.Port = 22
+ * options.SshUsername = 'admin'
+ * options.SshPassword = 'password'
+ * NAVSocketConnectionInit(connection, options)
+ */
+struct _NAVSocketConnectionOptions {
+    char Id[NAV_MAX_CHARS]
+    dev Device
+    integer ConnectionType
+    integer Protocol
+    integer Port
+    integer TlsMode
+    char SshUsername[NAV_MAX_CHARS]
+    char SshPassword[NAV_MAX_CHARS]
+    char SshPrivateKey[NAV_MAX_CHARS]
+    char SshPrivateKeyPassphrase[NAV_MAX_CHARS]
+    long TimelineId
+}
 
 
 #END_IF // __NAV_FOUNDATION_SOCKETUTILS_H__

@@ -534,7 +534,7 @@ define_function sinteger LoadEncryptedConfig(char masterPassword[], ConfigData c
     }
 
     // Convert hex encrypted data back to binary
-    set_length_array(encrypted, length_string(encryptedHex) / 2)
+    set_length_array(encrypted, length_array(encryptedHex) / 2)
     for (i = 0; i < length_array(encrypted); i++) {
         stack_var char hexPair[3]
         stack_var integer value
@@ -588,7 +588,7 @@ define_function sinteger LoadEncryptedConfig(char masterPassword[], ConfigData c
 
     // Extract auth token
     pos = nextPos + 1
-    config.authToken = mid_string(decrypted, pos, length_string(decrypted)-pos+1)
+    config.authToken = mid_string(decrypted, pos, length_array(decrypted)-pos+1)
 
     NAVErrorLog(NAV_LOG_LEVEL_INFO, 'Encrypted configuration loaded successfully')
     return NAV_AES_SUCCESS
@@ -646,23 +646,19 @@ define_function TestConfigEncryption() {
 ## Security Considerations
 
 1. **ECB Mode Limitations**
-
     - ECB mode encrypts identical plaintext blocks to identical ciphertext blocks
     - For better security with multi-block data, CBC mode should be used (planned for future)
 
 2. **Key Management**
-
     - Never hard-code encryption keys in production code
     - Use password-based key derivation when possible
     - Store derived keys securely and never expose them
 
 3. **Password Strength**
-
     - Use strong passwords (min. 12 characters) with mix of numbers, letters, symbols
     - Consider using a passphrase (multiple words) for better security and memorability
 
 4. **Salt Handling**
-
     - Always use a unique salt for each encryption operation
     - Store the salt alongside the ciphertext (salt is not a secret)
     - Salt should be at least 16 random bytes
@@ -702,7 +698,6 @@ Base64 is often used to represent binary data as ASCII text.
 The examples in this document reference these additional NAVFoundation modules:
 
 - [NAVFoundation.Logging.axi](../Logging/NAVFoundation.Logging.md) - Provides logging utilities including:
-
     - `NAVErrorLog()` - Log errors and other messages
     - `NAVDebugLog()` - Log debug information
 

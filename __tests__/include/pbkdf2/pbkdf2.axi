@@ -1,19 +1,14 @@
-#DEFINE TESTING_NAVPBKDF2HMACSHA1
 #DEFINE TESTING_NAVPBKDF2F
 #DEFINE TESTING_NAVPBKDF2SHA1
 #DEFINE TESTING_NAVPBKDF2GETRANDOMSALT
-#DEFINE TESTING_NAVPBKDF2BENCHMARKS  // Uncomment to run benchmarks (takes longer)
-// #DEFINE NAV_KDF_PRODUCTION_BENCHMARKS
+// #DEFINE TESTING_NAVPBKDF2BENCHMARKS  // Uncomment to run benchmarks (takes longer)
 #include 'NAVFoundation.Core.axi'
+#include 'NAVFoundation.Assert.axi'
+#include 'NAVFoundation.Testing.axi'
 #include 'NAVFoundation.Cryptography.Pbkdf2.axi'
 
 // Include shared utilities for all PBKDF2 tests
 #include 'NAVPbkdf2Shared.axi'
-
-// Include individual test files with updated names
-#IF_DEFINED TESTING_NAVPBKDF2HMACSHA1
-#include 'NAVPbkdf2HmacSha1.axi'
-#END_IF
 
 #IF_DEFINED TESTING_NAVPBKDF2F
 #include 'NAVPbkdf2F.axi'
@@ -32,10 +27,6 @@
 #END_IF
 
 define_function RunPbkdf2Tests() {
-    #IF_DEFINED TESTING_NAVPBKDF2HMACSHA1
-    RunNAVPbkdf2HmacSha1Tests()
-    #END_IF
-
     #IF_DEFINED TESTING_NAVPBKDF2F
     RunNAVPbkdf2FTests()
     #END_IF

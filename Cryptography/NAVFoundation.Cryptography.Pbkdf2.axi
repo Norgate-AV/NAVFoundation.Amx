@@ -36,90 +36,12 @@ SOFTWARE.
 
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.Cryptography.Pbkdf2.h.axi'
-#include 'NAVFoundation.Cryptography.Sha1.axi'
+#include 'NAVFoundation.Cryptography.Hmac.axi'
 
 /*
  * PBKDF2 implementation using HMAC-SHA1 as the pseudorandom function (PRF)
  * Based on RFC 2898: https://tools.ietf.org/html/rfc2898
  */
-
-/**
- * @function NAVPbkdf2HmacSha1
- * @internal
- * @description Computes HMAC-SHA1 digest using the provided key and message.
- * HMAC is defined as H(K XOR opad, H(K XOR ipad, message)) where H is SHA-1.
- *
- * @param {char[]} key - Secret key for HMAC operation
- * @param {char[]} message - Message to authenticate
- *
- * @returns {char[20]} 20-byte HMAC-SHA1 digest
- *
- * @note Internal function used by PBKDF2 implementation
- */
-define_function char[20] NAVPbkdf2HmacSha1(char key[], char message[]) {
-    stack_var char innerKey[64]
-    stack_var char outerKey[64]
-    stack_var char innerResult[20]
-    stack_var integer i
-    stack_var char innerPad[64]
-    stack_var char outerPad[64]
-    stack_var char combinedInner[NAV_MAX_BUFFER]
-    stack_var char combinedOuter[NAV_MAX_BUFFER]
-
-    // Initialize pads with 0x36 for inner and 0x5C for outer
-    for (i = 1; i <= 64; i++) {
-        innerPad[i] = $36
-        outerPad[i] = $5C
-    }
-
-    // If key is longer than 64 bytes, hash it
-    if (length_array(key) > 64) {
-        key = NAVSha1GetHash(key)
-    }
-
-    // Prepare the inner and outer keys
-    for (i = 1; i <= length_array(key); i++) {
-        innerKey[i] = key[i] ^ innerPad[i]
-        outerKey[i] = key[i] ^ outerPad[i]
-    }
-
-    // If key is shorter than 64 bytes, pad with zeros (already XORed with pads)
-    for (i = length_array(key) + 1; i <= 64; i++) {
-        innerKey[i] = innerPad[i]
-        outerKey[i] = outerPad[i]
-    }
-
-    // Set proper lengths
-    set_length_array(innerKey, 64)
-    set_length_array(outerKey, 64)
-
-    // Inner hash: SHA1(innerKey || message)
-    set_length_array(combinedInner, 64 + length_array(message))
-
-    for (i = 1; i <= 64; i++) {
-        combinedInner[i] = innerKey[i]
-    }
-
-    for (i = 1; i <= length_array(message); i++) {
-        combinedInner[64 + i] = message[i]
-    }
-
-    innerResult = NAVSha1GetHash(combinedInner)
-
-    // Outer hash: SHA1(outerKey || innerResult)
-    set_length_array(combinedOuter, 64 + 20)
-
-    for (i = 1; i <= 64; i++) {
-        combinedOuter[i] = outerKey[i]
-    }
-
-    for (i = 1; i <= 20; i++) {
-        combinedOuter[64 + i] = innerResult[i]
-    }
-
-    return NAVSha1GetHash(combinedOuter)
-}
-
 
 /**
  * @function NAVPbkdf2F
@@ -165,7 +87,7 @@ define_function char[20] NAVPbkdf2F(char password[],
     }
 
     // First iteration
-    u = NAVPbkdf2HmacSha1(password, saltWithIndex)
+    u = NAVHmacSha1(password, saltWithIndex)
     set_length_array(u, 20) // Ensure proper length
 
     // Initialize result with first hash
@@ -177,7 +99,7 @@ define_function char[20] NAVPbkdf2F(char password[],
 
     // Remaining iterations
     for (i = 2; i <= iterations; i++) {
-        u = NAVPbkdf2HmacSha1(password, u)
+        u = NAVHmacSha1(password, u)
         set_length_array(u, 20) // Ensure proper length
 
         // XOR result with u

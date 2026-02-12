@@ -144,7 +144,9 @@ define_function char[NAV_MAX_BUFFER] NAVDeviceToString(dev device) {
 /**
  * @function NAVStringToDevice
  * @public
+ * @deprecated Use NAVParseDevice instead
  * @description Parses a device string and populates a device structure.
+ * This function provides lenient parsing with defaults for backward compatibility.
  *
  * @param {char[]} value - String in D:P:S format to parse
  * @param {dev} device - Device variable to populate (modified in-place)
@@ -155,31 +157,19 @@ define_function char[NAV_MAX_BUFFER] NAVDeviceToString(dev device) {
  * stack_var dev newDevice
  * NAVStringToDevice('10001:1:0', newDevice)  // newDevice will be set to 10001:1:0
  *
- * @note If the string doesn't contain colons, only the device number will be set
+ * @note If parsing fails, sets device.number from atoi and defaults port=1, system=0
+ * @note For strict validation, use NAVParseDevice which returns a boolean
  */
 define_function NAVStringToDevice(char value[], dev device) {
-    stack_var integer colon1
-    stack_var integer colon2
+    // Try strict parsing first
+    if (NAVParseDevice(value, device)) {
+        return
+    }
 
-    // 5001:1:0
+    // Fall back to lenient parsing for backward compatibility
     device.number = atoi(value)
     device.port = 1
     device.system = 0
-
-    colon1 = find_string(value, ':', 1)
-    if (!colon1) {
-        return
-    }
-
-    device.number = atoi(mid_string(value, 1, colon1 - 1))
-
-    colon2 = find_string(value, ':', colon1 + 1)
-    if (!colon2) {
-        return
-    }
-
-    device.port = atoi(mid_string(value, colon1 + 1, colon2 - colon1 - 1))
-    device.system = atoi(mid_string(value, colon2 + 1, length_array(value) - colon2))
 }
 
 
@@ -709,9 +699,32 @@ define_function NAVGetControllerInformation(_NAVController controller) {
 
 
 /**
+ * @function NAVCharIsPrintable
+ * @public
+ * @description Determines if a character represents a printable ASCII character.
+ *
+ * @param {char} c - Character to check
+ *
+ * @returns {char} true if the character is a printable ASCII character, false otherwise
+ *
+ * @example
+ * stack_var char result
+ * result = NAVCharIsPrintable($41)  // 'A', Returns true
+ * result = NAVCharIsPrintable($0D)  // CR, Returns false
+ *
+ * @note Printable characters are in the range 32-126 (0x20-0x7E)
+ */
+define_function char NAVCharIsPrintable(char c) {
+    return (c > $1F && c < $7F)
+}
+
+
+/**
  * @function NAVByteIsHumanReadable
  * @public
+ * @deprecated Use NAVCharIsPrintable instead
  * @description Determines if a byte represents a human-readable ASCII character.
+ * This is an alias for NAVCharIsPrintable.
  *
  * @param {char} byte - Byte to check
  *
@@ -725,7 +738,7 @@ define_function NAVGetControllerInformation(_NAVController controller) {
  * @note Human-readable bytes are in the range 32-126 (0x20-0x7E)
  */
 define_function char NAVByteIsHumanReadable(char byte) {
-    return (byte > $1F && byte < $7F);
+    return NAVCharIsPrintable(byte)
 }
 
 
@@ -760,7 +773,7 @@ define_function char[NAV_MAX_BUFFER] NAVFormatHex(char value[]) {
     for(x = 1; x <= length_array(value); x++) {
         byte = value[x];
 
-        if(NAVByteIsHumanReadable(byte)) {
+        if(NAVCharIsPrintable(byte)) {
             result = "result, byte"
         }
         else {
@@ -786,29 +799,125 @@ define_function char[NAV_MAX_BUFFER] NAVFormatHex(char value[]) {
  *
  * @note Follows UUID v4 format with fixed version (4) and variant (8-B)
  */
-define_function char[NAV_MAX_CHARS] NAVGetNewGuid() {
+define_function char[NAV_GUID_LENGTH] NAVGetNewGuid() {
     stack_var integer x
-    stack_var integer length
-    stack_var integer random
-    stack_var char byte
-    stack_var char result[NAV_MAX_CHARS]
+    stack_var char result[NAV_GUID_LENGTH]
 
-    length = length_array(NAV_GUID)
+    for (x = 1; x <= NAV_GUID_LENGTH; x++) {
+        stack_var integer random
+        stack_var char byte
 
-    for (x = 1; x <= length; x++) {
         random = (random_number(65535) % 16) + 1
 
         switch (NAV_GUID[x]) {
             case 'x': { byte = NAV_GUID_HEX[random] }
-            case 'y': { byte = NAV_GUID_HEX[random] & $03 | $08 }
+            case 'y': { byte = NAV_GUID_HEX[((random & $03) | $08) + 1] }
             case '-': { byte = '-' }
             case '4': { byte = '4' }
         }
 
-        result = "result, byte"
+        if (byte > 0) {
+            result = "result, byte"
+        }
     }
 
     return result
+}
+
+
+/**
+ * @function NAVGetNewUuid
+ * @public
+ * @description Generates a new random UUID (GUID) in standard format.
+ *
+ * @returns {char[]} Generated UUID string in the format "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+ *
+ * @example
+ * stack_var char uuid[NAV_MAX_CHARS]
+ * uuid = NAVGetNewUuid()  // Returns something like "b4e12e58-c720-4b9d-a7f3-21a8a6490c14"
+ */
+define_function char[NAV_GUID_LENGTH] NAVGetNewUuid() {
+    return NAVGetNewGuid()
+}
+
+
+/**
+ * @function NAVParseDevice
+ * @public
+ * @description Parses a device string in D:P:S format and populates a device structure with validation.
+ *
+ * @param {char[]} value - Device string in "D:P:S" format (e.g., "5001:1:0")
+ * @param {dev} device - Device structure to populate (modified in-place)
+ *
+ * @returns {char} true if parsing succeeded, false if validation failed
+ *
+ * @example
+ * stack_var dev myDevice
+ * if (NAVParseDevice('5001:1:0', myDevice)) {
+ *     // Device successfully parsed
+ *     send_command myDevice, 'POWER=ON'
+ * }
+ *
+ * @note Validates format and ensures all three components (device:port:system) are present
+ */
+define_function char NAVParseDevice(char value[], dev device) {
+    stack_var integer length
+    stack_var integer colon1
+    stack_var integer colon2
+    stack_var char number[5]
+    stack_var char port[3]
+    stack_var char system[3]
+    stack_var integer x
+
+    length = length_array(value)
+
+    // Minimum valid format is "D:P:S" (5 chars: 0:1:0)
+    if (length < 5) {
+        return false
+    }
+
+    // Find first colon
+    colon1 = find_string(value, ':', 1)
+    if (!colon1 || colon1 == 1) {
+        return false  // No colon found or empty device number
+    }
+
+    // Find second colon
+    colon2 = find_string(value, ':', colon1 + 1)
+    if (!colon2 || colon2 == colon1 + 1 || colon2 == length) {
+        return false  // No second colon, empty port, or empty system
+    }
+
+    // Extract components
+    number = mid_string(value, 1, colon1 - 1)
+    port = mid_string(value, colon1 + 1, colon2 - colon1 - 1)
+    system = mid_string(value, colon2 + 1, length - colon2)
+
+    // Validate each component contains only digits
+    for (x = 1; x <= length_array(number); x++) {
+        if (number[x] < '0' || number[x] > '9') {
+            return false
+        }
+    }
+
+    for (x = 1; x <= length_array(port); x++) {
+        if (port[x] < '0' || port[x] > '9') {
+            return false
+        }
+    }
+
+    for (x = 1; x <= length_array(system); x++) {
+        if (system[x] < '0' || system[x] > '9') {
+            return false
+        }
+    }
+
+    // Parse values
+    device.number = atoi(number)
+    device.port = atoi(port)
+    device.system = atoi(system)
+
+    return true
 }
 
 

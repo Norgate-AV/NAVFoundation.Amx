@@ -150,7 +150,7 @@
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
             <TransSerial>COM1,115200,8,None,1,None</TransSerial>
-            <TransTCPIPEx>192.168.10.83|1319|1|DVX-2250||</TransTCPIPEx>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
             <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
             <TransUSBEx>|||||</TransUSBEx>
             <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
@@ -216,7 +216,7 @@
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
             <TransSerial>COM1,115200,8,None,1,None</TransSerial>
-            <TransTCPIPEx>192.168.10.37|1319|1|NX-2200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
             <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
             <TransUSBEx>|||||</TransUSBEx>
             <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
@@ -348,7 +348,7 @@
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
             <TransSerial>COM1,115200,8,None,1,None</TransSerial>
-            <TransTCPIPEx>192.168.10.83|1319|1|DVX-2250||</TransTCPIPEx>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
             <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
             <TransUSBEx>|||||</TransUSBEx>
             <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
@@ -502,7 +502,7 @@
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
             <TransSerial>COM1,115200,8,None,1,None</TransSerial>
-            <TransTCPIPEx>192.168.10.37|1319|1|NX-2200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
             <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
             <TransUSBEx>|||||</TransUSBEx>
             <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
@@ -766,7 +766,7 @@
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
             <TransSerial>COM1,115200,8,None,1,None</TransSerial>
-            <TransTCPIPEx>192.168.10.37|1319|1|NX-2200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
             <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
             <TransUSBEx>|||||</TransUSBEx>
             <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
@@ -810,7 +810,7 @@
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
             <TransSerial>COM1,115200,8,None,1,None</TransSerial>
-            <TransTCPIPEx>192.168.10.37|1319|1|NX-2200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
             <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
             <TransUSBEx>|||||</TransUSBEx>
             <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
@@ -849,7 +849,7 @@
                 <Comments></Comments>
             </File>
         </System>
-        <System IsActive="true" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
             <Identifier>WebSocket</Identifier>
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
@@ -873,6 +873,248 @@
             <File CompileType="Netlinx" Type="MasterSrc">
                 <Identifier>websocket</Identifier>
                 <FilePathName>src\websocket.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>Json</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>json</Identifier>
+                <FilePathName>src\json.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>CloudLog</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.37|1319|1|NX-2200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>cloudlog</Identifier>
+                <FilePathName>src\cloudlog.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>Core</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>core</Identifier>
+                <FilePathName>src\core.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>SocketUtils</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>socket-utils</Identifier>
+                <FilePathName>src\socket-utils.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>Xml</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>xml</Identifier>
+                <FilePathName>src\xml.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>Yaml</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>yaml</Identifier>
+                <FilePathName>src\yaml.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>Toml</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>toml</Identifier>
+                <FilePathName>src\toml.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>Hmac</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>hmac</Identifier>
+                <FilePathName>src\hmac.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>Base64Url</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>base64url</Identifier>
+                <FilePathName>src\base64url.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>Jwt</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>jwt</Identifier>
+                <FilePathName>src\jwt.axs</FilePathName>
+                <Comments></Comments>
+            </File>
+        </System>
+        <System IsActive="true" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+            <Identifier>Sha384</Identifier>
+            <SysID>0</SysID>
+            <TransTCPIP>0.0.0.0</TransTCPIP>
+            <TransSerial>COM1,115200,8,None,1,None</TransSerial>
+            <TransTCPIPEx>192.168.10.38|1319|1|NX-1200|ZGFtaWVu|QXZtYWNoMW5lcyE3MjQ5</TransTCPIPEx>
+            <TransSerialEx>COM1|38400|8|None|1|None||</TransSerialEx>
+            <TransUSBEx>|||||</TransUSBEx>
+            <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
+            <VirtualNetLinxMasterFlag>false</VirtualNetLinxMasterFlag>
+            <VNMSystemID>1</VNMSystemID>
+            <VNMIPAddress>10.0.0.1</VNMIPAddress>
+            <VNMMaskAddress>255.255.255.0</VNMMaskAddress>
+            <UserName></UserName>
+            <Password></Password>
+            <Comments></Comments>
+            <File CompileType="Netlinx" Type="MasterSrc">
+                <Identifier>sha384</Identifier>
+                <FilePathName>src\sha384.axs</FilePathName>
                 <Comments></Comments>
             </File>
         </System>

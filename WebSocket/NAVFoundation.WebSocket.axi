@@ -1822,6 +1822,8 @@ define_function NAVWebSocketProcessBuffer(_NAVWebSocket ws) {
                     #END_IF
 
                     ws.RxBuffer.State = NAV_WEBSOCKET_STATE_CLOSED
+                    ws.IsConnected = false
+                    NAVWebSocketCloseSocket(ws)
                     break
                 }
 
@@ -1866,6 +1868,10 @@ define_function NAVWebSocketProcessBuffer(_NAVWebSocket ws) {
                     }
                     #END_IF
 
+                    // Force close after protocol error - don't wait for server
+                    ws.RxBuffer.State = NAV_WEBSOCKET_STATE_CLOSED
+                    ws.IsConnected = false
+                    NAVWebSocketCloseSocket(ws)
                     break
                 }
 
@@ -1887,6 +1893,9 @@ define_function NAVWebSocketProcessBuffer(_NAVWebSocket ws) {
                         if (!ws.RxBuffer.IsFragmenting) {
                             // Continuation frame without initial fragment - protocol error
                             NAVWebSocketSendClose(ws, NAV_WEBSOCKET_CLOSE_PROTOCOL_ERROR, 'Unexpected continuation frame')
+                            ws.RxBuffer.State = NAV_WEBSOCKET_STATE_CLOSED
+                            ws.IsConnected = false
+                            NAVWebSocketCloseSocket(ws)
                             break
                         }
 
@@ -1965,6 +1974,9 @@ define_function NAVWebSocketProcessBuffer(_NAVWebSocket ws) {
                             if (ws.RxBuffer.IsFragmenting) {
                                 // Already fragmenting - protocol error
                                 NAVWebSocketSendClose(ws, NAV_WEBSOCKET_CLOSE_PROTOCOL_ERROR, 'Interleaved fragments')
+                                ws.RxBuffer.State = NAV_WEBSOCKET_STATE_CLOSED
+                                ws.IsConnected = false
+                                NAVWebSocketCloseSocket(ws)
                                 break
                             }
 
@@ -1998,6 +2010,9 @@ define_function NAVWebSocketProcessBuffer(_NAVWebSocket ws) {
                             if (ws.RxBuffer.IsFragmenting) {
                                 // Received non-continuation frame while fragmenting - protocol error
                                 NAVWebSocketSendClose(ws, NAV_WEBSOCKET_CLOSE_PROTOCOL_ERROR, 'Expected continuation frame')
+                                ws.RxBuffer.State = NAV_WEBSOCKET_STATE_CLOSED
+                                ws.IsConnected = false
+                                NAVWebSocketCloseSocket(ws)
                                 break
                             }
 
@@ -2066,9 +2081,24 @@ define_function NAVWebSocketProcessBuffer(_NAVWebSocket ws) {
                     }
 
                     case NAV_WEBSOCKET_OPCODE_PING: {
-                        // Auto-respond with pong
-                        if (NAVWebSocketBuildPongFrame(parseResult.Frame.Payload, NAV_WEBSOCKET_UNMASKED, pongFrame)) {
+                        // Auto-respond with pong (RFC 6455 §5.3: client MUST mask all frames sent to server)
+                        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                                   __NAV_FOUNDATION_WEBSOCKET__,
+                                                   'NAVWebSocketProcessBuffer',
+                                                   "'Received PING frame, payload length: ', itoa(parseResult.Frame.PayloadLength)")
+
+                        if (NAVWebSocketBuildPongFrame(parseResult.Frame.Payload, NAV_WEBSOCKET_MASKED, pongFrame)) {
+                            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                                       __NAV_FOUNDATION_WEBSOCKET__,
+                                                       'NAVWebSocketProcessBuffer',
+                                                       "'Sending PONG response, frame length: ', itoa(length_array(pongFrame))")
                             NAVWebSocketSendFrame(ws.Device, pongFrame)
+                        }
+                        else {
+                            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                                       __NAV_FOUNDATION_WEBSOCKET__,
+                                                       'NAVWebSocketProcessBuffer',
+                                                       'Failed to build PONG frame')
                         }
                     }
 
@@ -2094,6 +2124,10 @@ define_function NAVWebSocketProcessBuffer(_NAVWebSocket ws) {
                         }
                         #END_IF
 
+                        // Force close after protocol error
+                        ws.RxBuffer.State = NAV_WEBSOCKET_STATE_CLOSED
+                        ws.IsConnected = false
+                        NAVWebSocketCloseSocket(ws)
                         break
                     }
                 }

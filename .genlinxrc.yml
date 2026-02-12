@@ -20,6 +20,8 @@ build:
       - ./Int64
       - ./InterModuleApi
       - ./Jsmn
+      - ./Json
+      - ./Jwt
       - ./Lexer
       - ./List
       - ./LogicEngine
@@ -38,10 +40,13 @@ build:
       - ./StringUtils
       - ./Testing
       - ./TimelineUtils
+      - ./Toml
       - ./Tui
       - ./UIUtils
       - ./Url
       - ./WebSocket
+      - ./Xml
+      - ./Yaml
       - ./__tests__/include/aes128
       - ./__tests__/include/hash-table
       - ./__tests__/include/path-utils
@@ -55,6 +60,7 @@ build:
       - ./__tests__/include/assert
       - ./__tests__/include/sha1
       - ./__tests__/include/sha512
+      - ./__tests__/include/sha384
       - ./__tests__/include/sha256
       - ./__tests__/include/md5
       - ./__tests__/include/base64
@@ -78,3 +84,13 @@ build:
       - ./__tests__/include/net-utils
       - ./__tests__/include/list
       - ./__tests__/include/websocket
+      - ./__tests__/include/json
+      - ./__tests__/include/cloudlog
+      - ./__tests__/include/core
+      - ./__tests__/include/socket-utils
+      - ./__tests__/include/xml
+      - ./__tests__/include/yaml
+      - ./__tests__/include/toml
+      - ./__tests__/include/hmac
+      - ./__tests__/include/base64url
+      - ./__tests__/include/jwt

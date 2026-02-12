@@ -5,7 +5,7 @@ PROGRAM_NAME='NAVByteToBitArray'
 
 DEFINE_TYPE
 
-structure _NAVByteToBitArrayTest {
+struct _NAVByteToBitArrayTest {
     char value
     char expected[8]
 }

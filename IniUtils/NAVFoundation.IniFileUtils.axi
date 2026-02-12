@@ -36,7 +36,7 @@ SOFTWARE.
 
 #include 'NAVFoundation.IniFileLexer.axi'
 #include 'NAVFoundation.IniFileParser.axi'
-#include 'NAVFoundation.Regex.axi'
+#include 'NAVFoundation.StringUtils.axi'
 
 
 (***********************************************************)
@@ -314,7 +314,7 @@ define_function char NAVIniFileHasKey(_NAVIniFile iniFile, char dotPath[]) {
  */
 define_function integer NAVIniFileGetIntegerValue(_NAVIniFile iniFile, char dotPath[], integer defaultValue) {
     stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
-    stack_var integer valueInt
+    stack_var integer result
 
     if (!NAVIniFileHasKey(iniFile, dotPath)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -330,11 +330,11 @@ define_function integer NAVIniFileGetIntegerValue(_NAVIniFile iniFile, char dotP
         return defaultValue
     }
 
-    // Trim whitespace and validate it's a valid integer
+    // Trim whitespace and parse as integer
     value = NAVTrimString(value)
 
-    if (NAVRegexTest('/^\d+$/', value)) {
-        return atoi(value)
+    if (NAVParseInteger(value, result)) {
+        return result
     }
 
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -370,6 +370,7 @@ define_function integer NAVIniFileGetIntegerValue(_NAVIniFile iniFile, char dotP
  */
 define_function sinteger NAVIniFileGetSignedIntegerValue(_NAVIniFile iniFile, char dotPath[], sinteger defaultValue) {
     stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+    stack_var sinteger result
 
     if (!NAVIniFileHasKey(iniFile, dotPath)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -385,11 +386,11 @@ define_function sinteger NAVIniFileGetSignedIntegerValue(_NAVIniFile iniFile, ch
         return defaultValue
     }
 
-    // Trim whitespace and validate it's a valid signed integer
+    // Trim whitespace and parse as signed integer
     value = NAVTrimString(value)
 
-    if (NAVRegexTest('/^[+-]?\d+$/', value)) {
-        return atoi(value)
+    if (NAVParseSignedInteger(value, result)) {
+        return result
     }
 
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -425,6 +426,7 @@ define_function sinteger NAVIniFileGetSignedIntegerValue(_NAVIniFile iniFile, ch
  */
 define_function long NAVIniFileGetLongValue(_NAVIniFile iniFile, char dotPath[], long defaultValue) {
     stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+    stack_var long result
 
     if (!NAVIniFileHasKey(iniFile, dotPath)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -440,11 +442,11 @@ define_function long NAVIniFileGetLongValue(_NAVIniFile iniFile, char dotPath[],
         return defaultValue
     }
 
-    // Trim whitespace and validate it's a valid long integer
+    // Trim whitespace and parse as long integer
     value = NAVTrimString(value)
 
-    if (NAVRegexTest('/^\d+$/', value)) {
-        return type_cast(atol(value))
+    if (NAVParseLong(value, result)) {
+        return result
     }
 
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -480,6 +482,7 @@ define_function long NAVIniFileGetLongValue(_NAVIniFile iniFile, char dotPath[],
  */
 define_function slong NAVIniFileGetSignedLongValue(_NAVIniFile iniFile, char dotPath[], slong defaultValue) {
     stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+    stack_var slong result
 
     if (!NAVIniFileHasKey(iniFile, dotPath)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -495,11 +498,11 @@ define_function slong NAVIniFileGetSignedLongValue(_NAVIniFile iniFile, char dot
         return defaultValue
     }
 
-    // Trim whitespace and validate it's a valid signed long integer
+    // Trim whitespace and parse as signed long integer
     value = NAVTrimString(value)
 
-    if (NAVRegexTest('/^[+-]?\d+$/', value)) {
-        return atol(value)
+    if (NAVParseSignedLong(value, result)) {
+        return result
     }
 
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -535,6 +538,7 @@ define_function slong NAVIniFileGetSignedLongValue(_NAVIniFile iniFile, char dot
  */
 define_function float NAVIniFileGetFloatValue(_NAVIniFile iniFile, char dotPath[], float defaultValue) {
     stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+    stack_var float result
 
     if (!NAVIniFileHasKey(iniFile, dotPath)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -550,12 +554,11 @@ define_function float NAVIniFileGetFloatValue(_NAVIniFile iniFile, char dotPath[
         return defaultValue
     }
 
-    // Trim whitespace and validate it's a valid float
+    // Trim whitespace and parse as float
     value = NAVTrimString(value)
 
-    // Allow formats: 5, 5.0, .5, +5.0, -.5
-    if (NAVRegexTest('/^[+-]?(\d+(\.\d*)?|\.\d+)$/', value)) {
-        return atof(value)
+    if (NAVParseFloat(value, result)) {
+        return result
     }
 
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -589,6 +592,7 @@ define_function float NAVIniFileGetFloatValue(_NAVIniFile iniFile, char dotPath[
  */
 define_function char NAVIniFileGetBooleanValue(_NAVIniFile iniFile, char dotPath[], char defaultValue) {
     stack_var char value[NAV_INI_PARSER_MAX_VALUE_LENGTH]
+    stack_var char result
 
     if (!NAVIniFileHasKey(iniFile, dotPath)) {
         NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
@@ -604,9 +608,9 @@ define_function char NAVIniFileGetBooleanValue(_NAVIniFile iniFile, char dotPath
         return defaultValue
     }
 
-    // Validate it's a recognized boolean value, then convert
-    if (NAVRegexTest('/^(1|true|yes|on|0|false|no|off)$/i', value)) {
-        return NAVStringToBoolean(value)
+    // Parse as boolean
+    if (NAVParseBoolean(value, result)) {
+        return result
     }
 
     NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,

@@ -366,4 +366,39 @@ define_function integer NAVBcdToBinary(char value) {
 }
 
 
+/**
+ * @function NAVBinaryCountLeadingZeros
+ * @public
+ * @description Counts the number of leading zero bits in a 32-bit integer.
+ *
+ * @param {long} value - The value to analyze
+ *
+ * @returns {integer} Number of leading zeros (0-32)
+ *
+ * @example
+ * stack_var long value
+ * stack_var integer leadingZeros
+ *
+ * value = $0000000F  // Binary: 00000000 00000000 00000000 00001111
+ * leadingZeros = NAVBinaryCountLeadingZeros(value)  // Returns 28
+ *
+ * value = $80000000  // Binary: 10000000 00000000 00000000 00000000
+ * leadingZeros = NAVBinaryCountLeadingZeros(value)  // Returns 0
+ *
+ * value = $00000000  // Binary: 00000000 00000000 00000000 00000000
+ * leadingZeros = NAVBinaryCountLeadingZeros(value)  // Returns 32
+ */
+define_function integer NAVBinaryCountLeadingZeros(long value) {
+    stack_var integer count
+
+    count = 0
+
+    while (count < 32 && (value & (1 << (31 - count))) == 0) {
+        count = count + 1
+    }
+
+    return count
+}
+
+
 #END_IF // __NAV_FOUNDATION_BINARYUTILS__

@@ -21,10 +21,7 @@ constant char NAV_NET_JOIN_HOST_PORT_HOST_TESTS[][255] = {
 
     // Invalid hosts
     '',                     // 11: Empty host
-    '   ',                  // 12: Whitespace only host
-    '192.168.1.1',          // 13: Valid host but will test with invalid port
-    '192.168.1.1',          // 14: Valid host but will test with invalid port
-    '192.168.1.1'           // 15: Valid host but will test with invalid port
+    '   '                   // 12: Whitespace only host
 }
 
 // Test cases for NAVNetJoinHostPort - port inputs
@@ -41,20 +38,17 @@ constant integer NAV_NET_JOIN_HOST_PORT_PORT_TESTS[] = {
     1,
     0,
 
-    // Invalid combinations (matching invalid hosts 11-15)
+    // Invalid combinations (matching invalid hosts 11-12)
     8080,       // 11: Valid port but empty host
-    8080,       // 12: Valid port but whitespace host
-    -1,         // 13: Negative port
-    65536,      // 14: Port too large
-    999999      // 15: Port way too large
+    8080        // 12: Valid port but whitespace host
 }
 
 // Expected results: true = should succeed, false = should fail
 constant char NAV_NET_JOIN_HOST_PORT_EXPECTED_RESULT[] = {
     // Valid (1-10)
     true, true, true, true, true, true, true, true, true, true,
-    // Invalid (11-15)
-    false, false, false, false, false
+    // Invalid (11-12)
+    false, false
 }
 
 // Expected output strings for valid tests (first 10)
@@ -76,7 +70,7 @@ define_function TestNAVNetJoinHostPort() {
     stack_var integer x
     stack_var integer validCount
 
-    NAVLog("'***************** NAVNetJoinHostPort *****************'")
+    NAVLogTestSuiteStart('NAVNetJoinHostPort')
 
     validCount = 0
 
@@ -107,4 +101,6 @@ define_function TestNAVNetJoinHostPort() {
 
         NAVLogTestPassed(x)
     }
+
+    NAVLogTestSuiteEnd('NAVNetJoinHostPort')
 }

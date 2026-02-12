@@ -153,7 +153,7 @@ This example demonstrates a complete system for secure password storage and veri
 ```netlinx
 // Structure to store a password hash with its salt
 define_type
-structure PasswordHash {
+struct PasswordHash {
     char salt[16]
     char key[32]
 }

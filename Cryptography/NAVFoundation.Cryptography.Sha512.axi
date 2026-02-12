@@ -268,6 +268,8 @@ define_function integer NAVSha512Reset(_NAVSha512Context context) {
     return SHA512_SUCCESS
 }
 
+#IF_NOT_DEFINED __NAV_FOUNDATION_CRYPTOGRAPHY_INT64_DEBUG_STRING__
+#DEFINE __NAV_FOUNDATION_CRYPTOGRAPHY_INT64_DEBUG_STRING__
 /**
  * @function NAVInt64ToDebugString
  * @internal
@@ -280,6 +282,7 @@ define_function integer NAVSha512Reset(_NAVSha512Context context) {
 define_function char[32] NAVInt64ToDebugString(_NAVInt64 val) {
     return "'$', format('%08x', val.Hi), format('%08x', val.Lo)"
 }
+#END_IF
 
 /**
  * @function NAVSha512Result

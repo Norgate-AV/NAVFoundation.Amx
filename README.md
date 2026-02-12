@@ -41,7 +41,6 @@ It's feature rich and written in pure NetLinx.
 - Comprehensive utility libraries for common tasks
 - Well-tested and production-ready components
 - Consistent API design across all modules
-- Full compatibility with AMX NetLinx Studio
 - Extensive error handling and logging capabilities
 
 ## Installation :zap:
@@ -50,13 +49,31 @@ This library can be installed using [Scoop](https://scoop.sh/).
 
 ```powershell
 # If you don't have sudo installed - Required to create symlinks in the AMX directory
-scoop install sudo
+scoop install gsudo
 
 # Add the Norgate-AV AMX bucket
 scoop bucket add norgateav-amx https://github.com/Norgate-AV/scoop-norgateav-amx
 
 # Install NAVFoundation.Amx
 sudo scoop install navfoundation-amx
+```
+
+## Usage :rocket:
+
+To use the NAVFoundation.Amx libraries in your NetLinx project, simply include the desired library files in your project.
+
+### Example
+
+To use the `StringUtils` library, you would include it as follows:
+
+```c
+#include 'NAVFoundation.StringUtils.axi'
+```
+
+To use the `ArrayUtils` library, you would include it as follows:
+
+```c
+#include 'NAVFoundation.ArrayUtils.axi'
 ```
 
 ## Documentation :page_facing_up:
@@ -70,6 +87,7 @@ For more detailed guides and documentation, please refer the `README.md` files i
 - [ArrayUtils](./ArrayUtils)
     - Provides utility functions for working with arrays in AMX.
 - [Assert](./Assert)
+    - Provides assertion functions for testing and debugging.
 - [BinaryUtils](./BinaryUtils)
     - Provides functions for binary data manipulation and conversion.
 - [Cryptography](./Cryptography)
@@ -98,7 +116,12 @@ For more detailed guides and documentation, please refer the `README.md` files i
 - [InterModuleApi](./InterModuleApi)
 - [Jsmn](./Jsmn)
     - Provides a JSON parser for AMX.
+- [Json](./Json)
+    - Provides functions for working with JSON data.
+- [Jwt](./Jwt)
+    - Provides functions for working with JSON Web Tokens (JWT).
 - [List](./List)
+    - Provides an array-based list implementation.
 - [LogicEngine](./LogicEngine)
 - [Math](./Math)
     - Provides mathematical functions and utilities.
@@ -107,9 +130,11 @@ For more detailed guides and documentation, please refer the `README.md` files i
 - [NetUtils](./NetUtils)
     - Provides network-related utility functions.
 - [NtpUtils](./NtpUtils)
+    - Provides functions for working with NTP (Network Time Protocol).
 - [PathUtils](./PathUtils)
     - Provides utility functions for file path manipulation.
 - [Queue](./Queue)
+    - Provides an array-based queue implementation.
 - [Regex](./Regex)
     - Provides regular expression matching and manipulation functions.
 - [Redis](./Redis)
@@ -125,12 +150,18 @@ For more detailed guides and documentation, please refer the `README.md` files i
     - Provides utility functions for string manipulation.
 - [TimelineUtils](./TimelineUtils)
     - Provides functions for working with timelines.
+- [Toml](./Toml)
+    - Provides functions for parsing and working with TOML configuration files.
 - [Tui](./Tui)
 - [UIUtils](./UIUtils)
 - [Url](./Url)
     - Provides functions for URL manipulation and encoding.
 - [WebSocket](./WebSocket)
     - Provides a WebSocket client implementation for AMX.
+- [Xml](./Xml)
+    - Provides functions for working with XML data.
+- [Yaml](./Yaml)
+    - Provides functions for working with YAML data.
 
 ## Support :question:
 

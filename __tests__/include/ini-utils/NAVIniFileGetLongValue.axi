@@ -192,12 +192,12 @@ define_function TestLongGetVerification() {
         }
     }
 
-    // Test 5: Invalid format returns default
+    // Test 5: Mixed format with letters - parses first number
     testData = "'invalid_format=123abc456', 10"
     if (NAVIniFileParse(testData, testIni)) {
         result = NAVIniFileGetLongValue(testIni, 'invalid_format', 888888)
-        if (!NAVAssertLongEqual('Invalid Format Test', 888888, result)) {
-            NAVLogTestFailed(5, '888888', itoa(result))
+        if (!NAVAssertLongEqual('Mixed Format Test', 123, result)) {
+            NAVLogTestFailed(5, '123', itoa(result))
         } else {
             NAVLogTestPassed(5)
         }

@@ -195,12 +195,12 @@ define_function TestFloatGetVerification() {
         }
     }
 
-    // Test 5: Invalid format returns default
+    // Test 5: Mixed format with multiple decimals - parses first number
     testData = "'invalid_format=12.34.56', 10"
     if (NAVIniFileParse(testData, testIni)) {
         result = NAVIniFileGetFloatValue(testIni, 'invalid_format', 888.8)
-        if (!NAVAssertFloatEqual('Invalid Format Test', 888.8, result)) {
-            NAVLogTestFailed(5, '888.8', ftoa(result))
+        if (!NAVAssertFloatEqual('Mixed Format Test', 12.34, result)) {
+            NAVLogTestFailed(5, '12.34', ftoa(result))
         } else {
             NAVLogTestPassed(5)
         }

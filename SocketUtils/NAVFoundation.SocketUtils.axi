@@ -36,6 +36,8 @@ SOFTWARE.
 
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.StringUtils.axi'
+#include 'NAVFoundation.TimelineUtils.axi'
+#include 'NAVFoundation.NetUtils.axi'
 #include 'NAVFoundation.SocketUtils.h.axi'
 
 
@@ -50,7 +52,7 @@ SOFTWARE.
  *
  * @example
  * stack_var slong result
- * stack_var char errorMessage[NAV_MAX_BUFFER]
+ * stack_var char errorMessage[50]
  *
  * result = NAVClientSocketOpen(dvTCPClient.PORT, '192.168.1.100', 23, IP_TCP)
  * if (result < 0) {
@@ -58,7 +60,7 @@ SOFTWARE.
  *     NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'Socket error: ', errorMessage")
  * }
  */
-define_function char[NAV_MAX_BUFFER] NAVGetSocketError(slong error) {
+define_function char[50] NAVGetSocketError(slong error) {
     switch (error) {
         case NAV_SOCKET_ERROR_INVALID_SERVER_PORT:          { return 'Invalid server port' }
         case NAV_SOCKET_ERROR_INVALID_PROTOCOL_VALUE:       { return 'Invalid value for protocol' }
@@ -93,12 +95,12 @@ define_function char[NAV_MAX_BUFFER] NAVGetSocketError(slong error) {
  *
  * @example
  * stack_var integer protocol
- * stack_var char protocolName[NAV_MAX_BUFFER]
+ * stack_var char protocolName[50]
  *
  * protocol = IP_TCP
  * protocolName = NAVGetSocketProtocol(protocol)  // Returns 'TCP'
  */
-define_function char[NAV_MAX_BUFFER] NAVGetSocketProtocol(integer protocol) {
+define_function char[50] NAVGetSocketProtocol(integer protocol) {
     switch (protocol) {
         case IP_TCP:        { return 'TCP' }
         case IP_UDP:        { return 'UDP' }
@@ -119,12 +121,12 @@ define_function char[NAV_MAX_BUFFER] NAVGetSocketProtocol(integer protocol) {
  *
  * @example
  * stack_var integer mode
- * stack_var char modeName[NAV_MAX_BUFFER]
+ * stack_var char modeName[50]
  *
  * mode = TLS_VALIDATE_CERTIFICATE
  * modeName = NAVGetTlsSocketMode(mode)  // Returns 'TLS Validate Certificate'
  */
-define_function char[NAV_MAX_BUFFER] NAVGetTlsSocketMode(integer mode) {
+define_function char[50] NAVGetTlsSocketMode(integer mode) {
     switch (mode) {
         case TLS_VALIDATE_CERTIFICATE:      { return 'TLS Validate Certificate' }
         case TLS_IGNORE_CERTIFICATE_ERRORS: { return 'TLS Ignore Certificate Errors' }
@@ -511,6 +513,8 @@ define_function long NAVSocketGetExponentialBackoff(integer attempt,
                                                     long maxDelay) {
     stack_var long interval
     stack_var long jitter
+    stack_var integer exponent
+    stack_var long multiplier
 
     // For first N attempts, use base delay
     if (attempt <= maxRetries) {
@@ -518,15 +522,35 @@ define_function long NAVSocketGetExponentialBackoff(integer attempt,
     }
     else {
         // After N attempts, start exponential backoff
-        // Use native POWER_VALUE function for 2^n calculation
-        interval = baseDelay * power_value(2, attempt - maxRetries)
+        exponent = attempt - maxRetries
 
-        // Add jitter (100-1000ms) to prevent thundering herd
-        jitter = random_number(10) * 100  // 1-10 * 100ms = 100-1000ms
-        interval = interval + jitter
+        // Cap exponent to prevent integer overflow
+        // 2^20 = 1,048,576 - beyond this we'll hit maxDelay anyway
+        if (exponent > 20) {
+            exponent = 20
+        }
 
-        // Cap at maximum delay (after jitter)
-        interval = min_value(interval, maxDelay)
+        // Calculate 2^exponent
+        multiplier = power_value(2, exponent)
+        interval = baseDelay * multiplier
+
+        // If we've already exceeded maxDelay, cap it before adding jitter
+        if (interval > maxDelay) {
+            interval = maxDelay
+        }
+        else {
+            // Add jitter (100-1000ms) to prevent thundering herd
+            // Note: random_number can return 0 on first call, so ensure minimum jitter
+            jitter = random_number(10) * 100  // Should be 1-10 * 100ms = 100-1000ms
+            if (jitter == 0) {
+                jitter = 100  // Minimum jitter if random_number returns 0
+            }
+
+            interval = interval + jitter
+
+            // Cap at maximum delay (after jitter)
+            interval = min_value(interval, maxDelay)
+        }
     }
 
     return interval
@@ -564,6 +588,992 @@ define_function long NAVSocketGetConnectionInterval(integer attempt) {
                                           NAV_MAX_SOCKET_CONNECTION_RETRIES,
                                           NAV_SOCKET_CONNECTION_INTERVAL_BASE_DELAY,
                                           NAV_SOCKET_CONNECTION_INTERVAL_MAX_DELAY)
+}
+
+
+/**
+ * @function NAVSocketConnectionIsInitialized
+ * @private
+ * @description Internal helper to validate that a socket connection has been properly initialized.
+ *              Logs an error if not initialized.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure to check
+ * @param {char[]} functionName - Name of the calling function for error logging
+ *
+ * @returns {char} True if initialized, false otherwise
+ */
+define_function char NAVSocketConnectionIsInitialized(_NAVSocketConnection connection, char functionName[]) {
+    if (!connection.IsInitialized) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   functionName,
+                                   "'Connection not initialized. Call NAVSocketConnectionInit() first.'")
+        return false
+    }
+    return true
+}
+
+
+/**
+ * @function NAVSocketConnectionInit
+ * @public
+ * @description Initializes a socket connection structure with default values using an options struct.
+ *              Performs validation on device, socket, and port parameters. If options.Id is empty,
+ *              it will be automatically populated with the device string (e.g., "0:3:0").
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure to initialize
+ * @param {_NAVSocketConnectionOptions} options - Options structure containing initialization parameters
+ *
+ * @returns {char} True (1) if initialization successful, false (0) if validation failed
+ *
+ * @example
+ * // Automatic Id (will use device string like "0:3:0")
+ * stack_var _NAVSocketConnectionOptions options
+ * options.Device = dvPort
+ * options.ConnectionType = NAV_SOCKET_CONNECTION_TYPE_TCP_UDP
+ * options.Protocol = IP_TCP
+ * options.Port = IP_PORT
+ * options.TimelineId = TL_SOCKET_MAINTAIN
+ * if (!NAVSocketConnectionInit(module.Device.SocketConnection, options)) {
+ *     // Handle initialization failure
+ * }
+ *
+ * // Custom Id for multiple instances
+ * options.Id = 'Camera 1'
+ * options.Device = dvCamera1
+ * if (!NAVSocketConnectionInit(camera1Connection, options)) {
+ *     // Handle initialization failure
+ * }
+ *
+ * @note Device number must be 0 for socket connections
+ * @note Socket number (device.PORT) must be greater than 1
+ * @note Port must be in range 1-65535
+ * @note ConnectionType must be NAV_SOCKET_CONNECTION_TYPE_TCP_UDP, _SSH, or _TLS
+ * @note If options.Id is empty, it will be automatically set to NAVDeviceToString(options.Device)
+ */
+define_function char NAVSocketConnectionInit(_NAVSocketConnection connection,
+                                             _NAVSocketConnectionOptions options) {
+    // Validate device number must be 0 for socket connections
+    if (options.Device.NUMBER != 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   'NAVSocketConnectionInit',
+                                   "'Invalid device number: ', itoa(options.Device.NUMBER), ' (must be 0 for socket connections)'")
+        return false
+    }
+
+    // Validate socket number must be greater than 1
+    if (options.Device.PORT <= 1) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   'NAVSocketConnectionInit',
+                                   "'Invalid socket number: ', itoa(options.Device.PORT), ' (must be greater than 1)'")
+        return false
+    }
+
+    // Auto-populate Id with device string if not provided
+    if (options.Id == '') {
+        options.Id = "'[', NAVDeviceToString(options.Device), ']'"
+    }
+
+    // Validate port range
+    if (options.Port < 1 || options.Port > 65535) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   'NAVSocketConnectionInit',
+                                   "options.Id, ' Invalid port: ', itoa(options.Port), ' (must be between 1 and 65535)'")
+        return false
+    }
+
+    // Validate timeline ID
+    if (options.TimelineId <= 0) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   'NAVSocketConnectionInit',
+                                   "options.Id, ' Invalid timeline ID: ', itoa(options.TimelineId), ' (must be greater than 0)'")
+        return false
+    }
+
+    // Validate connection type - default to TCP/UDP if not specified
+    switch (options.ConnectionType) {
+        case 0: {
+            options.ConnectionType = NAV_SOCKET_CONNECTION_TYPE_TCP_UDP
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                       __NAV_FOUNDATION_SOCKETUTILS__,
+                                       'NAVSocketConnectionInit',
+                                       "options.Id, ' Connection type not specified, defaulting to TCP/UDP'")
+        }
+        case NAV_SOCKET_CONNECTION_TYPE_TCP_UDP:
+        case NAV_SOCKET_CONNECTION_TYPE_SSH:
+        case NAV_SOCKET_CONNECTION_TYPE_TLS: {
+            // Valid connection types - no action needed
+        }
+        default: {
+            options.ConnectionType = NAV_SOCKET_CONNECTION_TYPE_TCP_UDP
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                       __NAV_FOUNDATION_SOCKETUTILS__,
+                                       'NAVSocketConnectionInit',
+                                       "options.Id, ' Invalid connection type: ', itoa(options.ConnectionType), ' (must be TCP_UDP, SSH, or TLS), defaulting to TCP_UDP'")
+        }
+    }
+
+    // Validate protocol - only relevant for TCP_UDP connection types, default to IP_TCP if not specified
+    if (options.ConnectionType == NAV_SOCKET_CONNECTION_TYPE_TCP_UDP) {
+        switch (options.Protocol) {
+            case 0: {
+                options.Protocol = IP_TCP
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                           __NAV_FOUNDATION_SOCKETUTILS__,
+                                           'NAVSocketConnectionInit',
+                                           "options.Id, ': Protocol not specified, defaulting to TCP'")
+            }
+            case IP_TCP:
+            case IP_UDP:
+            case IP_UDP_2WAY: {
+                // Valid protocols - no action needed
+            }
+            default: {
+                options.Protocol = IP_TCP
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                           __NAV_FOUNDATION_SOCKETUTILS__,
+                                           'NAVSocketConnectionInit',
+                                           "options.Id, ': Invalid protocol: ', itoa(options.Protocol), ' (must be TCP, UDP, or UDP 2-Way), defaulting to TCP'")
+            }
+        }
+    }
+
+    // Validate TLS mode - only relevant for TLS connection types
+    if (options.ConnectionType == NAV_SOCKET_CONNECTION_TYPE_TLS) {
+        switch (options.TlsMode) {
+            case TLS_VALIDATE_CERTIFICATE:
+            case TLS_IGNORE_CERTIFICATE_ERRORS: {
+                // Valid TLS modes - no action needed
+            }
+            default: {
+                options.TlsMode = TLS_VALIDATE_CERTIFICATE
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                                           __NAV_FOUNDATION_SOCKETUTILS__,
+                                           'NAVSocketConnectionInit',
+                                           "options.Id, ': Invalid TLS mode: ', itoa(options.TlsMode), ' (must be TLS_VALIDATE_CERTIFICATE or TLS_IGNORE_CERTIFICATE_ERRORS), defaulting to TLS_VALIDATE_CERTIFICATE'")
+            }
+        }
+    }
+
+    // Validate SSH credentials - only relevant for SSH connection types
+    if (options.ConnectionType == NAV_SOCKET_CONNECTION_TYPE_SSH) {
+        if (!length_array(options.SshUsername)) {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                       __NAV_FOUNDATION_SOCKETUTILS__,
+                                       'NAVSocketConnectionInit',
+                                       "options.Id, ': SSH username is required for SSH connections'")
+            return false
+        }
+
+        if (!length_array(options.SshPassword) && !length_array(options.SshPrivateKey)) {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                       __NAV_FOUNDATION_SOCKETUTILS__,
+                                       'NAVSocketConnectionInit',
+                                       "options.Id, ': Either SSH password or private key is required for SSH connections'")
+            return false
+        }
+    }
+
+    // All validations passed, initialize the connection
+    connection.Device = options.Device
+    connection.Id = options.Id
+    connection.Socket = options.Device.PORT
+    connection.ConnectionType = options.ConnectionType
+    connection.Protocol = options.Protocol
+    connection.Port = options.Port
+    connection.TlsMode = options.TlsMode
+
+    connection.Credential.Username = options.SshUsername
+    connection.Credential.Password = options.SshPassword
+    connection.SshPrivateKey = options.SshPrivateKey
+    connection.SshPrivateKeyPassphrase = options.SshPrivateKeyPassphrase
+
+    connection.IsConnected = false
+    connection.IsNegotiated = false
+    connection.IsAuthenticated = false
+    connection.IsInitialized = true
+
+    connection.AutoReconnect = true
+
+    connection.TimelineId = options.TimelineId
+    connection.RetryCount = 0
+    connection.Interval[1] = NAVSocketGetConnectionInterval(connection.RetryCount)
+
+    return true
+}
+
+
+/**
+ * @function NAVSocketConnectionSetAddress
+ * @public
+ * @description Sets the address for a socket connection with validation.
+ *              Validates both IP addresses and hostnames before setting.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ * @param {char[]} address - IP address or hostname
+ *
+ * @returns {char} True if address was valid and set (or cleared), false if invalid
+ *
+ * @example
+ * if (NAVSocketConnectionSetAddress(module.Device.SocketConnection, '192.168.1.100')) {
+ *     NAVSocketConnectionReset(module.Device.SocketConnection)  // Apply changes
+ * }
+ *
+ * @note Empty addresses are accepted and will clear the connection (returns true)
+ * @note Invalid addresses will be rejected and an error will be logged (returns false)
+ * @note You must call NAVSocketConnectionReset() after changing connection properties to apply changes
+ */
+define_function char NAVSocketConnectionSetAddress(_NAVSocketConnection connection, char address[]) {
+    stack_var _NAVIP ip
+    stack_var char addr[255]
+
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionSetAddress')) {
+        return false
+    }
+
+    addr = NAVTrimString(address)
+
+    // Handle empty address - only allow clearing if there's an existing address
+    if (!length_array(addr)) {
+        if (!length_array(connection.Address)) {
+            // Address is already empty, cannot clear nothing
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                       __NAV_FOUNDATION_SOCKETUTILS__,
+                                       'NAVSocketConnectionSetAddress',
+                                       "connection.Id, ': Address cannot be empty'")
+            return false
+        }
+
+        // Clear existing address
+        connection.Address = ''
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   'NAVSocketConnectionSetAddress',
+                                   "connection.Id, ': Clearing IP address'")
+        return true
+    }
+
+    // Try to parse as IP address first
+    if (NAVNetParseIP(addr, ip)) {
+        connection.Address = ip.Address
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   'NAVSocketConnectionSetAddress',
+                                   "connection.Id, ': Using IP address: ', ip.Address")
+        return true
+    }
+
+    // Reject if it looks like a malformed IP address (contains only digits and dots)
+    // This prevents treating "256.1.1.1" or "192.168.1" as hostnames
+    if (NAVNetIsMalformedIP(addr)) {
+        connection.Address = ''
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   'NAVSocketConnectionSetAddress',
+                                   "connection.Id, ': Malformed IP address: ', addr")
+        return false
+    }
+
+    {
+        stack_var _NAVHostname hostname
+
+        if (NAVNetParseHostname(addr, hostname)) {
+            connection.Address = hostname.Hostname
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+                                       __NAV_FOUNDATION_SOCKETUTILS__,
+                                       'NAVSocketConnectionSetAddress',
+                                       "connection.Id, ': Using hostname: ', hostname.Hostname")
+            return true
+        }
+    }
+
+    // Invalid address - reject and log error
+    connection.Address = ''
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                               __NAV_FOUNDATION_SOCKETUTILS__,
+                               'NAVSocketConnectionSetAddress',
+                               "connection.Id, ': Invalid IP address or hostname: ', addr")
+    return false
+}
+
+
+/**
+ * @function NAVSocketConnectionSetPort
+ * @public
+ * @description Sets the port for a socket connection with validation.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ * @param {integer} port - Port number (1-65535)
+ *
+ * @returns {char} True if port was valid and set, false if invalid
+ *
+ * @example
+ * if (NAVSocketConnectionSetPort(module.Device.SocketConnection, 23)) {
+ *     NAVSocketConnectionReset(module.Device.SocketConnection)  // Apply changes
+ * }
+ *
+ * @note Port must be between 1 and 65535 (inclusive)
+ * @note You must call NAVSocketConnectionReset() after changing connection properties to apply changes
+ */
+define_function char NAVSocketConnectionSetPort(_NAVSocketConnection connection, integer port) {
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionSetPort')) {
+        return false
+    }
+
+    // Validate port range
+    if (port <= 0 || port > 65535) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   'NAVSocketConnectionSetPort',
+                                   "connection.Id, ': Invalid port number: ', itoa(port), ' (must be 1-65535)'")
+        return false
+    }
+
+    connection.Port = port
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+                               __NAV_FOUNDATION_SOCKETUTILS__,
+                               'NAVSocketConnectionSetPort',
+                               "connection.Id, ': Port set to ', itoa(port)")
+    return true
+}
+
+
+/**
+ * @function NAVSocketConnectionSetAutoReconnect
+ * @public
+ * @description Enables or disables automatic reconnection for a socket connection.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ * @param {char} enabled - True to enable auto-reconnect, false to disable
+ *
+ * @example
+ * // Disable auto-reconnect
+ * NAVSocketConnectionSetAutoReconnect(module.Device.SocketConnection, false)
+ *
+ * // Enable auto-reconnect
+ * NAVSocketConnectionSetAutoReconnect(module.Device.SocketConnection, true)
+ */
+define_function NAVSocketConnectionSetAutoReconnect(_NAVSocketConnection connection, char enabled) {
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionSetAutoReconnect')) {
+        return
+    }
+
+    connection.AutoReconnect = enabled
+
+    if (enabled) {
+        // Start the timeline if auto-reconnect is being enabled
+        NAVSocketConnectionStart(connection)
+    }
+    else {
+        // Stop the timeline if auto-reconnect is being disabled
+        NAVTimelineStop(connection.TimelineId)
+    }
+}
+
+
+/**
+ * @function NAVSocketConnectionSetCredential
+ * @public
+ * @description Sets username and password credentials for authenticated connections (SSH).
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ * @param {char[]} username - Username for authentication
+ * @param {char[]} password - Password for authentication
+ *
+ * @returns {char} True if credentials were set successfully, false if validation failed
+ *
+ * @example
+ * if (NAVSocketConnectionSetCredential(module.Device.SocketConnection, 'admin', 'password123')) {
+ *     // Credentials valid
+ * }
+ */
+define_function char NAVSocketConnectionSetCredential(_NAVSocketConnection connection, char username[], char password[]) {
+    stack_var char trimmedUsername[NAV_MAX_CHARS]
+
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionSetCredential')) {
+        return false
+    }
+
+    // Create internal copy before trimming
+    trimmedUsername = username
+    trimmedUsername = NAVTrimString(trimmedUsername)
+
+    if (!length_array(trimmedUsername)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   'NAVSocketConnectionSetCredential',
+                                   "connection.Id, ': Username cannot be empty'")
+        return false
+    }
+
+    connection.Credential.Username = trimmedUsername
+    connection.Credential.Password = password
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                               __NAV_FOUNDATION_SOCKETUTILS__,
+                               'NAVSocketConnectionSetCredential',
+                               "connection.Id, ': Credentials set for user: ', trimmedUsername")
+    return true
+}
+
+
+/**
+ * @function NAVSocketConnectionSetSshPrivateKey
+ * @public
+ * @description Sets SSH private key authentication parameters.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ * @param {char[]} privateKey - Path to SSH private key file
+ * @param {char[]} passphrase - Passphrase for private key (empty if not required)
+ *
+ * @returns {char} True if private key path was set successfully, false if validation failed
+ *
+ * @example
+ * if (NAVSocketConnectionSetSshPrivateKey(module.Device.SocketConnection, '/amx/keys/id_rsa', '')) {
+ *     // Private key path valid
+ * }
+ */
+define_function char NAVSocketConnectionSetSshPrivateKey(_NAVSocketConnection connection, char privateKey[], char passphrase[]) {
+    stack_var char trimmedPrivateKey[NAV_MAX_CHARS]
+
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionSetSshPrivateKey')) {
+        return false
+    }
+
+    // Create internal copy before trimming
+    trimmedPrivateKey = privateKey
+    trimmedPrivateKey = NAVTrimString(trimmedPrivateKey)
+
+    if (!length_array(trimmedPrivateKey)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   'NAVSocketConnectionSetSshPrivateKey',
+                                   "connection.Id, ': Private key path cannot be empty'")
+        return false
+    }
+
+    connection.SshPrivateKey = trimmedPrivateKey
+    connection.SshPrivateKeyPassphrase = passphrase
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                               __NAV_FOUNDATION_SOCKETUTILS__,
+                               'NAVSocketConnectionSetSshPrivateKey',
+                               "connection.Id, ': SSH private key configured'")
+    return true
+}
+
+
+/**
+ * @function NAVSocketConnectionSetTlsMode
+ * @public
+ * @description Sets the TLS certificate validation mode.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ * @param {integer} mode - TLS_VALIDATE_CERTIFICATE (0) or TLS_IGNORE_CERTIFICATE_ERRORS (1)
+ *
+ * @returns {char} True if mode was valid and set successfully, false if validation failed
+ *
+ * @example
+ * if (NAVSocketConnectionSetTlsMode(module.Device.SocketConnection, TLS_VALIDATE_CERTIFICATE)) {
+ *     // TLS mode valid
+ * }
+ */
+define_function char NAVSocketConnectionSetTlsMode(_NAVSocketConnection connection, integer mode) {
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionSetTlsMode')) {
+        return false
+    }
+
+    if (mode != TLS_VALIDATE_CERTIFICATE && mode != TLS_IGNORE_CERTIFICATE_ERRORS) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   'NAVSocketConnectionSetTlsMode',
+                                   "connection.Id, ': Invalid TLS mode: ', itoa(mode), ' (must be TLS_VALIDATE_CERTIFICATE or TLS_IGNORE_CERTIFICATE_ERRORS)'")
+        return false
+    }
+
+    connection.TlsMode = mode
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                               __NAV_FOUNDATION_SOCKETUTILS__,
+                               'NAVSocketConnectionSetTlsMode',
+                               "connection.Id, ': TLS mode set to: ', NAVGetTlsSocketMode(mode)")
+    return true
+}
+
+
+/**
+ * @function NAVSocketConnectionIsConfigured
+ * @public
+ * @description Checks if a socket connection has been properly configured.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ *
+ * @returns {char} True if address and port are configured, false otherwise
+ *
+ * @example
+ * if (NAVSocketConnectionIsConfigured(module.Device.SocketConnection)) {
+ *     // Connection can be established
+ * }
+ */
+define_function char NAVSocketConnectionIsConfigured(_NAVSocketConnection connection) {
+    return (length_array(connection.Address) && connection.Port > 0)
+}
+
+
+/**
+ * @function NAVSocketConnectionMaintain
+ * @public
+ * @description Maintains a socket connection by attempting to reconnect if disconnected.
+ *              Automatically handles TCP, SSH, and TLS connections based on ConnectionType.
+ *              Call this from a timeline event handler.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ *
+ * @example
+ * timeline_event[TL_SOCKET_CHECK] {
+ *     NAVSocketConnectionMaintain(module.Device.SocketConnection)
+ * }
+ */
+define_function NAVSocketConnectionMaintain(_NAVSocketConnection connection) {
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionMaintain')) {
+        return
+    }
+
+    if (connection.IsConnected) {
+        return
+    }
+
+    if (!connection.AutoReconnect) {
+        return
+    }
+
+    if (!NAVSocketConnectionIsConfigured(connection)) {
+        return
+    }
+
+    switch (connection.ConnectionType) {
+        case NAV_SOCKET_CONNECTION_TYPE_TCP_UDP: {
+            NAVClientSocketOpen(connection.Socket,
+                                connection.Address,
+                                connection.Port,
+                                connection.Protocol)
+        }
+        case NAV_SOCKET_CONNECTION_TYPE_SSH: {
+            NAVClientSecureSocketOpen(connection.Socket,
+                                      connection.Address,
+                                      connection.Port,
+                                      connection.Credential.Username,
+                                      connection.Credential.Password,
+                                      connection.SshPrivateKey,
+                                      connection.SshPrivateKeyPassphrase)
+        }
+        case NAV_SOCKET_CONNECTION_TYPE_TLS: {
+            NAVClientTlsSocketOpen(connection.Socket,
+                                   connection.Address,
+                                   connection.Port,
+                                   connection.TlsMode)
+        }
+        default: {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_SOCKETUTILS__,
+                                       'NAVSocketConnectionMaintain',
+                                       "connection.Id, ': Unknown connection type: ', itoa(connection.ConnectionType)")
+        }
+    }
+}
+
+
+/**
+ * @function NAVSocketConnectionStart
+ * @public
+ * @description Starts the socket connection timeline for automatic reconnection.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ *
+ * @example
+ * NAVSocketConnectionStart(module.Device.SocketConnection)
+ */
+define_function NAVSocketConnectionStart(_NAVSocketConnection connection) {
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionStart')) {
+        return
+    }
+
+    if (!NAVSocketConnectionIsConfigured(connection)) {
+        return
+    }
+
+    if (!connection.AutoReconnect) {
+        return
+    }
+
+    NAVTimelineStart(connection.TimelineId,
+                     connection.Interval,
+                     TIMELINE_ABSOLUTE,
+                     TIMELINE_REPEAT)
+}
+
+
+/**
+ * @function NAVSocketConnectionStop
+ * @public
+ * @description Stops the socket connection timeline and closes the connection.
+ *              Automatically handles TCP, SSH, and TLS connections based on ConnectionType.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ *
+ * @example
+ * NAVSocketConnectionStop(module.Device.SocketConnection)
+ */
+define_function NAVSocketConnectionStop(_NAVSocketConnection connection) {
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionStop')) {
+        return
+    }
+
+    NAVTimelineStop(connection.TimelineId)
+
+    if (connection.IsConnected) {
+        switch (connection.ConnectionType) {
+            case NAV_SOCKET_CONNECTION_TYPE_TCP_UDP: {
+                NAVClientSocketClose(connection.Socket)
+            }
+            case NAV_SOCKET_CONNECTION_TYPE_SSH: {
+                NAVClientSecureSocketClose(connection.Socket)
+            }
+            case NAV_SOCKET_CONNECTION_TYPE_TLS: {
+                NAVClientTlsSocketClose(connection.Socket)
+            }
+        }
+    }
+}
+
+
+/**
+ * @function NAVSocketConnectionReset
+ * @public
+ * @description Resets a socket connection by closing it, resetting retry counters,
+ *              and restarting the connection timeline. Automatically handles TCP, SSH,
+ *              and TLS connections based on ConnectionType.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ *
+ * @example
+ * NAVSocketConnectionReset(module.Device.SocketConnection)
+ */
+define_function NAVSocketConnectionReset(_NAVSocketConnection connection) {
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionReset')) {
+        return
+    }
+
+    NAVTimelineStop(connection.TimelineId)
+
+    if (connection.IsConnected) {
+        switch (connection.ConnectionType) {
+            case NAV_SOCKET_CONNECTION_TYPE_TCP_UDP: {
+                NAVClientSocketClose(connection.Socket)
+            }
+            case NAV_SOCKET_CONNECTION_TYPE_SSH: {
+                NAVClientSecureSocketClose(connection.Socket)
+            }
+            case NAV_SOCKET_CONNECTION_TYPE_TLS: {
+                NAVClientTlsSocketClose(connection.Socket)
+            }
+        }
+    }
+
+    // Always reset retry count for clean state
+    connection.RetryCount = 0
+    connection.Interval[1] = NAVSocketGetConnectionInterval(connection.RetryCount)
+
+    // Restart timeline if configured and auto-reconnect is enabled
+    NAVSocketConnectionStart(connection)
+}
+
+
+/**
+ * @function NAVSocketConnectionHandleOnline
+ * @public
+ * @description Handles the online event for a socket connection.
+ *              Call this from the online handler in data_event.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ * @param {tdata} data - Event data from data_event
+ *
+ * @example
+ * data_event[dvPort] {
+ *     online: {
+ *         NAVSocketConnectionHandleOnline(module.Device.SocketConnection, data)
+ *         // Module-specific online handling...
+ *     }
+ * }
+ */
+define_function NAVSocketConnectionHandleOnline(_NAVSocketConnection connection, tdata data) {
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionHandleOnline')) {
+        return
+    }
+
+    // Only handle IP connection events (device.number == 0)
+    if (data.device.number != 0) {
+        return
+    }
+
+    connection.IsConnected = true
+
+    // Reset retry count on successful connection
+    connection.RetryCount = 0
+    connection.Interval[1] = NAVSocketGetConnectionInterval(connection.RetryCount)
+    NAVTimelineReload(connection.TimelineId, connection.Interval)
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+                               __NAV_FOUNDATION_SOCKETUTILS__,
+                               'NAVSocketConnectionHandleOnline',
+                               "connection.Id, ': Socket connected to ', connection.Address, ':', itoa(connection.Port)")
+}
+
+
+/**
+ * @function NAVSocketConnectionHandleOffline
+ * @public
+ * @description Handles the offline event for a socket connection.
+ *              Call this from the offline handler in data_event.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ * @param {tdata} data - Event data from data_event
+ *
+ * @example
+ * data_event[dvPort] {
+ *     offline: {
+ *         NAVSocketConnectionHandleOffline(module.Device.SocketConnection, data)
+ *         // Module-specific offline handling...
+ *     }
+ * }
+ */
+define_function NAVSocketConnectionHandleOffline(_NAVSocketConnection connection, tdata data) {
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionHandleOffline')) {
+        return
+    }
+
+    // Only handle IP connection events (device.number == 0)
+    if (data.device.number != 0) {
+        return
+    }
+
+    NAVClientSocketClose(data.device.port)
+
+    connection.IsConnected = false
+    connection.IsNegotiated = false
+    connection.IsAuthenticated = false
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_INFO,
+                               __NAV_FOUNDATION_SOCKETUTILS__,
+                               'NAVSocketConnectionHandleOffline',
+                               "connection.Id, ': Socket disconnected from ', connection.Address, ':', itoa(connection.Port)")
+}
+
+
+/**
+ * @function NAVSocketConnectionHandleError
+ * @public
+ * @description Handles the onerror event for a socket connection with exponential backoff.
+ *              Call this from the onerror handler in data_event.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ * @param {tdata} data - Event data from data_event
+ *
+ * @example
+ * data_event[dvPort] {
+ *     onerror: {
+ *         NAVSocketConnectionHandleError(module.Device.SocketConnection, data)
+ *         // Module-specific error handling...
+ *     }
+ * }
+ */
+define_function NAVSocketConnectionHandleError(_NAVSocketConnection connection, tdata data) {
+    if (!NAVSocketConnectionIsInitialized(connection, 'NAVSocketConnectionHandleError')) {
+        return
+    }
+
+    // Only handle IP connection events (device.number == 0)
+    if (data.device.number != 0) {
+        return
+    }
+
+    connection.RetryCount++
+
+    // Single consolidated warning with all relevant information
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_WARNING,
+                               __NAV_FOUNDATION_SOCKETUTILS__,
+                               'NAVSocketConnectionHandleError',
+                               "connection.Id, ': Connection failed - ', NAVGetSocketError(type_cast(data.number)), ' (retry ', itoa(connection.RetryCount), ' in ', itoa(connection.Interval[1]), 'ms)'")
+
+    if (connection.RetryCount <= NAV_MAX_SOCKET_CONNECTION_RETRIES) {
+        // Still in base retry phase - timeline already running at base interval
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                                   __NAV_FOUNDATION_SOCKETUTILS__,
+                                   'NAVSocketConnectionHandleError',
+                                   "connection.Id, ': Using base retry interval: ', itoa(connection.Interval[1]), 'ms'")
+        return
+    }
+
+    // Calculate new exponential backoff interval
+    connection.Interval[1] = NAVSocketGetConnectionInterval(connection.RetryCount)
+
+    NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_DEBUG,
+                               __NAV_FOUNDATION_SOCKETUTILS__,
+                               'NAVSocketConnectionHandleError',
+                               "connection.Id, ': Using exponential backoff interval: ', itoa(connection.Interval[1]), 'ms'")
+
+    // Restart timeline with new interval
+    NAVTimelineReload(connection.TimelineId, connection.Interval)
+}
+
+
+/**
+ * @function NAVIsSocketDevice
+ * @public
+ * @description Validates if a device is a valid socket device for IP connections.
+ *              Checks that the device number is 0 (required for IP connections)
+ *              and that the socket/port number is greater than 1.
+ *
+ * @param {dev} device - Device to validate
+ *
+ * @returns {char} True if device is a valid socket device, false otherwise
+ *
+ * @example
+ * if (NAVIsSocketDevice(dvPort)) {
+ *     // Valid socket device
+ * }
+ *
+ * @note Device number must be 0 for IP socket connections
+ * @note Socket number (PORT) must be greater than 1 (port 1 is reserved)
+ */
+define_function char NAVIsSocketDevice(dev device) {
+    return (device.NUMBER == 0 && device.PORT > 1)
+}
+
+
+/**
+ * @function NAVSocketConnectionGetStatus
+ * @public
+ * @description Returns a human-readable status string for a socket connection.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ *
+ * @returns {char[]} Status string (e.g., "Connected", "Disconnected", "Connecting", "Not Configured")
+ *
+ * @example
+ * stack_var char status[50]
+ * status = NAVSocketConnectionGetStatus(module.Device.SocketConnection)
+ * // Returns: "Connected" or "Connecting (attempt 3)" or "Disconnected"
+ */
+define_function char[50] NAVSocketConnectionGetStatus(_NAVSocketConnection connection) {
+    if (!NAVSocketConnectionIsConfigured(connection)) {
+        return 'Not Configured'
+    }
+
+    if (connection.IsConnected) {
+        return 'Connected'
+    }
+
+    if (connection.AutoReconnect && connection.RetryCount > 0) {
+        return "'Connecting (attempt ', itoa(connection.RetryCount), ')'"
+    }
+
+    return 'Disconnected'
+}
+
+
+/**
+ * @function NAVSocketConnectionGetConnectionTypeString
+ * @public
+ * @description Converts a connection type constant to a human-readable string.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ *
+ * @returns {char[]} Connection type string ("TCP", "SSH", "TLS", or "Unknown")
+ *
+ * @example
+ * stack_var char connType[50]
+ * connType = NAVSocketConnectionGetConnectionTypeString(module.Device.SocketConnection)
+ */
+define_function char[50] NAVSocketConnectionGetConnectionTypeString(_NAVSocketConnection connection) {
+    switch (connection.ConnectionType) {
+        case NAV_SOCKET_CONNECTION_TYPE_TCP_UDP: { return 'TCP/UDP' }
+        case NAV_SOCKET_CONNECTION_TYPE_SSH: { return 'SSH' }
+        case NAV_SOCKET_CONNECTION_TYPE_TLS: { return 'TLS' }
+        default: { return "'Unknown (', itoa(connection.ConnectionType), ')'" }
+    }
+}
+
+
+/**
+ * @function NAVSocketConnectionIsRetrying
+ * @public
+ * @description Checks if a socket connection is currently in retry/backoff phase.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ *
+ * @returns {char} True if connection is retrying (has failed at least once), false otherwise
+ *
+ * @example
+ * if (NAVSocketConnectionIsRetrying(module.Device.SocketConnection)) {
+ *     // Connection has failed and is retrying
+ * }
+ */
+define_function char NAVSocketConnectionIsRetrying(_NAVSocketConnection connection) {
+    return (connection.RetryCount > 0 && !connection.IsConnected)
+}
+
+
+/**
+ * @function NAVSocketConnectionIsConnected
+ * @public
+ * @description Checks if a socket connection is currently connected.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ *
+ * @returns {char} True if connection is connected, false otherwise
+ *
+ * @example
+ * if (NAVSocketConnectionIsConnected(module.Device.SocketConnection)) {
+ *     // Socket is connected
+ *     send_string module.Device.SocketConnection.Socket, "'COMMAND'"
+ * }
+ */
+define_function char NAVSocketConnectionIsConnected(_NAVSocketConnection connection) {
+    return connection.IsConnected
+}
+
+
+/**
+ * @function NAVSocketConnectionGetInfo
+ * @public
+ * @description Returns a formatted string with connection information for logging/debugging.
+ *
+ * @param {_NAVSocketConnection} connection - Socket connection structure
+ *
+ * @returns {char[]} Formatted connection info string
+ *
+ * @example
+ * stack_var char info[255]
+ * info = NAVSocketConnectionGetInfo(module.Device.SocketConnection)
+ * // Returns: "WolfVision Visualizer [TCP] 192.168.1.100:50915 - Connected"
+ */
+define_function char[255] NAVSocketConnectionGetInfo(_NAVSocketConnection connection) {
+    stack_var char info[255]
+
+    info = "connection.Id, ' [', NAVSocketConnectionGetConnectionTypeString(connection), ']'"
+
+    if (length_array(connection.Address)) {
+        info = "info, ' ', connection.Address, ':', itoa(connection.Port)"
+    }
+    else {
+        info = "info, ' [No Address]'"
+    }
+
+    info = "info, ' - ', NAVSocketConnectionGetStatus(connection)"
+
+    return info
 }
 
 

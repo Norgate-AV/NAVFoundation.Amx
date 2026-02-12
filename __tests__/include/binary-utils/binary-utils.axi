@@ -7,7 +7,7 @@
 #DEFINE TESTING_NAVBYTETOBINARYSTRING
 #DEFINE TESTING_NAVBCDTOBINARY
 #DEFINE TESTING_NAVBINARYTOBCD
-
+#DEFINE TESTING_NAVBINARYCOUNTLEADINGZEROS
 #include 'NAVFoundation.Core.axi'
 #include 'NAVFoundation.BinaryUtils.axi'
 #include 'NAVFoundation.Assert.axi'
@@ -50,6 +50,10 @@
 #include 'NAVBinaryToBcd.axi'
 #END_IF
 
+#IF_DEFINED TESTING_NAVBINARYCOUNTLEADINGZEROS
+#include 'NAVBinaryCountLeadingZeros.axi'
+#END_IF
+
 define_function RunBinaryUtilsTests() {
     #IF_DEFINED TESTING_NAVBINARYROTATELEFT
     TestNAVBinaryRotateLeft()
@@ -85,5 +89,9 @@ define_function RunBinaryUtilsTests() {
 
     #IF_DEFINED TESTING_NAVBINARYTOBCD
     TestNAVBinaryToBcd()
+    #END_IF
+
+    #IF_DEFINED TESTING_NAVBINARYCOUNTLEADINGZEROS
+    TestNAVBinaryCountLeadingZeros()
     #END_IF
 }

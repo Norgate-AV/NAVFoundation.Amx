@@ -196,20 +196,21 @@ constant integer NAV_LOG_CHUNK_SIZE             = 100
 /////////////////////////////////////////////////////////////
 // Events
 /////////////////////////////////////////////////////////////
-constant char NAV_EVENT_ONLINE[NAV_MAX_CHARS]       = 'online'
-constant char NAV_EVENT_OFFLINE[NAV_MAX_CHARS]      = 'offline'
-constant char NAV_EVENT_ONERROR[NAV_MAX_CHARS]      = 'onerror'
-constant char NAV_EVENT_STRING[NAV_MAX_CHARS]       = 'string'
-constant char NAV_EVENT_COMMAND[NAV_MAX_CHARS]      = 'command'
-constant char NAV_EVENT_STANDBY[NAV_MAX_CHARS]      = 'standby'
-constant char NAV_EVENT_AWAKE[NAV_MAX_CHARS]        = 'awake'
+constant char NAV_EVENT_ONLINE[]    = 'online'
+constant char NAV_EVENT_OFFLINE[]   = 'offline'
+constant char NAV_EVENT_ONERROR[]   = 'onerror'
+constant char NAV_EVENT_STRING[]    = 'string'
+constant char NAV_EVENT_COMMAND[]   = 'command'
+constant char NAV_EVENT_STANDBY[]   = 'standby'
+constant char NAV_EVENT_AWAKE[]     = 'awake'
 
 
 /////////////////////////////////////////////////////////////
 // Guid
 /////////////////////////////////////////////////////////////
-constant char    NAV_GUID[NAV_MAX_CHARS] = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
-constant char    NAV_GUID_HEX[NAV_MAX_CHARS] = '0123456789abcdef-'
+constant integer NAV_GUID_LENGTH      = 36
+constant char NAV_GUID[]              = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+constant char NAV_GUID_HEX[]          = '0123456789abcdef-'
 
 
 /////////////////////////////////////////////////////////////
@@ -402,12 +403,12 @@ struct _NAVContact {
 /**
  * @struct _NAVStateBoolean
  * @description Tracks boolean state with required and actual values plus initialization status.
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  * @property {char} Required - The desired boolean state (0=false, non-zero=true)
  * @property {char} Actual - The current boolean state (0=false, non-zero=true)
  */
 struct _NAVStateBoolean {
-    integer Initialized
+    char Initialized
     char Required
     char Actual
 }
@@ -416,12 +417,12 @@ struct _NAVStateBoolean {
 /**
  * @struct _NAVStateInteger
  * @description Tracks integer state with required and actual values plus initialization status.
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  * @property {integer} Required - The desired integer state value
  * @property {integer} Actual - The current integer state value
  */
 struct _NAVStateInteger {
-    integer Initialized
+    char Initialized
     integer Required
     integer Actual
 }
@@ -430,12 +431,12 @@ struct _NAVStateInteger {
 /**
  * @struct _NAVStateSignedInteger
  * @description Tracks signed integer state with required and actual values plus initialization status.
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  * @property {sinteger} Required - The desired signed integer state value
  * @property {sinteger} Actual - The current signed integer state value
  */
 struct _NAVStateSignedInteger {
-    integer Initialized
+    char Initialized
     sinteger Required
     sinteger Actual
 }
@@ -446,12 +447,12 @@ struct _NAVStateSignedInteger {
  * @description Tracks long integer state with required and actual values plus initialization status.
  * @property {long} Required - The desired long integer state value
  * @property {long} Actual - The current long integer state value
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  */
 struct _NAVStateLong {
     long Required
     long Actual
-    integer Initialized
+    char Initialized
 }
 
 
@@ -460,12 +461,12 @@ struct _NAVStateLong {
  * @description Tracks signed long integer state with required and actual values plus initialization status.
  * @property {slong} Required - The desired signed long integer state value
  * @property {slong} Actual - The current signed long integer state value
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  */
 struct _NAVStateSignedLong {
     slong Required
     slong Actual
-    integer Initialized
+    char Initialized
 }
 
 
@@ -474,12 +475,12 @@ struct _NAVStateSignedLong {
  * @description Tracks double precision floating-point state with required and actual values plus initialization status.
  * @property {double} Required - The desired double state value
  * @property {double} Actual - The current double state value
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  */
 struct _NAVStateDouble {
     double Required
     double Actual
-    integer Initialized
+    char Initialized
 }
 
 
@@ -488,24 +489,24 @@ struct _NAVStateDouble {
  * @description Tracks single precision floating-point state with required and actual values plus initialization status.
  * @property {float} Required - The desired float state value
  * @property {float} Actual - The current float state value
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  */
 struct _NAVStateFloat {
     float Required
     float Actual
-    integer Initialized
+    char Initialized
 }
 
 
 /**
  * @struct _NAVStateString
  * @description Tracks string state with required and actual values plus initialization status.
- * @property {integer} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
+ * @property {char} Initialized - Flag indicating if the state has been initialized (0=no, non-zero=yes)
  * @property {char[]} Required - The desired string state value
  * @property {char[]} Actual - The current string state value
  */
 struct _NAVStateString {
-    integer Initialized
+    char Initialized
     char Required[NAV_MAX_BUFFER]
     char Actual[NAV_MAX_BUFFER]
 }
@@ -573,7 +574,7 @@ struct _NAVProjector {
  * @property {_NAVDevice} Device - The base device information and connection details
  * @property {_NAVVolume} Volume - The audio volume and mute settings
  * @property {_NAVStateInteger[][][]} Output - 3D array of output states [type][output number]
- * @property {integer[][]} PendingRequired - Array tracking pending output changes
+ * @property {char[][]} PendingRequired - Array tracking pending output changes
  * @property {integer} NumberOfInputs - The number of available inputs on the switcher
  * @property {char[]} InputHasSignal - Array indicating which inputs have active signals
  * @property {char} Pending - Flag indicating if there are pending changes
@@ -584,7 +585,7 @@ struct _NAVSwitcher {
     // integer OutputRequired[3][128]
     // integer OutputActual[3][128]
     _NAVStateInteger Output[3][128]
-    integer PendingRequired[3][128]
+    char PendingRequired[3][128]
     integer NumberOfInputs
     char InputHasSignal[128]
     char Pending
@@ -633,23 +634,84 @@ struct _NAVCredential {
 
 /**
  * @struct _NAVSocketConnection
- * @description Manages a network socket connection with retry and timing functionality.
+ * @description Manages a network socket connection with retry and timing functionality. Supports TCP, SSH, and TLS connections.
+ * @property {dev} Device - The physical device reference
+ * @property {char[]} Id - Identifier for the connection (used in logging). Auto-populated with device string if not explicitly set
  * @property {integer} Socket - The socket identifier
- * @property {integer} Port - The TCP/IP port number
- * @property {integer} IsConnected - Flag indicating connection status (0=disconnected, non-zero=connected)
- * @property {integer} IsAuthenticated - Flag indicating authentication status (0=not authenticated, non-zero=authenticated)
  * @property {char[]} Address - The IP address or hostname for the connection
+ * @property {integer} Port - The TCP/IP port number
+ * @property {integer} Protocol - Protocol type (IP_TCP, IP_UDP, IP_UDP_2WAY)
+ * @property {integer} ConnectionType - Connection type (NAV_SOCKET_CONNECTION_TYPE_TCP_UDP, _SSH, or _TLS)
+ * @property {char} IsConnected - Flag indicating connection status (0=disconnected, non-zero=connected)
+ * @property {char} IsNegotiated - Flag indicating if protocol negotiation is complete (0=no, non-zero=yes)
+ * @property {char} IsAuthenticated - Flag indicating authentication status (0=not authenticated, non-zero=authenticated)
+ * @property {char} AutoReconnect - Flag enabling automatic reconnection (0=disabled, non-zero=enabled)
+ * @property {_NAVCredential} Credential - Username and password for authentication (used by SSH)
+ * @property {char[]} SshPrivateKey - Path to SSH private key file for key-based authentication
+ * @property {char[]} SshPrivateKeyPassphrase - Passphrase for SSH private key (if required)
+ * @property {integer} TlsMode - TLS certificate validation mode (TLS_VALIDATE_CERTIFICATE or TLS_IGNORE_CERTIFICATE_ERRORS)
+ * @property {long} TimelineId - Timeline ID for connection maintenance
  * @property {long[1]} Interval - Array containing the retry interval in milliseconds for connection attempts
  * @property {integer} RetryCount - Current count of connection retry attempts
+ * @property {char} IsInitialized - Flag indicating if the connection has been initialized via NAVSocketConnectionInit (0=no, non-zero=yes)
  */
 struct _NAVSocketConnection {
+    dev Device
+
+    char Id[NAV_MAX_CHARS]
+
     integer Socket
-    integer Port
-    integer IsConnected
-    integer IsAuthenticated
     char Address[NAV_MAX_CHARS]
+    integer Port
+    integer Protocol
+    integer ConnectionType
+
+    char IsConnected
+    char IsNegotiated
+    char IsAuthenticated
+    char IsInitialized
+
+    char AutoReconnect
+
+    _NAVCredential Credential
+
+    char SshPrivateKey[NAV_MAX_BUFFER]
+    char SshPrivateKeyPassphrase[NAV_MAX_CHARS]
+
+    integer TlsMode
+
+    long TimelineId
     long Interval[1]
     integer RetryCount
+}
+
+
+/**
+ * @struct _NAVOptionalDevice
+ * @description Generic structure for tracking optional device integrations in modules.
+ *              Used when a module needs to optionally integrate with other modules or services
+ *              without creating a hard dependency. Common use cases include CloudLogger integration,
+ *              telemetry services, etc.
+ * @property {dev} Device - The device reference to the optional module/service
+ * @property {char} Initialized - Flag indicating if the device has been configured (0=no, non-zero=yes)
+ *
+ * @example
+ * // Used in _NAVModule for optional CloudLogger:
+ * module.CloudLogger.Device
+ * module.CloudLogger.Initialized
+ *
+ * // Set via PROPERTY command:
+ * case 'CLOUDLOG_DEVICE': {
+ *     if (!NAVParseDevice(NAVTrimString(event.Args[1]), module.CloudLogger.Device)) {
+ *         module.CloudLogger.Initialized = false
+ *         return
+ *     }
+ *     module.CloudLogger.Initialized = true
+ * }
+ */
+struct _NAVOptionalDevice {
+    dev Device
+    char Initialized
 }
 
 
@@ -657,15 +719,15 @@ struct _NAVSocketConnection {
  * @struct _NAVDevice
  * @description Represents a networked device with connection and status information.
  * @property {_NAVSocketConnection} SocketConnection - The network connection details
- * @property {integer} IsOnline - Flag indicating online status (0=offline, non-zero=online)
- * @property {integer} IsCommunicating - Flag indicating active communication (0=no, non-zero=yes)
- * @property {integer} IsInitialized - Flag indicating if the device is initialized (0=no, non-zero=yes)
+ * @property {char} IsOnline - Flag indicating online status (0=offline, non-zero=online)
+ * @property {char} IsCommunicating - Flag indicating active communication (0=no, non-zero=yes)
+ * @property {char} IsInitialized - Flag indicating if the device is initialized (0=no, non-zero=yes)
  */
 struct _NAVDevice {
     _NAVSocketConnection SocketConnection
-    integer IsOnline
-    integer IsCommunicating
-    integer IsInitialized
+    char IsOnline
+    char IsCommunicating
+    char IsInitialized
 }
 
 
@@ -674,16 +736,18 @@ struct _NAVDevice {
  * @description Represents a NetLinx module with device and communication properties.
  * @property {_NAVDevice} Device - The base device information and connection details
  * @property {_NAVRxBuffer} RxBuffer - Buffer for receiving data
- * @property {integer} Enabled - Flag indicating if the module is enabled (0=disabled, non-zero=enabled)
- * @property {integer} CommandBusy - Flag indicating if the module is processing commands (0=not busy, non-zero=busy)
+ * @property {char} Enabled - Flag indicating if the module is enabled (0=disabled, non-zero=enabled)
+ * @property {char} CommandBusy - Flag indicating if the module is processing commands (0=not busy, non-zero=busy)
  * @property {dev[]} VirtualDevice - Array of virtual devices associated with the module
+ * @property {_NAVOptionalDevice} CloudLogger - Optional CloudLogger device for forwarding logs to cloud service
  */
 struct _NAVModule {
     _NAVDevice Device
     _NAVRxBuffer RxBuffer
-    integer Enabled
-    integer CommandBusy
+    char Enabled
+    char CommandBusy
     dev VirtualDevice[10]
+    _NAVOptionalDevice CloudLogger
 }
 
 

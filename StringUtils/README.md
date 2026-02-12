@@ -11,7 +11,7 @@ Working with strings in NetLinx can be challenging due to limited built-in funct
 - **String Manipulation**: Trimming, substring extraction, replacing, etc.
 - **String Testing**: Contains, startsWith, endsWith, etc.
 - **String Searching**: Find index of substrings, count occurrences
-- **String Parsing**: Parse integers, signed integers, longs, signed longs, and floats with validation
+- **String Parsing**: Parse integers, signed integers, longs, signed longs, floats, and booleans with validation
 - **Case Conversion**: Upper/lower case, camelCase, PascalCase, etc.
 - **Character Operations**: Check character types, convert case
 - **String Splitting and Joining**: Split strings into arrays, join arrays into strings
@@ -208,35 +208,54 @@ result = NAVStringScreamKebabCase('hello world')  // Returns 'HELLO-WORLD'
 
 ```netlinx
 // Parse unsigned integer (0-65535)
+// Supports decimal, hexadecimal (0x or $), binary (0b), and octal (0o)
 stack_var integer value
 stack_var char success
 success = NAVParseInteger('12345', value)     // Returns true, value = 12345
+success = NAVParseInteger('0xFF', value)      // Returns true, value = 255 (hex)
+success = NAVParseInteger('$FFFF', value)     // Returns true, value = 65535 (hex with $)
+success = NAVParseInteger('0b1111', value)    // Returns true, value = 15 (binary)
+success = NAVParseInteger('0o777', value)     // Returns true, value = 511 (octal)
 success = NAVParseInteger('99999', value)     // Returns false (out of range)
 success = NAVParseInteger('-100', value)      // Returns false (negative)
 success = NAVParseInteger('Volume=50', value) // Returns true, value = 50 (extracts first number)
 success = NAVParseInteger('   42  99   ', value) // Returns true, value = 42 (stops at space)
 
 // Parse signed integer (-32768 to 32767)
+// Supports decimal, hexadecimal (0x or $), binary (0b), and octal (0o)
 stack_var sinteger svalue
 success = NAVParseSignedInteger('-12345', svalue)  // Returns true, svalue = -12345
+success = NAVParseSignedInteger('0x7FFF', svalue)  // Returns true, svalue = 32767 (max)
+success = NAVParseSignedInteger('-0x8000', svalue) // Returns true, svalue = -32768 (min)
+success = NAVParseSignedInteger('0b1010', svalue)  // Returns true, svalue = 10 (binary)
+success = NAVParseSignedInteger('-0o77', svalue)   // Returns true, svalue = -63 (octal)
 success = NAVParseSignedInteger('50000', svalue)   // Returns false (out of range)
 success = NAVParseSignedInteger('Offset=-100', svalue) // Returns true, svalue = -100
 success = NAVParseSignedInteger('   -10  20   ', svalue) // Returns true, svalue = -10
 
 // Parse unsigned long (0-4294967295)
+// Supports decimal, hexadecimal (0x or $), binary (0b), and octal (0o)
 stack_var long lvalue
 success = NAVParseLong('1234567890', lvalue)   // Returns true, lvalue = 1234567890
 success = NAVParseLong('4294967295', lvalue)   // Returns true (max LONG value)
+success = NAVParseLong('0xFFFFFFFF', lvalue)   // Returns true, lvalue = 4294967295 (hex)
+success = NAVParseLong('0b11111111', lvalue)   // Returns true, lvalue = 255 (binary)
+success = NAVParseLong('0o7777', lvalue)       // Returns true, lvalue = 4095 (octal)
 success = NAVParseLong('5000000000', lvalue)   // Returns false (overflow)
 success = NAVParseLong('-1000', lvalue)        // Returns false (negative)
 success = NAVParseLong('   100  200   ', lvalue) // Returns true, lvalue = 100
 
 // Parse signed long (-2147483648 to 2147483647)
+// Supports decimal, hexadecimal (0x or $), binary (0b), and octal (0o)
 stack_var slong slvalue
 success = NAVParseSignedLong('-1234567890', slvalue)  // Returns true, slvalue = -1234567890
 success = NAVParseSignedLong('2147483647', slvalue)   // Returns true (max SLONG)
+success = NAVParseSignedLong('0x7FFFFFFF', slvalue)   // Returns true, slvalue = 2147483647 (hex)
+success = NAVParseSignedLong('-0x80000000', slvalue)  // Returns true, slvalue = -2147483648 (min)
+success = NAVParseSignedLong('0b11111111', slvalue)   // Returns true, slvalue = 255 (binary)
+success = NAVParseSignedLong('-0o777', slvalue)       // Returns true, slvalue = -511 (octal)
 success = NAVParseSignedLong('3000000000', slvalue)   // Returns false (overflow)
-success = NAVParseSignedLong('xyz-123', slvalue)     // Returns true, slvalue = -123 (extracts number)
+success = NAVParseSignedLong('xyz-123', slvalue)      // Returns true, slvalue = -123 (extracts number)
 success = NAVParseSignedLong('   -100  200   ', slvalue) // Returns true, slvalue = -100
 
 // Parse floating-point number
@@ -245,17 +264,39 @@ success = NAVParseFloat('3.14159', fvalue)      // Returns true, fvalue = 3.1415
 success = NAVParseFloat('-1.25e-3', fvalue)     // Returns true, fvalue = -0.00125
 success = NAVParseFloat('Temp=22.5', fvalue)    // Returns true, fvalue = 22.5 (extracts first number)
 success = NAVParseFloat('   10.5  20.3   ', fvalue) // Returns true, fvalue = 10.5
+
+// Parse boolean values (case-insensitive)
+stack_var char bvalue
+success = NAVParseBoolean('true', bvalue)   // Returns true, bvalue = 1
+success = NAVParseBoolean('FALSE', bvalue)  // Returns true, bvalue = 0
+success = NAVParseBoolean('1', bvalue)      // Returns true, bvalue = 1
+success = NAVParseBoolean('0', bvalue)      // Returns true, bvalue = 0
+success = NAVParseBoolean('yes', bvalue)    // Returns true, bvalue = 1
+success = NAVParseBoolean('no', bvalue)     // Returns true, bvalue = 0
+success = NAVParseBoolean('ON', bvalue)     // Returns true, bvalue = 1
+success = NAVParseBoolean('off', bvalue)    // Returns true, bvalue = 0
+success = NAVParseBoolean('maybe', bvalue)  // Returns false (invalid)
+success = NAVParseBoolean('', bvalue)       // Returns false (empty string)
 ```
 
 **Parsing Behavior Notes:**
+
 - All parsing functions skip leading whitespace
 - They parse the first valid number encountered
 - Parsing stops at the first space or non-digit character after the number (matching ATOI/ATOF behavior)
 - Example: `'   10  20   '` parses as `10`, not `20` or `1020`
 - The functions validate ranges and return `false` if the value is out of bounds
-- `NAVParseInteger` and `NAVParseSignedInteger` use ATOI internally
-- `NAVParseLong` and `NAVParseSignedLong` use manual digit-by-digit parsing for full range support and overflow detection
-- `NAVParseFloat` uses ATOF internally
+- **Multi-base Support**: `NAVParseInteger`, `NAVParseSignedInteger`, `NAVParseLong`, and `NAVParseSignedLong` automatically detect number bases:
+    - **Hexadecimal**: `0x` or `0X` prefix (e.g., `'0xFF'`, `'0x1A2B'`) or `$` prefix (e.g., `'$FF'`, `'$1A2B'`)
+    - **Binary**: `0b` or `0B` prefix (e.g., `'0b1010'`, `'0b11111111'`)
+    - **Octal**: `0o` or `0O` prefix (e.g., `'0o777'`, `'0o123'`)
+    - **Decimal**: No prefix (e.g., `'123'`, `'-456'`)
+- `NAVParseLong` and `NAVParseSignedLong` use manual digit-by-digit parsing for full range support and precise overflow detection
+- `NAVParseFloat` uses ATOF internally and only supports decimal notation
+- `NAVParseBoolean` performs case-insensitive matching of valid boolean strings:
+    - **True values**: `'1'`, `'true'`, `'yes'`, `'on'`
+    - **False values**: `'0'`, `'false'`, `'no'`, `'off'`
+    - Returns `false` for any other input (including empty strings, partial matches like `'tr'` or `'fals'`, or numeric values other than `'1'` or `'0'`)
 
 ### Time and Duration Functions
 
@@ -374,6 +415,23 @@ if (success) {
     send_command dvAudioDevice, "'VOLUME-', itoa(volume)"
 }
 
+// Parse hexadecimal color values
+stack_var char colorStr[10]
+stack_var integer red, green, blue
+
+colorStr = '0xFF'
+success = NAVParseInteger(colorStr, red)  // red = 255
+
+colorStr = '$A5'
+success = NAVParseInteger(colorStr, green)  // green = 165
+
+// Parse binary flags
+stack_var char flagsStr[20]
+stack_var integer flags
+
+flagsStr = '0b11010110'
+success = NAVParseInteger(flagsStr, flags)  // flags = 214
+
 // Parse temperature with negative values
 stack_var char tempStr[20]
 stack_var sinteger temperature
@@ -383,6 +441,10 @@ success = NAVParseSignedInteger(tempStr, temperature)
 if (success) {
     // temperature = -15, valid range -32768 to 32767
 }
+
+// Parse hex values with sign
+stack_var sinteger signedHex
+success = NAVParseSignedInteger('-0x10', signedHex)  // signedHex = -16
 
 // Parse large numbers like timestamps
 stack_var char timestampStr[20]
@@ -402,6 +464,31 @@ response = 'Temperature: 22.5 degrees'
 success = NAVParseFloat(response, value)
 if (success) {
     // value = 22.5
+}
+
+// Parse boolean configuration values
+stack_var char enabledStr[10]
+stack_var char boolValue
+
+enabledStr = 'true'
+success = NAVParseBoolean(enabledStr, boolValue)
+if (success) {
+    if (boolValue) {
+        // Feature is enabled
+        send_command dvDevice, "'FEATURE-ON'"
+    } else {
+        // Feature is disabled
+        send_command dvDevice, "'FEATURE-OFF'"
+    }
+}
+
+// Handle configuration from INI files or user input
+stack_var char config[20]
+config = 'DEBUG=yes'
+config = NAVGetStringAfter(config, '=')  // Extract 'yes'
+success = NAVParseBoolean(config, boolValue)
+if (success && boolValue) {
+    // Enable debug mode
 }
 ```
 

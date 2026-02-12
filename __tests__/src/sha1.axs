@@ -5,13 +5,26 @@ PROGRAM_NAME='sha1'
 
 DEFINE_DEVICE
 
-dvTP    =   10001:1:0
+vdvTest = 33201:1:0
+
+DEFINE_START {
+    set_log_level(NAV_LOG_LEVEL_DEBUG)
+}
 
 DEFINE_EVENT
 
-button_event[dvTP, 1] {
+button_event[vdvTest, 1] {
     push: {
-        set_log_level(NAV_LOG_LEVEL_DEBUG)
+        NAVLogTestStart()
         RunSha1Tests()
+        NAVLogTestEnd()
+    }
+}
+
+channel_event[vdvTest, 1] {
+    on: {
+        NAVLogTestStart()
+        RunSha1Tests()
+        NAVLogTestEnd()
     }
 }
