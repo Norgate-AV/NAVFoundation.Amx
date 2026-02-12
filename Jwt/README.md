@@ -12,7 +12,7 @@ This library implements:
 Key features:
 
 - Create JWT tokens with custom headers and payloads
-- Sign tokens using HMAC algorithms (HS256, HS512; HS384 not yet implemented)
+- Sign tokens using HMAC algorithms (HS256, HS384, HS512)
 - Verify token signatures
 - Decode and extract token components
 - Time-based validation (exp, nbf, iat claims)
@@ -272,7 +272,7 @@ define_function char[NAV_JWT_MAX_JSON_LENGTH] NAVJwtCreateHeader(char algorithm[
 
 **Parameters:**
 
-- `algorithm` - Signing algorithm (use `NAV_JWT_ALG_HS256` or `NAV_JWT_ALG_HS512`; HS384 not yet implemented)
+- `algorithm` - Signing algorithm (use `NAV_JWT_ALG_HS256`, `NAV_JWT_ALG_HS384`, or `NAV_JWT_ALG_HS512`)
 - `tokenType` - Token type (default: `NAV_JWT_TYP_JWT`)
 
 **Returns:** JSON string representing the JWT header
@@ -567,12 +567,12 @@ define_function integer ValidateTokenTiming(char token[], char secret[]) {
 
 ### Algorithm Constants
 
-| Constant            | Value     | Description                               |
-| ------------------- | --------- | ----------------------------------------- |
-| `NAV_JWT_ALG_HS256` | `"HS256"` | HMAC using SHA-256 (recommended)          |
-| `NAV_JWT_ALG_HS384` | `"HS384"` | HMAC using SHA-384 (not yet implemented)  |
-| `NAV_JWT_ALG_HS512` | `"HS512"` | HMAC using SHA-512 (strongest)            |
-| `NAV_JWT_ALG_NONE`  | `"none"`  | No signature (unsafe - use with caution!) |
+| Constant            | Value     | Description                 |
+| ------------------- | --------- | --------------------------- |
+| `NAV_JWT_ALG_HS256` | `"HS256"` | HMAC using SHA-256          |
+| `NAV_JWT_ALG_HS384` | `"HS384"` | HMAC using SHA-384          |
+| `NAV_JWT_ALG_HS512` | `"HS512"` | HMAC using SHA-512          |
+| `NAV_JWT_ALG_NONE`  | `"none"`  | No signature (use caution!) |
 
 ### Error Codes
 

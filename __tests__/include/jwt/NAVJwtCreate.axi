@@ -9,7 +9,8 @@ constant char JWT_CREATE_TEST_PAYLOADS[][1024] = {
     '{"sub":"1234567890","name":"John Doe","email":"john.doe@example.com","role":"admin","permissions":["read","write","delete"],"iat":1516239022}', // Complex
     '',                                                             // Empty (should fail)
     '{"exp":0}',                                                    // Zero timestamp
-    '{"sub":"very_long_subject_string_with_lots_of_characters_to_test_boundary_conditions_in_the_jwt_implementation"}' // Long value
+    '{"sub":"very_long_subject_string_with_lots_of_characters_to_test_boundary_conditions_in_the_jwt_implementation"}', // Long value
+    '{"sub":"test384","name":"HS384 Test"}'                         // HS384 test
 }
 
 // Expected success/failure for create tests
@@ -18,6 +19,7 @@ constant char JWT_CREATE_TEST_EXPECTED_RESULT[] = {
     true,
     true,
     false,
+    true,
     true,
     true
 }
@@ -28,7 +30,8 @@ constant char JWT_CREATE_TEST_EXPECTED_HEADER[][255] = {
     '{"alg":"HS512","typ":"JWT"}',
     '{"alg":"HS256","typ":"JWT"}',
     '{"alg":"HS512","typ":"JWT"}',
-    '{"alg":"HS256","typ":"JWT"}'
+    '{"alg":"HS256","typ":"JWT"}',
+    '{"alg":"HS384","typ":"JWT"}'
 }
 
 constant char JWT_CREATE_TEST_EXPECTED_TOKEN[][NAV_JWT_MAX_TOKEN_LENGTH] = {
@@ -37,7 +40,8 @@ constant char JWT_CREATE_TEST_EXPECTED_TOKEN[][NAV_JWT_MAX_TOKEN_LENGTH] = {
     'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOiJqb2huLmRvZUBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbInJlYWQiLCJ3cml0ZSIsImRlbGV0ZSJdLCJpYXQiOjE1MTYyMzkwMjJ9.rNdpOMrWSuLXkM-ZpDf5h105WbtNUJK8wDBJu-OtII22JCSUb6KwRlLYHfTIHsNCj1fFvuVsEW03jXz8npo-pA',
     '',
     'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjB9.S2L6nE_7uhQhro2FiY-nx1o1c1mpdZ8Txy1zzI_KoKm-9O46rmSAmiUJFz8Ur9WFtiSJ88xqYuab_ecoiwEIYA',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2ZXJ5X2xvbmdfc3ViamVjdF9zdHJpbmdfd2l0aF9sb3RzX29mX2NoYXJhY3RlcnNfdG9fdGVzdF9ib3VuZGFyeV9jb25kaXRpb25zX2luX3RoZV9qd3RfaW1wbGVtZW50YXRpb24ifQ.qLdhVATRZUtc7X9C9E1u0MFwnIkU5-5rOFBfO3COmes'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2ZXJ5X2xvbmdfc3ViamVjdF9zdHJpbmdfd2l0aF9sb3RzX29mX2NoYXJhY3RlcnNfdG9fdGVzdF9ib3VuZGFyeV9jb25kaXRpb25zX2luX3RoZV9qd3RfaW1wbGVtZW50YXRpb24ifQ.qLdhVATRZUtc7X9C9E1u0MFwnIkU5-5rOFBfO3COmes',
+    'eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0Mzg0IiwibmFtZSI6IkhTMzg0IFRlc3QifQ.MrCpeBpIKrmKcj78okchRkWdnV-szd4Iwyb0q5_sGzjCjY1Kpzi2fKdXP5BAeDZG'
 }
 
 // Test algorithms for creation
@@ -47,7 +51,8 @@ constant char JWT_CREATE_TEST_ALGORITHMS[][32] = {
     'HS512',
     'HS256',
     'HS512',
-    'HS256'
+    'HS256',
+    'HS384'
 }
 
 // Test secrets for creation (RFC 7518 compliant lengths)
@@ -57,7 +62,8 @@ constant char JWT_CREATE_TEST_SECRETS[][128] = {
     'your-512-bit-secret-key-with-lots-of-entropy-and-more-padding-1234',                   // 64 bytes for HS512
     'your-256-bit-secret-1234567890ab',                                                      // 32 bytes for HS256
     'your-512-bit-secret-key-with-lots-of-entropy-and-more-padding-1234',                   // 64 bytes for HS512
-    'your-256-bit-secret-1234567890ab'                                                       // 32 bytes for HS256
+    'your-256-bit-secret-1234567890ab',                                                      // 32 bytes for HS256
+    'your-384-bit-secret-key-with-good-entropy-1234567890'                                   // 48+ bytes for HS384
 }
 
 define_function TestNAVJwtCreate() {

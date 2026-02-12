@@ -364,11 +364,7 @@ define_function char[HMAC_SHA512_HASH_SIZE] NAVJwtSignData(char data[], char sec
             return NAVHmacSha256(secret, data)
         }
         case NAV_JWT_ALG_TYPE_HS384: {
-            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
-                                        __NAV_FOUNDATION_JWT__,
-                                        'NAVJwtSignData',
-                                        'HS384 algorithm is not supported')
-            return ''
+            return NAVHmacSha384(secret, data)
         }
         case NAV_JWT_ALG_TYPE_HS512: {
             return NAVHmacSha512(secret, data)
