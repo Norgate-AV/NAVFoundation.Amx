@@ -18,7 +18,7 @@ This collection addresses security requirements in AV control systems by providi
 The NAVFoundation.Cryptography collection includes the following libraries:
 
 - [Aes128](./NAVFoundation.Cryptography.Aes128.md) - Implementation of 128-bit Advanced Encryption Standard for symmetric encryption
-- [Hmac](./NAVFoundation.Cryptography.Hmac.md) - Hash-based Message Authentication Code for message authentication, API signing, and webhook verification (supports MD5, SHA-1, SHA-256, SHA-512)
+- [Hmac](./NAVFoundation.Cryptography.Hmac.md) - Hash-based Message Authentication Code for message authentication, API signing, and webhook verification (supports MD5, SHA-1, SHA-256, SHA-384, SHA-512)
 - [Md5](./NAVFoundation.Cryptography.Md5.md) - MD5 message-digest algorithm for cryptographic hashing
 - [Pbkdf2](./NAVFoundation.Cryptography.Pbkdf2.md) - Password-Based Key Derivation Function 2 for secure key generation
 - [Sha1](./NAVFoundation.Cryptography.Sha1.md) - Secure Hash Algorithm 1 for cryptographic hashing

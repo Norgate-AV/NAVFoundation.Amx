@@ -73,6 +73,12 @@ constant integer HMAC_SHA1_BLOCK_SIZE = 64
 constant integer HMAC_SHA256_BLOCK_SIZE = 64
 
 /**
+ * @constant HMAC_SHA384_BLOCK_SIZE
+ * @description Block size for SHA-384 hash function (128 bytes = 1024 bits)
+ */
+constant integer HMAC_SHA384_BLOCK_SIZE = 128
+
+/**
  * @constant HMAC_SHA512_BLOCK_SIZE
  * @description Block size for SHA-512 hash function (128 bytes = 1024 bits)
  */
@@ -99,6 +105,12 @@ constant integer HMAC_SHA1_HASH_SIZE = 20
  * @description Output size for SHA-256 HMAC (32 bytes = 256 bits)
  */
 constant integer HMAC_SHA256_HASH_SIZE = 32
+
+/**
+ * @constant HMAC_SHA384_HASH_SIZE
+ * @description Output size for SHA-384 HMAC (48 bytes = 384 bits)
+ */
+constant integer HMAC_SHA384_HASH_SIZE = 48
 
 /**
  * @constant HMAC_SHA512_HASH_SIZE
@@ -143,6 +155,12 @@ constant char HMAC_ALGORITHM_SHA1[]   = 'SHA1'
  * @description Identifier for SHA-256 hash algorithm
  */
 constant char HMAC_ALGORITHM_SHA256[] = 'SHA256'
+
+/**
+ * @constant HMAC_ALGORITHM_SHA384
+ * @description Identifier for SHA-384 hash algorithm
+ */
+constant char HMAC_ALGORITHM_SHA384[] = 'SHA384'
 
 /**
  * @constant HMAC_ALGORITHM_SHA512

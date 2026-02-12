@@ -17,7 +17,7 @@ HMAC is essential for:
 
 ## Features
 
-- **Multiple Hash Algorithms** - Supports MD5, SHA-1, SHA-256, and SHA-512
+- **Multiple Hash Algorithms** - Supports MD5, SHA-1, SHA-256, SHA-384, and SHA-512
 - **Binary Output** - Returns raw binary digests for maximum flexibility
 - **RFC 2104 Compliant** - Follows the official HMAC specification
 - **Type-Safe Functions** - Algorithm-specific functions with fixed return sizes
@@ -83,6 +83,13 @@ digest = NAVHmacSha1(key, message)
 ```netlinx
 stack_var char digest[HMAC_SHA256_HASH_SIZE]  // 32 bytes
 digest = NAVHmacSha256(key, message)
+```
+
+#### HMAC-SHA384
+
+```netlinx
+stack_var char digest[HMAC_SHA384_HASH_SIZE]  // 48 bytes
+digest = NAVHmacSha384(key, message)
 ```
 
 #### HMAC-SHA512
@@ -222,6 +229,23 @@ Computes HMAC using SHA-256 hash function. **Recommended for most applications.*
 
 ---
 
+#### NAVHmacSha384
+
+```netlinx
+define_function char[HMAC_SHA384_HASH_SIZE] NAVHmacSha384(char key[], char message[])
+```
+
+Computes HMAC using SHA-384 hash function. Provides strong security with moderate output size.
+
+**Parameters:**
+
+- `key` - Secret key for authentication (any length)
+- `message` - Message to authenticate (any length)
+
+**Returns:** 48-byte binary HMAC-SHA384 digest, or empty string if key is empty
+
+---
+
 #### NAVHmacSha512
 
 ```netlinx
@@ -253,7 +277,7 @@ Generic HMAC function with runtime algorithm selection.
 
 **Parameters:**
 
-- `algorithm` - Hash algorithm: 'MD5', 'SHA1', 'SHA256', 'SHA512' (case-insensitive)
+- `algorithm` - Hash algorithm: 'MD5', 'SHA1', 'SHA256', 'SHA384', 'SHA512' (case-insensitive)
 - `key` - Secret key for authentication (any length)
 - `message` - Message to authenticate (any length)
 
@@ -270,6 +294,7 @@ Generic HMAC function with runtime algorithm selection.
 | `HMAC_MD5_BLOCK_SIZE`    | 64 bytes  | MD5 block size     |
 | `HMAC_SHA1_BLOCK_SIZE`   | 64 bytes  | SHA-1 block size   |
 | `HMAC_SHA256_BLOCK_SIZE` | 64 bytes  | SHA-256 block size |
+| `HMAC_SHA384_BLOCK_SIZE` | 128 bytes | SHA-384 block size |
 | `HMAC_SHA512_BLOCK_SIZE` | 128 bytes | SHA-512 block size |
 
 ### Hash Sizes
@@ -279,6 +304,7 @@ Generic HMAC function with runtime algorithm selection.
 | `HMAC_MD5_HASH_SIZE`    | 16 bytes | MD5 output size     |
 | `HMAC_SHA1_HASH_SIZE`   | 20 bytes | SHA-1 output size   |
 | `HMAC_SHA256_HASH_SIZE` | 32 bytes | SHA-256 output size |
+| `HMAC_SHA384_HASH_SIZE` | 48 bytes | SHA-384 output size |
 | `HMAC_SHA512_HASH_SIZE` | 64 bytes | SHA-512 output size |
 
 ### Algorithm Identifiers
@@ -288,6 +314,7 @@ Generic HMAC function with runtime algorithm selection.
 | `HMAC_ALGORITHM_MD5`    | 'MD5'    | MD5 identifier     |
 | `HMAC_ALGORITHM_SHA1`   | 'SHA1'   | SHA-1 identifier   |
 | `HMAC_ALGORITHM_SHA256` | 'SHA256' | SHA-256 identifier |
+| `HMAC_ALGORITHM_SHA384` | 'SHA384' | SHA-384 identifier |
 | `HMAC_ALGORITHM_SHA512` | 'SHA512' | SHA-512 identifier |
 
 ### Error Codes
@@ -306,11 +333,13 @@ Generic HMAC function with runtime algorithm selection.
 | MD5         | ⚠️ Weak        | Very Fast | Legacy systems only               |
 | SHA-1       | ⚠️ Weak        | Fast      | Legacy/compatibility              |
 | **SHA-256** | ✅ Strong      | Fast      | **General purpose (recommended)** |
+| SHA-384     | ✅ Strong      | Medium    | High security, moderate output    |
 | SHA-512     | ✅ Very Strong | Medium    | Maximum security requirements     |
 
 ### Recommendations
 
 - **SHA-256**: Best choice for most applications (JWT HS256, API signing, webhooks)
+- **SHA-384**: Good balance when you need stronger security than SHA-256 (JWT HS384)
 - **SHA-512**: Use when maximum security is required (JWT HS512, high-value transactions)
 - **SHA-1**: Only for legacy systems or when compatibility requires it
 - **MD5**: Avoid for any security-sensitive applications
@@ -327,7 +356,7 @@ HMAC(K, m) = H((K' ⊕ opad) || H((K' ⊕ ipad) || m))
 
 Where:
 
-- `H` = Hash function (MD5, SHA-1, SHA-256, or SHA-512)
+- `H` = Hash function (MD5, SHA-1, SHA-256, SHA-384, or SHA-512)
 - `K` = Secret key
 - `K'` = Key adjusted to block size (hashed if too long, padded if too short)
 - `m` = Message to authenticate
@@ -400,6 +429,7 @@ hexString = NAVByteArrayToHexString(digest)
 - `NAVFoundation.Cryptography.Md5.axi` - MD5 hash function
 - `NAVFoundation.Cryptography.Sha1.axi` - SHA-1 hash function
 - `NAVFoundation.Cryptography.Sha256.axi` - SHA-256 hash function
+- `NAVFoundation.Cryptography.Sha384.axi` - SHA-384 hash function
 - `NAVFoundation.Cryptography.Sha512.axi` - SHA-512 hash function
 - `NAVFoundation.ErrorLogUtils.axi` - Error logging
 
@@ -415,6 +445,7 @@ hexString = NAVByteArrayToHexString(digest)
 - [MD5](./NAVFoundation.Cryptography.Md5.md) - Underlying hash function
 - [SHA1](./NAVFoundation.Cryptography.Sha1.md) - Underlying hash function
 - [SHA256](./NAVFoundation.Cryptography.Sha256.md) - Underlying hash function
+- [SHA384](./NAVFoundation.Cryptography.Sha384.md) - Underlying hash function
 - [SHA512](./NAVFoundation.Cryptography.Sha512.md) - Underlying hash function
 - [Base64](../Encoding/NAVFoundation.Encoding.Base64.md) - For encoding HMAC output
 - JWT (future) - Will use HMAC for token signing

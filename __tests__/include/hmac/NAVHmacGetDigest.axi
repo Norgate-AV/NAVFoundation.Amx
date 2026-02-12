@@ -13,10 +13,14 @@ constant char NAV_HMAC_GENERIC_KEY[][20] = {
     {$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b},
     {$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b},
     {$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b},
+    {$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b},
+    {$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b},
     {$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b}
 }
 
 constant char NAV_HMAC_GENERIC_DATA[][10] = {
+    'Hi There',
+    'Hi There',
     'Hi There',
     'Hi There',
     'Hi There',
@@ -30,6 +34,8 @@ constant char NAV_HMAC_GENERIC_ALGO[][10] = {
     'SHA1',
     'SHA-256',
     'SHA256',
+    'SHA-384',
+    'SHA384',
     'SHA512',
     'INVALID'
 }
@@ -55,6 +61,20 @@ constant char NAV_HMAC_GENERIC_EXPECTED[][64] = {
     {
         $b0,$34,$4c,$61,$d8,$db,$38,$53,$5c,$a8,$af,$ce,$af,$0b,$f1,$2b,
         $88,$1d,$c2,$00,$c9,$83,$3d,$a7,$26,$e9,$37,$6c,$2e,$32,$cf,$f7
+    },
+
+    // SHA-384 (with hyphen)
+    {
+        $af,$d0,$39,$44,$d8,$48,$95,$62,$6b,$08,$25,$f4,$ab,$46,$90,$7f,
+        $15,$f9,$da,$db,$e4,$10,$1e,$c6,$82,$aa,$03,$4c,$7c,$eb,$c5,$9c,
+        $fa,$ea,$9e,$a9,$07,$6e,$de,$7f,$4a,$f1,$52,$e8,$b2,$fa,$9c,$b6
+    },
+
+    // SHA384 (without hyphen)
+    {
+        $af,$d0,$39,$44,$d8,$48,$95,$62,$6b,$08,$25,$f4,$ab,$46,$90,$7f,
+        $15,$f9,$da,$db,$e4,$10,$1e,$c6,$82,$aa,$03,$4c,$7c,$eb,$c5,$9c,
+        $fa,$ea,$9e,$a9,$07,$6e,$de,$7f,$4a,$f1,$52,$e8,$b2,$fa,$9c,$b6
     },
 
     // SHA512

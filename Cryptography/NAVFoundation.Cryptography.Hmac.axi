@@ -36,7 +36,7 @@ SOFTWARE.
  * @brief Implementation of HMAC (Keyed-Hash Message Authentication Code).
  *
  * This module provides HMAC functionality for message authentication using
- * various cryptographic hash functions (MD5, SHA-1, SHA-256, SHA-512).
+ * various cryptographic hash functions (MD5, SHA-1, SHA-256, SHA-384, SHA-512).
  *
  * HMAC is defined as:
  *   HMAC(K, m) = H((K' ⊕ opad) || H((K' ⊕ ipad) || m))
@@ -61,6 +61,7 @@ SOFTWARE.
 #include 'NAVFoundation.Cryptography.Md5.axi'
 #include 'NAVFoundation.Cryptography.Sha1.axi'
 #include 'NAVFoundation.Cryptography.Sha256.axi'
+#include 'NAVFoundation.Cryptography.Sha384.axi'
 #include 'NAVFoundation.Cryptography.Sha512.axi'
 #include 'NAVFoundation.ErrorLogUtils.axi'
 
@@ -105,6 +106,9 @@ define_function char[HMAC_SHA512_HASH_SIZE] NAVHmacCompute(
             case HMAC_ALGORITHM_SHA256: {
                 keyAdjusted = NAVSha256GetHash(key)
             }
+            case HMAC_ALGORITHM_SHA384: {
+                keyAdjusted = NAVSha384GetHash(key)
+            }
             case HMAC_ALGORITHM_SHA512: {
                 keyAdjusted = NAVSha512GetHash(key)
             }
@@ -134,6 +138,9 @@ define_function char[HMAC_SHA512_HASH_SIZE] NAVHmacCompute(
         }
         case HMAC_ALGORITHM_SHA256: {
             return NAVSha256GetHash("outerKey, NAVSha256GetHash("innerKey, message")")
+        }
+        case HMAC_ALGORITHM_SHA384: {
+            return NAVSha384GetHash("outerKey, NAVSha384GetHash("innerKey, message")")
         }
         case HMAC_ALGORITHM_SHA512: {
             return NAVSha512GetHash("outerKey, NAVSha512GetHash("innerKey, message")")
@@ -250,6 +257,41 @@ define_function char[HMAC_SHA256_HASH_SIZE] NAVHmacSha256(char key[], char messa
 
 
 /**
+ * @function NAVHmacSha384
+ * @public
+ * @description Computes HMAC-SHA384 digest using the provided key and message.
+ *
+ * @param {char[]} key - Secret key for HMAC operation
+ * @param {char[]} message - Message to authenticate
+ *
+ * @returns {char[HMAC_SHA384_HASH_SIZE]} 48-byte HMAC-SHA384 digest (binary)
+ *
+ * @example
+ * stack_var char key[50]
+ * stack_var char message[100]
+ * stack_var char digest[HMAC_SHA384_HASH_SIZE]
+ *
+ * key = 'my-secret-key'
+ * message = 'Hello, World!'
+ * digest = NAVHmacSha384(key, message)
+ *
+ * @note Returns empty string if key is empty
+ */
+define_function char[HMAC_SHA384_HASH_SIZE] NAVHmacSha384(char key[], char message[]) {
+    // Validate key
+    if (!length_array(key)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_CRYPTOGRAPHY_HMAC__,
+                                    'NAVHmacSha384',
+                                    'Empty key provided')
+        return ''
+    }
+
+    return NAVHmacCompute(HMAC_ALGORITHM_SHA384, HMAC_SHA384_BLOCK_SIZE, key, message)
+}
+
+
+/**
  * @function NAVHmacSha512
  * @public
  * @description Computes HMAC-SHA512 digest using the provided key and message.
@@ -333,6 +375,10 @@ define_function char[HMAC_SHA512_HASH_SIZE] NAVHmacGetDigest(char algorithm[], c
         case 'SHA-256': {
             return NAVHmacSha256(key, message)
         }
+        case HMAC_ALGORITHM_SHA384:
+        case 'SHA-384': {
+            return NAVHmacSha384(key, message)
+        }
         case HMAC_ALGORITHM_SHA512:
         case 'SHA-512': {
             return NAVHmacSha512(key, message)
@@ -341,7 +387,7 @@ define_function char[HMAC_SHA512_HASH_SIZE] NAVHmacGetDigest(char algorithm[], c
             NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
                                         __NAV_FOUNDATION_CRYPTOGRAPHY_HMAC__,
                                         'NAVHmacGetDigest',
-                                        "'Unsupported algorithm: ', algorithm, ' (supported: MD5, SHA1, SHA256, SHA512)'")
+                                        "'Unsupported algorithm: ', algorithm, ' (supported: MD5, SHA1, SHA256, SHA384, SHA512)'")
             return ''
         }
     }
