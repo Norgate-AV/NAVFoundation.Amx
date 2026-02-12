@@ -1,4 +1,4 @@
-PROGRAM_NAME='NAVFoundation.Cryptography.Sha512'
+PROGRAM_NAME='NAVFoundation.Cryptography.Sha384'
 
 /*
  _   _                       _          ___     __
@@ -32,67 +32,71 @@ SOFTWARE.
 */
 
 /**
- * @file NAVFoundation.Cryptography.Sha512.axi
- * @brief Implementation of the SHA-512 cryptographic hash function.
+ * @file NAVFoundation.Cryptography.Sha384.axi
+ * @brief Implementation of the SHA-384 cryptographic hash function.
  *
- * This module provides functions to compute SHA-512 hashes of data.
- * SHA-512 produces a 512-bit (64-byte) hash value, typically rendered
- * as a 128-character hexadecimal number.
+ * This module provides functions to compute SHA-384 hashes of data.
+ * SHA-384 produces a 384-bit (48-byte) hash value, typically rendered
+ * as a 96-character hexadecimal number.
  *
  * This implementation uses the NAVFoundation.Int64 library for 64-bit
- * arithmetic operations required by the SHA-512 algorithm. While the
+ * arithmetic operations required by the SHA-384 algorithm. While the
  * Int64 library has some documented limitations for extreme values,
- * these limitations do not affect the correctness of the SHA-512
+ * these limitations do not affect the correctness of the SHA-384
  * implementation, which only requires arithmetic within well-defined
  * ranges.
+ *
+ * SHA-384 is a truncated version of SHA-512, using different initial
+ * hash values and outputting only the first 384 bits (6 of the 8
+ * 64-bit words) of the result.
  *
  * Implementation based on RFC6234: https://www.rfc-editor.org/rfc/rfc6234
  */
 
-#IF_NOT_DEFINED __NAV_FOUNDATION_CRYPTOGRAPHY_SHA512__
-#DEFINE __NAV_FOUNDATION_CRYPTOGRAPHY_SHA512__ 'NAVFoundation.Cryptography.Sha512'
+#IF_NOT_DEFINED __NAV_FOUNDATION_CRYPTOGRAPHY_SHA384__
+#DEFINE __NAV_FOUNDATION_CRYPTOGRAPHY_SHA384__ 'NAVFoundation.Cryptography.Sha384'
 
-#include 'NAVFoundation.Cryptography.Sha512.h.axi'
+#include 'NAVFoundation.Cryptography.Sha384.h.axi'
 #include 'NAVFoundation.Int64.axi'
 #include 'NAVFoundation.ErrorLogUtils.axi'
 
-// Only define SHA512_DEBUG if not already defined elsewhere
-#IF_NOT_DEFINED SHA512_DEBUG
-// #DEFINE SHA512_DEBUG  // Comment this out to disable debug logging
+// Only define SHA384_DEBUG if not already defined elsewhere
+#IF_NOT_DEFINED SHA384_DEBUG
+// #DEFINE SHA384_DEBUG  // Comment this out to disable debug logging
 #END_IF
 
-// #DEFINE SHA512_DEBUG
-// #DEFINE SHA512_EXTENSIVE_DEBUG
+// #DEFINE SHA384_DEBUG
+// #DEFINE SHA384_EXTENSIVE_DEBUG
 
 
 /**
- * @function NAVSha512DebugLog
+ * @function NAVSha384DebugLog
  * @description Logs a debug message only if the required level is enabled
  *
  * @param {integer} level - Debug level required for this message
  * @param {char} message - The message to log
  */
-define_function NAVSha512DebugLog(integer level, char message[]) {
-    #IF_DEFINED SHA512_DEBUG
-    if (level <= SHA512_DEBUG_LEVEL) {
+define_function NAVSha384DebugLog(integer level, char message[]) {
+    #IF_DEFINED SHA384_DEBUG
+    if (level <= SHA384_DEBUG_LEVEL) {
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, message)
     }
     #END_IF
 }
 
 /**
- * @function NAVGetSHA512K
+ * @function NAVGetSHA384K
  * @internal
- * @description Helper function to get SHA-512 constants as _NAVInt64 structs
+ * @description Helper function to get SHA-384 constants as _NAVInt64 structs
  *
  * @param {integer} index - The index of the constant to retrieve (0-79)
  * @param {_NAVInt64} result - The struct to populate with the constant value
  */
-define_function NAVGetSHA512K(integer index, _NAVInt64 result) {
+define_function NAVGetSHA384K(integer index, _NAVInt64 result) {
     stack_var integer i
     // Adjust index because:
-    // 1. SHA-512 spec uses 0-based indexing for K[0]...K[79]
-    // 2. NetLinx arrays are 1-based, so our array is SHA512_K[1]...SHA512_K[80]
+    // 1. SHA-384 spec uses 0-based indexing for K[0]...K[79]
+    // 2. NetLinx arrays are 1-based, so our array is SHA384_K[1]...SHA384_K[80]
     // 3. We need to add 1 to convert from 0-based algorithm index to 1-based array index
 
     // Make a copy so we don't modify the original
@@ -105,63 +109,63 @@ define_function NAVGetSHA512K(integer index, _NAVInt64 result) {
         return
     }
 
-    #IF_DEFINED SHA512_DEBUG
+    #IF_DEFINED SHA384_DEBUG
     if (i <= 3 || i >= 78) {
-        NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Using K[', itoa(i-1), '] = $', format('%08x', SHA512_K[i][1]), format('%08x', SHA512_K[i][2]), ' at index ', itoa(i)")
+        NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Using K[', itoa(i-1), '] = $', format('%08x', SHA384_K[i][1]), format('%08x', SHA384_K[i][2]), ' at index ', itoa(i)")
     }
     #END_IF
 
-    result.Hi = SHA512_K[i][1]
-    result.Lo = SHA512_K[i][2]
+    result.Hi = SHA384_K[i][1]
+    result.Lo = SHA384_K[i][2]
 }
 
 /**
- * @function NAVSha512GetHash
+ * @function NAVSha384GetHash
  * @public
- * @description Computes the SHA-512 hash of an input string
- * This is the main public API function for the SHA-512 module.
+ * @description Computes the SHA-384 hash of an input string
+ * This is the main public API function for the SHA-384 module.
  *
  * @param {char[]} value - The input string to be hashed
  *
- * @returns {char[64]} 64-byte SHA-512 hash value (512 bits), or empty string on error
+ * @returns {char[48]} 48-byte SHA-384 hash value (384 bits), or empty string on error
  *
  * @example
  * stack_var char message[100]
- * stack_var char digest[64]
- * stack_var char hexDigest[128]
+ * stack_var char digest[48]
+ * stack_var char hexDigest[96]
  *
  * message = 'Hello, World!'
- * digest = NAVSha512GetHash(message)
+ * digest = NAVSha384GetHash(message)
  * // To convert to hexadecimal display format:
  * hexDigest = NAVHexToString(digest)
  */
-define_function char[64] NAVSha512GetHash(char value[]) {
+define_function char[48] NAVSha384GetHash(char value[]) {
     stack_var integer error
-    stack_var _NAVSha512Context context
-    stack_var char digest[SHA512_HASH_SIZE]
+    stack_var _NAVSha384Context context
+    stack_var char digest[SHA384_HASH_SIZE]
     stack_var integer i
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'========== SHA512 BEGIN HASH OPERATION =========='")
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'========== SHA384 BEGIN HASH OPERATION =========='")
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Input length: ', itoa(length_array(value)), ' bytes'")
     if (length_array(value) > 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'First 10 bytes: ', NAVSha512HexToString(mid_string(value, 1, min_value(10, length_array(value))))")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'First 10 bytes: ', NAVSha384HexToString(mid_string(value, 1, min_value(10, length_array(value))))")
     }
     #END_IF
 
-    #IF_DEFINED SHA512_DEBUG
-    NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Hashing input of length ', itoa(length_array(value))")
+    #IF_DEFINED SHA384_DEBUG
+    NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Hashing input of length ', itoa(length_array(value))")
     if (length_array(value) < 100) {
-        NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Input = "', value, '"'")
+        NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Input = "', value, '"'")
     }
     else {
-        NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Input (first 50 bytes) = "', mid_string(value, 1, 50), '..."'")
+        NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Input (first 50 bytes) = "', mid_string(value, 1, 50), '..."'")
     }
     #END_IF
 
-    error = NAVSha512Reset(context)
+    error = NAVSha384Reset(context)
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'After reset, context state:'")
     for (i = 1; i <= 8; i++) {
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Hash[', itoa(i), '] = ', NAVInt64ToDebugString(context.IntermediateHash[i])")
@@ -169,36 +173,36 @@ define_function char[64] NAVSha512GetHash(char value[]) {
     #END_IF
 
     if (error > 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'NAVSha512Reset Error => ', itoa(error)")
+        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'NAVSha384Reset Error => ', itoa(error)")
         return ""
     }
 
-    error = NAVSha512Input(context, value, length_array(value))
+    error = NAVSha384Input(context, value, length_array(value))
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'After input, message block index = ', itoa(context.MessageBlockIndex)")
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Message length in bits = ', NAVInt64ToDebugString(context.LengthLow)")
     #END_IF
 
     if (error > 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'NAVSha512Input Error => ', itoa(error)")
+        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'NAVSha384Input Error => ', itoa(error)")
         return ""
     }
 
-    error = NAVSha512Result(context, digest)
+    error = NAVSha384Result(context, digest)
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'After result, final hash values:'")
     for (i = 1; i <= 8; i++) {
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Hash[', itoa(i), '] = ', NAVInt64ToDebugString(context.IntermediateHash[i])")
     }
 
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Final digest (hex): ', NAVSha512HexToString(digest)")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'========== SHA512 END HASH OPERATION =========='")
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Final digest (hex): ', NAVSha384HexToString(digest)")
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'========== SHA384 END HASH OPERATION =========='")
     #END_IF
 
     if (error > 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'NAVSha512Result Error => ', itoa(error), ', could not compute digest'")
+        NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'NAVSha384Result Error => ', itoa(error), ', could not compute digest'")
         return ""
     }
 
@@ -206,18 +210,18 @@ define_function char[64] NAVSha512GetHash(char value[]) {
 }
 
 /**
- * @function NAVSha512Reset
+ * @function NAVSha384Reset
  * @internal
- * @description Initializes the context in preparation for computing a new SHA-512 message digest
- * Sets up the initial hash values according to the SHA-512 specification.
+ * @description Initializes the context in preparation for computing a new SHA-384 message digest
+ * Sets up the initial hash values according to the SHA-384 specification.
  *
- * @param {_NAVSha512Context} context - The context to reset
+ * @param {_NAVSha384Context} context - The context to reset
  *
  * @returns {integer} SHA_SUCCESS on success, or an error code
  */
-define_function integer NAVSha512Reset(_NAVSha512Context context) {
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'SHA512 Reset: Initializing context with standard initial values'")
+define_function integer NAVSha384Reset(_NAVSha384Context context) {
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'SHA384 Reset: Initializing context with SHA-384 initial values'")
     #END_IF
 
     // Initialize length to zero
@@ -228,44 +232,45 @@ define_function integer NAVSha512Reset(_NAVSha512Context context) {
 
     context.MessageBlockIndex = 0
 
-    // Initial hash values (first 64 bits of the fractional parts of the square roots of the first 8 primes 2..19)
-    // CRITICAL: These values must exactly match the SHA-512 specification - verify each value
-    context.IntermediateHash[1].Hi = $6a09e667
-    context.IntermediateHash[1].Lo = $f3bcc908
+    // Initial hash values for SHA-384 (first 64 bits of the fractional parts
+    // of the square roots of the 9th through 16th prime numbers: 23, 29, 31, 37, 41, 43, 47, 53)
+    // CRITICAL: These values must exactly match the SHA-384 specification - verify each value
+    context.IntermediateHash[1].Hi = $cbbb9d5d
+    context.IntermediateHash[1].Lo = $c1059ed8
 
-    context.IntermediateHash[2].Hi = $bb67ae85
-    context.IntermediateHash[2].Lo = $84caa73b
+    context.IntermediateHash[2].Hi = $629a292a
+    context.IntermediateHash[2].Lo = $367cd507
 
-    context.IntermediateHash[3].Hi = $3c6ef372
-    context.IntermediateHash[3].Lo = $fe94f82b
+    context.IntermediateHash[3].Hi = $9159015a
+    context.IntermediateHash[3].Lo = $3070dd17
 
-    context.IntermediateHash[4].Hi = $a54ff53a
-    context.IntermediateHash[4].Lo = $5f1d36f1
+    context.IntermediateHash[4].Hi = $152fecd8
+    context.IntermediateHash[4].Lo = $f70e5939
 
-    context.IntermediateHash[5].Hi = $510e527f
-    context.IntermediateHash[5].Lo = $ade682d1
+    context.IntermediateHash[5].Hi = $67332667
+    context.IntermediateHash[5].Lo = $ffc00b31
 
-    context.IntermediateHash[6].Hi = $9b05688c
-    context.IntermediateHash[6].Lo = $2b3e6c1f
+    context.IntermediateHash[6].Hi = $8eb44a87
+    context.IntermediateHash[6].Lo = $68581511
 
-    context.IntermediateHash[7].Hi = $1f83d9ab
-    context.IntermediateHash[7].Lo = $fb41bd6b
+    context.IntermediateHash[7].Hi = $db0c2e0d
+    context.IntermediateHash[7].Lo = $64f98fa7
 
-    context.IntermediateHash[8].Hi = $5be0cd19
-    context.IntermediateHash[8].Lo = $137e2179
+    context.IntermediateHash[8].Hi = $47b5481d
+    context.IntermediateHash[8].Lo = $befa4fa4
 
     context.Computed  = false
     context.Corrupted = false
 
     context.MessageBlock = ""
 
-    #IF_DEFINED SHA512_DEBUG
-    NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Reset context, initial hash values:'")
-    NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'Hash[1] = ', NAVInt64ToDebugString(context.IntermediateHash[1])")
-    NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'Hash[8] = ', NAVInt64ToDebugString(context.IntermediateHash[8])")
+    #IF_DEFINED SHA384_DEBUG
+    NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Reset context, initial hash values:'")
+    NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'Hash[1] = ', NAVInt64ToDebugString(context.IntermediateHash[1])")
+    NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'Hash[8] = ', NAVInt64ToDebugString(context.IntermediateHash[8])")
     #END_IF
 
-    return SHA512_SUCCESS
+    return SHA384_SUCCESS
 }
 
 #IF_NOT_DEFINED __NAV_FOUNDATION_CRYPTOGRAPHY_INT64_DEBUG_STRING__
@@ -285,21 +290,21 @@ define_function char[32] NAVInt64ToDebugString(_NAVInt64 val) {
 #END_IF
 
 /**
- * @function NAVSha512Result
+ * @function NAVSha384Result
  * @internal
- * @description Finalizes the SHA-512 calculation and returns the 512-bit message digest
+ * @description Finalizes the SHA-384 calculation and returns the 384-bit message digest
  * Performs the padding if needed and produces the final hash value.
  *
- * @param {_NAVSha512Context} context - The context to use to calculate the SHA-512 hash
- * @param {char[SHA512_HASH_SIZE]} digest - Where the digest is returned (64 bytes)
+ * @param {_NAVSha384Context} context - The context to use to calculate the SHA-384 hash
+ * @param {char[SHA384_HASH_SIZE]} digest - Where the digest is returned (48 bytes)
  *
  * @returns {integer} SHA_SUCCESS on success, or an error code
  */
-define_function integer NAVSha512Result(_NAVSha512Context context, char digest[SHA512_HASH_SIZE]) {
+define_function integer NAVSha384Result(_NAVSha384Context context, char digest[SHA384_HASH_SIZE]) {
     stack_var integer i
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'SHA512 Result: Creating digest'")
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'SHA384 Result: Creating digest'")
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Context computed = ', itoa(context.Computed), ', corrupted = ', itoa(context.Corrupted)")
     #END_IF
 
@@ -308,11 +313,11 @@ define_function integer NAVSha512Result(_NAVSha512Context context, char digest[S
     }
 
     if (!context.Computed) {
-        #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+        #IF_DEFINED SHA384_EXTENSIVE_DEBUG
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Need to pad message and process final block'")
         #END_IF
 
-        NAVSha512PadMessage(context)
+        NAVSha384PadMessage(context)
 
         // After padding, we need to explicitly set as computed
         context.Computed = true
@@ -325,7 +330,7 @@ define_function integer NAVSha512Result(_NAVSha512Context context, char digest[S
         context.LengthLow.Hi = 0
         context.LengthLow.Lo = 0
 
-        #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+        #IF_DEFINED SHA384_EXTENSIVE_DEBUG
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Final hash values after padding:'")
         for (i = 1; i <= 8; i++) {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Hash[', itoa(i), '] = ', NAVInt64ToDebugString(context.IntermediateHash[i])")
@@ -333,62 +338,63 @@ define_function integer NAVSha512Result(_NAVSha512Context context, char digest[S
         #END_IF
     }
 
-    #IF_DEFINED SHA512_DEBUG
-    NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Creating final digest'")
-    NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Final hash[1] = ', NAVInt64ToDebugString(context.IntermediateHash[1])")
-    NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Final hash[8] = ', NAVInt64ToDebugString(context.IntermediateHash[8])")
+    #IF_DEFINED SHA384_DEBUG
+    NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Creating final digest'")
+    NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Final hash[1] = ', NAVInt64ToDebugString(context.IntermediateHash[1])")
+    NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Final hash[6] = ', NAVInt64ToDebugString(context.IntermediateHash[6])")
     #END_IF
 
     // Create the final hash value (big-endian)
+    // SHA-384 uses only the first 6 of the 8 64-bit words (384 bits = 48 bytes)
     digest = ""
-    for (i = 1; i <= 8; i++) {
+    for (i = 1; i <= 6; i++) {
         stack_var char bytes[8]
 
         bytes = NAVInt64ToByteArrayBE(context.IntermediateHash[i])
         digest = "digest, bytes"
 
-        #IF_DEFINED SHA512_EXTENSIVE_DEBUG
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Added to digest - Hash[', itoa(i), '] = ', NAVInt64ToDebugString(context.IntermediateHash[i]), ' as bytes: ', NAVSha512HexToString(bytes)")
+        #IF_DEFINED SHA384_EXTENSIVE_DEBUG
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Added to digest - Hash[', itoa(i), '] = ', NAVInt64ToDebugString(context.IntermediateHash[i]), ' as bytes: ', NAVSha384HexToString(bytes)")
         #END_IF
 
-        #IF_DEFINED SHA512_DEBUG
+        #IF_DEFINED SHA384_DEBUG
         if (i <= 2) {
-            NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Hash[', itoa(i), '] bytes = ', NAVHexToString(bytes)")
+            NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Hash[', itoa(i), '] bytes = ', NAVHexToString(bytes)")
         }
         #END_IF
     }
 
-    #IF_DEFINED SHA512_DEBUG
-    NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Final digest (first 16 bytes) = ', NAVHexToString(mid_string(digest, 1, 16)), '...'")
+    #IF_DEFINED SHA384_DEBUG
+    NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Final digest (first 16 bytes) = ', NAVHexToString(mid_string(digest, 1, 16)), '...'")
     #END_IF
 
-    return SHA512_SUCCESS
+    return SHA384_SUCCESS
 }
 
 /**
- * @function NAVSha512Input
+ * @function NAVSha384Input
  * @internal
- * @description Processes an array of bytes as part of the SHA-512 calculation
+ * @description Processes an array of bytes as part of the SHA-384 calculation
  * Updates the context state to include the new data in the hash calculation.
  *
- * @param {_NAVSha512Context} context - The SHA context to update
+ * @param {_NAVSha384Context} context - The SHA context to update
  * @param {char[]} message - An array of characters representing the next portion of the message
  * @param {integer} length - The length of the message
  *
  * @returns {integer} SHA_SUCCESS on success, or an error code
  */
-define_function integer NAVSha512Input(_NAVSha512Context context, char message[], integer length) {
+define_function integer NAVSha384Input(_NAVSha384Context context, char message[], integer length) {
     stack_var integer messageIndex
     stack_var _NAVInt64 temp
     stack_var integer carry
 
     if (!length) {
-        return SHA512_SUCCESS
+        return SHA384_SUCCESS
     }
 
     if (context.Computed) {
-        context.Corrupted = SHA512_STATE_ERROR
-        return SHA512_STATE_ERROR
+        context.Corrupted = SHA384_STATE_ERROR
+        return SHA384_STATE_ERROR
     }
 
     if (context.Corrupted) {
@@ -397,11 +403,11 @@ define_function integer NAVSha512Input(_NAVSha512Context context, char message[]
 
     messageIndex = 0
 
-    #IF_DEFINED SHA512_DEBUG
+    #IF_DEFINED SHA384_DEBUG
     if (length > 0) {
-        NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Input adding ', itoa(length), ' bytes'")
+        NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Input adding ', itoa(length), ' bytes'")
         if (context.MessageBlockIndex > 0 && context.MessageBlockIndex < 10) {
-            NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: First few bytes = ', NAVHexToString(mid_string(context.MessageBlock, 1, context.MessageBlockIndex))")
+            NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: First few bytes = ', NAVHexToString(mid_string(context.MessageBlock, 1, context.MessageBlockIndex))")
         }
     }
     #END_IF
@@ -410,7 +416,7 @@ define_function integer NAVSha512Input(_NAVSha512Context context, char message[]
         context.MessageBlock = "context.MessageBlock, message[(messageIndex + 1)] & $FF"
         context.MessageBlockIndex = context.MessageBlockIndex + 1  // Use longhand form
 
-        #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+        #IF_DEFINED SHA384_EXTENSIVE_DEBUG
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Adding byte to message block: ', format('%02x', type_cast(message[(messageIndex + 1)] & $FF)), ' at index ', itoa(context.MessageBlockIndex)")
         #END_IF
 
@@ -424,7 +430,7 @@ define_function integer NAVSha512Input(_NAVSha512Context context, char message[]
 
             // Check for overflow in the LengthLow.Hi field
             if (context.LengthLow.Hi == 0) {
-                #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+                #IF_DEFINED SHA384_EXTENSIVE_DEBUG
                 NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'LengthLow.Hi overflow, incrementing LengthHigh.Lo'")
                 #END_IF
 
@@ -433,7 +439,7 @@ define_function integer NAVSha512Input(_NAVSha512Context context, char message[]
 
                 // Check for overflow in LengthHigh.Lo
                 if (context.LengthHigh.Lo == 0) {
-                    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+                    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
                     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'LengthHigh.Lo overflow, incrementing LengthHigh.Hi'")
                     #END_IF
 
@@ -442,49 +448,49 @@ define_function integer NAVSha512Input(_NAVSha512Context context, char message[]
 
                     // Check for overflow - too long message
                     if (context.LengthHigh.Hi == 0) {
-                        context.Corrupted = SHA512_INPUT_TOO_LONG
-                        return SHA512_INPUT_TOO_LONG
+                        context.Corrupted = SHA384_INPUT_TOO_LONG
+                        return SHA384_INPUT_TOO_LONG
                     }
                 }
             }
         }
 
         if (context.MessageBlockIndex == 128) {
-            #IF_DEFINED SHA512_DEBUG
-            NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Calling ProcessMessageBlock - block filled'")
+            #IF_DEFINED SHA384_DEBUG
+            NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Calling ProcessMessageBlock - block filled'")
             #END_IF
-            NAVSha512ProcessMessageBlock(context)
+            NAVSha384ProcessMessageBlock(context)
         }
 
         messageIndex = messageIndex + 1  // Use longhand form
         length = length - 1  // Use longhand form
     }
 
-    return SHA512_SUCCESS
+    return SHA384_SUCCESS
 }
 
 /**
- * @function NAVSha512PadMessage
+ * @function NAVSha384PadMessage
  * @internal
- * @description Pads the message according to SHA-512 requirements
+ * @description Pads the message according to SHA-384 requirements
  * Adds padding bits and message length to prepare for final hash calculation.
  *
- * @param {_NAVSha512Context} context - The SHA context to pad
+ * @param {_NAVSha384Context} context - The SHA context to pad
  */
-define_function NAVSha512PadMessage(_NAVSha512Context context) {
+define_function NAVSha384PadMessage(_NAVSha384Context context) {
     stack_var integer i
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'SHA512 PadMessage: Starting padding, current index = ', itoa(context.MessageBlockIndex)")
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'SHA384 PadMessage: Starting padding, current index = ', itoa(context.MessageBlockIndex)")
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Message length in bits = ', NAVInt64ToDebugString(context.LengthLow)")
     if (context.MessageBlockIndex > 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Current block data (first 16 bytes): ', NAVSha512HexToString(mid_string(context.MessageBlock, 1, min_value(16, context.MessageBlockIndex)))")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Current block data (first 16 bytes): ', NAVSha384HexToString(mid_string(context.MessageBlock, 1, min_value(16, context.MessageBlockIndex)))")
     }
     #END_IF
 
     // Check if we need to create a new block for padding
     if (context.MessageBlockIndex >= 112) { // Not enough room for length (need 16 bytes at end)
-        #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+        #IF_DEFINED SHA384_EXTENSIVE_DEBUG
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Padding requires two blocks - index (', itoa(context.MessageBlockIndex), ') >= 112'")
         #END_IF
 
@@ -498,13 +504,13 @@ define_function NAVSha512PadMessage(_NAVSha512Context context) {
             context.MessageBlockIndex = context.MessageBlockIndex + 1
         }
 
-        #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+        #IF_DEFINED SHA384_EXTENSIVE_DEBUG
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'First padding block complete (128 bytes total)'")
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Calling ProcessMessageBlock for first padding block'")
         #END_IF
 
         // Process this block
-        NAVSha512ProcessMessageBlock(context)
+        NAVSha384ProcessMessageBlock(context)
 
         // Create a new block with all zeros
         context.MessageBlock = ""
@@ -513,12 +519,12 @@ define_function NAVSha512PadMessage(_NAVSha512Context context) {
         }
         context.MessageBlockIndex = 112
 
-        #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+        #IF_DEFINED SHA384_EXTENSIVE_DEBUG
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Created second padding block with 112 zeros'")
         #END_IF
     }
     else {
-        #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+        #IF_DEFINED SHA384_EXTENSIVE_DEBUG
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Padding fits in one block - index (', itoa(context.MessageBlockIndex), ') < 112'")
         #END_IF
 
@@ -532,12 +538,12 @@ define_function NAVSha512PadMessage(_NAVSha512Context context) {
             context.MessageBlockIndex = context.MessageBlockIndex + 1
         }
 
-        #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+        #IF_DEFINED SHA384_EXTENSIVE_DEBUG
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Single block padding complete (', itoa(context.MessageBlockIndex), ' bytes)'")
         #END_IF
     }
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Adding 8 bytes of zeros for high 64 bits of length'")
     #END_IF
 
@@ -545,37 +551,37 @@ define_function NAVSha512PadMessage(_NAVSha512Context context) {
     // First the high 64 bits (always 0 for our implementation)
     context.MessageBlock = "context.MessageBlock, $00, $00, $00, $00, $00, $00, $00, $00"
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Adding 8 bytes for low 64 bits of length: ', NAVSha512HexToString(NAVInt64ToByteArrayBE(context.LengthLow))")
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Adding 8 bytes for low 64 bits of length: ', NAVSha384HexToString(NAVInt64ToByteArrayBE(context.LengthLow))")
     #END_IF
 
     // Then the low 64 bits of length - ensure correct endianness
     context.MessageBlock = "context.MessageBlock, NAVInt64ToByteArrayBE(context.LengthLow)"
     context.MessageBlockIndex = 128
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Final block complete with length (128 bytes total)'")
-    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Final block data (last 32 bytes): ', NAVSha512HexToString(mid_string(context.MessageBlock, 97, 32))")
+    NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Final block data (last 32 bytes): ', NAVSha384HexToString(mid_string(context.MessageBlock, 97, 32))")
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Calling ProcessMessageBlock for final block'")
     #END_IF
 
     // Process the final block
-    NAVSha512ProcessMessageBlock(context)
+    NAVSha384ProcessMessageBlock(context)
 
-    #IF_DEFINED SHA512_DEBUG
-    NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Processed final block with length'")
+    #IF_DEFINED SHA384_DEBUG
+    NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Processed final block with length'")
     #END_IF
 }
 
 /**
- * @function NAVSha512ProcessMessageBlock
+ * @function NAVSha384ProcessMessageBlock
  * @internal
- * @description Process a 128-byte message block according to SHA-512 algorithm
- * This is the core compression function of SHA-512.
+ * @description Process a 128-byte message block according to SHA-384 algorithm
+ * This is the core compression function of SHA-384.
  *
- * @param {_NAVSha512Context} context - The SHA context to process
+ * @param {_NAVSha384Context} context - The SHA context to process
  */
-define_function NAVSha512ProcessMessageBlock(_NAVSha512Context context) {
+define_function NAVSha384ProcessMessageBlock(_NAVSha384Context context) {
     stack_var integer t
     stack_var _NAVInt64 a, b, c, d, e, f, g, h
     stack_var _NAVInt64 temp1, temp2
@@ -585,12 +591,12 @@ define_function NAVSha512ProcessMessageBlock(_NAVSha512Context context) {
     // Add the compressed chunk to the current hash value
     stack_var _NAVInt64 accumulator;
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'ProcessMessageBlock: Starting - block index = ', itoa(context.MessageBlockIndex)")
 
     // Log the first few bytes of the message block for debugging
     if (context.MessageBlockIndex > 0) {
-        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Block data (first 16 bytes): ', NAVSha512HexToString(mid_string(context.MessageBlock, 1, min_value(16, context.MessageBlockIndex)))")
+        NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Block data (first 16 bytes): ', NAVSha384HexToString(mid_string(context.MessageBlock, 1, min_value(16, context.MessageBlockIndex)))")
     }
 
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Initial hash state:'")
@@ -599,8 +605,8 @@ define_function NAVSha512ProcessMessageBlock(_NAVSha512Context context) {
     }
     #END_IF
 
-    #IF_DEFINED SHA512_DEBUG
-    NAVSha512DebugLog(SHA512_LEVEL_VERBOSE, "'SHA512: Processing message block, index=', itoa(context.MessageBlockIndex)")
+    #IF_DEFINED SHA384_DEBUG
+    NAVSha384DebugLog(SHA384_LEVEL_VERBOSE, "'SHA384: Processing message block, index=', itoa(context.MessageBlockIndex)")
     #END_IF
 
     // Initialize the first 16 words in the array W
@@ -617,15 +623,15 @@ define_function NAVSha512ProcessMessageBlock(_NAVSha512Context context) {
             bytes = mid_string(context.MessageBlock, index, 8)
             NAVByteArrayBEToInt64(bytes, W[t+1])
 
-            #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+            #IF_DEFINED SHA384_EXTENSIVE_DEBUG
             if (t < 4 || t > 12) { // Log first and last few words for readability
                 NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'W[', itoa(t), '] = ', NAVInt64ToDebugString(W[t+1]), ' (from bytes ', itoa(index), '-', itoa(index+7), ')'")
             }
             #END_IF
 
-            #IF_DEFINED SHA512_DEBUG
+            #IF_DEFINED SHA384_DEBUG
             if (t < 2) {
-                NAVSha512DebugLog(SHA512_LEVEL_VERBOSE, "'W[', itoa(t), '] = ', NAVInt64ToDebugString(W[t+1]), ' (from bytes ', itoa(index), '-', itoa(index+7), ')'")
+                NAVSha384DebugLog(SHA384_LEVEL_VERBOSE, "'W[', itoa(t), '] = ', NAVInt64ToDebugString(W[t+1]), ' (from bytes ', itoa(index), '-', itoa(index+7), ')'")
             }
             #END_IF
         }
@@ -634,28 +640,28 @@ define_function NAVSha512ProcessMessageBlock(_NAVSha512Context context) {
             W[t+1].Hi = 0
             W[t+1].Lo = 0
 
-            #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+            #IF_DEFINED SHA384_EXTENSIVE_DEBUG
             NAVErrorLog(NAV_LOG_LEVEL_ERROR, "'WARNING: Unexpected condition - message block too short at index ', itoa(index)")
             #END_IF
         }
     }
 
     // Message schedule (expand the message into 80 words)
-    // This loop must calculate correctly according to SHA-512 spec
+    // This loop must calculate correctly according to SHA-384 spec
     for (t = 16; t < 80; t++) {
         stack_var _NAVInt64 s0, s1, temp, tempAdd
 
-        #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+        #IF_DEFINED SHA384_EXTENSIVE_DEBUG
         if (t == 16) {
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Starting message schedule expansion'")
         }
         #END_IF
 
         // Calculate s0 = sigma0(W[t-15])
-        NAVSha512SigmaSmall0(W[t-15+1], s0)
+        NAVSha384SigmaSmall0(W[t-15+1], s0)
 
         // Calculate s1 = sigma1(W[t-2])
-        NAVSha512SigmaSmall1(W[t-2+1], s1)
+        NAVSha384SigmaSmall1(W[t-2+1], s1)
 
         // Calculate W[t] = W[t-16] + s0 + W[t-7] + s1
         temp.Hi = 0; temp.Lo = 0
@@ -666,15 +672,15 @@ define_function NAVSha512ProcessMessageBlock(_NAVSha512Context context) {
 
         NAVInt64Add(temp, tempAdd, W[t+1])
 
-        #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+        #IF_DEFINED SHA384_EXTENSIVE_DEBUG
         if (t >= 75) { // Log just the last few W values for readability
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'W[', itoa(t), '] = ', NAVInt64ToDebugString(W[t+1])")
         }
         #END_IF
 
-        #IF_DEFINED SHA512_DEBUG
+        #IF_DEFINED SHA384_DEBUG
         if (t >= 75) {
-            NAVSha512DebugLog(SHA512_LEVEL_VERBOSE, "'W[', itoa(t), '] = ', NAVInt64ToDebugString(W[t+1])")
+            NAVSha384DebugLog(SHA384_LEVEL_VERBOSE, "'W[', itoa(t), '] = ', NAVInt64ToDebugString(W[t+1])")
         }
         #END_IF
     }
@@ -689,33 +695,33 @@ define_function NAVSha512ProcessMessageBlock(_NAVSha512Context context) {
     g = context.IntermediateHash[7]
     h = context.IntermediateHash[8]
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Beginning compression function with initial working variables:'")
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'a = ', NAVInt64ToDebugString(a)")
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'e = ', NAVInt64ToDebugString(e)")
     #END_IF
 
-    #IF_DEFINED SHA512_DEBUG
-    NAVSha512DebugLog(SHA512_LEVEL_VERBOSE, "'Initial state a = ', NAVInt64ToDebugString(a)")
-    NAVSha512DebugLog(SHA512_LEVEL_VERBOSE, "'Initial state e = ', NAVInt64ToDebugString(e)")
+    #IF_DEFINED SHA384_DEBUG
+    NAVSha384DebugLog(SHA384_LEVEL_VERBOSE, "'Initial state a = ', NAVInt64ToDebugString(a)")
+    NAVSha384DebugLog(SHA384_LEVEL_VERBOSE, "'Initial state e = ', NAVInt64ToDebugString(e)")
     #END_IF
 
-    // Main hash computation loop - this is where we implement the SHA-512 round function
-    // The transform must match the SHA-512 specification exactly
+    // Main hash computation loop - this is where we implement the SHA-384 round function
+    // The transform must match the SHA-384 specification exactly
     for (t = 0; t < 80; t++) {
         stack_var _NAVInt64 T1, T2, Sum0, Sum1, ch, maj
 
         // Calculate Sigma1(e)
-        NAVSha512SigmaBig1(e, Sum1)
+        NAVSha384SigmaBig1(e, Sum1)
 
         // Calculate Ch(e,f,g)
-        NAVSha512CH(e, f, g, ch)
+        NAVSha384CH(e, f, g, ch)
 
         // T1 = h + Sigma1(e) + Ch(e,f,g) + K[t] + W[t]
         T1.Hi = 0; T1.Lo = 0
 
         // Get the constant K[t]
-        NAVGetSHA512K(t, k_t)
+        NAVGetSHA384K(t, k_t)
 
         // Calculate T1 step by step - order of operations matters!
         NAVInt64Add(h, Sum1, T1)
@@ -724,16 +730,16 @@ define_function NAVSha512ProcessMessageBlock(_NAVSha512Context context) {
         NAVInt64Add(T1, W[t+1], T1)
 
         // Calculate Sigma0(a)
-        NAVSha512SigmaBig0(a, Sum0)
+        NAVSha384SigmaBig0(a, Sum0)
 
         // Calculate Maj(a,b,c)
-        NAVSha512MAJ(a, b, c, maj)
+        NAVSha384MAJ(a, b, c, maj)
 
         // T2 = Sigma0(a) + Maj(a,b,c)
         T2.Hi = 0; T2.Lo = 0
         NAVInt64Add(Sum0, maj, T2)
 
-        // Update working variables according to SHA-512 spec
+        // Update working variables according to SHA-384 spec
         h = g;
         g = f;
         f = e;
@@ -752,20 +758,20 @@ define_function NAVSha512ProcessMessageBlock(_NAVSha512Context context) {
         a.Lo = 0;
         NAVInt64Add(T1, T2, a);
 
-        #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+        #IF_DEFINED SHA384_EXTENSIVE_DEBUG
         if (t == 0 || t == 19 || t == 39 || t == 59 || t == 79) {  // Log at specific intervals
             NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Round ', itoa(t), ': a = ', NAVInt64ToDebugString(a), ', e = ', NAVInt64ToDebugString(e)")
         }
         #END_IF
 
-        #IF_DEFINED SHA512_DEBUG
+        #IF_DEFINED SHA384_DEBUG
         if (t == 0 || t == 79) {
-            NAVSha512DebugLog(SHA512_LEVEL_VERBOSE, "'Round ', itoa(t), ': a = ', NAVInt64ToDebugString(a), ', e = ', NAVInt64ToDebugString(e)")
+            NAVSha384DebugLog(SHA384_LEVEL_VERBOSE, "'Round ', itoa(t), ': a = ', NAVInt64ToDebugString(a), ', e = ', NAVInt64ToDebugString(e)")
         }
         #END_IF
     }
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'After compression loop, before adding to hash:'")
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'a = ', NAVInt64ToDebugString(a), ', Hash[1] = ', NAVInt64ToDebugString(context.IntermediateHash[1])")
     #END_IF
@@ -820,16 +826,16 @@ define_function NAVSha512ProcessMessageBlock(_NAVSha512Context context) {
     context.IntermediateHash[8].Hi = accumulator.Hi;
     context.IntermediateHash[8].Lo = accumulator.Lo;
 
-    #IF_DEFINED SHA512_EXTENSIVE_DEBUG
+    #IF_DEFINED SHA384_EXTENSIVE_DEBUG
     NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'After adding to intermediate hash:'")
     for (t = 1; t <= 8; t++) {
         NAVErrorLog(NAV_LOG_LEVEL_DEBUG, "'Hash[', itoa(t), '] = ', NAVInt64ToDebugString(context.IntermediateHash[t])")
     }
     #END_IF
 
-    #IF_DEFINED SHA512_DEBUG
-    NAVSha512DebugLog(SHA512_LEVEL_VERBOSE, "'After block, Hash[1] = ', NAVInt64ToDebugString(context.IntermediateHash[1])")
-    NAVSha512DebugLog(SHA512_LEVEL_VERBOSE, "'After block, Hash[5] = ', NAVInt64ToDebugString(context.IntermediateHash[5])")
+    #IF_DEFINED SHA384_DEBUG
+    NAVSha384DebugLog(SHA384_LEVEL_VERBOSE, "'After block, Hash[1] = ', NAVInt64ToDebugString(context.IntermediateHash[1])")
+    NAVSha384DebugLog(SHA384_LEVEL_VERBOSE, "'After block, Hash[5] = ', NAVInt64ToDebugString(context.IntermediateHash[5])")
     #END_IF
 
     // Clear the message block for next use
@@ -838,15 +844,15 @@ define_function NAVSha512ProcessMessageBlock(_NAVSha512Context context) {
 }
 
 /**
- * @function NAVSha512SigmaBig0
+ * @function NAVSha384SigmaBig0
  * @internal
- * @description SHA-512 SIGMA0 function: ROTR^28(x) XOR ROTR^34(x) XOR ROTR^39(x)
- * Used in the SHA-512 compression function for the working variable 'a'.
+ * @description SHA-384 SIGMA0 function: ROTR^28(x) XOR ROTR^34(x) XOR ROTR^39(x)
+ * Used in the SHA-384 compression function for the working variable 'a'.
  *
  * @param {_NAVInt64} x - The input value
  * @param {_NAVInt64} result - The result of the operation
  */
-define_function NAVSha512SigmaBig0(_NAVInt64 x, _NAVInt64 result) {
+define_function NAVSha384SigmaBig0(_NAVInt64 x, _NAVInt64 result) {
     stack_var _NAVInt64 temp1, temp2, temp3, tempXor
 
     // Using NAVInt64RotateRightFull for true 64-bit rotations
@@ -861,15 +867,15 @@ define_function NAVSha512SigmaBig0(_NAVInt64 x, _NAVInt64 result) {
 }
 
 /**
- * @function NAVSha512SigmaBig1
+ * @function NAVSha384SigmaBig1
  * @internal
- * @description SHA-512 SIGMA1 function: ROTR^14(x) XOR ROTR^18(x) XOR ROTR^41(x)
- * Used in the SHA-512 compression function for the working variable 'e'.
+ * @description SHA-384 SIGMA1 function: ROTR^14(x) XOR ROTR^18(x) XOR ROTR^41(x)
+ * Used in the SHA-384 compression function for the working variable 'e'.
  *
  * @param {_NAVInt64} x - The input value
  * @param {_NAVInt64} result - The result of the operation
  */
-define_function NAVSha512SigmaBig1(_NAVInt64 x, _NAVInt64 result) {
+define_function NAVSha384SigmaBig1(_NAVInt64 x, _NAVInt64 result) {
     stack_var _NAVInt64 temp1, temp2, temp3, tempXor
 
     // Using NAVInt64RotateRightFull for true 64-bit rotations
@@ -884,15 +890,15 @@ define_function NAVSha512SigmaBig1(_NAVInt64 x, _NAVInt64 result) {
 }
 
 /**
- * @function NAVSha512SigmaSmall0
+ * @function NAVSha384SigmaSmall0
  * @internal
- * @description SHA-512 sigma0 function: ROTR^1(x) XOR ROTR^8(x) XOR SHR^7(x)
- * Used in the SHA-512 message schedule calculation.
+ * @description SHA-384 sigma0 function: ROTR^1(x) XOR ROTR^8(x) XOR SHR^7(x)
+ * Used in the SHA-384 message schedule calculation.
  *
  * @param {_NAVInt64} x - The input value
  * @param {_NAVInt64} result - The result of the operation
  */
-define_function NAVSha512SigmaSmall0(_NAVInt64 x, _NAVInt64 result) {
+define_function NAVSha384SigmaSmall0(_NAVInt64 x, _NAVInt64 result) {
     stack_var _NAVInt64 temp1, temp2, temp3
 
     // Use proper full 64-bit rotations for the first two operations
@@ -907,15 +913,15 @@ define_function NAVSha512SigmaSmall0(_NAVInt64 x, _NAVInt64 result) {
 }
 
 /**
- * @function NAVSha512SigmaSmall1
+ * @function NAVSha384SigmaSmall1
  * @internal
- * @description SHA-512 sigma1 function: ROTR^19(x) XOR ROTR^61(x) XOR SHR^6(x)
- * Used in the SHA-512 message schedule calculation.
+ * @description SHA-384 sigma1 function: ROTR^19(x) XOR ROTR^61(x) XOR SHR^6(x)
+ * Used in the SHA-384 message schedule calculation.
  *
  * @param {_NAVInt64} x - The input value
  * @param {_NAVInt64} result - The result of the operation
  */
-define_function NAVSha512SigmaSmall1(_NAVInt64 x, _NAVInt64 result) {
+define_function NAVSha384SigmaSmall1(_NAVInt64 x, _NAVInt64 result) {
     stack_var _NAVInt64 temp1, temp2, temp3
 
     // Use proper full 64-bit rotations for the first two operations
@@ -930,9 +936,9 @@ define_function NAVSha512SigmaSmall1(_NAVInt64 x, _NAVInt64 result) {
 }
 
 /**
- * @function NAVSha512CH
+ * @function NAVSha384CH
  * @internal
- * @description SHA-512 CH function: (x AND y) XOR ((NOT x) AND z)
+ * @description SHA-384 CH function: (x AND y) XOR ((NOT x) AND z)
  * The "choose" function: for each bit, select either y or z based on the value of x.
  *
  * @param {_NAVInt64} x - The first input value
@@ -940,7 +946,7 @@ define_function NAVSha512SigmaSmall1(_NAVInt64 x, _NAVInt64 result) {
  * @param {_NAVInt64} z - The third input value
  * @param {_NAVInt64} result - The result of the operation
  */
-define_function NAVSha512CH(_NAVInt64 x, _NAVInt64 y, _NAVInt64 z, _NAVInt64 result) {
+define_function NAVSha384CH(_NAVInt64 x, _NAVInt64 y, _NAVInt64 z, _NAVInt64 result) {
     stack_var _NAVInt64 temp1, temp2, not_x
 
     // x AND y
@@ -957,9 +963,9 @@ define_function NAVSha512CH(_NAVInt64 x, _NAVInt64 y, _NAVInt64 z, _NAVInt64 res
 }
 
 /**
- * @function NAVSha512MAJ
+ * @function NAVSha384MAJ
  * @internal
- * @description SHA-512 MAJ function: (x AND y) XOR (x AND z) XOR (y AND z)
+ * @description SHA-384 MAJ function: (x AND y) XOR (x AND z) XOR (y AND z)
  * The "majority" function: for each bit position, select the value that appears
  * most often among the three inputs.
  *
@@ -968,7 +974,7 @@ define_function NAVSha512CH(_NAVInt64 x, _NAVInt64 y, _NAVInt64 z, _NAVInt64 res
  * @param {_NAVInt64} z - The third input value
  * @param {_NAVInt64} result - The result of the operation
  */
-define_function NAVSha512MAJ(_NAVInt64 x, _NAVInt64 y, _NAVInt64 z, _NAVInt64 result) {
+define_function NAVSha384MAJ(_NAVInt64 x, _NAVInt64 y, _NAVInt64 z, _NAVInt64 result) {
     stack_var _NAVInt64 temp1, temp2, temp3
 
     // x AND y
@@ -986,20 +992,20 @@ define_function NAVSha512MAJ(_NAVInt64 x, _NAVInt64 y, _NAVInt64 z, _NAVInt64 re
 }
 
 /**
- * @function NAVSha512TraceIntermediateState
+ * @function NAVSha384TraceIntermediateState
  * @internal
  * @description Helper to trace the intermediate hash state
  * Logs the current values of the 8 hash registers for debugging.
  *
- * @param {_NAVSha512Context} context - The SHA context to trace
+ * @param {_NAVSha384Context} context - The SHA context to trace
  */
-define_function NAVSha512TraceIntermediateState(_NAVSha512Context context) {
-    #IF_DEFINED SHA512_DEBUG
-    if (SHA512_DEBUG_LEVEL >= SHA512_LEVEL_NORMAL) {
+define_function NAVSha384TraceIntermediateState(_NAVSha384Context context) {
+    #IF_DEFINED SHA384_DEBUG
+    if (SHA384_DEBUG_LEVEL >= SHA384_LEVEL_NORMAL) {
         stack_var integer i
-        NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'SHA512: Current intermediate hash state:'")
+        NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'SHA384: Current intermediate hash state:'")
         for (i = 1; i <= 8; i++) {
-            NAVSha512DebugLog(SHA512_LEVEL_NORMAL, "'    Hash[', itoa(i), '] = ', NAVInt64ToDebugString(context.IntermediateHash[i])")
+            NAVSha384DebugLog(SHA384_LEVEL_NORMAL, "'    Hash[', itoa(i), '] = ', NAVInt64ToDebugString(context.IntermediateHash[i])")
         }
     }
     #END_IF
@@ -1007,7 +1013,7 @@ define_function NAVSha512TraceIntermediateState(_NAVSha512Context context) {
 
 // Add a helper function to log binary data in a readable way
 /**
- * @function NAVSha512HexToString
+ * @function NAVSha384HexToString
  * @internal
  * @description Helper function to convert binary data to hexadecimal string
  *
@@ -1015,7 +1021,7 @@ define_function NAVSha512TraceIntermediateState(_NAVSha512Context context) {
  *
  * @returns {char[500]} Hexadecimal string representation of the input data
  */
-define_function char[500] NAVSha512HexToString(char bytes[]) {
+define_function char[500] NAVSha384HexToString(char bytes[]) {
     stack_var char result[500]
     stack_var integer i, len
 
@@ -1034,4 +1040,4 @@ define_function char[500] NAVSha512HexToString(char bytes[]) {
     return result
 }
 
-#END_IF // __NAV_FOUNDATION_CRYPTOGRAPHY_SHA512__
+#END_IF // __NAV_FOUNDATION_CRYPTOGRAPHY_SHA384__

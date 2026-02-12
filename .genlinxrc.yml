@@ -59,6 +59,7 @@ build:
       - ./__tests__/include/assert
       - ./__tests__/include/sha1
       - ./__tests__/include/sha512
+      - ./__tests__/include/sha384
       - ./__tests__/include/sha256
       - ./__tests__/include/md5
       - ./__tests__/include/base64
