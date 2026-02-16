@@ -43,7 +43,7 @@ DEFINE_TYPE
  * Provides a comprehensive interface for setting baud rate, data bits, parity, stop bits,
  * RS-232/422/485 modes, character pacing, flow control, and 9-bit mode.
  *
- * @property {integer} Baud - Baud rate (150, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 76800, 115200)
+ * @property {long} Baud - Baud rate (150, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 76800, 115200)
  * @property {integer} DataBits - Number of data bits (8 for standard, 9 for B9Mode only)
  * @property {integer} StopBits - Number of stop bits (1 or 2)
  * @property {char} Parity - Parity setting: 'N' (none), 'E' (even), 'O' (odd), 'M' (mark), 'S' (space)
@@ -67,7 +67,7 @@ DEFINE_TYPE
  * NAVComSpecApply(dvSerialPort, spec)
  */
 struct _NAVComSpec {
-    integer Baud
+    long Baud
     integer DataBits
     integer StopBits
     char Parity

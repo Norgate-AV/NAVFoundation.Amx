@@ -81,7 +81,7 @@ The `_NAVComSpec` structure contains all serial port configuration options:
 
 | Property   | Type    | Valid Values                                                              | Default | Description                           |
 | ---------- | ------- | ------------------------------------------------------------------------- | ------- | ------------------------------------- |
-| `Baud`     | integer | 150, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 76800, 115200 | 9600    | Baud rate                             |
+| `Baud`     | long    | 150, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 76800, 115200 | 9600    | Baud rate                             |
 | `DataBits` | integer | 8, 9                                                                      | 8       | Data bits (9 only valid with B9Mode)  |
 | `StopBits` | integer | 1, 2                                                                      | 1       | Stop bits                             |
 | `Parity`   | char    | 'N', 'E', 'O', 'M', 'S'                                                   | 'N'     | Parity (None, Even, Odd, Mark, Space) |
