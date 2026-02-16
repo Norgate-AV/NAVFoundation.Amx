@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.20.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.20.0...v5.20.1) (2026-02-16)
+
+### 🐛 Bug Fixes
+
+- **comspec:** change Baud type from integer to long ([3f07f51](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/3f07f51b45563be521e9ec1a7ddb125df82400d6))
+
 ## [5.20.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.19.0...v5.20.0) (2026-02-16)
 
 ### 🌟 Features
