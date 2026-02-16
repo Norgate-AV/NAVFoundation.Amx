@@ -825,6 +825,7 @@ struct _NAVSystem {
 
 /**
  * @struct _NAVSerialPortSettings
+ * @deprecated Use _NAVComSpec in NAVFoundation.ComSpec library instead
  * @description Configuration settings for a serial (RS-232/RS-485) port.
  * @property {char[]} Speed - Baud rate (e.g., "9600", "115200")
  * @property {char[]} DataBits - Number of data bits (typically "8")
