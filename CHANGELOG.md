@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.20.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.19.0...v5.20.0) (2026-02-16)
+
+### 🌟 Features
+
+- **comspec:** add ComSpec library ([e2afb4a](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/e2afb4a58dcd85f2c3f6228545bfedc260ed70ec))
+
 ## [5.19.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.18.0...v5.19.0) (2026-02-12)
 
 ### 🌟 Features
