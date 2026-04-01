@@ -52,9 +52,7 @@
         "editor.defaultFormatter": "ms-vscode.powershell"
     },
     "[xml]": {
-        "editor.defaultFormatter": "DotJoshJohnson.xml"
+        "editor.defaultFormatter": "redhat.vscode-xml"
     },
-    "github-actions.workflows.pinned.workflows": [
-        ".github/workflows/main.yml"
-    ]
+    "github-actions.workflows.pinned.workflows": [".github/workflows/main.yml"]
 }
