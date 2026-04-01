@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.21.0](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.20.1...v5.21.0) (2026-04-01)
+
+### 🌟 Features
+
+- **net-utils:** add subnet arithmetic and IP classification functions ([06fa459](https://github.com/Norgate-AV/NAVFoundation.Amx/commit/06fa459783d04759f3f6f4dec7e146c6dd004b63))
+
 ## [5.20.1](https://github.com/Norgate-AV/NAVFoundation.Amx/compare/v5.20.0...v5.20.1) (2026-02-16)
 
 ### 🐛 Bug Fixes
