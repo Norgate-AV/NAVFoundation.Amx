@@ -783,4 +783,705 @@ define_function char NAVNetIsMalformedIP(char address[]) {
 }
 
 
+/**
+ * @function NAVNetSubnetMaskToPrefix
+ * @public
+ * @description Converts a subnet mask in dotted-decimal notation to its CIDR prefix length.
+ *
+ * This function parses a subnet mask string (e.g., "255.255.254.0") and returns
+ * the equivalent CIDR prefix length (e.g., 23). The mask must be a valid contiguous
+ * mask where all network bits (1s) precede all host bits (0s).
+ *
+ * Valid subnet mask octets are: 0, 128, 192, 224, 240, 248, 252, 254, 255.
+ * Any other octet value, or a non-contiguous ordering (e.g., a non-zero octet
+ * appearing after a zero octet), is considered invalid.
+ *
+ * @param {char[]} mask - The subnet mask string in dotted-decimal notation
+ *
+ * @returns {integer} The CIDR prefix length (0-32) on success, or 255 on failure
+ *
+ * @example
+ * stack_var integer prefix
+ * prefix = NAVNetSubnetMaskToPrefix('255.255.255.0')    // 24
+ * prefix = NAVNetSubnetMaskToPrefix('255.255.254.0')    // 23
+ * prefix = NAVNetSubnetMaskToPrefix('255.255.255.128')  // 25
+ * prefix = NAVNetSubnetMaskToPrefix('255.0.0.0')        // 8
+ * prefix = NAVNetSubnetMaskToPrefix('0.0.0.0')          // 0
+ * prefix = NAVNetSubnetMaskToPrefix('255.255.255.255')  // 32
+ * prefix = NAVNetSubnetMaskToPrefix('255.255.1.0')      // 255 (invalid)
+ *
+ * @see NAVNetCalculateBroadcast
+ * @see NAVNetCalculateBroadcastFromPrefix
+ */
+define_function integer NAVNetSubnetMaskToPrefix(char mask[]) {
+    stack_var _NAVIP maskIP
+    stack_var integer prefix
+    stack_var integer x
+    stack_var integer octet
+    stack_var char foundZeroByte
+
+    if (!NAVNetParseIPv4(mask, maskIP)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_NETUTILS__,
+                                    'NAVNetSubnetMaskToPrefix',
+                                    "'Invalid subnet mask format: ', mask")
+        return 255
+    }
+
+    prefix = 0
+    foundZeroByte = false
+
+    for (x = 1; x <= 4; x++) {
+        octet = type_cast(maskIP.Octets[x])
+
+        if (foundZeroByte && octet != 0) {
+            NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                        __NAV_FOUNDATION_NETUTILS__,
+                                        'NAVNetSubnetMaskToPrefix',
+                                        "'Invalid subnet mask: non-contiguous bits in mask: ', mask")
+            return 255
+        }
+
+        switch (octet) {
+            case 255: { prefix = prefix + 8 }
+            case 254: { prefix = prefix + 7; foundZeroByte = true }
+            case 252: { prefix = prefix + 6; foundZeroByte = true }
+            case 248: { prefix = prefix + 5; foundZeroByte = true }
+            case 240: { prefix = prefix + 4; foundZeroByte = true }
+            case 224: { prefix = prefix + 3; foundZeroByte = true }
+            case 192: { prefix = prefix + 2; foundZeroByte = true }
+            case 128: { prefix = prefix + 1; foundZeroByte = true }
+            case 0:   { foundZeroByte = true }
+            default: {
+                NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                            __NAV_FOUNDATION_NETUTILS__,
+                                            'NAVNetSubnetMaskToPrefix',
+                                            "'Invalid subnet mask octet value ', itoa(octet), ' in mask: ', mask")
+                return 255
+            }
+        }
+    }
+
+    return prefix
+}
+
+
+/**
+ * @function NAVNetCalculateBroadcastFromPrefix
+ * @public
+ * @description Calculates the IPv4 broadcast address for a given IP address and CIDR prefix length.
+ *
+ * The broadcast address is the highest address in the subnet and is computed as:
+ *   broadcast = IP OR (NOT mask)
+ * where the subnet mask is derived from the prefix length, and NOT mask is the
+ * wildcard mask (i.e., 255 - mask_octet for each octet).
+ *
+ * @param {char[]} ip - The IP address in dotted-decimal notation (e.g., "192.168.1.100")
+ * @param {integer} prefix - The CIDR prefix length, 0-32 (e.g., 24)
+ *
+ * @returns {char[16]} The broadcast address string on success, or empty string on failure
+ *
+ * @example
+ * stack_var char broadcast[16]
+ * broadcast = NAVNetCalculateBroadcastFromPrefix('192.168.1.100', 24)
+ * // broadcast = '192.168.1.255'
+ *
+ * broadcast = NAVNetCalculateBroadcastFromPrefix('10.0.0.50', 23)
+ * // broadcast = '10.0.1.255'
+ *
+ * broadcast = NAVNetCalculateBroadcastFromPrefix('172.16.5.1', 16)
+ * // broadcast = '172.16.255.255'
+ *
+ * @see NAVNetCalculateBroadcast
+ * @see NAVNetSubnetMaskToPrefix
+ */
+define_function char[16] NAVNetCalculateBroadcastFromPrefix(char ip[], integer prefix) {
+    stack_var _NAVIP ipParsed
+    stack_var integer prefixRemaining
+    stack_var integer results[4]
+    stack_var integer x
+
+    if (prefix > 32) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_NETUTILS__,
+                                    'NAVNetCalculateBroadcastFromPrefix',
+                                    "'Invalid prefix length: ', itoa(prefix), '. Must be 0-32'")
+        return ''
+    }
+
+    if (!NAVNetParseIPv4(ip, ipParsed)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_NETUTILS__,
+                                    'NAVNetCalculateBroadcastFromPrefix',
+                                    "'Invalid IP address: ', ip")
+        return ''
+    }
+
+    // For each octet, compute how many host bits remain, then:
+    //   wildcard = (1 << hostBits) - 1
+    //   broadcast = ip | wildcard
+    prefixRemaining = prefix
+
+    for (x = 1; x <= 4; x++) {
+        stack_var integer hostBits
+
+        if (prefixRemaining >= 8) {
+            hostBits = 0
+            prefixRemaining = prefixRemaining - 8
+        } else {
+            hostBits = 8 - prefixRemaining
+            prefixRemaining = 0
+        }
+
+        results[x] = type_cast(ipParsed.Octets[x]) | (type_cast(1 << hostBits) - 1)
+    }
+
+    return "itoa(results[1]), '.', itoa(results[2]), '.', itoa(results[3]), '.', itoa(results[4])"
+}
+
+
+/**
+ * @function NAVNetCalculateBroadcast
+ * @public
+ * @description Calculates the IPv4 broadcast address for a given IP address and subnet mask.
+ *
+ * This is a convenience wrapper around NAVNetCalculateBroadcastFromPrefix that
+ * accepts a subnet mask in dotted-decimal notation. The mask is validated and
+ * converted to a prefix length, then the broadcast is computed as:
+ *   broadcast = IP OR (NOT mask)
+ *
+ * @param {char[]} ip - The IP address in dotted-decimal notation (e.g., "192.168.1.100")
+ * @param {char[]} mask - The subnet mask in dotted-decimal notation (e.g., "255.255.255.0")
+ *
+ * @returns {char[16]} The broadcast address string on success, or empty string on failure
+ *
+ * @example
+ * stack_var char broadcast[16]
+ * broadcast = NAVNetCalculateBroadcast('192.168.1.100', '255.255.255.0')
+ * // broadcast = '192.168.1.255'
+ *
+ * broadcast = NAVNetCalculateBroadcast('10.0.0.50', '255.255.254.0')
+ * // broadcast = '10.0.1.255'
+ *
+ * broadcast = NAVNetCalculateBroadcast('172.16.5.1', '255.255.0.0')
+ * // broadcast = '172.16.255.255'
+ *
+ * @see NAVNetCalculateBroadcastFromPrefix
+ * @see NAVNetSubnetMaskToPrefix
+ */
+define_function char[16] NAVNetCalculateBroadcast(char ip[], char mask[]) {
+    stack_var integer prefix
+
+    prefix = NAVNetSubnetMaskToPrefix(mask)
+
+    if (prefix == 255) {
+        // Error already logged by NAVNetSubnetMaskToPrefix
+        return ''
+    }
+
+    return NAVNetCalculateBroadcastFromPrefix(ip, prefix)
+}
+
+
+/**
+ * @function NAVNetPrefixToSubnetMask
+ * @public
+ * @description Converts a CIDR prefix length to a subnet mask in dotted-decimal notation.
+ *
+ * This is the reverse operation of NAVNetSubnetMaskToPrefix, completing the
+ * bidirectional prefix/mask conversion API.
+ *
+ * @param {integer} prefix - The CIDR prefix length (0-32)
+ *
+ * @returns {char[16]} The subnet mask string on success, or empty string on failure
+ *
+ * @example
+ * stack_var char mask[16]
+ * mask = NAVNetPrefixToSubnetMask(24)   // '255.255.255.0'
+ * mask = NAVNetPrefixToSubnetMask(23)   // '255.255.254.0'
+ * mask = NAVNetPrefixToSubnetMask(16)   // '255.255.0.0'
+ * mask = NAVNetPrefixToSubnetMask(0)    // '0.0.0.0'
+ * mask = NAVNetPrefixToSubnetMask(32)   // '255.255.255.255'
+ *
+ * @see NAVNetSubnetMaskToPrefix
+ */
+define_function char[16] NAVNetPrefixToSubnetMask(integer prefix) {
+    stack_var integer octets[4]
+    stack_var integer prefixRemaining
+    stack_var integer x
+
+    if (prefix > 32) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_NETUTILS__,
+                                    'NAVNetPrefixToSubnetMask',
+                                    "'Invalid prefix length: ', itoa(prefix), '. Must be 0-32'")
+        return ''
+    }
+
+    prefixRemaining = prefix
+
+    for (x = 1; x <= 4; x++) {
+        if (prefixRemaining >= 8) {
+            octets[x] = 255
+            prefixRemaining = prefixRemaining - 8
+        } else if (prefixRemaining > 0) {
+            octets[x] = 256 - type_cast(1 << (8 - prefixRemaining))
+            prefixRemaining = 0
+        } else {
+            octets[x] = 0
+        }
+    }
+
+    return "itoa(octets[1]), '.', itoa(octets[2]), '.', itoa(octets[3]), '.', itoa(octets[4])"
+}
+
+
+/**
+ * @function NAVNetIPToLong
+ * @public
+ * @description Packs an IPv4 address string into a 32-bit unsigned integer.
+ *
+ * Converts a dotted-decimal IPv4 address into its 32-bit integer representation,
+ * with the most significant byte being the first octet. This is useful for range
+ * comparisons and bitwise subnet calculations without string manipulation.
+ *
+ * @param {char[]} ip - The IPv4 address string in dotted-decimal notation
+ *
+ * @returns {long} The 32-bit packed representation on success, or 0 on failure
+ *
+ * @example
+ * stack_var long value
+ * value = NAVNetIPToLong('192.168.1.1')    // $C0A80101 (3232235777)
+ * value = NAVNetIPToLong('10.0.0.1')       // $0A000001 (167772161)
+ * value = NAVNetIPToLong('255.255.255.255') // $FFFFFFFF (4294967295)
+ * value = NAVNetIPToLong('0.0.0.0')        // $00000000 (0)
+ *
+ * @see NAVNetLongToIP
+ */
+define_function long NAVNetIPToLong(char ip[]) {
+    stack_var _NAVIP ipParsed
+    stack_var long result
+
+    if (!NAVNetParseIPv4(ip, ipParsed)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_NETUTILS__,
+                                    'NAVNetIPToLong',
+                                    "'Invalid IP address: ', ip")
+        return 0
+    }
+
+    result = type_cast(ipParsed.Octets[1])
+    result = (result << 8) | type_cast(ipParsed.Octets[2])
+    result = (result << 8) | type_cast(ipParsed.Octets[3])
+    result = (result << 8) | type_cast(ipParsed.Octets[4])
+
+    return result
+}
+
+
+/**
+ * @function NAVNetLongToIP
+ * @public
+ * @description Unpacks a 32-bit unsigned integer into a dotted-decimal IPv4 address string.
+ *
+ * This is the reverse of NAVNetIPToLong, converting a 32-bit packed value back
+ * into its human-readable dotted-decimal representation.
+ *
+ * @param {long} value - The 32-bit packed IPv4 address
+ *
+ * @returns {char[16]} The dotted-decimal IPv4 address string
+ *
+ * @example
+ * stack_var char ip[16]
+ * ip = NAVNetLongToIP($C0A80101)   // '192.168.1.1'
+ * ip = NAVNetLongToIP($0A000001)   // '10.0.0.1'
+ * ip = NAVNetLongToIP($FFFFFFFF)   // '255.255.255.255'
+ * ip = NAVNetLongToIP(0)           // '0.0.0.0'
+ *
+ * @see NAVNetIPToLong
+ */
+define_function char[16] NAVNetLongToIP(long value) {
+    stack_var integer octets[4]
+
+    octets[1] = type_cast((value >> 24) & $FF)
+    octets[2] = type_cast((value >> 16) & $FF)
+    octets[3] = type_cast((value >> 8)  & $FF)
+    octets[4] = type_cast(value & $FF)
+
+    return "itoa(octets[1]), '.', itoa(octets[2]), '.', itoa(octets[3]), '.', itoa(octets[4])"
+}
+
+
+/**
+ * @function NAVNetCalculateNetworkAddress
+ * @public
+ * @description Calculates the IPv4 network address for a given IP address and subnet mask.
+ *
+ * The network address is the lowest address in the subnet and is computed as:
+ *   network = IP AND mask
+ *
+ * @param {char[]} ip - The IP address in dotted-decimal notation (e.g., "192.168.1.100")
+ * @param {char[]} mask - The subnet mask in dotted-decimal notation (e.g., "255.255.255.0")
+ *
+ * @returns {char[16]} The network address string on success, or empty string on failure
+ *
+ * @example
+ * stack_var char network[16]
+ * network = NAVNetCalculateNetworkAddress('192.168.1.100', '255.255.255.0')
+ * // network = '192.168.1.0'
+ *
+ * network = NAVNetCalculateNetworkAddress('10.0.0.50', '255.255.254.0')
+ * // network = '10.0.0.0'
+ *
+ * @see NAVNetCalculateNetworkAddressFromPrefix
+ * @see NAVNetCalculateBroadcast
+ */
+define_function char[16] NAVNetCalculateNetworkAddress(char ip[], char mask[]) {
+    stack_var _NAVIP ipParsed
+    stack_var long maskLong
+
+    if (!NAVNetParseIPv4(ip, ipParsed)) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_NETUTILS__,
+                                    'NAVNetCalculateNetworkAddress',
+                                    "'Invalid IP address: ', ip")
+        return ''
+    }
+
+    // Validate mask is a proper subnet mask before using it
+    if (NAVNetSubnetMaskToPrefix(mask) == 255) {
+        // Error already logged by NAVNetSubnetMaskToPrefix
+        return ''
+    }
+
+    maskLong = NAVNetIPToLong(mask)
+
+    return NAVNetLongToIP(NAVNetIPToLong(ip) & maskLong)
+}
+
+
+/**
+ * @function NAVNetCalculateNetworkAddressFromPrefix
+ * @public
+ * @description Calculates the IPv4 network address for a given IP address and CIDR prefix length.
+ *
+ * Derives the subnet mask from the prefix length, then computes network = IP AND mask.
+ *
+ * @param {char[]} ip - The IP address in dotted-decimal notation (e.g., "192.168.1.100")
+ * @param {integer} prefix - The CIDR prefix length, 0-32 (e.g., 24)
+ *
+ * @returns {char[16]} The network address string on success, or empty string on failure
+ *
+ * @example
+ * stack_var char network[16]
+ * network = NAVNetCalculateNetworkAddressFromPrefix('192.168.1.100', 24)
+ * // network = '192.168.1.0'
+ *
+ * network = NAVNetCalculateNetworkAddressFromPrefix('10.0.0.50', 23)
+ * // network = '10.0.0.0'
+ *
+ * @see NAVNetCalculateNetworkAddress
+ * @see NAVNetCalculateBroadcastFromPrefix
+ */
+define_function char[16] NAVNetCalculateNetworkAddressFromPrefix(char ip[], integer prefix) {
+    stack_var char mask[16]
+
+    mask = NAVNetPrefixToSubnetMask(prefix)
+
+    if (!length_array(mask)) {
+        // Error already logged by NAVNetPrefixToSubnetMask
+        return ''
+    }
+
+    return NAVNetCalculateNetworkAddress(ip, mask)
+}
+
+
+/**
+ * @function NAVNetCalculateHostCount
+ * @public
+ * @description Returns the number of usable host addresses in a subnet.
+ *
+ * Usable hosts are all addresses except the network address and broadcast address:
+ *   usable = 2^(32 - prefix) - 2
+ *
+ * For prefix lengths of 31 and 32, returns 0 (point-to-point and host routes
+ * have no usable address range in the traditional sense).
+ *
+ * @param {integer} prefix - The CIDR prefix length (0-32)
+ *
+ * @returns {long} The number of usable host addresses
+ *
+ * @example
+ * stack_var long count
+ * count = NAVNetCalculateHostCount(24)   // 254
+ * count = NAVNetCalculateHostCount(23)   // 510
+ * count = NAVNetCalculateHostCount(16)   // 65534
+ * count = NAVNetCalculateHostCount(30)   // 2
+ * count = NAVNetCalculateHostCount(32)   // 0
+ * count = NAVNetCalculateHostCount(0)    // 4294967294
+ *
+ * @see NAVNetCalculateBroadcastFromPrefix
+ * @see NAVNetCalculateNetworkAddressFromPrefix
+ */
+define_function long NAVNetCalculateHostCount(integer prefix) {
+    stack_var integer hostBits
+    stack_var integer x
+    stack_var long wildcard
+
+    if (prefix > 32) {
+        NAVLibraryFunctionErrorLog(NAV_LOG_LEVEL_ERROR,
+                                    __NAV_FOUNDATION_NETUTILS__,
+                                    'NAVNetCalculateHostCount',
+                                    "'Invalid prefix length: ', itoa(prefix), '. Must be 0-32'")
+        return 0
+    }
+
+    if (prefix >= 31) {
+        return 0
+    }
+
+    // Build the 32-bit wildcard mask as (2^hostBits) - 1, bit by bit to avoid overflow
+    hostBits = 32 - prefix
+    wildcard = 0
+
+    for (x = 1; x <= hostBits; x++) {
+        wildcard = (wildcard << 1) | 1
+    }
+
+    // usable = total - 2 = (wildcard + 1) - 2 = wildcard - 1
+    return wildcard - 1
+}
+
+
+/**
+ * @function NAVNetIsIPInSubnet
+ * @public
+ * @description Tests whether an IPv4 address belongs to a given subnet.
+ *
+ * The check is: (ip AND mask) == (network AND mask)
+ * Both ip and network are masked before comparison, so network can be any
+ * address within the subnet — it does not need to be the network address itself.
+ *
+ * @param {char[]} ip - The IP address to test
+ * @param {char[]} network - Any address within the target subnet (e.g., network address or gateway)
+ * @param {char[]} mask - The subnet mask in dotted-decimal notation
+ *
+ * @returns {char} true if ip is within the subnet, false otherwise
+ *
+ * @example
+ * stack_var char result
+ * result = NAVNetIsIPInSubnet('192.168.1.100', '192.168.1.0', '255.255.255.0')   // true
+ * result = NAVNetIsIPInSubnet('192.168.2.1',   '192.168.1.0', '255.255.255.0')   // false
+ * result = NAVNetIsIPInSubnet('10.0.0.50',     '10.0.1.0',    '255.255.254.0')   // true  (/23)
+ *
+ * @see NAVNetIsIPInSubnetFromPrefix
+ */
+define_function char NAVNetIsIPInSubnet(char ip[], char network[], char mask[]) {
+    stack_var long maskLong
+    stack_var integer prefix
+
+    // Validate mask is a proper subnet mask
+    prefix = NAVNetSubnetMaskToPrefix(mask)
+    if (prefix == 255) {
+        return false
+    }
+
+    maskLong = NAVNetIPToLong(mask)
+
+    return type_cast((NAVNetIPToLong(ip) & maskLong) == (NAVNetIPToLong(network) & maskLong))
+}
+
+
+/**
+ * @function NAVNetIsIPInSubnetFromPrefix
+ * @public
+ * @description Tests whether an IPv4 address belongs to a given subnet using a CIDR prefix length.
+ *
+ * Convenience wrapper around NAVNetIsIPInSubnet that accepts a prefix length
+ * instead of a dotted-decimal subnet mask.
+ *
+ * @param {char[]} ip - The IP address to test
+ * @param {char[]} network - Any address within the target subnet
+ * @param {integer} prefix - The CIDR prefix length (0-32)
+ *
+ * @returns {char} true if ip is within the subnet, false otherwise
+ *
+ * @example
+ * stack_var char result
+ * result = NAVNetIsIPInSubnetFromPrefix('192.168.1.100', '192.168.1.0', 24)   // true
+ * result = NAVNetIsIPInSubnetFromPrefix('192.168.2.1',   '192.168.1.0', 24)   // false
+ * result = NAVNetIsIPInSubnetFromPrefix('10.0.0.50',     '10.0.1.0',    23)   // true
+ *
+ * @see NAVNetIsIPInSubnet
+ */
+define_function char NAVNetIsIPInSubnetFromPrefix(char ip[], char network[], integer prefix) {
+    stack_var char mask[16]
+
+    mask = NAVNetPrefixToSubnetMask(prefix)
+
+    if (!length_array(mask)) {
+        return false
+    }
+
+    return NAVNetIsIPInSubnet(ip, network, mask)
+}
+
+
+/**
+ * @function NAVNetIsPrivateIP
+ * @public
+ * @description Determines whether an IPv4 address falls within an RFC 1918 private range.
+ *
+ * RFC 1918 defines three private address ranges:
+ * - 10.0.0.0/8      (10.0.0.0   - 10.255.255.255)
+ * - 172.16.0.0/12   (172.16.0.0 - 172.31.255.255)
+ * - 192.168.0.0/16  (192.168.0.0 - 192.168.255.255)
+ *
+ * @param {char[]} ip - The IPv4 address string to test
+ *
+ * @returns {char} true if the address is in a private range, false otherwise
+ *
+ * @example
+ * stack_var char result
+ * result = NAVNetIsPrivateIP('192.168.1.1')   // true
+ * result = NAVNetIsPrivateIP('10.0.0.1')      // true
+ * result = NAVNetIsPrivateIP('172.20.5.1')    // true
+ * result = NAVNetIsPrivateIP('8.8.8.8')       // false
+ *
+ * @see NAVNetIsLoopback
+ * @see NAVNetIsLinkLocal
+ */
+define_function char NAVNetIsPrivateIP(char ip[]) {
+    stack_var _NAVIP ipParsed
+    stack_var integer o1
+    stack_var integer o2
+
+    if (!NAVNetParseIPv4(ip, ipParsed)) {
+        return false
+    }
+
+    o1 = type_cast(ipParsed.Octets[1])
+    o2 = type_cast(ipParsed.Octets[2])
+
+    // 10.0.0.0/8
+    if (o1 == 10) {
+        return true
+    }
+
+    // 172.16.0.0/12  (172.16.x.x to 172.31.x.x)
+    if (o1 == 172 && o2 >= 16 && o2 <= 31) {
+        return true
+    }
+
+    // 192.168.0.0/16
+    if (o1 == 192 && o2 == 168) {
+        return true
+    }
+
+    return false
+}
+
+
+/**
+ * @function NAVNetIsLoopback
+ * @public
+ * @description Determines whether an IPv4 address is a loopback address (127.0.0.0/8).
+ *
+ * RFC 5735 reserves 127.0.0.0/8 for loopback. The most common loopback
+ * address is 127.0.0.1. All addresses in the 127.x.x.x range are loopback.
+ *
+ * @param {char[]} ip - The IPv4 address string to test
+ *
+ * @returns {char} true if the address is a loopback address, false otherwise
+ *
+ * @example
+ * stack_var char result
+ * result = NAVNetIsLoopback('127.0.0.1')   // true
+ * result = NAVNetIsLoopback('127.1.2.3')   // true
+ * result = NAVNetIsLoopback('192.168.1.1') // false
+ *
+ * @see NAVNetIsPrivateIP
+ * @see NAVNetIsLinkLocal
+ */
+define_function char NAVNetIsLoopback(char ip[]) {
+    stack_var _NAVIP ipParsed
+
+    if (!NAVNetParseIPv4(ip, ipParsed)) {
+        return false
+    }
+
+    return type_cast(ipParsed.Octets[1] == 127)
+}
+
+
+/**
+ * @function NAVNetIsLinkLocal
+ * @public
+ * @description Determines whether an IPv4 address is a link-local address (169.254.0.0/16).
+ *
+ * RFC 3927 defines 169.254.0.0/16 as the link-local range, also known as
+ * APIPA (Automatic Private IP Addressing). These addresses are assigned
+ * automatically when DHCP is unavailable.
+ *
+ * @param {char[]} ip - The IPv4 address string to test
+ *
+ * @returns {char} true if the address is a link-local address, false otherwise
+ *
+ * @example
+ * stack_var char result
+ * result = NAVNetIsLinkLocal('169.254.1.5')  // true
+ * result = NAVNetIsLinkLocal('169.253.1.1')  // false
+ * result = NAVNetIsLinkLocal('192.168.1.1')  // false
+ *
+ * @see NAVNetIsPrivateIP
+ * @see NAVNetIsLoopback
+ */
+define_function char NAVNetIsLinkLocal(char ip[]) {
+    stack_var _NAVIP ipParsed
+
+    if (!NAVNetParseIPv4(ip, ipParsed)) {
+        return false
+    }
+
+    return type_cast(ipParsed.Octets[1] == 169 && ipParsed.Octets[2] == 254)
+}
+
+
+/**
+ * @function NAVNetIsMulticast
+ * @public
+ * @description Determines whether an IPv4 address is a multicast address (224.0.0.0/4).
+ *
+ * RFC 5771 defines 224.0.0.0/4 (224.0.0.0 - 239.255.255.255) as the
+ * multicast address range. These addresses are used for one-to-many
+ * communication (e.g., mDNS at 224.0.0.251, SSDP at 239.255.255.250).
+ *
+ * @param {char[]} ip - The IPv4 address string to test
+ *
+ * @returns {char} true if the address is a multicast address, false otherwise
+ *
+ * @example
+ * stack_var char result
+ * result = NAVNetIsMulticast('224.0.0.251')    // true  (mDNS)
+ * result = NAVNetIsMulticast('239.255.255.250') // true  (SSDP)
+ * result = NAVNetIsMulticast('192.168.1.1')    // false
+ *
+ * @see NAVNetIsPrivateIP
+ * @see NAVNetIsLinkLocal
+ */
+define_function char NAVNetIsMulticast(char ip[]) {
+    stack_var _NAVIP ipParsed
+    stack_var integer o1
+
+    if (!NAVNetParseIPv4(ip, ipParsed)) {
+        return false
+    }
+
+    o1 = type_cast(ipParsed.Octets[1])
+
+    return type_cast(o1 >= 224 && o1 <= 239)
+}
+
+
 #END_IF // __NAV_FOUNDATION_NETUTILS__

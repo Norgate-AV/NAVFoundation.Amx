@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Workspace [
 
-<!-- Common Elements -->
-<!ELEMENT Identifier (#PCDATA)>
-<!ELEMENT Comments (#PCDATA)>
-<!ELEMENT MasterDirectory (#PCDATA)>
-<!ELEMENT CreationDate (#PCDATA)>
+    <!-- Common Elements -->
+    <!ELEMENT Identifier (#PCDATA)>
+    <!ELEMENT Comments (#PCDATA)>
+    <!ELEMENT MasterDirectory (#PCDATA)>
+    <!ELEMENT CreationDate (#PCDATA)>
 
-<!-- Workspace Elements-->
-<!ELEMENT Workspace ( Identifier,
+    <!-- Workspace Elements-->
+    <!ELEMENT Workspace ( Identifier,
                CreateVersion,
                PJS_File?,
                PJS_ConvertDate?,
@@ -16,18 +16,17 @@
                Comments?,
                Project*)>
 
-<!ATTLIST Workspace
-      CurrentVersion CDATA   #REQUIRED>
+    <!ATTLIST Workspace CurrentVersion CDATA #REQUIRED>
 
-<!ELEMENT CreateVersion     (#PCDATA)>
+    <!ELEMENT CreateVersion (#PCDATA)>
 
 
-<!-- Conversion data only: only included for files converted from the old .pjs database -->
-<!ELEMENT PJS_File (#PCDATA)>
-<!ELEMENT PJS_ConvertDate (#PCDATA)>
-<!ELEMENT PJS_CreateDate (#PCDATA)>
+    <!-- Conversion data only: only included for files converted from the old .pjs database -->
+    <!ELEMENT PJS_File (#PCDATA)>
+    <!ELEMENT PJS_ConvertDate (#PCDATA)>
+    <!ELEMENT PJS_CreateDate (#PCDATA)>
 
-<!ELEMENT Project ( Identifier,
+    <!ELEMENT Project ( Identifier,
                Designer?,
                DealerID?,
                SalesOrder?,
@@ -35,13 +34,13 @@
                Comments?,
                System*)>
 
-<!ELEMENT Designer (#PCDATA)>
-<!ELEMENT DealerID (#PCDATA)>
-<!ELEMENT SalesOrder (#PCDATA)>
-<!ELEMENT PurchaseOrder (#PCDATA)>
+    <!ELEMENT Designer (#PCDATA)>
+    <!ELEMENT DealerID (#PCDATA)>
+    <!ELEMENT SalesOrder (#PCDATA)>
+    <!ELEMENT PurchaseOrder (#PCDATA)>
 
 
-<!ELEMENT System  (  Identifier,
+    <!ELEMENT System (  Identifier,
                  SysID,
                  TransTCPIP?,
                  TransSerial?,
@@ -58,55 +57,55 @@
                  Comments?,
                  File*)>
 
-<!ATTLIST System
-      IsActive   (true | false)   "false"
-      Platform   (Axcess | Netlinx)   "Axcess"
-      Transport   (Serial | Modem | TCPIP) "Serial"
-      TransportEx   (Serial | USB | TCPIP | VNM) "Serial">
+    <!ATTLIST System
+        IsActive (true | false) "false"
+        Platform (Axcess | Netlinx) "Axcess"
+        Transport (Serial | Modem | TCPIP) "Serial"
+        TransportEx (Serial | USB | TCPIP | VNM) "Serial">
 
-<!ELEMENT SysID (#PCDATA)>
-<!ELEMENT TransSerial (#PCDATA)>
-<!ELEMENT TransTCPIP (#PCDATA)>
-<!ELEMENT TransTCPIPEx (#PCDATA)>
-<!ELEMENT TransSerialEx (#PCDATA)>
-<!ELEMENT TransUSBEx (#PCDATA)>
-<!ELEMENT TransVNMEx (#PCDATA)>
-<!ELEMENT VNMSystemID (#PCDATA)>
-<!ELEMENT VNMIPAddress (#PCDATA)>
-<!ELEMENT VNMMaskAddress (#PCDATA)>
-<!ELEMENT VirtualNetLinxMasterFlag (#PCDATA)>
-<!ELEMENT UserName (#PCDATA)>
-<!ELEMENT Password (#PCDATA)>
+    <!ELEMENT SysID (#PCDATA)>
+    <!ELEMENT TransSerial (#PCDATA)>
+    <!ELEMENT TransTCPIP (#PCDATA)>
+    <!ELEMENT TransTCPIPEx (#PCDATA)>
+    <!ELEMENT TransSerialEx (#PCDATA)>
+    <!ELEMENT TransUSBEx (#PCDATA)>
+    <!ELEMENT TransVNMEx (#PCDATA)>
+    <!ELEMENT VNMSystemID (#PCDATA)>
+    <!ELEMENT VNMIPAddress (#PCDATA)>
+    <!ELEMENT VNMMaskAddress (#PCDATA)>
+    <!ELEMENT VirtualNetLinxMasterFlag (#PCDATA)>
+    <!ELEMENT UserName (#PCDATA)>
+    <!ELEMENT Password (#PCDATA)>
 
 
-<!ELEMENT File ( Identifier,
+    <!ELEMENT File ( Identifier,
                FilePathName,
                Comments?,
                MasterDirectory?,
                DeviceMap*,
                IRDB*)>
 
-<!ATTLIST File
-       Type (Source | MasterSrc | Include | Module | AXB | IR | TPD | TP4 | TP5 | KPD | TKO | AMX_IR_DB | IRN_DB | Other | DUET | TOK | TKN | KPB | XDD ) "Other"
-       CompileType (Axcess | Netlinx | None) "None">
+    <!ATTLIST File
+        Type (Source | MasterSrc | Include | Module | AXB | IR | TPD | TP4 | TP5 | KPD | TKO | AMX_IR_DB | IRN_DB | Other | DUET | TOK | TKN | KPB | XDD ) "Other"
+        CompileType (Axcess | Netlinx | None) "None">
 
-<!ELEMENT FilePathName	(#PCDATA)>
+    <!ELEMENT FilePathName (#PCDATA)>
 
-<!ELEMENT DeviceMap (DevName)>
-<!ATTLIST DeviceMap DevAddr CDATA #REQUIRED>
+    <!ELEMENT DeviceMap (DevName)>
+    <!ATTLIST DeviceMap DevAddr CDATA #REQUIRED>
 
-<!ELEMENT DevName (#PCDATA)>
+    <!ELEMENT DevName (#PCDATA)>
 
-<!ELEMENT IRDB    (Property,
+    <!ELEMENT IRDB (Property,
                  DOSName,
                  UserDBPathName,
                  Notes)>
-<!ATTLIST IRDB DBKey CDATA #REQUIRED>
+    <!ATTLIST IRDB DBKey CDATA #REQUIRED>
 
-<!ELEMENT Property (#PCDATA)>
-<!ELEMENT DOSName (#PCDATA)>
-<!ELEMENT UserDBPathName (#PCDATA)>
-<!ELEMENT Notes (#PCDATA)>
+    <!ELEMENT Property (#PCDATA)>
+    <!ELEMENT DOSName (#PCDATA)>
+    <!ELEMENT UserDBPathName (#PCDATA)>
+    <!ELEMENT Notes (#PCDATA)>
 ]>
 
 <Workspace CurrentVersion="4.0">
@@ -805,7 +804,7 @@
                 <Comments></Comments>
             </File>
         </System>
-        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+        <System IsActive="true" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
             <Identifier>NetUtils</Identifier>
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>
@@ -1096,7 +1095,7 @@
                 <Comments></Comments>
             </File>
         </System>
-        <System IsActive="true" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
+        <System IsActive="false" Platform="Netlinx" Transport="Serial" TransportEx="TCPIP">
             <Identifier>Sha384</Identifier>
             <SysID>0</SysID>
             <TransTCPIP>0.0.0.0</TransTCPIP>

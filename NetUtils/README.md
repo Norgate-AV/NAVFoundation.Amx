@@ -16,6 +16,11 @@ NAVFoundation.NetUtils provides a comprehensive, RFC-compliant toolkit for worki
 - ✅ Extensible design (IPv6-ready)
 - ✅ Go's net package inspired API
 - ✅ High-performance procedural parsing
+- ✅ Subnet mask / CIDR prefix conversion
+- ✅ Broadcast and network address calculation
+- ✅ IP range / subnet membership testing
+- ✅ IP address classification (private, loopback, link-local, multicast)
+- ✅ 32-bit IP packing and unpacking
 
 ## Table of Contents
 
@@ -28,13 +33,28 @@ NAVFoundation.NetUtils provides a comprehensive, RFC-compliant toolkit for worki
 - [Functions](#functions)
     - [NAVNetParseIPv4](#navnetparseipv4)
     - [NAVNetParseIP](#navnetparseip)
-    - [NAVNetIPInit](#navnetipi init)
+    - [NAVNetIPInit](#navnetipit)
     - [NAVNetParseHostname](#navnetparsehostname)
     - [NAVNetHostnameInit](#navnethostnameinit)
     - [NAVNetIsMalformedIP](#navnetismalformedip)
     - [NAVNetSplitHostPort](#navnetsplithostport)
     - [NAVNetParseIPAddr](#navnetparseipaddr)
     - [NAVNetJoinHostPort](#navnetjoinhostport)
+    - [NAVNetSubnetMaskToPrefix](#navnetsubnetmasktopre-fix)
+    - [NAVNetPrefixToSubnetMask](#navnetprefixtosub-netmask)
+    - [NAVNetIPToLong](#navnetiptolong)
+    - [NAVNetLongToIP](#navnetlongtoip)
+    - [NAVNetCalculateBroadcast](#navnetcalculatebroadcast)
+    - [NAVNetCalculateBroadcastFromPrefix](#navnetcalculatebroadcastfromprefix)
+    - [NAVNetCalculateNetworkAddress](#navnetcalculatenetworkaddress)
+    - [NAVNetCalculateNetworkAddressFromPrefix](#navnetcalculatenetworkaddressfromprefix)
+    - [NAVNetCalculateHostCount](#navnetcalculatehostcount)
+    - [NAVNetIsIPInSubnet](#navnetisipinsubnet)
+    - [NAVNetIsIPInSubnetFromPrefix](#navnetisipinsubnetfromprefix)
+    - [NAVNetIsPrivateIP](#navnetisprivateip)
+    - [NAVNetIsLoopback](#navnetisloopback)
+    - [NAVNetIsLinkLocal](#navnetislinklocal)
+    - [NAVNetIsMulticast](#navnetismulticast)
 - [Usage Examples](#usage-examples)
 - [Error Handling](#error-handling)
 - [Best Practices](#best-practices)
@@ -92,6 +112,24 @@ if (NAVNetSplitHostPort('example.com:443', host, port)) {
 stack_var char endpoint[NAV_MAX_BUFFER]
 endpoint = NAVNetJoinHostPort('192.168.1.1', 8080)
 // endpoint = '192.168.1.1:8080'
+```
+
+```netlinx
+// Subnet and network operations
+stack_var char broadcast[16]
+stack_var char network[16]
+
+broadcast = NAVNetCalculateBroadcastFromPrefix('192.168.1.100', 24)       // '192.168.1.255'
+network   = NAVNetCalculateNetworkAddressFromPrefix('192.168.1.100', 24)  // '192.168.1.0'
+
+// Classify IP addresses
+NAVNetIsPrivateIP('192.168.1.1')  // true  (RFC 1918 private)
+NAVNetIsLoopback('127.0.0.1')     // true  (loopback)
+NAVNetIsMulticast('224.0.0.251')  // true  (mDNS multicast)
+
+// Check subnet membership
+NAVNetIsIPInSubnetFromPrefix('192.168.1.100', '192.168.1.0', 24)  // true
+NAVNetIsIPInSubnetFromPrefix('10.5.0.1',      '192.168.1.0', 24)  // false
 ```
 
 ## Data Structures
@@ -726,6 +764,491 @@ endpoint = NAVNetJoinHostPort('host', 70000) // ✗ Port out of range
 - Generating connection strings
 - Reverse operation of `NAVNetSplitHostPort`
 
+### NAVNetSubnetMaskToPrefix
+
+Converts a dotted-decimal subnet mask string to its CIDR prefix length.
+
+**Signature:**
+
+```netlinx
+define_function integer NAVNetSubnetMaskToPrefix(char mask[])
+```
+
+**Parameters:**
+
+- `mask` - Subnet mask in dotted-decimal notation (e.g., `'255.255.255.0'`)
+
+**Returns:** Prefix length (0–32), or `255` on error
+
+**Validation:**
+
+- Rejects empty or malformed strings (via `NAVNetParseIPv4`)
+- Rejects octets that are not valid subnet mask values (0, 128, 192, 224, 240, 248, 252, 254, 255)
+- Rejects non-contiguous masks (e.g., `255.0.255.0`)
+- Uses `255` as an error sentinel (not a valid prefix length)
+
+**Example:**
+
+```netlinx
+stack_var integer prefix
+
+prefix = NAVNetSubnetMaskToPrefix('255.255.255.0')   // 24
+prefix = NAVNetSubnetMaskToPrefix('255.255.254.0')   // 23
+prefix = NAVNetSubnetMaskToPrefix('255.0.0.0')       // 8
+prefix = NAVNetSubnetMaskToPrefix('0.0.0.0')         // 0
+prefix = NAVNetSubnetMaskToPrefix('255.255.255.255') // 32
+
+// Invalid inputs (return 255)
+prefix = NAVNetSubnetMaskToPrefix('255.255.1.0')     // ✗ Invalid octet value
+prefix = NAVNetSubnetMaskToPrefix('255.128.255.0')   // ✗ Non-contiguous bits
+prefix = NAVNetSubnetMaskToPrefix('')                // ✗ Empty string
+```
+
+**Error Check:**
+
+```netlinx
+stack_var integer prefix
+
+prefix = NAVNetSubnetMaskToPrefix(userMask)
+if (prefix == 255) {
+    send_string 0, "'ERROR: Invalid subnet mask: ', userMask"
+    return
+}
+send_string 0, "'Prefix length: /', itoa(prefix)"
+```
+
+### NAVNetPrefixToSubnetMask
+
+Converts a CIDR prefix length to a dotted-decimal subnet mask string.
+
+**Signature:**
+
+```netlinx
+define_function char[16] NAVNetPrefixToSubnetMask(integer prefix)
+```
+
+**Parameters:**
+
+- `prefix` - CIDR prefix length (0–32)
+
+**Returns:** Subnet mask string (e.g., `'255.255.255.0'`), or empty string on error
+
+**Example:**
+
+```netlinx
+stack_var char mask[16]
+
+mask = NAVNetPrefixToSubnetMask(24)   // '255.255.255.0'
+mask = NAVNetPrefixToSubnetMask(16)   // '255.255.0.0'
+mask = NAVNetPrefixToSubnetMask(8)    // '255.0.0.0'
+mask = NAVNetPrefixToSubnetMask(32)   // '255.255.255.255'
+mask = NAVNetPrefixToSubnetMask(0)    // '0.0.0.0'
+
+// Invalid input (returns '')
+mask = NAVNetPrefixToSubnetMask(33)   // ✗ Out of range
+mask = NAVNetPrefixToSubnetMask(255)  // ✗ Out of range
+```
+
+**Note:** The inverse of `NAVNetSubnetMaskToPrefix`.
+
+### NAVNetIPToLong
+
+Packs an IPv4 address string into a 32-bit unsigned integer (big-endian).
+
+**Signature:**
+
+```netlinx
+define_function long NAVNetIPToLong(char ip[])
+```
+
+**Parameters:**
+
+- `ip` - IPv4 address string (e.g., `'192.168.1.1'`)
+
+**Returns:** 32-bit packed value, or `0` on error
+
+**Bit Layout:**
+
+```
+ 31      24 23      16 15       8 7        0
+[ octet 1 ][ octet 2 ][ octet 3 ][ octet 4 ]
+```
+
+**Example:**
+
+```netlinx
+stack_var long value
+
+value = NAVNetIPToLong('0.0.0.0')           // 0
+value = NAVNetIPToLong('255.255.255.255')   // 4294967295 ($FFFFFFFF)
+value = NAVNetIPToLong('192.168.1.1')       // 3232235777 ($C0A80101)
+value = NAVNetIPToLong('10.0.0.1')          // 167772161  ($0A000001)
+
+// Invalid input (returns 0)
+value = NAVNetIPToLong('')                  // ✗ Empty
+value = NAVNetIPToLong('256.0.0.0')         // ✗ Invalid octet
+```
+
+### NAVNetLongToIP
+
+Converts a 32-bit unsigned integer back to a dotted-decimal IPv4 address string.
+
+**Signature:**
+
+```netlinx
+define_function char[16] NAVNetLongToIP(long value)
+```
+
+**Parameters:**
+
+- `value` - 32-bit packed IP address
+
+**Returns:** Dotted-decimal IPv4 string (e.g., `'192.168.1.1'`)
+
+**Example:**
+
+```netlinx
+stack_var char ip[16]
+
+ip = NAVNetLongToIP(0)           // '0.0.0.0'
+ip = NAVNetLongToIP(4294967295)  // '255.255.255.255'
+ip = NAVNetLongToIP(3232235777)  // '192.168.1.1'
+```
+
+**Note:** The inverse of `NAVNetIPToLong`. Together they enable bitwise subnet arithmetic.
+
+### NAVNetCalculateBroadcast
+
+Calculates the broadcast address for a given IP address and subnet mask.
+
+**Signature:**
+
+```netlinx
+define_function char[16] NAVNetCalculateBroadcast(char ip[], char mask[])
+```
+
+**Parameters:**
+
+- `ip` - IPv4 address string
+- `mask` - Subnet mask string in dotted-decimal notation
+
+**Returns:** Broadcast address string, or empty string on error
+
+**Example:**
+
+```netlinx
+stack_var char broadcast[16]
+
+broadcast = NAVNetCalculateBroadcast('192.168.1.0',   '255.255.255.0') // '192.168.1.255'
+broadcast = NAVNetCalculateBroadcast('10.0.0.0',      '255.0.0.0')     // '10.255.255.255'
+broadcast = NAVNetCalculateBroadcast('172.16.0.0',    '255.255.0.0')   // '172.16.255.255'
+broadcast = NAVNetCalculateBroadcast('192.168.1.100', '255.255.255.0') // '192.168.1.255'
+
+// Invalid inputs (return '')
+broadcast = NAVNetCalculateBroadcast('', '255.255.255.0')              // ✗ Empty IP
+broadcast = NAVNetCalculateBroadcast('192.168.1.0', '255.255.1.0')    // ✗ Invalid mask
+```
+
+**Note:** Delegates to `NAVNetCalculateBroadcastFromPrefix` after converting the mask.
+
+### NAVNetCalculateBroadcastFromPrefix
+
+Calculates the broadcast address for a given IP address and CIDR prefix length.
+
+**Signature:**
+
+```netlinx
+define_function char[16] NAVNetCalculateBroadcastFromPrefix(char ip[], integer prefix)
+```
+
+**Parameters:**
+
+- `ip` - IPv4 address string
+- `prefix` - CIDR prefix length (0–32)
+
+**Returns:** Broadcast address string, or empty string on error
+
+**Example:**
+
+```netlinx
+stack_var char broadcast[16]
+
+broadcast = NAVNetCalculateBroadcastFromPrefix('192.168.1.0',  24) // '192.168.1.255'
+broadcast = NAVNetCalculateBroadcastFromPrefix('10.0.0.0',      8) // '10.255.255.255'
+broadcast = NAVNetCalculateBroadcastFromPrefix('172.16.0.0',   12) // '172.31.255.255'
+
+// Invalid inputs (return '')
+broadcast = NAVNetCalculateBroadcastFromPrefix('', 24)             // ✗ Empty IP
+broadcast = NAVNetCalculateBroadcastFromPrefix('192.168.1.0', 33) // ✗ Invalid prefix
+```
+
+### NAVNetCalculateNetworkAddress
+
+Calculates the network address (network ID) for a given IP address and subnet mask.
+
+**Signature:**
+
+```netlinx
+define_function char[16] NAVNetCalculateNetworkAddress(char ip[], char mask[])
+```
+
+**Parameters:**
+
+- `ip` - IPv4 address string
+- `mask` - Subnet mask string in dotted-decimal notation
+
+**Returns:** Network address string, or empty string on error
+
+**Example:**
+
+```netlinx
+stack_var char network[16]
+
+network = NAVNetCalculateNetworkAddress('192.168.1.100', '255.255.255.0') // '192.168.1.0'
+network = NAVNetCalculateNetworkAddress('10.5.20.1',     '255.0.0.0')     // '10.0.0.0'
+network = NAVNetCalculateNetworkAddress('172.16.5.1',    '255.255.0.0')   // '172.16.0.0'
+
+// Invalid inputs (return '')
+network = NAVNetCalculateNetworkAddress('', '255.255.255.0')             // ✗ Empty IP
+network = NAVNetCalculateNetworkAddress('192.168.1.0', '255.255.1.0')   // ✗ Invalid mask
+```
+
+### NAVNetCalculateNetworkAddressFromPrefix
+
+Calculates the network address for a given IP address and CIDR prefix length.
+
+**Signature:**
+
+```netlinx
+define_function char[16] NAVNetCalculateNetworkAddressFromPrefix(char ip[], integer prefix)
+```
+
+**Parameters:**
+
+- `ip` - IPv4 address string
+- `prefix` - CIDR prefix length (0–32)
+
+**Returns:** Network address string, or empty string on error
+
+**Example:**
+
+```netlinx
+stack_var char network[16]
+
+network = NAVNetCalculateNetworkAddressFromPrefix('192.168.1.100', 24) // '192.168.1.0'
+network = NAVNetCalculateNetworkAddressFromPrefix('10.5.20.1',       8) // '10.0.0.0'
+network = NAVNetCalculateNetworkAddressFromPrefix('172.16.5.1',     16) // '172.16.0.0'
+```
+
+### NAVNetCalculateHostCount
+
+Returns the number of usable host addresses in a subnet for a given prefix length.
+
+**Signature:**
+
+```netlinx
+define_function long NAVNetCalculateHostCount(integer prefix)
+```
+
+**Parameters:**
+
+- `prefix` - CIDR prefix length (0–32)
+
+**Returns:** Number of usable hosts (`2^(32−prefix) − 2`), or `0` for /31, /32, or invalid prefix
+
+**Note:** /31 and /32 return 0 usable hosts following RFC 3021 point-to-point conventions.
+
+**Example:**
+
+```netlinx
+stack_var long count
+
+count = NAVNetCalculateHostCount(24)  // 254
+count = NAVNetCalculateHostCount(16)  // 65534
+count = NAVNetCalculateHostCount(8)   // 16777214
+count = NAVNetCalculateHostCount(30)  // 2
+count = NAVNetCalculateHostCount(31)  // 0 (point-to-point)
+count = NAVNetCalculateHostCount(32)  // 0 (host route)
+count = NAVNetCalculateHostCount(0)   // 4294967294
+
+// Invalid input (returns 0)
+count = NAVNetCalculateHostCount(33)  // ✗ Out of range
+```
+
+### NAVNetIsIPInSubnet
+
+Checks whether an IP address belongs to a given network/subnet.
+
+**Signature:**
+
+```netlinx
+define_function char NAVNetIsIPInSubnet(char ip[], char network[], char mask[])
+```
+
+**Parameters:**
+
+- `ip` - IPv4 address to test
+- `network` - Network address (e.g., `'192.168.1.0'`)
+- `mask` - Subnet mask in dotted-decimal notation
+
+**Returns:** `true` if the IP is within the subnet, `false` otherwise
+
+**Example:**
+
+```netlinx
+// 192.168.1.100 is in 192.168.1.0/24
+NAVNetIsIPInSubnet('192.168.1.100', '192.168.1.0', '255.255.255.0')  // true
+
+// 192.168.2.100 is NOT in 192.168.1.0/24
+NAVNetIsIPInSubnet('192.168.2.100', '192.168.1.0', '255.255.255.0')  // false
+
+// 10.5.20.1 is in 10.0.0.0/8
+NAVNetIsIPInSubnet('10.5.20.1', '10.0.0.0', '255.0.0.0')             // true
+```
+
+### NAVNetIsIPInSubnetFromPrefix
+
+Checks whether an IP address belongs to a given network/subnet using a CIDR prefix.
+
+**Signature:**
+
+```netlinx
+define_function char NAVNetIsIPInSubnetFromPrefix(char ip[], char network[], integer prefix)
+```
+
+**Parameters:**
+
+- `ip` - IPv4 address to test
+- `network` - Network address
+- `prefix` - CIDR prefix length (0–32)
+
+**Returns:** `true` if the IP is within the subnet, `false` otherwise
+
+**Example:**
+
+```netlinx
+NAVNetIsIPInSubnetFromPrefix('192.168.1.100', '192.168.1.0', 24)  // true
+NAVNetIsIPInSubnetFromPrefix('192.168.2.100', '192.168.1.0', 24)  // false
+NAVNetIsIPInSubnetFromPrefix('10.5.20.1',     '10.0.0.0',     8)  // true
+```
+
+### NAVNetIsPrivateIP
+
+Checks whether an IPv4 address falls within a private address range per RFC 1918.
+
+**Signature:**
+
+```netlinx
+define_function char NAVNetIsPrivateIP(char ip[])
+```
+
+**Parameters:**
+
+- `ip` - IPv4 address string
+
+**Returns:** `true` if private, `false` otherwise (including on parse failure)
+
+**RFC 1918 Private Ranges:**
+
+| Range                         | CIDR           | Description     |
+| ----------------------------- | -------------- | --------------- |
+| 10.0.0.0 – 10.255.255.255     | 10.0.0.0/8     | Class A private |
+| 172.16.0.0 – 172.31.255.255   | 172.16.0.0/12  | Class B private |
+| 192.168.0.0 – 192.168.255.255 | 192.168.0.0/16 | Class C private |
+
+**Example:**
+
+```netlinx
+NAVNetIsPrivateIP('192.168.1.1')    // true
+NAVNetIsPrivateIP('10.0.0.1')       // true
+NAVNetIsPrivateIP('172.16.5.1')     // true
+NAVNetIsPrivateIP('172.31.255.255') // true
+NAVNetIsPrivateIP('8.8.8.8')        // false (public)
+NAVNetIsPrivateIP('172.32.0.1')     // false (outside 172.16.0.0/12)
+```
+
+### NAVNetIsLoopback
+
+Checks whether an IPv4 address is a loopback address (127.0.0.0/8).
+
+**Signature:**
+
+```netlinx
+define_function char NAVNetIsLoopback(char ip[])
+```
+
+**Parameters:**
+
+- `ip` - IPv4 address string
+
+**Returns:** `true` if loopback, `false` otherwise
+
+**Example:**
+
+```netlinx
+NAVNetIsLoopback('127.0.0.1')       // true
+NAVNetIsLoopback('127.255.255.255') // true
+NAVNetIsLoopback('127.0.0.0')       // true
+NAVNetIsLoopback('128.0.0.1')       // false
+NAVNetIsLoopback('192.168.1.1')     // false
+```
+
+### NAVNetIsLinkLocal
+
+Checks whether an IPv4 address is a link-local address (169.254.0.0/16, APIPA).
+
+**Signature:**
+
+```netlinx
+define_function char NAVNetIsLinkLocal(char ip[])
+```
+
+**Parameters:**
+
+- `ip` - IPv4 address string
+
+**Returns:** `true` if link-local, `false` otherwise
+
+**Example:**
+
+```netlinx
+NAVNetIsLinkLocal('169.254.1.5')     // true
+NAVNetIsLinkLocal('169.254.0.0')     // true
+NAVNetIsLinkLocal('169.254.255.255') // true
+NAVNetIsLinkLocal('169.255.0.1')     // false
+NAVNetIsLinkLocal('192.168.1.1')     // false
+```
+
+**Use Case:** Detect APIPA addresses — when a device fails to obtain a DHCP lease and self-assigns a 169.254.x.x address.
+
+### NAVNetIsMulticast
+
+Checks whether an IPv4 address is a multicast address (224.0.0.0/4).
+
+**Signature:**
+
+```netlinx
+define_function char NAVNetIsMulticast(char ip[])
+```
+
+**Parameters:**
+
+- `ip` - IPv4 address string
+
+**Returns:** `true` if multicast, `false` otherwise
+
+**Multicast Range:** 224.0.0.0 – 239.255.255.255
+
+**Example:**
+
+```netlinx
+NAVNetIsMulticast('224.0.0.1')       // true  (all hosts)
+NAVNetIsMulticast('239.255.255.250') // true  (SSDP)
+NAVNetIsMulticast('224.0.0.251')     // true  (mDNS)
+NAVNetIsMulticast('240.0.0.1')       // false (reserved, not multicast)
+NAVNetIsMulticast('192.168.1.1')     // false
+```
+
 ## Usage Examples
 
 ### Basic IP Parsing
@@ -833,32 +1356,57 @@ define_function char[NAV_MAX_BUFFER] BuildConnectionString(char host[], integer 
 }
 ```
 
-### Network Range Checking
+### Subnet and Network Operations
 
 ```netlinx
-define_function char IsPrivateNetwork(_NAVIP ip) {
-    // Check if IP is in private ranges (RFC 1918)
+// Calculate and log all subnet parameters for a given IP/prefix
+define_function LogSubnetInfo(char ip[], integer prefix) {
+    stack_var char network[16]
+    stack_var char broadcast[16]
+    stack_var char mask[16]
+    stack_var long hosts
 
-    if (ip.Version != 4) {
-        return false
+    network   = NAVNetCalculateNetworkAddressFromPrefix(ip, prefix)
+    broadcast = NAVNetCalculateBroadcastFromPrefix(ip, prefix)
+    mask      = NAVNetPrefixToSubnetMask(prefix)
+    hosts     = NAVNetCalculateHostCount(prefix)
+
+    send_string 0, "'--- Subnet Info ---'"
+    send_string 0, "'IP:        ', ip, '/', itoa(prefix)"
+    send_string 0, "'Mask:      ', mask"
+    send_string 0, "'Network:   ', network"
+    send_string 0, "'Broadcast: ', broadcast"
+    send_string 0, "'Hosts:     ', itoa(hosts)"
+}
+
+// Check if a device is on the local management network
+define_function char IsOnManagementNetwork(char deviceIP[]) {
+    return NAVNetIsIPInSubnetFromPrefix(deviceIP, '10.10.0.0', 16)
+}
+
+// Classify an IP address by type
+define_function ClassifyIP(char ip[]) {
+    if (NAVNetIsLoopback(ip)) {
+        send_string 0, "'Address ', ip, ' is loopback'"
+        return
     }
 
-    // 10.0.0.0/8
-    if (ip.Octets[1] == 10) {
-        return true
+    if (NAVNetIsLinkLocal(ip)) {
+        send_string 0, "'Address ', ip, ' is link-local (APIPA - check DHCP config)'"
+        return
     }
 
-    // 172.16.0.0/12
-    if (ip.Octets[1] == 172 && ip.Octets[2] >= 16 && ip.Octets[2] <= 31) {
-        return true
+    if (NAVNetIsMulticast(ip)) {
+        send_string 0, "'Address ', ip, ' is multicast'"
+        return
     }
 
-    // 192.168.0.0/16
-    if (ip.Octets[1] == 192 && ip.Octets[2] == 168) {
-        return true
+    if (NAVNetIsPrivateIP(ip)) {
+        send_string 0, "'Address ', ip, ' is private (RFC 1918)'"
     }
-
-    return false
+    else {
+        send_string 0, "'Address ', ip, ' is public'"
+    }
 }
 ```
 
@@ -989,16 +1537,34 @@ The library includes comprehensive test coverage:
 
 **Test Statistics:**
 
-- **215 total tests** across 5 test suites
-- **100% passing** (70 + 31 + 29 + 15 + 70)
+- **456 total tests** across 21 test suites
+- **100% passing**
 
 **Test Suites:**
 
-1. `NAVNetParseIPv4`: 70 tests (18 valid, 52 invalid)
-2. `NAVNetSplitHostPort`: 31 tests (14 valid, 17 invalid)
-3. `NAVNetParseIPAddr`: 29 tests (13 valid, 16 invalid)
-4. `NAVNetJoinHostPort`: 15 tests (10 valid, 5 invalid)
-5. `NAVNetParseHostname`: 70 tests (20 valid, 50 invalid)
+| Suite                                     | Tests |
+| ----------------------------------------- | ----- |
+| `NAVNetParseIPv4`                         | 70    |
+| `NAVNetSplitHostPort`                     | 31    |
+| `NAVNetParseIPAddr`                       | 29    |
+| `NAVNetJoinHostPort`                      | 12    |
+| `NAVNetParseHostname`                     | 70    |
+| `NAVNetIsMalformedIP`                     | 49    |
+| `NAVNetSubnetMaskToPrefix`                | 23    |
+| `NAVNetPrefixToSubnetMask`                | 18    |
+| `NAVNetIPToLong`                          | 14    |
+| `NAVNetLongToIP`                          | 10    |
+| `NAVNetCalculateBroadcast`                | 10    |
+| `NAVNetCalculateBroadcastFromPrefix`      | 9     |
+| `NAVNetCalculateNetworkAddress`           | 10    |
+| `NAVNetCalculateNetworkAddressFromPrefix` | 9     |
+| `NAVNetCalculateHostCount`                | 11    |
+| `NAVNetIsIPInSubnet`                      | 13    |
+| `NAVNetIsIPInSubnetFromPrefix`            | 7     |
+| `NAVNetIsPrivateIP`                       | 20    |
+| `NAVNetIsLoopback`                        | 12    |
+| `NAVNetIsLinkLocal`                       | 13    |
+| `NAVNetIsMulticast`                       | 16    |
 
 **Coverage Includes:**
 
@@ -1052,6 +1618,14 @@ Full compliance with hostname updates:
 - **Range Checking**: Port overflow detection using SLONG
 - **Input Sanitization**: Whitespace trimming, empty string rejection
 
+### RFC 1918 - Address Allocation for Private Internets
+
+IPv4 private address classification per RFC 1918:
+
+- ✅ 10.0.0.0/8 (Class A private, `NAVNetIsPrivateIP`)
+- ✅ 172.16.0.0/12 (Class B private, `NAVNetIsPrivateIP`)
+- ✅ 192.168.0.0/16 (Class C private, `NAVNetIsPrivateIP`)
+
 ### Go's net Package Inspiration
 
 API design follows Go's battle-tested patterns:
@@ -1072,16 +1646,32 @@ API design follows Go's battle-tested patterns:
 
 ## API Reference
 
-| Function              | Purpose                       | Returns   |
-| --------------------- | ----------------------------- | --------- |
-| `NAVNetParseIPv4`     | Parse IPv4 address            | `boolean` |
-| `NAVNetParseIP`       | Parse IP (v4/v6)              | `boolean` |
-| `NAVNetIPInit`        | Initialize IP structure       | `void`    |
-| `NAVNetParseHostname` | Parse and validate hostname   | `boolean` |
-| `NAVNetHostnameInit`  | Initialize hostname structure | `void`    |
-| `NAVNetSplitHostPort` | Split host:port string        | `boolean` |
-| `NAVNetParseIPAddr`   | Parse IP:port with validation | `boolean` |
-| `NAVNetJoinHostPort`  | Join host+port to string      | `string`  |
+| Function                                  | Purpose                             | Returns   |
+| ----------------------------------------- | ----------------------------------- | --------- |
+| `NAVNetParseIPv4`                         | Parse IPv4 address                  | `boolean` |
+| `NAVNetParseIP`                           | Parse IP (v4/v6)                    | `boolean` |
+| `NAVNetIPInit`                            | Initialize IP structure             | `void`    |
+| `NAVNetParseHostname`                     | Parse and validate hostname         | `boolean` |
+| `NAVNetHostnameInit`                      | Initialize hostname structure       | `void`    |
+| `NAVNetSplitHostPort`                     | Split host:port string              | `boolean` |
+| `NAVNetParseIPAddr`                       | Parse IP:port with validation       | `boolean` |
+| `NAVNetJoinHostPort`                      | Join host+port to string            | `string`  |
+| `NAVNetIsMalformedIP`                     | Detect malformed IP string          | `boolean` |
+| `NAVNetSubnetMaskToPrefix`                | Convert subnet mask to CIDR prefix  | `integer` |
+| `NAVNetPrefixToSubnetMask`                | Convert CIDR prefix to subnet mask  | `string`  |
+| `NAVNetIPToLong`                          | Pack IPv4 to 32-bit integer         | `long`    |
+| `NAVNetLongToIP`                          | Unpack 32-bit integer to IPv4       | `string`  |
+| `NAVNetCalculateBroadcast`                | Calculate broadcast address         | `string`  |
+| `NAVNetCalculateBroadcastFromPrefix`      | Calculate broadcast address (CIDR)  | `string`  |
+| `NAVNetCalculateNetworkAddress`           | Calculate network address           | `string`  |
+| `NAVNetCalculateNetworkAddressFromPrefix` | Calculate network address (CIDR)    | `string`  |
+| `NAVNetCalculateHostCount`                | Count usable hosts in subnet        | `long`    |
+| `NAVNetIsIPInSubnet`                      | Test IP subnet membership           | `boolean` |
+| `NAVNetIsIPInSubnetFromPrefix`            | Test IP subnet membership (CIDR)    | `boolean` |
+| `NAVNetIsPrivateIP`                       | Test for RFC 1918 private address   | `boolean` |
+| `NAVNetIsLoopback`                        | Test for loopback address           | `boolean` |
+| `NAVNetIsLinkLocal`                       | Test for link-local (APIPA) address | `boolean` |
+| `NAVNetIsMulticast`                       | Test for multicast address          | `boolean` |
 
 | Structure      | Purpose                     | Size         |
 | -------------- | --------------------------- | ------------ |
