@@ -293,7 +293,7 @@ define_function sinteger NAVInt64Compare(_NAVInt64 a, _NAVInt64 b)
 #### NAVInt64IsZero
 
 ```netlinx
-define_function integer NAVInt64IsZero(_NAVInt64 a)
+define_function char NAVInt64IsZero(_NAVInt64 a)
 ```
 
 **Description:** Checks if a 64-bit integer is zero.
@@ -309,7 +309,7 @@ define_function integer NAVInt64IsZero(_NAVInt64 a)
 #### NAVInt64IsNegative
 
 ```netlinx
-define_function integer NAVInt64IsNegative(_NAVInt64 a)
+define_function char NAVInt64IsNegative(_NAVInt64 a)
 ```
 
 **Description:** Checks if a 64-bit integer is negative.

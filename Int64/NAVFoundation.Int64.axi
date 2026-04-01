@@ -535,9 +535,9 @@ define_function sinteger NAVInt64Compare(_NAVInt64 a, _NAVInt64 b) {
  *
  * @param {_NAVInt64} a - The 64-bit integer to check
  *
- * @returns {integer} 1 if zero, 0 if non-zero
+ * @returns {char} 1 if zero, 0 if non-zero
  */
-define_function integer NAVInt64IsZero(_NAVInt64 a) {
+define_function char NAVInt64IsZero(_NAVInt64 a) {
     return (a.Hi == 0 && a.Lo == 0)
 }
 
@@ -1238,9 +1238,9 @@ define_function NAVInt64Abs(_NAVInt64 a, _NAVInt64 result) {
  *
  * @param {_NAVInt64} a - The 64-bit integer to check
  *
- * @returns {integer} 1 if negative, 0 if zero or positive
+ * @returns {char} 1 if negative, 0 if zero or positive
  */
-define_function integer NAVInt64IsNegative(_NAVInt64 a) {
+define_function char NAVInt64IsNegative(_NAVInt64 a) {
     return (a.Hi & $80000000) != 0
 }
 

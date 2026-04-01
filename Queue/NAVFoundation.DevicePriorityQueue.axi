@@ -60,14 +60,14 @@ SOFTWARE.
  * @public
  * @description Checks if both the command and query queues are empty.
  * @param {_NAVDevicePriorityQueue} queue - The device priority queue to check
- * @returns {integer} Returns true (1) if both queues are empty, false (0) otherwise
+ * @returns {char} Returns true (1) if both queues are empty, false (0) otherwise
  * @example
  * _NAVDevicePriorityQueue deviceQueue
  * if (NAVDevicePriorityQueueIsEmpty(deviceQueue)) {
  *     // Both queues are empty
  * }
  */
-define_function integer NAVDevicePriorityQueueIsEmpty(_NAVDevicePriorityQueue queue) {
+define_function char NAVDevicePriorityQueueIsEmpty(_NAVDevicePriorityQueue queue) {
     return (NAVQueueIsEmpty(queue.CommandQueue) && NAVQueueIsEmpty(queue.QueryQueue))
 }
 

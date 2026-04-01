@@ -62,7 +62,7 @@ define_function integer NAVGlobalFeedbackTimelineReset() {
 }
 
 
-define_function integer NAVGlobalFeedbackTimelineIsRunning() {
+define_function char NAVGlobalFeedbackTimelineIsRunning() {
     return NAVTimelineIsRunning(TL_NAV_FEEDBACK)
 }
 
@@ -85,7 +85,7 @@ define_function integer NAVGlobalBlinkerTimelineReset() {
 }
 
 
-define_function integer NAVGlobalBlinkerTimelineIsRunning() {
+define_function char NAVGlobalBlinkerTimelineIsRunning() {
     return NAVTimelineIsRunning(TL_NAV_BLINKER)
 }
 

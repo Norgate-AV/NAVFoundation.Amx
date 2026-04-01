@@ -385,15 +385,15 @@ define_function long NAVPow(integer value, integer exponent) {
  *
  * @param {integer} value - Value to check
  *
- * @returns {integer} True (1) if the number is odd, false (0) otherwise
+ * @returns {char} True (1) if the number is odd, false (0) otherwise
  *
  * @example
- * stack_var integer result
+ * stack_var char result
  *
  * result = NAVIsOdd(5)  // Returns 1 (true)
  * result = NAVIsOdd(10)  // Returns 0 (false)
  */
-define_function integer NAVIsOdd(integer value) {
+define_function char NAVIsOdd(integer value) {
     return value % 2 == 1
 }
 
@@ -405,15 +405,15 @@ define_function integer NAVIsOdd(integer value) {
  *
  * @param {integer} value - Value to check
  *
- * @returns {integer} True (1) if the number is even, false (0) otherwise
+ * @returns {char} True (1) if the number is even, false (0) otherwise
  *
  * @example
- * stack_var integer result
+ * stack_var char result
  *
  * result = NAVIsEven(5)  // Returns 0 (false)
  * result = NAVIsEven(10)  // Returns 1 (true)
  */
-define_function integer NAVIsEven(integer value) {
+define_function char NAVIsEven(integer value) {
     return value % 2 == 0
 }
 
@@ -425,17 +425,17 @@ define_function integer NAVIsEven(integer value) {
  *
  * @param {integer} value - Value to check
  *
- * @returns {integer} True (1) if the number is prime, false (0) otherwise
+ * @returns {char} True (1) if the number is prime, false (0) otherwise
  *
  * @example
- * stack_var integer result
+ * stack_var char result
  *
  * result = NAVIsPrime(7)  // Returns 1 (true)
  * result = NAVIsPrime(10)  // Returns 0 (false)
  *
  * @note Uses trial division with optimization to check only up to the square root
  */
-define_function integer NAVIsPrime(integer value) {
+define_function char NAVIsPrime(integer value) {
     stack_var integer x
 
     if (value == 2) {
